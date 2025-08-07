@@ -2637,7 +2637,7 @@
 
 ✅ Performance & Security
    • Error logging and monitoring
-   �� Data backup and recovery
+   • Data backup and recovery
    • Input validation and sanitization
    • Session security and timeouts
 
@@ -3977,7 +3977,7 @@
                     setTimeout(() => {
                         const testBtn = document.querySelector('.btn-primary');
                         if (testBtn) {
-                            console.log('�� Mobile test button found:', testBtn.textContent);
+                            console.log('📱 Mobile test button found:', testBtn.textContent);
                         }
                     }, 1000);
                 }
@@ -4804,7 +4804,7 @@
 
                 console.log('🔄 Updating quantity for product:', productId, 'to:', quantity);
 
-                if (!currentUser) {
+                if (!window.currentUser) {
                     showNotification('❌ Please log in to update cart', 'error');
                     return;
                 }
