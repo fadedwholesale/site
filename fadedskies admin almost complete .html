@@ -3179,18 +3179,25 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Edit existing product
                 const product = products.find(p => p.id === window.editingProductId);
                 Object.assign(product, productData);
+
+                // Update shared data manager (this will notify partner portals)
+                window.sharedDataManager.updateProduct(window.editingProductId, productData);
+
                 showNotification(`✅ Product ${product.strain} updated successfully!`, 'success');
                 delete window.editingProductId;
             } else {
                 // Add new product
                 productData.id = nextProductId++;
                 products.push(productData);
+
+                // Add to shared data manager (this will notify partner portals)
+                window.sharedDataManager.addProduct(productData);
+
                 showNotification(`✅ Product ${productData.strain} added successfully!`, 'success');
             }
-            
+
             updateAllDashboardViews();
             closeModal('addProductModal');
-            syncToPortal();
             
             // Reset form
             event.target.reset();
@@ -4654,7 +4661,7 @@ Faded Skies Wholesale Team
             if (partner && confirm(`Are you sure you want to delete ${partner.businessName}? This will also disable their portal access.`)) {
                 partners = partners.filter(p => p.id !== partnerId);
                 updateAllDashboardViews();
-                showNotification(`🗑️ Partner ${partner.businessName} deleted and portal access revoked`, 'success');
+                showNotification(`���️ Partner ${partner.businessName} deleted and portal access revoked`, 'success');
             }
         }
 
