@@ -189,8 +189,8 @@ function showUserSession() {
     if (cartToggle) cartToggle.style.display = 'inline-flex';
 
     // Update cart display immediately for authenticated user
-    if (window.cartManager) {
-        window.cartManager.updateDisplay();
+    if (window.cartUI) {
+        window.cartUI.refresh();
     }
 }
 
