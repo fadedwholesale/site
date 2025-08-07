@@ -33,6 +33,7 @@ function initializeApplication() {
     if (savedUser) {
         try {
             currentUser = JSON.parse(savedUser);
+            window.currentUser = currentUser;
             showUserSession();
             console.log('✅ User session restored:', currentUser.email);
         } catch (error) {
@@ -101,10 +102,10 @@ function handleSharedDataChange(event) {
 // Authentication Functions
 function login(event) {
     event.preventDefault();
-    
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    
+
     // Simple authentication (in real app, this would be server-side)
     if (email && password) {
         currentUser = {
@@ -113,18 +114,21 @@ function login(event) {
             tier: 'Gold Partner',
             loginTime: new Date().toISOString()
         };
-        
+
+        // Set global window.currentUser for cart access
+        window.currentUser = currentUser;
+
         // Save user session
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
+
         // Update UI
         showUserSession();
         closeModal('loginModal');
         showPartnerPortal();
-        
+
         // Notify cart manager
         window.dispatchEvent(new CustomEvent('userAuthenticated', { detail: currentUser }));
-        
+
         showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
         console.log('✅ User logged in:', currentUser.email);
     } else {
@@ -136,18 +140,19 @@ function logout() {
     if (currentUser) {
         const userName = currentUser.name;
         currentUser = null;
+        window.currentUser = null;
         localStorage.removeItem('currentUser');
-        
+
         // Clear cart
         if (window.cartManager) {
             window.cartManager.cart = [];
             window.cartManager.updateDisplay();
         }
-        
+
         // Update UI
         showGuestSession();
         showPublicWebsite();
-        
+
         showNotification(`Goodbye, ${userName}! 👋`, 'success');
         console.log('✅ User logged out');
     }
@@ -256,16 +261,16 @@ function toggleCart() {
 }
 
 function addToCart(productId, quantity = 1) {
-    if (!currentUser) {
+    if (!currentUser || !window.currentUser) {
         showNotification('🔒 Please log in to add items to cart', 'error');
         openModal('loginModal');
         return false;
     }
-    
+
     if (window.cartManager) {
         return window.cartManager.addProduct(productId, quantity);
     }
-    
+
     return false;
 }
 
