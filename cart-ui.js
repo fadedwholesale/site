@@ -30,14 +30,20 @@ class CartUIManager {
     }
 
     initialize() {
-        this.createCartContainer();
-        this.loadTemplates();
-        this.setupEventListeners();
-        this.setupCartIntegration();
-        this.injectStyles();
-        
-        this.state.isInitialized = true;
-        console.log('✅ Cart UI Manager initialized');
+        try {
+            console.log('🎨 Starting Cart UI initialization...');
+            this.createCartContainer();
+            this.loadTemplates();
+            this.setupEventListeners();
+            this.setupCartIntegration();
+            this.injectStyles();
+
+            this.state.isInitialized = true;
+            console.log('✅ Cart UI Manager initialized');
+        } catch (error) {
+            console.error('❌ Cart UI initialization failed:', error);
+            this.state.isInitialized = false;
+        }
     }
 
     createCartContainer() {
