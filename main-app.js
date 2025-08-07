@@ -4,11 +4,19 @@
 // Global Variables - Authentication State
 let currentUser = null;
 
-function setCurrentUser(user) {
+function setUserGlobally(user) {
     currentUser = user;
     window.currentUser = user;
+    if (user) {
+        try {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+        } catch (e) {}
+    }
     return user;
 }
+
+// Alias for compatibility
+window.setCurrentUser = setUserGlobally;
 
 let currentView = 'public';
 let activePortalTab = 'dashboard';
