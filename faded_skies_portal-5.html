@@ -1413,7 +1413,7 @@
             <div id="liveInventorySection" class="live-inventory">
                 <div class="container">
                     <div class="section-header">
-                        <h2 class="section-title">Live Wholesale Inventory 📊</h2>
+                        <h2 class="section-title">Live Wholesale Inventory ��</h2>
                         <p class="section-subtitle">Real-time pricing and availability - synchronized with admin systems</p>
                     </div>
                     
@@ -4150,7 +4150,7 @@
 
                 if (guestSection) guestSection.style.display = 'none';
                 if (userSession) userSession.classList.add('show');
-                if (userWelcome) userWelcome.textContent = `Welcome, ${currentUser.email.split('@')[0]}`;
+                if (userWelcome) userWelcome.textContent = `Welcome, ${window.currentUser.email.split('@')[0]}`;
                 if (cartToggle) cartToggle.style.display = 'inline-flex';
 
                 updateProfileDisplay();
@@ -4761,7 +4761,7 @@
                 }
 
                 updateCartDisplay(); // Ensure cart is always updated
-                console.log('🛒 Cart after adding item:', cart.map(item => `${item.strain} (${item.quantity}x)`));
+                console.log('���� Cart after adding item:', cart.map(item => `${item.strain} (${item.quantity}x)`));
 
                 // Auto-open cart if it's the first item
                 if (cart.length === 1) {
@@ -4959,7 +4959,7 @@
                     showNotification(`🎉 Order placed successfully! Order ID: ${newOrder.id}`, 'success');
                     
                     setTimeout(() => {
-                        showNotification(`📧 Order confirmation sent to ${currentUser.email}`, 'success');
+                        showNotification(`�� Order confirmation sent to ${currentUser.email}`, 'success');
                     }, 2000);
                     
                     setTimeout(() => {
