@@ -32,7 +32,21 @@ class CartManager {
 
     // Refresh authentication state and reload cart
     refreshUserState() {
-        console.log('🔄 Cart: Refreshing user state', { currentUser: !!window.currentUser });
+        console.log('🔄 Cart: Refreshing user state', {
+            windowCurrentUser: !!window.currentUser,
+            localStorage: !!localStorage.getItem('currentUser')
+        });
+
+        // Try to restore user from localStorage if window.currentUser is missing
+        if (!window.currentUser && localStorage.getItem('currentUser')) {
+            try {
+                window.currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                console.log('🔄 Cart: Restored user from localStorage:', window.currentUser.email);
+            } catch (error) {
+                console.error('🔄 Cart: Error restoring user from localStorage:', error);
+            }
+        }
+
         if (window.currentUser) {
             this.loadCart();
             this.updateDisplay();
