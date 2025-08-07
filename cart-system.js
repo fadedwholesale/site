@@ -83,30 +83,7 @@ class CartManager {
         this.addToCartLock = true;
         setTimeout(() => { this.addToCartLock = false; }, 300);
 
-        console.log('📝 Cart: Adding product attempt', {
-            productId,
-            quantity,
-            windowCurrentUser: window.currentUser,
-            hasCurrentUser: !!window.currentUser,
-            userEmail: window.currentUser?.email,
-            windowKeys: Object.keys(window).filter(k => k.includes('current')),
-            localStorageUser: localStorage.getItem('currentUser')
-        });
-
-        // Enhanced authentication check
-        const isAuthenticated = window.currentUser && window.currentUser.email;
-
-        if (!isAuthenticated) {
-            console.error('❌ Cart: Authentication failed', {
-                windowCurrentUser: window.currentUser,
-                hasCurrentUser: !!window.currentUser,
-                hasEmail: window.currentUser?.email,
-                localStorage: !!localStorage.getItem('currentUser')
-            });
-
-            this.showNotification('🔒 Please log in to add items to cart', 'error');
-            return false;
-        }
+        console.log('📝 Cart: Adding product', { productId, quantity });
 
         console.log('✅ Cart: Authenticated user found:', window.currentUser.email);
 
