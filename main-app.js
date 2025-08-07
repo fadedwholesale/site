@@ -216,15 +216,15 @@ function login(event) {
             console.log('User logged in:', currentUser.email);
         } else {
             if (typeof showNotification === 'function') {
-                showNotification('❌ Please enter valid credentials', 'error');
+                showNotification('Please enter valid credentials', 'error');
             } else {
                 alert('Please enter valid credentials');
             }
         }
     } catch (error) {
-        console.error('❌ Login function error:', error);
+        console.error('Login function error:', error);
         if (typeof showNotification === 'function') {
-            showNotification('❌ Login system error', 'error');
+            showNotification('Login system error', 'error');
         } else {
             alert('Login system error');
         }
