@@ -32,11 +32,21 @@ class CartManager {
 
     // Refresh authentication state and reload cart
     refreshUserState() {
-        console.log('🔄 Cart: Refreshing user state', { currentUser: !!window.currentUser });
-        if (window.currentUser) {
+        console.log('🔄 Cart: Refreshing user state', {
+            currentUser: !!window.currentUser,
+            userEmail: window.currentUser?.email,
+            localStorage: !!localStorage.getItem('currentUser')
+        });
+
+        if (window.currentUser && window.currentUser.email) {
+            console.log('✅ Cart: Valid user found, loading cart');
             this.loadCart();
             this.updateDisplay();
             console.log('✅ Cart: User state refreshed successfully');
+        } else {
+            console.log('⚠️ Cart: No valid user found during refresh');
+            this.cart = [];
+            this.updateDisplay();
         }
     }
 
@@ -73,14 +83,28 @@ class CartManager {
         this.addToCartLock = true;
         setTimeout(() => { this.addToCartLock = false; }, 300);
 
-        // Check for authentication - ensure current user exists
-        if (!window.currentUser || !window.currentUser.email) {
-            this.showNotification('🔒 Please log in to add items to cart', 'error');
-            console.log('❌ Cart: No authenticated user found', {
+        console.log('📝 Cart: Adding product attempt', {
+            productId,
+            quantity,
+            windowCurrentUser: window.currentUser,
+            hasCurrentUser: !!window.currentUser,
+            userEmail: window.currentUser?.email,
+            windowKeys: Object.keys(window).filter(k => k.includes('current')),
+            localStorageUser: localStorage.getItem('currentUser')
+        });
+
+        // Enhanced authentication check
+        const isAuthenticated = window.currentUser && window.currentUser.email;
+
+        if (!isAuthenticated) {
+            console.error('❌ Cart: Authentication failed', {
+                windowCurrentUser: window.currentUser,
                 hasCurrentUser: !!window.currentUser,
                 hasEmail: window.currentUser?.email,
-                windowHasCurrentUser: 'currentUser' in window
+                localStorage: !!localStorage.getItem('currentUser')
             });
+
+            this.showNotification('🔒 Please log in to add items to cart', 'error');
             return false;
         }
 
