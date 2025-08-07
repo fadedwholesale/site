@@ -2115,6 +2115,8 @@
 
             console.log('✅ Cart system initialization complete', {
                 hasCartManager: !!window.cartManager,
+                hasModernCart: !!window.modernCart,
+                hasFixedCartUI: !!window.updateFixedCartDisplay,
                 hasSharedDataManager: !!window.sharedDataManager,
                 hasCurrentUser: !!window.currentUser,
                 userEmail: window.currentUser?.email
@@ -6400,7 +6402,7 @@ Phone: (210) 835-7834
                 
             } catch (error) {
                 console.error('Error adding new product:', error);
-                showNotification('❌ Failed to add new product', 'error');
+                showNotification('��� Failed to add new product', 'error');
             }
         }
 
