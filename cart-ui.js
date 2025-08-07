@@ -123,8 +123,17 @@ class CartUIManager {
     }
 
     loadTemplates() {
-        // Simple template - will be populated with string replacement
-        this.templates.cartItem = 'CART_ITEM_TEMPLATE';
+        try {
+            // Simple template - will be populated with string replacement
+            if (!this.templates) {
+                this.templates = {};
+            }
+            this.templates.cartItem = 'CART_ITEM_TEMPLATE';
+            console.log('✅ Cart templates loaded');
+        } catch (error) {
+            console.error('Error loading cart templates:', error);
+            this.templates = { cartItem: 'CART_ITEM_TEMPLATE' };
+        }
     }
 
     setupEventListeners() {
