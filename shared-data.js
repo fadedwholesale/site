@@ -234,8 +234,29 @@ class SharedDataManager {
     notifyChange(eventType, data) {
         // Dispatch custom event for components to listen to
         window.dispatchEvent(new CustomEvent('sharedDataChange', {
-            detail: { type: eventType, data }
+            detail: { type: eventType, data, timestamp: new Date().toISOString() }
         }));
+
+        // Enhanced real-time broadcasting
+        this.broadcastRealTimeUpdate(eventType, data);
+    }
+
+    broadcastRealTimeUpdate(eventType, data) {
+        // Store the latest update for cross-tab communication
+        const updateData = {
+            type: eventType,
+            data: data,
+            timestamp: new Date().toISOString(),
+            id: Math.random().toString(36).substr(2, 9)
+        };
+
+        // Use a separate key for real-time updates
+        try {
+            localStorage.setItem('fadedSkiesRealTimeUpdate', JSON.stringify(updateData));
+            console.log('📡 Broadcasting real-time update:', eventType, data);
+        } catch (error) {
+            console.error('Error broadcasting update:', error);
+        }
     }
 
     // Sync operations
