@@ -1794,7 +1794,7 @@
                     • Live Resin Vape Cartridges<br>
                     • Bulk Orders (20lb+ available)<br>
                     • Custom Packaging Solutions<br>
-                    ��� White Label Opportunities</p>
+                    • White Label Opportunities</p>
                 </div>
                 <div class="footer-section">
                     <h4>Partnership Support</h4>
@@ -2101,6 +2101,26 @@
                 hasCurrentUser: !!window.currentUser,
                 userEmail: window.currentUser?.email
             });
+
+            // Add a test button to check auth state
+            window.debugCartAuth = function() {
+                console.log('🔍 Cart Auth Debug:', {
+                    currentUser: window.currentUser,
+                    cartManager: window.cartManager,
+                    cartManagerExists: !!window.cartManager,
+                    userInCartManager: window.cartManager ? !!window.cartManager.currentUser : 'no cart manager'
+                });
+            };
+
+            // Test adding to cart manually
+            window.testAddToCart = function() {
+                console.log('🧪 Testing add to cart with productId 1');
+                if (window.addToCart) {
+                    window.addToCart(1);
+                } else {
+                    console.log('❌ addToCart function not found');
+                }
+            };
         });
     </script>
 
@@ -5048,7 +5068,7 @@
                         <button class="btn btn-secondary" onclick="trackOrderDetailed('${order.id}')">📦 Track Order</button>
                         <button class="btn btn-secondary" onclick="downloadOrderInvoice('${order.id}')">📄 Download Invoice</button>
                         ${order.status === 'PENDING' ? `<button class="btn btn-primary" onclick="this.closest('.modal').remove(); setTimeout(function(){editOrder('${order.id}')}, 200);">✏️ Edit Order</button>` : ''}
-                        <button class="btn btn-secondary" onclick="reorderItems('${order.id}')">🔄 Reorder</button>
+                        <button class="btn btn-secondary" onclick="reorderItems('${order.id}')">���� Reorder</button>
                     </div>
                 </div>
             `;
