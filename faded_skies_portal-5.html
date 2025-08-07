@@ -2082,11 +2082,11 @@
         let currentUser = null;
         let currentView = 'public';
         let currentPortalTab = 'dashboard';
-        let cart = [];
         let inventoryVisible = false;
-        let cartOpen = false;
         let activeFilter = 'all';
-        let addToCartLock = false;
+
+        // Cart is now managed by CartManager
+        let cartManager = null;
 
         // Product Data with Images
         let products = [
@@ -2623,7 +2623,7 @@
                     showNotification('🌐 Switched to public website', 'success');
                 } else {
                     console.error('Public view element not found');
-                    showNotification('�� Navigation error. Please refresh the page.', 'error');
+                    showNotification('❌ Navigation error. Please refresh the page.', 'error');
                 }
                 
                 console.log('Switched to public website view');
@@ -3779,7 +3779,7 @@
         // Handle shared data changes from admin portal
         function handleSharedDataChange(event) {
             const { type, data } = event.detail;
-            console.log('���� Received shared data change:', type, data);
+            console.log('📡 Received shared data change:', type, data);
 
             switch (type) {
                 case 'products_updated':
@@ -4773,7 +4773,7 @@
                 } else if (quantity < oldQuantity && product) {
                     showNotification(`⬇️ Decreased ${product.strain} quantity to ${quantity}`, 'success');
                 } else if (quantity === 0) {
-                    showNotification(`🗑️ Removed item from cart`, 'success');
+                    showNotification(`����️ Removed item from cart`, 'success');
                 }
             } catch (error) {
                 console.error('Error updating quantity:', error);
