@@ -1388,7 +1388,7 @@
                     </div>
                     <div class="grid">
                         <div class="card">
-                            <h3>���� THCA Flower</h3>
+                            <h3>����� THCA Flower</h3>
                             <p>Premium indoor and outdoor strains with exceptional terpene profiles. Consistent quality that drives customer loyalty.</p>
                             <div class="price" id="flowerStartingPrice">Starting at $550/lb</div>
                             <button class="btn btn-primary" onclick="toggleLiveInventory()">Browse Strains</button>
@@ -2998,18 +2998,11 @@
 
         function nextRegistrationStep() {
             if (currentRegistrationStep === 1) {
-                // Validate business information
-                if (!validateBusinessInfo()) {
-                    return;
-                }
+                // Save business information
                 saveBusinessInfo();
                 showRegistrationStep(2);
             } else if (currentRegistrationStep === 2) {
-                // Validate required documents
-                if (!validateRequiredDocuments()) {
-                    showNotification('Please upload all required documents before proceeding', 'error');
-                    return;
-                }
+                // Continue to review step
                 populateReviewStep();
                 showRegistrationStep(3);
             }
