@@ -2850,8 +2850,8 @@
                         return;
                     }
                     
-                    currentUser = { 
-                        email, 
+                    window.currentUser = {
+                        email,
                         role: 'partner',
                         loginTime: new Date().toISOString(),
                         sessionId: generateSessionId()
@@ -6206,7 +6206,7 @@ Phone: (210) 835-7834
             const sharedProducts = window.sharedDataManager.getProducts();
             const sharedCart = window.sharedDataManager.getCart(currentUser.email);
 
-            console.log('����� Cart Test Results:');
+            console.log('���� Cart Test Results:');
             console.log('  Local cart items:', cart.length);
             console.log('  Shared cart items:', sharedCart.length);
             console.log('  Available products:', sharedProducts.length);
