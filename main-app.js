@@ -6,49 +6,42 @@ let currentUser = null;
 
 // Ensure window.currentUser is always synchronized
 function setCurrentUser(user) {
+    // Basic assignments first - these should never fail
+    currentUser = user;
+    window.currentUser = user;
+
+    // Safe logging without special characters
     try {
-        console.log('🔄 Setting current user:', user ? user.email : 'null');
-
-        // Set both local and global references
-        currentUser = user;
-        window.currentUser = user;
-
-        // Handle localStorage operations safely
-        try {
-            if (user) {
-                localStorage.setItem('currentUser', JSON.stringify(user));
-                console.log('✅ User authenticated globally:', user.email);
-            } else {
-                localStorage.removeItem('currentUser');
-                console.log('✅ User logged out globally');
-            }
-        } catch (storageError) {
-            console.warn('LocalStorage operation failed:', storageError);
+        if (user && user.email) {
+            console.log('Setting current user:', user.email);
+        } else {
+            console.log('Clearing current user');
         }
-
-        // Notify cart system of auth change if available
-        try {
-            if (user && typeof window.updateFixedCartDisplay === 'function') {
-                setTimeout(function() {
-                    try {
-                        window.updateFixedCartDisplay();
-                    } catch (updateError) {
-                        console.warn('Cart update failed:', updateError);
-                    }
-                }, 100);
-            }
-        } catch (error) {
-            console.warn('Error scheduling cart update:', error);
-        }
-
-        return user;
-    } catch (error) {
-        console.error('❌ setCurrentUser failed:', error);
-        // Ensure we at least set the basic variables
-        currentUser = user;
-        window.currentUser = user;
-        return user;
+    } catch (logError) {
+        // Ignore logging errors
     }
+
+    // Safe localStorage operations
+    try {
+        if (user) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+        } else {
+            localStorage.removeItem('currentUser');
+        }
+    } catch (storageError) {
+        // Ignore storage errors
+    }
+
+    // Safe cart update
+    try {
+        if (user && window.updateFixedCartDisplay) {
+            setTimeout(window.updateFixedCartDisplay, 100);
+        }
+    } catch (cartError) {
+        // Ignore cart errors
+    }
+
+    return user;
 }
 
 let currentView = 'public';
