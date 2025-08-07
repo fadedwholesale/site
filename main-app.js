@@ -35,7 +35,7 @@ let currentFilter = 'all';
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Faded Skies Portal initializing...');
+    console.log('�� Faded Skies Portal initializing...');
     initializeApplication();
     loadInitialData();
     setupEventListeners();
@@ -277,43 +277,43 @@ function switchPortalTab(tabName) {
 
 // Cart Functions
 function toggleCart() {
-    if (window.cartManager) {
-        window.cartManager.toggle();
+    if (window.modernCart) {
+        window.modernCart.toggleCart();
     }
 }
 
 function addToCart(productId, quantity = 1) {
-    if (window.cartManager) {
-        return window.cartManager.addProduct(productId, quantity);
+    if (window.modernCart) {
+        return window.modernCart.addItem(productId, quantity);
     } else {
-        console.error('❌ Cart manager not found');
+        console.error('❌ Modern cart not found');
         showNotification('❌ Cart system not available', 'error');
         return false;
     }
 }
 
 function clearCart() {
-    if (window.cartManager) {
-        window.cartManager.clear();
+    if (window.modernCart) {
+        window.modernCart.clearCart();
     }
 }
 
 function checkout() {
-    if (window.cartManager) {
-        return window.cartManager.checkout();
+    if (window.modernCart) {
+        return window.modernCart.checkout();
     }
 }
 
 function updateCartDisplays() {
-    if (window.cartManager) {
-        const totals = window.cartManager.getTotals();
-        
+    if (window.modernCart) {
+        const totals = window.modernCart.getTotals();
+
         // Update cart counters
         const cartCount = document.getElementById('cartCount');
         const cartCount2 = document.getElementById('cartCount2');
-        
-        if (cartCount) cartCount.textContent = totals.totalItems;
-        if (cartCount2) cartCount2.textContent = totals.totalItems;
+
+        if (cartCount) cartCount.textContent = totals.itemCount;
+        if (cartCount2) cartCount2.textContent = totals.itemCount;
     }
 }
 
