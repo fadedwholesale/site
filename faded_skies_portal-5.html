@@ -2709,7 +2709,7 @@
                     showNotification(`📊 ${tabName.charAt(0).toUpperCase() + tabName.slice(1)} tab loaded!`, 'success');
                 }
                 
-                console.log('🔄 Portal tab switched to:', tabName);
+                console.log('��� Portal tab switched to:', tabName);
             } catch (error) {
                 console.error('Error switching portal tab:', error);
                 showNotification('Tab switching error. Please try again.', 'error');
@@ -2729,7 +2729,7 @@
                     showNotification('📊 Live inventory displayed with product images!', 'success');
                 } else {
                     inventory.classList.remove('show');
-                    showNotification('��� Live inventory hidden', 'info');
+                    showNotification('📊 Live inventory hidden', 'info');
                 }
                 
                 console.log('📊 Live inventory toggled:', inventoryVisible ? 'SHOWN' : 'HIDDEN');
@@ -3738,7 +3738,7 @@
 
         // Enhanced initialization with mobile-first approach and image support
         function initializeApp() {
-            console.log('���� Initializing Faded Skies Wholesale Portal...');
+            console.log('🌿 Initializing Faded Skies Wholesale Portal...');
             
             try {
                 // Check for existing session first
@@ -4232,9 +4232,16 @@
         }
 
         function removeFromCart(productId) {
+            if (!currentUser) {
+                showNotification('❌ Please log in to modify cart', 'error');
+                return;
+            }
+
             const item = cart.find(item => item.id === productId);
             if (item) {
-                cart = cart.filter(item => item.id !== productId);
+                // Use shared data manager to remove from cart
+                const updatedCart = window.sharedDataManager.removeFromCart(currentUser.email, productId);
+                cart = updatedCart; // Update local cart reference
                 updateCartDisplay();
                 showNotification(`🗑️ Removed ${item.strain} from cart`, 'success');
             }
@@ -5501,7 +5508,7 @@ Phone: (210) 835-7834
                             setTimeout(() => {
                                 const newQuantity = cart.find(item => item.id === testProduct.id)?.quantity;
                                 if (newQuantity === oldQuantity + 1) {
-                                    console.log('✅ Quantity increase test passed');
+                                    console.log('��� Quantity increase test passed');
                                     
                                     // Test quantity decrease
                                     setTimeout(() => {
@@ -5860,7 +5867,7 @@ Phone: (210) 835-7834
             
             console.log('DOM Elements Status:');
             Object.entries(elements).forEach(([name, element]) => {
-                console.log(`  ${name}: ${element ? '✅ Found' : '❌ Missing'}`);
+                console.log(`  ${name}: ${element ? '��� Found' : '❌ Missing'}`);
             });
             
             // Check for JavaScript errors
