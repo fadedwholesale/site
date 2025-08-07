@@ -1733,7 +1733,7 @@
                             </p>
                             <div style="display: flex; gap: 16px; flex-wrap: wrap;">
                                 <button class="btn btn-primary" onclick="createBulkOrder()">📦 Create Bulk Order</button>
-                                <button class="btn btn-secondary" onclick="requestCustomQuote()">💬 Request Custom Quote</button>
+                                <button class="btn btn-secondary" onclick="requestCustomQuote()">��� Request Custom Quote</button>
                                 <button class="btn btn-secondary" onclick="showNotification('📋 No bulk history found yet', 'warning')">📋 View History</button>
                             </div>
                             
@@ -2072,6 +2072,8 @@
 
     <!-- Include Shared Data Manager -->
     <script src="shared-data.js"></script>
+    <!-- Include Cart System -->
+    <script src="cart-system.js"></script>
     <!-- Include Test Functionality -->
     <script src="test-functionality.js"></script>
 
@@ -2080,11 +2082,11 @@
         let currentUser = null;
         let currentView = 'public';
         let currentPortalTab = 'dashboard';
-        let cart = [];
         let inventoryVisible = false;
-        let cartOpen = false;
         let activeFilter = 'all';
-        let addToCartLock = false;
+
+        // Cart is now managed by CartManager
+        let cartManager = null;
 
         // Product Data with Images
         let products = [
@@ -2734,7 +2736,7 @@
                     showNotification('📊 Live inventory hidden', 'info');
                 }
                 
-                console.log('📊 Live inventory toggled:', inventoryVisible ? 'SHOWN' : 'HIDDEN');
+                console.log('�� Live inventory toggled:', inventoryVisible ? 'SHOWN' : 'HIDDEN');
             } catch (error) {
                 console.error('Error toggling live inventory:', error);
                 showNotification('Inventory toggle error. Please try again.', 'error');
@@ -2820,6 +2822,14 @@
                     cart = window.sharedDataManager.getCart(currentUser.email);
                     console.log('Loaded cart for user:', currentUser.email, cart);
 
+                    // Initialize and sync CartManager
+                    if (window.cartManager) {
+                        window.cartManager.loadCart();
+                    }
+
+                    // Validate cart integrity after loading
+                    validateCartIntegrity();
+
                     showLoggedInState();
                     closeModal('loginModal');
                     showPartnerPortal();
@@ -2837,7 +2847,7 @@
                 
             } catch (error) {
                 console.error('Login error:', error);
-                showNotification('❌ Login error. Please try again or contact support.', 'error');
+                showNotification('�� Login error. Please try again or contact support.', 'error');
                 const submitBtn = event.target.querySelector('button[type="submit"]');
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -3497,7 +3507,7 @@
                         
                         const match = e.target.getAttribute('onclick').match(/removeFromCart\((\d+)\)/);
                         if (match) {
-                            console.log('📱 Mobile remove button pressed for product:', match[1]);
+                            console.log('���� Mobile remove button pressed for product:', match[1]);
                             removeFromCart(parseInt(match[1]));
                         }
                     }
@@ -3735,11 +3745,39 @@
                     showLoggedOutState();
                     showPublicWebsite();
                     updateCartDisplay();
-                    showNotification('🔒 Successfully logged out. Thank you for using Faded Skies!', 'success');
+                    showNotification('�� Successfully logged out. Thank you for using Faded Skies!', 'success');
                 }
             } catch (error) {
                 console.error('Logout error:', error);
                 showNotification('❌ Logout error. Please refresh the page.', 'error');
+            }
+        }
+
+        // Handle real-time updates
+        function handleRealTimeUpdate(event) {
+            const { type, data, timestamp } = event.detail;
+            console.log('📡 Received real-time update:', type, data);
+
+            switch (type) {
+                case 'cart_updated':
+                    if (currentUser && data.userEmail === currentUser.email) {
+                        console.log('🔄 Real-time cart update for current user');
+                        cart = data.cart;
+                        updateCartDisplay();
+                        showNotification('🔄 Cart updated in real-time', 'info');
+                    }
+                    break;
+                case 'product_updated':
+                case 'product_added':
+                case 'product_deleted':
+                    console.log('🔄 Real-time product update');
+                    products = window.sharedDataManager.getProducts();
+                    updateAllViews();
+                    showNotification(`📦 Product inventory updated`, 'info');
+                    break;
+                case 'new_order':
+                    // Don't show order notifications to partner portal (only admin needs these)
+                    break;
             }
         }
 
@@ -3773,7 +3811,7 @@
                 case 'product_deleted':
                     products = products.filter(p => p.id !== data.id);
                     updateAllViews();
-                    showNotification(`🗑️ Product removed: ${data.strain}`, 'warning');
+                    showNotification(`����️ Product removed: ${data.strain}`, 'warning');
                     break;
                 case 'cart_updated':
                     if (currentUser && data.userEmail === currentUser.email) {
@@ -3801,8 +3839,17 @@
                 products = window.sharedDataManager.getProducts();
                 console.log('📦 Loaded', products.length, 'products from shared data manager');
 
+                // Initialize CartManager
+                if (window.CartManager && !window.cartManager) {
+                    window.cartManager = new window.CartManager();
+                    console.log('🛒 Cart manager initialized');
+                }
+
                 // Listen for shared data changes
                 window.addEventListener('sharedDataChange', handleSharedDataChange);
+
+                // Listen for real-time updates
+                window.addEventListener('realTimeUpdate', handleRealTimeUpdate);
 
                 updateAllViews();
                 showPublicWebsite();
@@ -4287,46 +4334,33 @@
         }
 
         function removeFromCart(productId) {
-            if (!currentUser) {
-                showNotification('❌ Please log in to modify cart', 'error');
-                return;
-            }
-
-            const item = cart.find(item => item.id === productId);
-            if (item) {
-                // Use shared data manager to remove from cart
-                const updatedCart = window.sharedDataManager.removeFromCart(currentUser.email, productId);
-                cart = updatedCart; // Update local cart reference
-                updateCartDisplay();
-                showNotification(`🗑️ Removed ${item.strain} from cart`, 'success');
+            if (window.cartManager) {
+                return window.cartManager.removeProduct(productId);
             }
         }
 
         function clearCart() {
-            if (cart.length === 0) {
-                showNotification('🛒 Cart is already empty', 'warning');
-                return;
-            }
-
-            if (!currentUser) {
-                showNotification('❌ Please log in to clear cart', 'error');
-                return;
-            }
-
-            if (confirm('Are you sure you want to clear your entire cart? This action cannot be undone.')) {
-                const itemCount = cart.length;
-                // Use shared data manager to clear cart
-                window.sharedDataManager.clearCart(currentUser.email);
-                cart = []; // Update local cart reference
-                updateCartDisplay();
-                showNotification(`🗑️ Cart cleared successfully (${itemCount} items removed)`, 'success');
+            if (window.cartManager) {
+                return window.cartManager.clear();
             }
         }
 
         function updateCartDisplay() {
+            // Use new CartManager if available
+            if (window.cartManager) {
+                return window.cartManager.updateDisplay();
+            }
+
+            // Fallback to old implementation
             try {
+                // Ensure we have the latest cart data from shared data manager
+                if (currentUser) {
+                    cart = window.sharedDataManager.getCart(currentUser.email);
+                }
+
                 console.log('🔄 Updating cart display with', cart.length, 'unique items');
-                
+                console.log('🛒 Current cart contents:', cart.map(item => `${item.strain} (${item.quantity}x)`));
+
                 const cartItems = document.getElementById('cartItems');
                 const cartCount = document.getElementById('cartCount');
                 const cartCount2 = document.getElementById('cartCount2');
@@ -4373,14 +4407,26 @@
 
                 // Generate cart items HTML with proper quantity controls
                 cartItems.innerHTML = cart.map(item => {
-                    const product = products.find(p => p.id === item.id);
-                    const maxStock = product ? product.stock : item.maxStock;
+                    // Validate item data
+                    if (!item || !item.id || !item.strain || !item.quantity) {
+                        console.error('❌ Invalid cart item:', item);
+                        return '';
+                    }
+
+                    const product = window.sharedDataManager.getProducts().find(p => p.id === item.id);
+                    const maxStock = product ? product.stock : (item.maxStock || 1);
                     const productImage = product ? product.image : 'https://via.placeholder.com/60x60/1a1a1a/00C851?text=' + item.grade;
-                    
+
+                    // Ensure quantities are valid numbers
+                    const currentQuantity = parseInt(item.quantity) || 1;
+                    const decreaseQuantity = Math.max(0, currentQuantity - 1);
+                    const increaseQuantity = currentQuantity + 1;
+                    const maxAvailableStock = parseInt(maxStock) || 1;
+
                     return `
                         <div class="cart-item" data-product-id="${item.id}">
                             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                                <img src="${productImage}" alt="${item.strain}" class="cart-product-image" 
+                                <img src="${productImage}" alt="${item.strain}" class="cart-product-image"
                                      onerror="this.src='https://via.placeholder.com/60x60/1a1a1a/00C851?text=${item.grade}'" />
                                 <div style="flex: 1;">
                                     <h4>${item.strain}</h4>
@@ -4389,22 +4435,22 @@
                             </div>
                             <div class="cart-item-controls">
                                 <div class="quantity-controls">
-                                    <button class="quantity-btn" 
-                                            onclick="updateQuantity(${item.id}, ${Math.max(0, item.quantity - 1)})"
-                                            ${item.quantity <= 1 ? 'disabled' : ''}
+                                    <button class="quantity-btn"
+                                            onclick="updateQuantity(${item.id}, ${decreaseQuantity})"
+                                            ${currentQuantity <= 1 ? 'disabled' : ''}
                                             title="Decrease quantity">-</button>
-                                    <span class="quantity-display" title="Current quantity">${item.quantity}</span>
-                                    <button class="quantity-btn" 
-                                            onclick="updateQuantity(${item.id}, ${item.quantity + 1})"
-                                            ${item.quantity >= maxStock ? 'disabled' : ''}
+                                    <span class="quantity-display" title="Current quantity">${currentQuantity}</span>
+                                    <button class="quantity-btn"
+                                            onclick="updateQuantity(${item.id}, ${increaseQuantity})"
+                                            ${currentQuantity >= maxAvailableStock ? 'disabled' : ''}
                                             title="Increase quantity">+</button>
                                 </div>
                                 <button class="btn btn-danger btn-sm" onclick="removeFromCart(${item.id})" title="Remove from cart">Remove</button>
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                                <small style="color: var(--text-muted);">${maxStock} available</small>
+                                <small style="color: var(--text-muted);">${maxAvailableStock} available</small>
                                 <p style="font-weight: 700; color: var(--brand-green); margin: 0;">
-                                    $${(item.price * item.quantity).toFixed(2)}
+                                    $${(item.price * currentQuantity).toFixed(2)}
                                 </p>
                             </div>
                         </div>
@@ -4456,7 +4502,7 @@
                 const finalTotalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
                 if (cartCount) {
                     cartCount.textContent = finalTotalItems;
-                    console.log('🎯 Final cartCount update:', finalTotalItems);
+                    console.log('��� Final cartCount update:', finalTotalItems);
                 }
                 if (cartCount2) {
                     cartCount2.textContent = finalTotalItems;
@@ -4469,12 +4515,55 @@
             }
         }
 
+        function validateCartIntegrity() {
+            if (!currentUser) return true;
+
+            const sharedCart = window.sharedDataManager.getCart(currentUser.email);
+            const sharedProducts = window.sharedDataManager.getProducts();
+
+            // Check if local cart is in sync with shared cart
+            if (JSON.stringify(cart) !== JSON.stringify(sharedCart)) {
+                console.warn('🔄 Cart out of sync - updating from shared data manager');
+                cart = sharedCart;
+                updateCartDisplay();
+                return false;
+            }
+
+            // Validate cart items against current products
+            let hasInvalidItems = false;
+            cart.forEach(cartItem => {
+                const product = sharedProducts.find(p => p.id === cartItem.id);
+                if (!product) {
+                    console.warn('⚠️ Cart contains invalid product:', cartItem.strain);
+                    hasInvalidItems = true;
+                }
+            });
+
+            if (hasInvalidItems) {
+                console.log('🧹 Cleaning up invalid cart items');
+                cart = cart.filter(cartItem =>
+                    sharedProducts.find(p => p.id === cartItem.id)
+                );
+                window.sharedDataManager.updateCart(currentUser.email, cart);
+                updateCartDisplay();
+            }
+
+            return !hasInvalidItems;
+        }
+
         function toggleCart() {
+            // Use new CartManager if available
+            if (window.cartManager) {
+                return window.cartManager.toggle();
+            }
+
+            // Fallback to old implementation
             const cartEl = document.getElementById('cart');
             cartOpen = !cartOpen;
-            
+
             if (cartOpen) {
                 cartEl.classList.add('open');
+                validateCartIntegrity(); // Validate cart before showing
                 updateCartDisplay(); // Refresh cart display when opening
             } else {
                 cartEl.classList.remove('open');
@@ -4567,6 +4656,12 @@
         });
 
         function addToCart(productId) {
+            // Use new CartManager if available
+            if (window.cartManager) {
+                return window.cartManager.addProduct(productId, 1);
+            }
+
+            // Fallback to old implementation
             if (addToCartLock) return;
             addToCartLock = true;
             setTimeout(() => { addToCartLock = false; }, 300);
@@ -4578,6 +4673,8 @@
             }
 
             try {
+                console.log('🛒 Adding product to cart:', productId);
+
                 // Use shared data manager to add to cart
                 const updatedCart = window.sharedDataManager.addToCart(currentUser.email, productId, 1);
                 cart = updatedCart; // Update local cart reference
@@ -4586,11 +4683,18 @@
                 if (product) {
                     const cartItem = updatedCart.find(item => item.id === productId);
                     const quantity = cartItem ? cartItem.quantity : 1;
+                    console.log('✅ Product added successfully:', {
+                        strain: product.strain,
+                        quantity: quantity,
+                        cartSize: cart.length
+                    });
                     showNotification(`✅ Added ${product.strain} to cart! (${quantity} total)`, 'success');
+                } else {
+                    console.error('��� Product not found in shared data manager:', productId);
                 }
 
                 updateCartDisplay(); // Ensure cart is always updated
-                console.log('Cart after adding item:', cart);
+                console.log('🛒 Cart after adding item:', cart.map(item => `${item.strain} (${item.quantity}x)`));
 
                 // Auto-open cart if it's the first item
                 if (cart.length === 1) {
@@ -4607,7 +4711,30 @@
         }
 
         function updateQuantity(productId, quantity) {
+            // Use new CartManager if available
+            if (window.cartManager) {
+                return window.cartManager.updateQuantity(productId, quantity);
+            }
+
+            // Fallback to old implementation
             try {
+                // Input validation
+                if (typeof productId === 'undefined' || productId === null) {
+                    console.error('❌ Invalid productId:', productId);
+                    showNotification('❌ Invalid product. Please refresh the page.', 'error');
+                    return;
+                }
+
+                if (typeof quantity === 'undefined' || quantity === null || isNaN(quantity)) {
+                    console.error('❌ Invalid quantity:', quantity);
+                    showNotification('❌ Invalid quantity. Please try again.', 'error');
+                    return;
+                }
+
+                // Convert to numbers to ensure proper comparison
+                productId = parseInt(productId);
+                quantity = parseInt(quantity);
+
                 console.log('🔄 Updating quantity for product:', productId, 'to:', quantity);
 
                 if (!currentUser) {
@@ -4615,30 +4742,63 @@
                     return;
                 }
 
+                // Validate quantity is positive
+                if (quantity < 0) {
+                    console.error('❌ Negative quantity not allowed:', quantity);
+                    showNotification('❌ Quantity cannot be negative.', 'error');
+                    return;
+                }
+
                 const oldCart = [...cart];
                 const oldItem = cart.find(item => item.id === productId);
                 const oldQuantity = oldItem ? oldItem.quantity : 0;
 
+                // Check if item exists in cart
+                if (!oldItem && quantity > 0) {
+                    console.error('❌ Item not found in cart:', productId);
+                    showNotification('❌ Item not found in cart. Please refresh the page.', 'error');
+                    return;
+                }
+
                 // Use shared data manager to update quantity
                 const updatedCart = window.sharedDataManager.updateCartQuantity(currentUser.email, productId, quantity);
+
+                if (!updatedCart) {
+                    console.error('❌ Failed to update cart in shared data manager');
+                    showNotification('❌ Failed to update cart. Please try again.', 'error');
+                    return;
+                }
+
                 cart = updatedCart; // Update local cart reference
 
                 console.log('✅ Quantity updated:', { productId, oldQuantity, newQuantity: quantity });
                 updateCartDisplay();
 
+                // Get product information for notification
+                const product = window.sharedDataManager.getProducts().find(p => p.id === productId);
+
                 // Show feedback for quantity changes
-                if (quantity > oldQuantity) {
+                if (quantity > oldQuantity && product) {
                     showNotification(`⬆️ Increased ${product.strain} quantity to ${quantity}`, 'success');
-                } else if (quantity < oldQuantity) {
+                } else if (quantity < oldQuantity && product) {
                     showNotification(`⬇️ Decreased ${product.strain} quantity to ${quantity}`, 'success');
+                } else if (quantity === 0) {
+                    showNotification(`����️ Removed item from cart`, 'success');
                 }
             } catch (error) {
                 console.error('Error updating quantity:', error);
+                console.error('Error details:', { productId, quantity, currentUser: !!currentUser, cartLength: cart.length });
                 showNotification('❌ Error updating quantity. Please try again.', 'error');
             }
         }
 
         function checkout() {
+            // Use new CartManager if available
+            if (window.cartManager) {
+                return window.cartManager.checkout();
+            }
+
+            // Fallback to old implementation
             if (!currentUser) {
                 showNotification('🔒 Please log in to complete checkout', 'error');
                 return;
@@ -4652,7 +4812,7 @@
             // Validate cart items against current inventory
             let hasIssues = false;
             cart.forEach(cartItem => {
-                const product = products.find(p => p.id === cartItem.id);
+                const product = window.sharedDataManager.getProducts().find(p => p.id === cartItem.id);
                 if (!product || product.status !== 'AVAILABLE') {
                     showNotification(`❌ ${cartItem.strain} is no longer available`, 'error');
                     hasIssues = true;
@@ -4682,10 +4842,18 @@
                     const orderItems = cart.map(item => `${item.strain} (x${item.quantity})`).join(', ');
                     
                     const newOrder = {
-                        id: `ORD-${String(orders.length + 1).padStart(3, '0')}`,
+                        id: `ORD-${String(window.sharedDataManager.getOrders().length + 1).padStart(3, '0')}`,
                         partner: currentUser.email,
                         partnerName: currentUser.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') + ' Store',
                         items: orderItems,
+                        itemDetails: cart.map(item => ({
+                            id: item.id,
+                            strain: item.strain,
+                            grade: item.grade,
+                            quantity: item.quantity,
+                            price: item.price,
+                            subtotal: item.price * item.quantity
+                        })),
                         total: total,
                         status: 'PENDING',
                         date: new Date().toISOString().split('T')[0],
@@ -4693,19 +4861,28 @@
                         delivery: total > 1000 ? 'priority' : 'standard',
                         created: new Date().toISOString()
                     };
-                    
-                    orders.push(newOrder);
-                    
-                    // Update inventory
+
+                    // Add order to shared data manager (this will broadcast to admin portal)
+                    const savedOrder = window.sharedDataManager.addOrder(newOrder);
+                    orders.push(savedOrder);
+
+                    // Update inventory through shared data manager
                     cart.forEach(cartItem => {
-                        const product = products.find(p => p.id === cartItem.id);
+                        const product = window.sharedDataManager.getProducts().find(p => p.id === cartItem.id);
                         if (product) {
-                            product.stock = Math.max(0, product.stock - cartItem.quantity);
-                            if (product.stock === 0) {
-                                product.status = 'SOLD OUT';
-                            }
+                            const newStock = Math.max(0, product.stock - cartItem.quantity);
+                            const newStatus = newStock === 0 ? 'SOLD OUT' : product.status;
+
+                            // Update product in shared data manager
+                            window.sharedDataManager.updateProduct(product.id, {
+                                stock: newStock,
+                                status: newStatus
+                            });
                         }
                     });
+
+                    // Clear cart from shared data manager
+                    window.sharedDataManager.clearCart(currentUser.email);
 
                     cart = [];
                     updateAllViews();
@@ -4785,7 +4962,7 @@
                         </div>
                     </div>
                     <div style="margin-bottom: 24px;">
-                        <h4 style="color: var(--brand-green); margin-bottom: 12px;">📦 Order Items</h4>
+                        <h4 style="color: var(--brand-green); margin-bottom: 12px;">���� Order Items</h4>
                         <div style="background: var(--surface-card); padding: 16px; border-radius: 12px; border: 1px solid var(--border-subtle);">
                             <p style="color: var(--text-primary); line-height: 1.6;">${order.items}</p>
                         </div>
@@ -5083,7 +5260,7 @@ Phone: (210) 835-7834
                 });
                 
                 updateCartDisplay();
-                showNotification(`🔄 ${itemsAdded} items from order ${orderId} added to cart!`, 'success');
+                showNotification(`�� ${itemsAdded} items from order ${orderId} added to cart!`, 'success');
                 
                 if (itemsAdded < itemStrings.length) {
                     setTimeout(() => {
@@ -5139,7 +5316,7 @@ Phone: (210) 835-7834
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                                 <button class="btn btn-primary" onclick="contactOrderSupport()">📦 Order Issues</button>
                                 <button class="btn btn-secondary" onclick="contactShippingSupport()">���� Shipping Questions</button>
-                                <button class="btn btn-secondary" onclick="contactBillingSupport()">💳 Billing Support</button>
+                                <button class="btn btn-secondary" onclick="contactBillingSupport()">��� Billing Support</button>
                                 <button class="btn btn-secondary" onclick="contactGeneralSupport()">💬 General Inquiry</button>
                             </div>
                         </div>
@@ -5580,7 +5757,7 @@ Phone: (210) 835-7834
                                         setTimeout(() => {
                                             const finalQuantity = cart.find(item => item.id === testProduct.id)?.quantity;
                                             if (finalQuantity === oldQuantity) {
-                                                console.log('✅ Quantity decrease test passed');
+                                                console.log('��� Quantity decrease test passed');
                                                 showNotification('🎉 Cart functionality test completed successfully!', 'success');
                                             } else {
                                                 console.log('❌ Quantity decrease test failed');
@@ -5909,6 +6086,82 @@ Phone: (210) 835-7834
         console.log('📱 Mobile debugging tools available: testMobileFunction(), testMobileInteraction()');
         console.log('🔥 READY FOR MOBILE DEPLOYMENT! 🔥');
 
+        // Test Real-Time System
+        function testRealTimeSystem() {
+            console.log('🧪 Testing real-time system...');
+
+            if (!currentUser) {
+                console.log('❌ No user logged in - cannot test real-time system');
+                return false;
+            }
+
+            console.log('📡 Testing cart sync...');
+
+            // Test 1: Add multiple products to cart
+            const testProducts = window.sharedDataManager.getProducts().slice(0, 3);
+            testProducts.forEach(product => {
+                if (product.status === 'AVAILABLE' && product.stock > 0) {
+                    console.log(`Adding ${product.strain} to cart...`);
+                    addToCart(product.id);
+                }
+            });
+
+            // Test 2: Update quantities
+            setTimeout(() => {
+                if (cart.length > 0) {
+                    console.log('📡 Testing quantity updates...');
+                    const firstItem = cart[0];
+                    updateQuantity(firstItem.id, firstItem.quantity + 1);
+                }
+            }, 1000);
+
+            // Test 3: Real-time broadcasting test
+            setTimeout(() => {
+                console.log('📡 Testing real-time broadcast...');
+                window.sharedDataManager.broadcastRealTimeUpdate('test_update', {
+                    message: 'Real-time system test',
+                    timestamp: new Date().toISOString()
+                });
+            }, 2000);
+
+            return true;
+        }
+
+        // Test Cart Functionality
+        function testCartFunctionality() {
+            console.log('🧪 Testing cart functionality...');
+
+            if (!currentUser) {
+                console.log('❌ No user logged in - cannot test cart');
+                return false;
+            }
+
+            const sharedProducts = window.sharedDataManager.getProducts();
+            const sharedCart = window.sharedDataManager.getCart(currentUser.email);
+
+            console.log('���� Cart Test Results:');
+            console.log('  Local cart items:', cart.length);
+            console.log('  Shared cart items:', sharedCart.length);
+            console.log('  Available products:', sharedProducts.length);
+            console.log('  Cart sync status:', JSON.stringify(cart) === JSON.stringify(sharedCart) ? '✅ In sync' : '❌ Out of sync');
+
+            // Test cart integrity
+            let allItemsValid = true;
+            cart.forEach(cartItem => {
+                const product = sharedProducts.find(p => p.id === cartItem.id);
+                if (!product) {
+                    console.log(`  ❌ Invalid cart item: ${cartItem.strain} (ID: ${cartItem.id})`);
+                    allItemsValid = false;
+                } else {
+                    console.log(`  ✅ Valid cart item: ${cartItem.strain} (${cartItem.quantity}x)`);
+                }
+            });
+
+            console.log('  Cart integrity:', allItemsValid ? '✅ All items valid' : '❌ Some items invalid');
+
+            return allItemsValid && cart.length === sharedCart.length;
+        }
+
         // Debug Function to Check System Status
         function debugSystemStatus() {
             console.log('🔍 System Debug Information:');
@@ -5948,7 +6201,7 @@ Phone: (210) 835-7834
         // Simulate Admin-Side Product Updates (Demo Function)
         function simulateAdminUpdate() {
             try {
-                console.log('🔧 Simulating admin-side product update...');
+                console.log('���� Simulating admin-side product update...');
                 
                 // Simulate updating a product (change stock, price, or image)
                 const productToUpdate = products[1]; // Blue Gelatti
@@ -6070,7 +6323,75 @@ Phone: (210) 835-7834
                 window.testProductImages = testProductImages;
                 window.addNewProduct = addNewProduct;
                 window.forceUpdateWithImages = forceUpdateWithImages;
-                window.testCartFunctionality = testCartFunctionality; // New cart test function
+                window.testCartFunctionality = testCartFunctionality; // Legacy cart test function
+                window.testCartSystem = testCartSystem; // New cart system test function
+
+                // Test New Cart System
+                function testCartSystem() {
+                    console.log('🧪 Testing new cart system...');
+
+                    if (!currentUser) {
+                        console.log('❌ No user logged in - cannot test cart');
+                        return false;
+                    }
+
+                    if (!window.cartManager) {
+                        console.log('❌ CartManager not initialized');
+                        return false;
+                    }
+
+                    console.log('📊 Cart System Test Results:');
+
+                    // Get cart state
+                    const cartState = window.cartManager.getState();
+                    console.log('  Cart state:', cartState);
+
+                    // Test adding products
+                    const availableProducts = window.sharedDataManager.getProducts().filter(p => p.status === 'AVAILABLE' && p.stock > 0);
+                    if (availableProducts.length === 0) {
+                        console.log('  ⚠️ No available products to test with');
+                        return false;
+                    }
+
+                    // Clear cart first
+                    window.cartManager.clear();
+
+                    // Test 1: Add first product
+                    console.log('  🧪 Testing addProduct...');
+                    const product1 = availableProducts[0];
+                    const addResult1 = window.cartManager.addProduct(product1.id, 1);
+                    console.log(`    Add product 1 result: ${addResult1 ? '✅' : '❌'}`);
+
+                    // Test 2: Add second product if available
+                    if (availableProducts.length > 1) {
+                        console.log('  🧪 Testing multiple products...');
+                        const product2 = availableProducts[1];
+                        const addResult2 = window.cartManager.addProduct(product2.id, 2);
+                        console.log(`    Add product 2 result: ${addResult2 ? '✅' : '❌'}`);
+                    }
+
+                    // Test 3: Update quantity
+                    console.log('  🧪 Testing updateQuantity...');
+                    const updateResult = window.cartManager.updateQuantity(product1.id, 3);
+                    console.log(`    Update quantity result: ${updateResult ? '✅' : '❌'}`);
+
+                    // Test 4: Check cart totals
+                    console.log('  🧪 Testing getTotals...');
+                    const totals = window.cartManager.getTotals();
+                    console.log('    Cart totals:', totals);
+
+                    // Test 5: Remove product
+                    console.log('  🧪 Testing removeProduct...');
+                    const removeResult = window.cartManager.removeProduct(product1.id);
+                    console.log(`    Remove product result: ${removeResult ? '✅' : '❌'}`);
+
+                    // Final state
+                    const finalState = window.cartManager.getState();
+                    console.log('  📊 Final cart state:', finalState);
+
+                    console.log('✅ Cart system test completed');
+                    return true;
+                }
                 window.showInventoryWithImages = function() {
                     try {
                         console.log('🖼️ Showing inventory with images...');

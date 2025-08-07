@@ -109,31 +109,40 @@ class SharedDataManager {
     }
 
     addToCart(userEmail, productId, quantity = 1) {
+        console.log('📡 SharedDataManager: addToCart called', { userEmail, productId, quantity });
+
         const cart = this.getCart(userEmail);
         const products = this.getProducts();
-        const product = products.find(p => p.id === productId);
-        
+        const product = products.find(p => p.id == productId); // Use loose equality
+
         if (!product) {
+            console.error('❌ Product not found:', productId);
             throw new Error('Product not found');
         }
 
-        const existingItem = cart.find(item => item.id === productId);
-        
+        const existingItem = cart.find(item => item.id == productId);
+
         if (existingItem) {
-            existingItem.quantity = Math.min(existingItem.quantity + quantity, product.stock);
+            const newQuantity = Math.min(existingItem.quantity + quantity, product.stock);
+            console.log('📡 Updating existing item quantity:', existingItem.quantity, '->', newQuantity);
+            existingItem.quantity = newQuantity;
         } else {
-            cart.push({
+            const newItem = {
                 id: product.id,
                 strain: product.strain,
                 grade: product.grade,
                 price: product.price,
                 quantity: Math.min(quantity, product.stock),
                 maxStock: product.stock,
-                image: product.image
-            });
+                image: product.image,
+                addedAt: new Date().toISOString()
+            };
+            console.log('📡 Adding new item to cart:', newItem);
+            cart.push(newItem);
         }
 
         this.updateCart(userEmail, cart);
+        console.log('📡 Cart after add:', cart.map(item => `${item.strain}: ${item.quantity}x`));
         return cart;
     }
 
@@ -145,20 +154,46 @@ class SharedDataManager {
     }
 
     updateCartQuantity(userEmail, productId, quantity) {
-        const cart = this.getCart(userEmail);
-        const item = cart.find(item => item.id === productId);
-        
-        if (item) {
-            if (quantity <= 0) {
-                return this.removeFromCart(userEmail, productId);
-            } else {
-                const products = this.getProducts();
-                const product = products.find(p => p.id === productId);
-                item.quantity = Math.min(quantity, product ? product.stock : item.maxStock);
-                this.updateCart(userEmail, cart);
+        try {
+            console.log('📡 SharedDataManager: updateCartQuantity called', { userEmail, productId, quantity });
+
+            if (!userEmail || !productId) {
+                console.error('❌ SharedDataManager: Invalid parameters', { userEmail, productId, quantity });
+                throw new Error('Invalid parameters for updateCartQuantity');
             }
+
+            const cart = this.getCart(userEmail);
+            const item = cart.find(item => item.id == productId); // Use loose equality to handle string/number mismatch
+
+            console.log('📡 SharedDataManager: Found cart item:', item);
+
+            if (item) {
+                if (quantity <= 0) {
+                    console.log('📡 SharedDataManager: Removing item with zero/negative quantity');
+                    return this.removeFromCart(userEmail, productId);
+                } else {
+                    const products = this.getProducts();
+                    const product = products.find(p => p.id == productId); // Use loose equality
+                    console.log('📡 SharedDataManager: Found product:', product);
+
+                    const maxAllowed = product ? product.stock : (item.maxStock || 999);
+                    const newQuantity = Math.min(quantity, maxAllowed);
+
+                    console.log('📡 SharedDataManager: Updating quantity', { oldQuantity: item.quantity, newQuantity, maxAllowed });
+
+                    item.quantity = newQuantity;
+                    this.updateCart(userEmail, cart);
+                }
+            } else {
+                console.warn('📡 SharedDataManager: Item not found in cart', { productId, cartItems: cart.map(i => i.id) });
+            }
+
+            console.log('📡 SharedDataManager: Returning updated cart with', cart.length, 'items');
+            return cart;
+        } catch (error) {
+            console.error('❌ SharedDataManager: Error in updateCartQuantity:', error);
+            throw error;
         }
-        return cart;
     }
 
     clearCart(userEmail) {
@@ -167,15 +202,32 @@ class SharedDataManager {
 
     // Order Management
     addOrder(order) {
+        console.log('📡 SharedDataManager: Adding new order', order);
+
         const data = this.getData();
         if (!data.orders) data.orders = [];
-        
+
         order.id = order.id || `ORD-${Date.now()}`;
         order.createdAt = new Date().toISOString();
-        
+        order.status = order.status || 'PENDING';
+
         data.orders.push(order);
         this.saveData(data);
+
+        // Enhanced notification with real-time broadcasting
         this.notifyChange('order_added', order);
+
+        // Immediate broadcast for admin portal
+        this.broadcastRealTimeUpdate('new_order', {
+            ...order,
+            isUrgent: order.total > 1000,
+            customerInfo: {
+                email: order.partner,
+                name: order.partnerName
+            }
+        });
+
+        console.log('📡 Order added and broadcasted:', order.id);
         return order;
     }
 
@@ -202,14 +254,50 @@ class SharedDataManager {
             if (e.key === this.storageKey) {
                 this.notifyChange('external_update', JSON.parse(e.newValue || '{}'));
             }
+
+            // Listen for real-time updates
+            if (e.key === 'fadedSkiesRealTimeUpdate') {
+                try {
+                    const updateData = JSON.parse(e.newValue || '{}');
+                    console.log('📡 Received real-time update:', updateData);
+
+                    // Dispatch the real-time update
+                    window.dispatchEvent(new CustomEvent('realTimeUpdate', {
+                        detail: updateData
+                    }));
+                } catch (error) {
+                    console.error('Error processing real-time update:', error);
+                }
+            }
         });
     }
 
     notifyChange(eventType, data) {
         // Dispatch custom event for components to listen to
         window.dispatchEvent(new CustomEvent('sharedDataChange', {
-            detail: { type: eventType, data }
+            detail: { type: eventType, data, timestamp: new Date().toISOString() }
         }));
+
+        // Enhanced real-time broadcasting
+        this.broadcastRealTimeUpdate(eventType, data);
+    }
+
+    broadcastRealTimeUpdate(eventType, data) {
+        // Store the latest update for cross-tab communication
+        const updateData = {
+            type: eventType,
+            data: data,
+            timestamp: new Date().toISOString(),
+            id: Math.random().toString(36).substr(2, 9)
+        };
+
+        // Use a separate key for real-time updates
+        try {
+            localStorage.setItem('fadedSkiesRealTimeUpdate', JSON.stringify(updateData));
+            console.log('📡 Broadcasting real-time update:', eventType, data);
+        } catch (error) {
+            console.error('Error broadcasting update:', error);
+        }
     }
 
     // Sync operations
