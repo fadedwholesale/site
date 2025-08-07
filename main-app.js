@@ -795,7 +795,7 @@ function handleFileUpload(input, documentType) {
             previewContainer.innerHTML = `
                 <div class="file-preview-item">
                     <div class="file-info">
-                        <span class="file-icon">����</span>
+                        <span class="file-icon">📄</span>
                         <div class="file-details">
                             <div class="file-name">${file.name}</div>
                             <div class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
@@ -888,5 +888,21 @@ window.requestCustomQuote = requestCustomQuote;
 window.openSupportModal = openSupportModal;
 window.showNotification = showNotification;
 window.updateAllViews = updateAllViews;
+
+// Debug function to check authentication state
+window.debugAuth = function() {
+    console.log('🔍 Authentication Debug:', {
+        localCurrentUser: currentUser,
+        windowCurrentUser: window.currentUser,
+        localStorage: localStorage.getItem('currentUser'),
+        hasCartManager: !!window.cartManager
+    });
+    return {
+        localCurrentUser: currentUser,
+        windowCurrentUser: window.currentUser,
+        localStorage: localStorage.getItem('currentUser'),
+        hasCartManager: !!window.cartManager
+    };
+};
 
 console.log('🎯 All global functions loaded and ready');
