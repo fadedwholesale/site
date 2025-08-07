@@ -1697,7 +1697,7 @@
                             </div>
                             <div style="display: flex; gap: 12px; margin-top: 24px;">
                                 <button class="btn btn-primary" onclick="openProfileEditModal()">✏️ Edit Profile</button>
-                                <button class="btn btn-secondary" onclick="showNotification('⬆️ Tier upgrade request submitted!', 'success')">⬆️ Request Upgrade</button>
+                                <button class="btn btn-secondary" onclick="showNotification('⬆��� Tier upgrade request submitted!', 'success')">⬆️ Request Upgrade</button>
                             </div>
                         </div>
 
@@ -5099,7 +5099,7 @@ Phone: (210) 835-7834
                             <h4 style="color: var(--brand-green); margin-bottom: 16px;">🆘 Quick Support Options</h4>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                                 <button class="btn btn-primary" onclick="contactOrderSupport()">📦 Order Issues</button>
-                                <button class="btn btn-secondary" onclick="contactShippingSupport()">🚚 Shipping Questions</button>
+                                <button class="btn btn-secondary" onclick="contactShippingSupport()">���� Shipping Questions</button>
                                 <button class="btn btn-secondary" onclick="contactBillingSupport()">💳 Billing Support</button>
                                 <button class="btn btn-secondary" onclick="contactGeneralSupport()">💬 General Inquiry</button>
                             </div>
@@ -5277,6 +5277,12 @@ Phone: (210) 835-7834
                     
                     // Add visual feedback for mobile
                     showNotification('📱 Modal opened - tap outside or × to close', 'info');
+
+                    // Initialize registration modal if opened
+                    if (modalId === 'registerModal') {
+                        resetRegistrationForm();
+                        showRegistrationStep(1);
+                    }
                 } else {
                     console.warn('Modal not found:', modalId);
                     showNotification('Modal not found. Please refresh the page.', 'error');
