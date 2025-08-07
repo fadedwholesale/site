@@ -1697,7 +1697,7 @@
                             </div>
                             <div style="display: flex; gap: 12px; margin-top: 24px;">
                                 <button class="btn btn-primary" onclick="openProfileEditModal()">✏️ Edit Profile</button>
-                                <button class="btn btn-secondary" onclick="showNotification('⬆��� Tier upgrade request submitted!', 'success')">⬆️ Request Upgrade</button>
+                                <button class="btn btn-secondary" onclick="showNotification('⬆��� Tier upgrade request submitted!', 'success')">��️ Request Upgrade</button>
                             </div>
                         </div>
 
@@ -4728,7 +4728,7 @@
         });
 
         function addToCart(productId) {
-            console.log('���� addToCart called with productId:', productId);
+            console.log('🛒 addToCart called with productId:', productId);
             console.log('🔍 Current auth state:', {
                 hasCurrentUser: !!window.currentUser,
                 userEmail: window.currentUser?.email,
@@ -6843,24 +6843,38 @@ Phone: (210) 835-7834
 
         // Initialize modern systems
         function initializeModernSystems() {
+            console.log('🚀 Starting modern systems initialization...');
+
             try {
                 setupModernLogin();
-                updateCartToggleButton();
-
-                // Check if user is already authenticated
-                if (window.authManager && window.authManager.isAuthenticated()) {
-                    const user = window.authManager.getUser();
-                    updateAuthenticatedUI(user);
-                }
-
-                console.log('✅ Modern systems integrated successfully');
-                console.log('Auth Manager:', !!window.authManager);
-                console.log('Modern Cart:', !!window.modernCart);
-                console.log('Cart UI:', !!window.cartUI);
             } catch (error) {
-                console.error('Error initializing modern systems:', error);
-                console.log('🔄 Using fallback systems');
+                console.warn('Login setup failed:', error);
             }
+
+            try {
+                updateCartToggleButton();
+            } catch (error) {
+                console.warn('Cart toggle setup failed:', error);
+            }
+
+            try {
+                // Check if user is already authenticated
+                if (window.authManager && typeof window.authManager.isAuthenticated === 'function' && window.authManager.isAuthenticated()) {
+                    const user = window.authManager.getUser();
+                    if (user) {
+                        updateAuthenticatedUI(user);
+                    }
+                }
+            } catch (error) {
+                console.warn('Auth restoration failed:', error);
+            }
+
+            console.log('✅ Modern systems integration complete');
+            console.log('📊 System status:');
+            console.log('  - Auth Manager:', !!window.authManager);
+            console.log('  - Modern Cart:', !!window.modernCart);
+            console.log('  - Cart UI:', !!window.cartUI);
+            console.log('  - Simple Cart UI:', !!window.simpleCartUI);
         }
 
         // Wait for all systems to load
