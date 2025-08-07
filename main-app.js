@@ -1,9 +1,31 @@
 // Main Application JavaScript for Faded Skies Portal
 // Complete implementation with cart, orders, and profile functionality
 
-// Global Variables
+// Global Variables - Authentication State
 let currentUser = null;
-window.currentUser = null;
+
+// Ensure window.currentUser is always synchronized
+function setCurrentUser(user) {
+    currentUser = user;
+    window.currentUser = user;
+
+    if (user) {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        console.log('✅ User authenticated globally:', user.email);
+    } else {
+        localStorage.removeItem('currentUser');
+        console.log('✅ User logged out globally');
+    }
+
+    // Immediately notify cart manager of auth state change
+    if (window.cartManager) {
+        console.log('🔄 Refreshing cart manager after auth change');
+        window.cartManager.refreshUserState();
+        window.cartManager.updateDisplay();
+    }
+
+    return user;
+}
 let currentView = 'public';
 let activePortalTab = 'dashboard';
 let liveInventoryVisible = false;
@@ -33,15 +55,9 @@ function initializeApplication() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
         try {
-            currentUser = JSON.parse(savedUser);
-            window.currentUser = currentUser;
+            const userData = JSON.parse(savedUser);
+            setCurrentUser(userData);
             showUserSession();
-
-            // Refresh cart manager if it exists
-            if (window.cartManager) {
-                window.cartManager.refreshUserState();
-            }
-
             console.log('✅ User session restored:', currentUser.email);
         } catch (error) {
             console.error('Error restoring user session:', error);
@@ -115,32 +131,24 @@ function login(event) {
     
     // Simple authentication (in real app, this would be server-side)
     if (email && password) {
-        currentUser = {
+        const userData = {
             email: email,
             name: email.split('@')[0],
             tier: 'Gold Partner',
             loginTime: new Date().toISOString()
         };
 
-        // Set global user reference for cart manager
-        window.currentUser = currentUser;
+        // Set user with proper synchronization
+        setCurrentUser(userData);
 
-        // Save user session
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
         // Update UI
         showUserSession();
         closeModal('loginModal');
         showPartnerPortal();
-        
-        // Notify cart manager and refresh its state
+
+        // Notify all systems of authentication
         window.dispatchEvent(new CustomEvent('userAuthenticated', { detail: currentUser }));
 
-        // Explicitly refresh cart manager state
-        if (window.cartManager) {
-            window.cartManager.refreshUserState();
-        }
-        
         showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
         console.log('✅ User logged in:', currentUser.email);
     } else {
@@ -151,20 +159,20 @@ function login(event) {
 function logout() {
     if (currentUser) {
         const userName = currentUser.name;
-        currentUser = null;
-        window.currentUser = null;
-        localStorage.removeItem('currentUser');
-        
-        // Clear cart
+
+        // Clear cart first
         if (window.cartManager) {
             window.cartManager.cart = [];
             window.cartManager.updateDisplay();
         }
-        
+
+        // Clear authentication state
+        setCurrentUser(null);
+
         // Update UI
         showGuestSession();
         showPublicWebsite();
-        
+
         showNotification(`Goodbye, ${userName}! 👋`, 'success');
         console.log('✅ User logged out');
     }
@@ -795,7 +803,7 @@ function handleFileUpload(input, documentType) {
             previewContainer.innerHTML = `
                 <div class="file-preview-item">
                     <div class="file-info">
-                        <span class="file-icon">����</span>
+                        <span class="file-icon">📄</span>
                         <div class="file-details">
                             <div class="file-name">${file.name}</div>
                             <div class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
