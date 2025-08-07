@@ -39,7 +39,7 @@ function initializeApplication() {
 
             // Refresh cart manager if it exists
             if (window.cartManager) {
-                window.cartManager.refreshUserState();
+                window.cartManager.handleUserAuthentication();
             }
 
             console.log('✅ User session restored:', currentUser.email);
