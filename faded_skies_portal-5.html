@@ -2074,6 +2074,8 @@
     <script src="shared-data.js"></script>
     <!-- Include Cart System -->
     <script src="cart-system.js"></script>
+    <!-- Include Main Application -->
+    <script src="main-app.js"></script>
     <!-- Include Test Functionality -->
     <script src="test-functionality.js"></script>
 
@@ -2471,7 +2473,7 @@
                     }, 2000);
                 }
                 
-                console.log('✅ Application ready for production deployment!');
+                console.log('��� Application ready for production deployment!');
             } catch (error) {
                 console.error('Initialization error:', error);
                 showNotification('❌ Some features may be limited. Please refresh if you experience issues.', 'warning');
@@ -2951,7 +2953,7 @@
                     
                     // Send confirmation notification
                     setTimeout(() => {
-                        showNotification('���� Confirmation email sent to ' + businessEmail, 'success');
+                        showNotification('����� Confirmation email sent to ' + businessEmail, 'success');
                     }, 2000);
                 }, 2000);
                 
@@ -6235,7 +6237,7 @@ Phone: (210) 835-7834
                 }
             });
 
-            console.log('  Cart integrity:', allItemsValid ? '✅ All items valid' : '❌ Some items invalid');
+            console.log('  Cart integrity:', allItemsValid ? '✅ All items valid' : '��� Some items invalid');
 
             return allItemsValid && cart.length === sharedCart.length;
         }
