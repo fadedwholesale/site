@@ -4900,7 +4900,7 @@
             });
 
             if (hasIssues) {
-                showNotification('🔄 Please review your cart and try again', 'warning');
+                showNotification('��� Please review your cart and try again', 'warning');
                 return;
             }
 
@@ -5167,7 +5167,7 @@ Phone: (210) 835-7834
                 
                 const trackingNumber = `FS${orderId.slice(-3)}2025`;
                 let statusMessage = '';
-                let statusIcon = '���';
+                let statusIcon = '📦';
                 let statusColor = 'var(--brand-green)';
                 
                 switch(order.status) {
@@ -6591,7 +6591,7 @@ Phone: (210) 835-7834
                     </div>
                 </div>
                 <div class="card" style="margin-bottom: 32px;">
-                    <h3>�� Recent Orders</h3>
+                    <h3>📝 Recent Orders</h3>
                     <table class="data-table" style="margin-top: 12px;">
                         <thead>
                             <tr>
@@ -6646,6 +6646,7 @@ Phone: (210) 835-7834
     <script src="auth-system.js"></script>
     <script src="cart-system-v2.js"></script>
     <script src="cart-ui.js"></script>
+    <script src="cart-ui-simple.js"></script>
 
     <!-- Integration Script -->
     <script>
