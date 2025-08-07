@@ -3038,29 +3038,6 @@
             currentRegistrationStep = step;
         }
 
-        function validateBusinessInfo() {
-            const required = ['businessName', 'contactName', 'businessEmail', 'phone', 'businessAddress', 'businessType', 'licenseNumber', 'estimatedMonthlyVolume'];
-
-            for (let field of required) {
-                const element = document.getElementById(field);
-                if (!element || !element.value.trim()) {
-                    showNotification(`Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`, 'error');
-                    element?.focus();
-                    return false;
-                }
-            }
-
-            // Validate email format
-            const email = document.getElementById('businessEmail').value;
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showNotification('Please enter a valid email address', 'error');
-                document.getElementById('businessEmail').focus();
-                return false;
-            }
-
-            return true;
-        }
 
         function saveBusinessInfo() {
             registrationData = {
@@ -5853,7 +5830,7 @@ Phone: (210) 835-7834
                                         setTimeout(() => {
                                             const finalQuantity = cart.find(item => item.id === testProduct.id)?.quantity;
                                             if (finalQuantity === oldQuantity) {
-                                                console.log('��� Quantity decrease test passed');
+                                                console.log('���� Quantity decrease test passed');
                                                 showNotification('🎉 Cart functionality test completed successfully!', 'success');
                                             } else {
                                                 console.log('❌ Quantity decrease test failed');
