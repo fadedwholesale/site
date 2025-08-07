@@ -8,7 +8,7 @@ let currentUser = null;
 function setCurrentUser(user) {
     currentUser = user;
     window.currentUser = user;
-
+    
     if (user) {
         localStorage.setItem('currentUser', JSON.stringify(user));
         console.log('✅ User authenticated globally:', user.email);
@@ -16,16 +16,17 @@ function setCurrentUser(user) {
         localStorage.removeItem('currentUser');
         console.log('✅ User logged out globally');
     }
-
+    
     // Immediately notify cart manager of auth state change
     if (window.cartManager) {
         console.log('🔄 Refreshing cart manager after auth change');
         window.cartManager.refreshUserState();
         window.cartManager.updateDisplay();
     }
-
+    
     return user;
 }
+
 let currentView = 'public';
 let activePortalTab = 'dashboard';
 let liveInventoryVisible = false;
@@ -49,7 +50,7 @@ function initializeApplication() {
         window.cartManager = new CartManager();
         console.log('✅ Cart manager initialized');
     }
-
+    
     // Setup shared data manager event listeners
     window.addEventListener('sharedDataChange', handleSharedDataChange);
     
@@ -57,13 +58,8 @@ function initializeApplication() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
         try {
-<<<<<<< HEAD
             const userData = JSON.parse(savedUser);
             setCurrentUser(userData);
-=======
-            currentUser = JSON.parse(savedUser);
-            window.currentUser = currentUser;
->>>>>>> origin/main
             showUserSession();
             console.log('✅ User session restored:', currentUser.email);
         } catch (error) {
@@ -132,7 +128,7 @@ function handleSharedDataChange(event) {
 // Authentication Functions
 function login(event) {
     event.preventDefault();
-
+    
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
@@ -145,27 +141,15 @@ function login(event) {
             loginTime: new Date().toISOString()
         };
 
-<<<<<<< HEAD
         // Set user with proper synchronization
         setCurrentUser(userData);
-=======
-        // Set global window.currentUser for cart access
-        window.currentUser = currentUser;
-
-        // Save user session
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
->>>>>>> origin/main
 
         // Update UI
         showUserSession();
         closeModal('loginModal');
         showPartnerPortal();
 
-<<<<<<< HEAD
         // Notify all systems of authentication
-=======
-        // Notify cart manager
->>>>>>> origin/main
         window.dispatchEvent(new CustomEvent('userAuthenticated', { detail: currentUser }));
 
         showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
@@ -178,27 +162,16 @@ function login(event) {
 function logout() {
     if (currentUser) {
         const userName = currentUser.name;
-<<<<<<< HEAD
-
+        
         // Clear cart first
-=======
-        currentUser = null;
-        window.currentUser = null;
-        localStorage.removeItem('currentUser');
-
-        // Clear cart
->>>>>>> origin/main
         if (window.cartManager) {
             window.cartManager.cart = [];
             window.cartManager.updateDisplay();
         }
 
-<<<<<<< HEAD
         // Clear authentication state
         setCurrentUser(null);
-
-=======
->>>>>>> origin/main
+        
         // Update UI
         showGuestSession();
         showPublicWebsite();
@@ -316,38 +289,13 @@ function toggleCart() {
 }
 
 function addToCart(productId, quantity = 1) {
-<<<<<<< HEAD
-=======
-    console.log('🛒 addToCart called:', { productId, quantity, currentUser: !!currentUser, windowCurrentUser: !!window.currentUser });
-
-    if (!currentUser || !window.currentUser) {
-        console.log('❌ Authentication check failed:', {
-            localCurrentUser: !!currentUser,
-            windowCurrentUser: !!window.currentUser,
-            localUserEmail: currentUser?.email,
-            windowUserEmail: window.currentUser?.email
-        });
-        showNotification('🔒 Please log in to add items to cart', 'error');
-        openModal('loginModal');
-        return false;
-    }
-
-    console.log('✅ Authentication check passed, calling cart manager');
-
->>>>>>> origin/main
     if (window.cartManager) {
         return window.cartManager.addProduct(productId, quantity);
     } else {
         console.error('❌ Cart manager not found');
         showNotification('❌ Cart system not available', 'error');
-<<<<<<< HEAD
         return false;
     }
-=======
-    }
-
-    return false;
->>>>>>> origin/main
 }
 
 function clearCart() {
@@ -890,7 +838,7 @@ function createBulkOrder() {
 }
 
 function requestCustomQuote() {
-    showNotification('��� Custom quote request feature coming soon!', 'info');
+    showNotification('💬 Custom quote request feature coming soon!', 'info');
 }
 
 function openSupportModal() {
