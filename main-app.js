@@ -85,8 +85,8 @@ function setupEventListeners() {
     // Listen for authentication events
     window.addEventListener('userAuthenticated', function(event) {
         console.log('🔐 User authenticated event received');
-        if (window.cartManager) {
-            window.cartManager.refreshUserState();
+        if (window.modernCart) {
+            window.modernCart.notifyListeners('auth_changed', { user: event.detail });
         }
     });
     
