@@ -157,4 +157,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Test function to verify override is working
+window.testAuth = function() {
+    console.log('=== AUTH OVERRIDE TEST ===');
+    console.log('window.login:', typeof window.login);
+    console.log('window.setCurrentUser:', typeof window.setCurrentUser);
+    console.log('window.safeLogin:', typeof window.safeLogin);
+    console.log('window.currentUser:', window.currentUser);
+    console.log('Form element:', !!document.getElementById('loginForm'));
+    console.log('========================');
+
+    // Try a test login
+    console.log('Testing login with test@example.com...');
+    window.safeSetUser({
+        email: 'test@example.com',
+        name: 'test',
+        tier: 'Gold Partner',
+        loginTime: new Date().toISOString()
+    });
+    console.log('Test user set:', window.currentUser);
+};
+
 console.log('Auth override loaded successfully');
+console.log('Run window.testAuth() to test the authentication system');
