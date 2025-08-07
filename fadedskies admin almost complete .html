@@ -3086,21 +3086,28 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         function updateProductStock(productId, newStock) {
             const product = products.find(p => p.id === productId);
             if (product) {
-                product.stock = parseInt(newStock);
-                product.lastModified = new Date().toISOString();
-                product.modifiedBy = currentUser.email;
-                
+                const updates = {
+                    stock: parseInt(newStock),
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: currentUser.email
+                };
+
                 // Auto-update status based on stock
-                if (product.stock === 0) {
-                    product.status = 'SOLD OUT';
-                } else if (product.status === 'SOLD OUT' && product.stock > 0) {
-                    product.status = 'AVAILABLE';
+                if (updates.stock === 0) {
+                    updates.status = 'SOLD OUT';
+                } else if (product.status === 'SOLD OUT' && updates.stock > 0) {
+                    updates.status = 'AVAILABLE';
                 }
-                
+
+                // Update local array
+                Object.assign(product, updates);
+
+                // Update shared data manager (this will notify partner portals)
+                window.sharedDataManager.updateProduct(productId, updates);
+
                 updateInventoryTable();
                 updateDashboardStats();
                 showNotification(`📦 Stock updated for ${product.strain}`, 'success');
-                syncToPortal();
             }
         }
 
