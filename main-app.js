@@ -70,7 +70,7 @@ function loadInitialData() {
 function setupEventListeners() {
     // Listen for authentication events
     window.addEventListener('userAuthenticated', function(event) {
-        console.log('���� User authenticated event received');
+        console.log('🔐 User authenticated event received');
         if (window.cartManager) {
             window.cartManager.refreshUserState();
         }
@@ -138,7 +138,7 @@ function login(event) {
 
         // Explicitly refresh cart manager state
         if (window.cartManager) {
-            window.cartManager.refreshUserState();
+            window.cartManager.handleUserAuthentication();
         }
         
         showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
