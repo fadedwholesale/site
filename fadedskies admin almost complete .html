@@ -1222,7 +1222,7 @@
                         <div class="action-group">
                             <button class="btn btn-primary" onclick="openModal('addProductModal')">➕ Add Product</button>
                             <button class="btn btn-secondary" onclick="openModal('bulkImportModal')">📥 Bulk Import</button>
-                            <button class="btn btn-secondary" onclick="exportInventory()">📄 Export CSV</button>
+                            <button class="btn btn-secondary" onclick="exportInventory()">�� Export CSV</button>
                             <button class="btn btn-secondary" onclick="syncToPortal()">🔄 Sync to Portal</button>
                         </div>
                     </div>
@@ -2259,6 +2259,11 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         </div>
     </div>
 
+    <!-- Include Shared Data Manager -->
+    <script src="shared-data.js"></script>
+    <!-- Include Test Functionality -->
+    <script src="test-functionality.js"></script>
+
     <script>
         // Global State Management
         let currentUser = null;
@@ -2568,16 +2573,49 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
         function initializeAdminDashboard() {
             console.log('🔧 Initializing Faded Skies Admin Dashboard...');
-            
+
+            // Load products from shared data manager
+            const sharedProducts = window.sharedDataManager.getProducts();
+            if (sharedProducts.length > 0) {
+                products = sharedProducts;
+                console.log('📦 Loaded', products.length, 'products from shared data manager');
+            } else {
+                // Force sync default products to shared data manager
+                console.log('📦 No shared products found, syncing defaults...');
+                window.sharedDataManager.updateProducts(products);
+            }
+
+            // Listen for shared data changes
+            window.addEventListener('sharedDataChange', handleAdminSharedDataChange);
+
             // Start portal sync monitoring
             startPortalSync();
-            
+
             // Show login screen
             showLoginScreen();
-            
+
             console.log('✅ Admin dashboard initialized');
             console.log('🔐 Secure admin portal ready');
             console.log('🔄 Portal sync monitoring active');
+        }
+
+        // Handle shared data changes from partner portal
+        function handleAdminSharedDataChange(event) {
+            const { type, data } = event.detail;
+            console.log('📡 Admin received shared data change:', type, data);
+
+            switch (type) {
+                case 'external_update':
+                    // Reload products if they were updated externally
+                    products = window.sharedDataManager.getProducts();
+                    updateAllDashboardViews();
+                    updateSyncStatus('connected');
+                    break;
+                case 'cart_updated':
+                    // Update UI to show active cart users
+                    updateSyncStatus('connected');
+                    break;
+            }
         }
 
         // Portal Synchronization System
@@ -2692,10 +2730,17 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
         function syncToPortal() {
             updateSyncStatus('syncing');
-            
+
+            // Actually sync products to shared data manager
+            window.sharedDataManager.updateProducts(products);
+            console.log('🔄 Synced', products.length, 'products to shared data manager');
+
             setTimeout(() => {
                 updateSyncStatus('connected');
                 showNotification('📊 Inventory synced to partner portal successfully!', 'success');
+
+                // Update last sync timestamp
+                document.getElementById('lastSync').textContent = 'Just now';
             }, 1500);
         }
 
@@ -3001,57 +3046,84 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         function updateProductPrice(productId, newPrice) {
             const product = products.find(p => p.id === productId);
             if (product) {
-                product.price = parseFloat(newPrice);
-                product.lastModified = new Date().toISOString();
-                product.modifiedBy = currentUser.email;
+                const updates = {
+                    price: parseFloat(newPrice),
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: currentUser.email
+                };
+
+                // Update local array
+                Object.assign(product, updates);
+
+                // Update shared data manager (this will notify partner portals)
+                window.sharedDataManager.updateProduct(productId, updates);
+
                 updatePricingTable();
                 updateDashboardStats();
                 showNotification(`💰 Price updated for ${product.strain}`, 'success');
-                syncToPortal();
             }
         }
 
         function updateProductStatus(productId, newStatus) {
             const product = products.find(p => p.id === productId);
             if (product) {
-                product.status = newStatus;
-                product.lastModified = new Date().toISOString();
-                product.modifiedBy = currentUser.email;
+                const updates = {
+                    status: newStatus,
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: currentUser.email
+                };
+
+                // Update local array
+                Object.assign(product, updates);
+
+                // Update shared data manager (this will notify partner portals)
+                window.sharedDataManager.updateProduct(productId, updates);
+
                 updateInventoryTable();
                 updateDashboardStats();
                 showNotification(`📊 Status updated for ${product.strain}`, 'success');
-                syncToPortal();
             }
         }
 
         function updateProductStock(productId, newStock) {
             const product = products.find(p => p.id === productId);
             if (product) {
-                product.stock = parseInt(newStock);
-                product.lastModified = new Date().toISOString();
-                product.modifiedBy = currentUser.email;
-                
+                const updates = {
+                    stock: parseInt(newStock),
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: currentUser.email
+                };
+
                 // Auto-update status based on stock
-                if (product.stock === 0) {
-                    product.status = 'SOLD OUT';
-                } else if (product.status === 'SOLD OUT' && product.stock > 0) {
-                    product.status = 'AVAILABLE';
+                if (updates.stock === 0) {
+                    updates.status = 'SOLD OUT';
+                } else if (product.status === 'SOLD OUT' && updates.stock > 0) {
+                    updates.status = 'AVAILABLE';
                 }
-                
+
+                // Update local array
+                Object.assign(product, updates);
+
+                // Update shared data manager (this will notify partner portals)
+                window.sharedDataManager.updateProduct(productId, updates);
+
                 updateInventoryTable();
                 updateDashboardStats();
                 showNotification(`📦 Stock updated for ${product.strain}`, 'success');
-                syncToPortal();
             }
         }
 
         function deleteProduct(productId) {
             const product = products.find(p => p.id === productId);
             if (product && confirm(`Are you sure you want to delete ${product.strain}?`)) {
+                // Remove from local array
                 products = products.filter(p => p.id !== productId);
+
+                // Remove from shared data manager (this will notify partner portals)
+                window.sharedDataManager.deleteProduct(productId);
+
                 updateAllDashboardViews();
                 showNotification(`🗑️ Product ${product.strain} deleted`, 'success');
-                syncToPortal();
             }
         }
 
@@ -3109,18 +3181,25 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Edit existing product
                 const product = products.find(p => p.id === window.editingProductId);
                 Object.assign(product, productData);
+
+                // Update shared data manager (this will notify partner portals)
+                window.sharedDataManager.updateProduct(window.editingProductId, productData);
+
                 showNotification(`✅ Product ${product.strain} updated successfully!`, 'success');
                 delete window.editingProductId;
             } else {
                 // Add new product
                 productData.id = nextProductId++;
                 products.push(productData);
+
+                // Add to shared data manager (this will notify partner portals)
+                window.sharedDataManager.addProduct(productData);
+
                 showNotification(`✅ Product ${productData.strain} added successfully!`, 'success');
             }
-            
+
             updateAllDashboardViews();
             closeModal('addProductModal');
-            syncToPortal();
             
             // Reset form
             event.target.reset();
@@ -3579,7 +3658,7 @@ Faded Skies Wholesale Team
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 600px;">
                     <div class="modal-header">
-                        <h3 class="modal-title">✏️ Edit Order - ${order.id}</h3>
+                        <h3 class="modal-title">��️ Edit Order - ${order.id}</h3>
                         <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
                     </div>
                     <form id="editOrderForm">

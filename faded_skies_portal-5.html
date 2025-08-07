@@ -2070,6 +2070,11 @@
         </div>
     </div>
 
+    <!-- Include Shared Data Manager -->
+    <script src="shared-data.js"></script>
+    <!-- Include Test Functionality -->
+    <script src="test-functionality.js"></script>
+
     <script>
         // Global State Management
         let currentUser = null;
@@ -2706,7 +2711,7 @@
                     showNotification(`📊 ${tabName.charAt(0).toUpperCase() + tabName.slice(1)} tab loaded!`, 'success');
                 }
                 
-                console.log('🔄 Portal tab switched to:', tabName);
+                console.log('��� Portal tab switched to:', tabName);
             } catch (error) {
                 console.error('Error switching portal tab:', error);
                 showNotification('Tab switching error. Please try again.', 'error');
@@ -2811,16 +2816,21 @@
                         console.warn('Session storage not available');
                     }
                     
+                    // Load user's cart from shared data manager
+                    cart = window.sharedDataManager.getCart(currentUser.email);
+                    console.log('Loaded cart for user:', currentUser.email, cart);
+
                     showLoggedInState();
                     closeModal('loginModal');
                     showPartnerPortal();
+                    updateCartDisplay(); // Update cart display after loading
                     showNotification('✅ Welcome back! Successfully logged in to your partner portal.', 'success');
-                    
+
                     // Reset form
                     event.target.reset();
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
-                    
+
                     // Start order status simulation for demo
                     startOrderStatusSimulation();
                 }, 1500);
@@ -3733,6 +3743,47 @@
             }
         }
 
+        // Handle shared data changes from admin portal
+        function handleSharedDataChange(event) {
+            const { type, data } = event.detail;
+            console.log('📡 Received shared data change:', type, data);
+
+            switch (type) {
+                case 'products_updated':
+                    products = data;
+                    updateAllViews();
+                    console.log('🔄 Products updated from admin portal');
+                    break;
+                case 'product_added':
+                    const existingProduct = products.find(p => p.id === data.id);
+                    if (!existingProduct) {
+                        products.push(data);
+                        updateAllViews();
+                        showNotification(`✨ New product added: ${data.strain}`, 'success');
+                    }
+                    break;
+                case 'product_updated':
+                    const productIndex = products.findIndex(p => p.id === data.id);
+                    if (productIndex !== -1) {
+                        products[productIndex] = data;
+                        updateAllViews();
+                        showNotification(`📝 Product updated: ${data.strain}`, 'success');
+                    }
+                    break;
+                case 'product_deleted':
+                    products = products.filter(p => p.id !== data.id);
+                    updateAllViews();
+                    showNotification(`🗑️ Product removed: ${data.strain}`, 'warning');
+                    break;
+                case 'cart_updated':
+                    if (currentUser && data.userEmail === currentUser.email) {
+                        cart = data.cart;
+                        updateCartDisplay();
+                    }
+                    break;
+            }
+        }
+
         // Enhanced initialization with mobile-first approach and image support
         function initializeApp() {
             console.log('🌿 Initializing Faded Skies Wholesale Portal...');
@@ -3745,10 +3796,17 @@
                 if (hasSession) {
                     restoreSessionData();
                 }
-                
+
+                // Sync products with shared data manager
+                products = window.sharedDataManager.getProducts();
+                console.log('📦 Loaded', products.length, 'products from shared data manager');
+
+                // Listen for shared data changes
+                window.addEventListener('sharedDataChange', handleSharedDataChange);
+
                 updateAllViews();
                 showPublicWebsite();
-                
+
                 // Force update tables with images after a short delay
                 setTimeout(() => {
                     forceUpdateWithImages();
@@ -4229,9 +4287,16 @@
         }
 
         function removeFromCart(productId) {
+            if (!currentUser) {
+                showNotification('❌ Please log in to modify cart', 'error');
+                return;
+            }
+
             const item = cart.find(item => item.id === productId);
             if (item) {
-                cart = cart.filter(item => item.id !== productId);
+                // Use shared data manager to remove from cart
+                const updatedCart = window.sharedDataManager.removeFromCart(currentUser.email, productId);
+                cart = updatedCart; // Update local cart reference
                 updateCartDisplay();
                 showNotification(`🗑️ Removed ${item.strain} from cart`, 'success');
             }
@@ -4242,10 +4307,17 @@
                 showNotification('🛒 Cart is already empty', 'warning');
                 return;
             }
-            
+
+            if (!currentUser) {
+                showNotification('❌ Please log in to clear cart', 'error');
+                return;
+            }
+
             if (confirm('Are you sure you want to clear your entire cart? This action cannot be undone.')) {
                 const itemCount = cart.length;
-                cart = [];
+                // Use shared data manager to clear cart
+                window.sharedDataManager.clearCart(currentUser.email);
+                cart = []; // Update local cart reference
                 updateCartDisplay();
                 showNotification(`🗑️ Cart cleared successfully (${itemCount} items removed)`, 'success');
             }
@@ -4312,7 +4384,7 @@
                                      onerror="this.src='https://via.placeholder.com/60x60/1a1a1a/00C851?text=${item.grade}'" />
                                 <div style="flex: 1;">
                                     <h4>${item.strain}</h4>
-                                    <p>${item.grade} • $${item.price}${getUnitLabel(item.grade)}</p>
+                                    <p>${item.grade} �� $${item.price}${getUnitLabel(item.grade)}</p>
                                 </div>
                             </div>
                             <div class="cart-item-controls">
@@ -4505,88 +4577,55 @@
                 return;
             }
 
-            const product = products.find(p => p.id === productId);
-            if (!product) {
-                showNotification('❌ Product not found', 'error');
-                return;
-            }
-            
-            if (product.status !== 'AVAILABLE' || product.stock <= 0) {
-                showNotification('❌ Product currently unavailable', 'error');
-                return;
-            }
+            try {
+                // Use shared data manager to add to cart
+                const updatedCart = window.sharedDataManager.addToCart(currentUser.email, productId, 1);
+                cart = updatedCart; // Update local cart reference
 
-            const existingItem = cart.find(item => item.id === productId);
-            if (existingItem) {
-                // Allow adding up to the full available stock
-                if (existingItem.quantity < product.stock) {
-                    existingItem.quantity += 1;
-                    showNotification(`✅ Added another ${product.strain} to cart! (${existingItem.quantity} total)`, 'success');
-                } else {
-                    showNotification(`⚠️ Maximum available quantity is ${product.stock}`, 'warning');
+                const product = window.sharedDataManager.getProducts().find(p => p.id === productId);
+                if (product) {
+                    const cartItem = updatedCart.find(item => item.id === productId);
+                    const quantity = cartItem ? cartItem.quantity : 1;
+                    showNotification(`✅ Added ${product.strain} to cart! (${quantity} total)`, 'success');
                 }
-                console.log('Cart after adding existing item:', cart);
-            } else {
-                cart.push({
-                    id: product.id,
-                    strain: product.strain,
-                    grade: product.grade,
-                    price: product.price,
-                    quantity: 1,
-                    maxStock: product.stock,
-                    image: product.image // Include product image in cart
-                });
-                showNotification(`✅ Added ${product.strain} to cart!`, 'success');
-                console.log('Cart after adding new item:', cart);
-            }
 
-            updateCartDisplay(); // Ensure cart is always updated
-            console.log('Cart after updateCartDisplay:', cart);
-            // Auto-open cart if it's the first item
-            if (cart.length === 1) {
-                setTimeout(() => {
-                    if (confirm('Item added to cart! Would you like to view your cart?')) {
-                        toggleCart();
-                    }
-                }, 1000);
+                updateCartDisplay(); // Ensure cart is always updated
+                console.log('Cart after adding item:', cart);
+
+                // Auto-open cart if it's the first item
+                if (cart.length === 1) {
+                    setTimeout(() => {
+                        if (confirm('Item added to cart! Would you like to view your cart?')) {
+                            toggleCart();
+                        }
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                showNotification('❌ ' + error.message, 'error');
             }
         }
 
         function updateQuantity(productId, quantity) {
             try {
                 console.log('🔄 Updating quantity for product:', productId, 'to:', quantity);
-                
-                const item = cart.find(item => item.id === productId);
-                const product = products.find(p => p.id === productId);
-                
-                if (!item || !product) {
-                    console.error('Item or product not found:', { item, product });
-                    showNotification('❌ Item not found in cart', 'error');
+
+                if (!currentUser) {
+                    showNotification('❌ Please log in to update cart', 'error');
                     return;
                 }
-                
-                const oldQuantity = item.quantity;
-                
-                // If quantity is 0 or less, remove the item
-                if (quantity <= 0) {
-                    console.log('🗑️ Removing item from cart (quantity <= 0)');
-                    removeFromCart(productId);
-                    return;
-                }
-                
-                // Check stock limit
-                if (quantity > product.stock) {
-                    console.log('⚠️ Quantity exceeds stock limit');
-                    showNotification(`⚠️ Maximum available quantity is ${product.stock}`, 'warning');
-                    item.quantity = product.stock;
-                    updateCartDisplay();
-                    return;
-                }
-                
-                // Update quantity
-                item.quantity = quantity;
+
+                const oldCart = [...cart];
+                const oldItem = cart.find(item => item.id === productId);
+                const oldQuantity = oldItem ? oldItem.quantity : 0;
+
+                // Use shared data manager to update quantity
+                const updatedCart = window.sharedDataManager.updateCartQuantity(currentUser.email, productId, quantity);
+                cart = updatedCart; // Update local cart reference
+
                 console.log('✅ Quantity updated:', { productId, oldQuantity, newQuantity: quantity });
                 updateCartDisplay();
+
                 // Show feedback for quantity changes
                 if (quantity > oldQuantity) {
                     showNotification(`⬆️ Increased ${product.strain} quantity to ${quantity}`, 'success');
@@ -5531,7 +5570,7 @@ Phone: (210) 835-7834
                             setTimeout(() => {
                                 const newQuantity = cart.find(item => item.id === testProduct.id)?.quantity;
                                 if (newQuantity === oldQuantity + 1) {
-                                    console.log('✅ Quantity increase test passed');
+                                    console.log('��� Quantity increase test passed');
                                     
                                     // Test quantity decrease
                                     setTimeout(() => {
@@ -5551,7 +5590,7 @@ Phone: (210) 835-7834
                                     }, 1000);
                                 } else {
                                     console.log('❌ Quantity increase test failed');
-                                    showNotification('❌ Quantity increase test failed', 'error');
+                                    showNotification('��� Quantity increase test failed', 'error');
                                 }
                             }, 500);
                         }, 1000);
@@ -5890,7 +5929,7 @@ Phone: (210) 835-7834
             
             console.log('DOM Elements Status:');
             Object.entries(elements).forEach(([name, element]) => {
-                console.log(`  ${name}: ${element ? '✅ Found' : '❌ Missing'}`);
+                console.log(`  ${name}: ${element ? '��� Found' : '❌ Missing'}`);
             });
             
             // Check for JavaScript errors
