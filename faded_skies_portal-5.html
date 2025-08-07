@@ -1499,7 +1499,7 @@
                         <button class="portal-tab active" onclick="switchPortalTab('dashboard')">📊 Dashboard</button>
                         <button class="portal-tab" onclick="switchPortalTab('products')">🛒 Shop Products</button>
                         <button class="portal-tab" onclick="switchPortalTab('orders')">📋 My Orders</button>
-                        <button class="portal-tab" onclick="switchPortalTab('analytics')">📈 Analytics</button>
+                        <button class="portal-tab" onclick="switchPortalTab('analytics')">���� Analytics</button>
                         <button class="portal-tab" onclick="switchPortalTab('profile')">👤 Profile</button>
                         <button class="portal-tab" onclick="switchPortalTab('bulk')">📦 Bulk Orders</button>
                     </div>
@@ -2577,7 +2577,7 @@
 �� Partner Portal
    • Complete dashboard with 6 functional tabs
    • Order management (view, track, edit, cancel)
-   • Product browsing with search and filters
+   �� Product browsing with search and filters
    • Analytics and reporting
 
 ✅ User Experience
@@ -4624,6 +4624,8 @@
             }
 
             try {
+                console.log('🛒 Adding product to cart:', productId);
+
                 // Use shared data manager to add to cart
                 const updatedCart = window.sharedDataManager.addToCart(currentUser.email, productId, 1);
                 cart = updatedCart; // Update local cart reference
@@ -4632,11 +4634,18 @@
                 if (product) {
                     const cartItem = updatedCart.find(item => item.id === productId);
                     const quantity = cartItem ? cartItem.quantity : 1;
+                    console.log('✅ Product added successfully:', {
+                        strain: product.strain,
+                        quantity: quantity,
+                        cartSize: cart.length
+                    });
                     showNotification(`✅ Added ${product.strain} to cart! (${quantity} total)`, 'success');
+                } else {
+                    console.error('❌ Product not found in shared data manager:', productId);
                 }
 
                 updateCartDisplay(); // Ensure cart is always updated
-                console.log('Cart after adding item:', cart);
+                console.log('🛒 Cart after adding item:', cart.map(item => `${item.strain} (${item.quantity}x)`));
 
                 // Auto-open cart if it's the first item
                 if (cart.length === 1) {
@@ -4657,7 +4666,7 @@
                 console.log('🔄 Updating quantity for product:', productId, 'to:', quantity);
 
                 if (!currentUser) {
-                    showNotification('��� Please log in to update cart', 'error');
+                    showNotification('❌ Please log in to update cart', 'error');
                     return;
                 }
 
@@ -4990,7 +4999,7 @@ Phone: (210) 835-7834
                         break;
                     default:
                         statusMessage = 'Status information not available.';
-                        statusIcon = '❓';
+                        statusIcon = '���';
                         statusColor = 'var(--text-secondary)';
                 }
 
