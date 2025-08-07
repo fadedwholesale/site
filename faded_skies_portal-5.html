@@ -2638,7 +2638,7 @@
         console.log(`
 🚀 FADED SKIES WHOLESALE PORTAL - PRODUCTION READY CHECKLIST ✅
 
-✅ Authentication System
+�� Authentication System
    • Secure login/logout with session management
    • Form validation and error handling
    • Session persistence and auto-restore
@@ -3229,7 +3229,7 @@
 
             // Clear checkboxes
             if (document.getElementById('termsAccept')) document.getElementById('termsAccept').checked = false;
-            if (document.getElementById('verifyInfo')) document.getElementById('verifyInfo').checked = false;
+            if (document.getElementById('agreeInfo')) document.getElementById('agreeInfo').checked = false;
 
             // Reset step display
             showRegistrationStep(1);
@@ -5057,7 +5057,7 @@
                         <button class="btn btn-secondary" onclick="trackOrderDetailed('${order.id}')">📦 Track Order</button>
                         <button class="btn btn-secondary" onclick="downloadOrderInvoice('${order.id}')">📄 Download Invoice</button>
                         ${order.status === 'PENDING' ? `<button class="btn btn-primary" onclick="this.closest('.modal').remove(); setTimeout(function(){editOrder('${order.id}')}, 200);">✏️ Edit Order</button>` : ''}
-                        <button class="btn btn-secondary" onclick="reorderItems('${order.id}')">🔄 Reorder</button>
+                        <button class="btn btn-secondary" onclick="reorderItems('${order.id}')">��� Reorder</button>
                     </div>
                 </div>
             `;
