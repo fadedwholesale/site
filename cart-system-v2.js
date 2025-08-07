@@ -127,8 +127,8 @@ class ModernCartManager {
                 throw new Error('Product not found');
             }
 
-            // Validate quantity
-            quantity = this.validateQuantity(quantity, product);
+            // Process quantity
+            quantity = this.processQuantity(quantity, product);
             
             // Check if item already exists
             const existingItemIndex = this.state.items.findIndex(item => 
