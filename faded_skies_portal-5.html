@@ -2025,7 +2025,7 @@
                 </div>
 
                 <div style="display: flex; gap: 12px; margin-top: 30px;">
-                    <button type="button" class="btn btn-secondary" onclick="previousRegistrationStep()">← Back</button>
+                    <button type="button" class="btn btn-secondary" onclick="previousRegistrationStep()">��� Back</button>
                     <button type="button" class="btn btn-primary" onclick="submitRegistration()" id="submitRegistration" style="flex: 1;">Submit Application 🚀</button>
                 </div>
             </div>
@@ -4431,7 +4431,7 @@
                 }
 
                 console.log('🔄 Updating cart display with', cart.length, 'unique items');
-                console.log('🛒 Current cart contents:', cart.map(item => `${item.strain} (${item.quantity}x)`));
+                console.log('��� Current cart contents:', cart.map(item => `${item.strain} (${item.quantity}x)`));
 
                 const cartItems = document.getElementById('cartItems');
                 const cartCount = document.getElementById('cartCount');
@@ -6823,16 +6823,24 @@ Phone: (210) 835-7834
 
         // Initialize modern systems
         function initializeModernSystems() {
-            setupModernLogin();
-            updateCartToggleButton();
+            try {
+                setupModernLogin();
+                updateCartToggleButton();
 
-            // Check if user is already authenticated
-            if (window.authManager && window.authManager.isAuthenticated()) {
-                const user = window.authManager.getUser();
-                updateAuthenticatedUI(user);
+                // Check if user is already authenticated
+                if (window.authManager && window.authManager.isAuthenticated()) {
+                    const user = window.authManager.getUser();
+                    updateAuthenticatedUI(user);
+                }
+
+                console.log('✅ Modern systems integrated successfully');
+                console.log('Auth Manager:', !!window.authManager);
+                console.log('Modern Cart:', !!window.modernCart);
+                console.log('Cart UI:', !!window.cartUI);
+            } catch (error) {
+                console.error('Error initializing modern systems:', error);
+                console.log('🔄 Using fallback systems');
             }
-
-            console.log('✅ Modern systems integrated successfully');
         }
 
         // Wait for all systems to load
