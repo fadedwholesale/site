@@ -45,9 +45,11 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeApplication() {
     // Initialize cart manager if not already done
     if (!window.cartManager) {
+        console.log('🛒 Initializing cart manager...');
         window.cartManager = new CartManager();
+        console.log('✅ Cart manager initialized');
     }
-    
+
     // Setup shared data manager event listeners
     window.addEventListener('sharedDataChange', handleSharedDataChange);
     
