@@ -529,10 +529,13 @@ class CartManager {
                     const totals = this.getTotals();
                     const orderItems = this.cart.map(item => `${item.strain} (x${item.quantity})`).join(', ');
                     
+                    const userEmail = window.currentUser?.email || 'guest@example.com';
+                    const userName = window.currentUser?.name || 'Guest User';
+
                     const newOrder = {
                         id: `ORD-${String((window.sharedDataManager?.getOrders()?.length || 0) + 1).padStart(3, '0')}`,
-                        partner: window.currentUser.email,
-                        partnerName: window.currentUser.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') + ' Store',
+                        partner: userEmail,
+                        partnerName: userName + ' Store',
                         items: orderItems,
                         itemDetails: this.cart.map(item => ({
                             id: item.id,
