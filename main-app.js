@@ -3,6 +3,7 @@
 
 // Global Variables
 let currentUser = null;
+window.currentUser = null;
 let currentView = 'public';
 let activePortalTab = 'dashboard';
 let liveInventoryVisible = false;
