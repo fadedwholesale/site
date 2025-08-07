@@ -2261,6 +2261,8 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
     <!-- Include Shared Data Manager -->
     <script src="shared-data.js"></script>
+    <!-- Include Test Functionality -->
+    <script src="test-functionality.js"></script>
 
     <script>
         // Global State Management
@@ -4661,7 +4663,7 @@ Faded Skies Wholesale Team
             if (partner && confirm(`Are you sure you want to delete ${partner.businessName}? This will also disable their portal access.`)) {
                 partners = partners.filter(p => p.id !== partnerId);
                 updateAllDashboardViews();
-                showNotification(`���️ Partner ${partner.businessName} deleted and portal access revoked`, 'success');
+                showNotification(`🗑️ Partner ${partner.businessName} deleted and portal access revoked`, 'success');
             }
         }
 
