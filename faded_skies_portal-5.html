@@ -2096,7 +2096,15 @@
             // Check if user is already logged in from session
             if (window.currentUser) {
                 console.log('🔐 User already authenticated, refreshing cart state');
-                window.cartManager.refreshUserState();
+                try {
+                    if (window.modernCart && window.updateFixedCartDisplay) {
+                        window.updateFixedCartDisplay();
+                    } else if (window.cartManager && window.cartManager.refreshUserState) {
+                        window.cartManager.refreshUserState();
+                    }
+                } catch (error) {
+                    console.log('Cart refresh failed:', error.message);
+                }
             }
 
             console.log('✅ Cart system initialization complete', {
