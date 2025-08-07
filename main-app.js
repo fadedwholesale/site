@@ -171,7 +171,7 @@ function logout() {
         }
 
         // Clear authentication state
-        setCurrentUser(null);
+        setUserGlobally(null);
         
         // Update UI
         showGuestSession();
