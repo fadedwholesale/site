@@ -299,14 +299,8 @@ function checkout() {
 
 function updateCartDisplays() {
     if (window.cartManager) {
-        const totals = window.cartManager.getTotals();
-        
-        // Update cart counters
-        const cartCount = document.getElementById('cartCount');
-        const cartCount2 = document.getElementById('cartCount2');
-        
-        if (cartCount) cartCount.textContent = totals.totalItems;
-        if (cartCount2) cartCount2.textContent = totals.totalItems;
+        // The new cart manager handles all display updates internally
+        window.cartManager.updateDisplay();
     }
 }
 
