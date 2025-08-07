@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faded Skies Wholesale Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #000 0%, #001a0a 50%, #000 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+            padding: 40px;
+        }
+
+        .logo {
+            font-family: 'Comic Sans MS', cursive;
+            font-weight: 900;
+            font-size: 3rem;
+            color: white;
+            text-shadow: 0 0 20px #00C851;
+            margin-bottom: 20px;
+        }
+
+        .tagline {
+            color: #e0e0e0;
+            font-size: 1.2rem;
+            margin-bottom: 50px;
+        }
+
+        .portal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .portal-card {
+            background: rgba(17, 17, 17, 0.8);
+            padding: 40px 30px;
+            border-radius: 20px;
+            border: 1px solid #222;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .portal-card:hover {
+            transform: translateY(-5px);
+            border-color: #00C851;
+            box-shadow: 0 20px 40px rgba(0, 200, 81, 0.2);
+        }
+
+        .portal-card h2 {
+            color: #00C851;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .portal-card p {
+            color: #cccccc;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00C851, #1DD65F);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 200, 81, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #00C851;
+            border: 2px solid #00C851;
+        }
+
+        .btn-secondary:hover {
+            background: #00C851;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .portal-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .portal-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🌿 Faded Skies</div>
+        <div class="tagline">Premium THCA Wholesale Portal</div>
+        
+        <div class="portal-grid">
+            <div class="portal-card" onclick="window.location.href='faded_skies_portal-5.html'">
+                <h2>🌐 Public Portal</h2>
+                <p>Partner registration, live inventory viewing, and wholesale information. Perfect for partners and prospective customers.</p>
+                <a href="faded_skies_portal-5.html" class="btn">Access Public Portal</a>
+            </div>
+            
+            <div class="portal-card" onclick="window.location.href='fadedskies admin almost complete .html'">
+                <h2>🔧 Admin Dashboard</h2>
+                <p>Complete inventory management, order processing, partner administration, and analytics dashboard.</p>
+                <a href="fadedskies admin almost complete .html" class="btn btn-secondary">Admin Access</a>
+            </div>
+        </div>
+        
+        <div style="margin-top: 50px; padding: 30px; background: rgba(17, 17, 17, 0.5); border-radius: 15px; border: 1px solid #222;">
+            <h3 style="color: #00C851; margin-bottom: 15px;">🔐 Demo Credentials</h3>
+            <div style="text-align: left; display: inline-block;">
+                <p style="margin-bottom: 10px;"><strong>Partner Portal:</strong> partner@store.com / partner123</p>
+                <p style="margin-bottom: 10px;"><strong>Admin Dashboard:</strong> admin@fadedskies.com / admin123</p>
+                <p style="color: #999; font-size: 14px;">Both portals sync data in real-time for seamless operations</p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px; color: #666; font-size: 14px;">
+            <p>📧 info@fadedskieswholesale.com | 📞 (210) 835-7834 | 📍 Austin, TX</p>
+        </div>
+    </div>
+</body>
+</html>
