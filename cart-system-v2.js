@@ -456,12 +456,7 @@ class ModernCartManager {
         this.setState({ isLoading: true });
 
         try {
-            // Validate cart items
-            const validation = await this.validateCartForCheckout();
-            if (!validation.valid) {
-                this.showNotification('Please review your cart and try again', 'warning');
-                return false;
-            }
+            // Process checkout directly
 
             // Process checkout
             const order = await this.processCheckout();
