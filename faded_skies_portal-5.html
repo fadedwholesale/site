@@ -4087,7 +4087,7 @@
             // Update all other views
             updateAllViews();
             
-            showNotification('🖼️ Product images updated across all views!', 'success');
+            showNotification('🖼��� Product images updated across all views!', 'success');
             console.log('✅ All tables updated with product images');
         }
 
@@ -4475,12 +4475,49 @@
             }
         }
 
+        function validateCartIntegrity() {
+            if (!currentUser) return true;
+
+            const sharedCart = window.sharedDataManager.getCart(currentUser.email);
+            const sharedProducts = window.sharedDataManager.getProducts();
+
+            // Check if local cart is in sync with shared cart
+            if (JSON.stringify(cart) !== JSON.stringify(sharedCart)) {
+                console.warn('🔄 Cart out of sync - updating from shared data manager');
+                cart = sharedCart;
+                updateCartDisplay();
+                return false;
+            }
+
+            // Validate cart items against current products
+            let hasInvalidItems = false;
+            cart.forEach(cartItem => {
+                const product = sharedProducts.find(p => p.id === cartItem.id);
+                if (!product) {
+                    console.warn('⚠️ Cart contains invalid product:', cartItem.strain);
+                    hasInvalidItems = true;
+                }
+            });
+
+            if (hasInvalidItems) {
+                console.log('🧹 Cleaning up invalid cart items');
+                cart = cart.filter(cartItem =>
+                    sharedProducts.find(p => p.id === cartItem.id)
+                );
+                window.sharedDataManager.updateCart(currentUser.email, cart);
+                updateCartDisplay();
+            }
+
+            return !hasInvalidItems;
+        }
+
         function toggleCart() {
             const cartEl = document.getElementById('cart');
             cartOpen = !cartOpen;
-            
+
             if (cartOpen) {
                 cartEl.classList.add('open');
+                validateCartIntegrity(); // Validate cart before showing
                 updateCartDisplay(); // Refresh cart display when opening
             } else {
                 cartEl.classList.remove('open');
