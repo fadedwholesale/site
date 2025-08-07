@@ -447,10 +447,6 @@ class CartManager {
     // Checkout process
     async checkout() {
         try {
-            if (!window.currentUser) {
-                this.showNotification('🔒 Please log in to complete checkout', 'error');
-                return false;
-            }
 
             if (this.cart.length === 0) {
                 this.showNotification('⚠️ Your cart is empty! Add some products first.', 'error');
