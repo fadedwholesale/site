@@ -2113,7 +2113,7 @@
                 }
             }
 
-            console.log('✅ Cart system initialization complete', {
+            console.log('�� Cart system initialization complete', {
                 hasCartManager: !!window.cartManager,
                 hasModernCart: !!window.modernCart,
                 hasFixedCartUI: !!window.updateFixedCartDisplay,
@@ -4063,44 +4063,6 @@
             }
         }
 
-        function validateInput(event) {
-            try {
-                const input = event.target;
-                let isValid = true;
-                let errorMessage = '';
-                
-                if (input.type === 'email' && input.value && !isValidEmail(input.value)) {
-                    isValid = false;
-                    errorMessage = 'Please enter a valid email address';
-                } else if (input.type === 'tel' && input.value && !isValidPhone(input.value)) {
-                    isValid = false;
-                    errorMessage = 'Please enter a valid phone number';
-                } else if (input.required && !input.value.trim()) {
-                    isValid = false;
-                    errorMessage = 'This field is required';
-                }
-                
-                if (!isValid) {
-                    input.style.borderColor = 'var(--accent-red)';
-                    input.title = errorMessage;
-                } else {
-                    input.style.borderColor = 'var(--border-subtle)';
-                    input.title = '';
-                }
-            } catch (error) {
-                console.warn('Input validation failed:', error);
-            }
-        }
-        
-        function clearValidationError(event) {
-            try {
-                const input = event.target;
-                input.style.borderColor = 'var(--border-subtle)';
-                input.title = '';
-            } catch (error) {
-                console.warn('Clear validation error failed:', error);
-            }
-        }
         
         function handleKeyboardShortcuts(event) {
             try {
