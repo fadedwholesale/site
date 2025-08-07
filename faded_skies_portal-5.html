@@ -2814,16 +2814,21 @@
                         console.warn('Session storage not available');
                     }
                     
+                    // Load user's cart from shared data manager
+                    cart = window.sharedDataManager.getCart(currentUser.email);
+                    console.log('Loaded cart for user:', currentUser.email, cart);
+
                     showLoggedInState();
                     closeModal('loginModal');
                     showPartnerPortal();
+                    updateCartDisplay(); // Update cart display after loading
                     showNotification('✅ Welcome back! Successfully logged in to your partner portal.', 'success');
-                    
+
                     // Reset form
                     event.target.reset();
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
-                    
+
                     // Start order status simulation for demo
                     startOrderStatusSimulation();
                 }, 1500);
