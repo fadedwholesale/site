@@ -2597,6 +2597,25 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             console.log('🔄 Portal sync monitoring active');
         }
 
+        // Handle shared data changes from partner portal
+        function handleAdminSharedDataChange(event) {
+            const { type, data } = event.detail;
+            console.log('📡 Admin received shared data change:', type, data);
+
+            switch (type) {
+                case 'external_update':
+                    // Reload products if they were updated externally
+                    products = window.sharedDataManager.getProducts();
+                    updateAllDashboardViews();
+                    updateSyncStatus('connected');
+                    break;
+                case 'cart_updated':
+                    // Update UI to show active cart users
+                    updateSyncStatus('connected');
+                    break;
+            }
+        }
+
         // Portal Synchronization System
         function startPortalSync() {
             // Simulate real-time sync with public website/partner portal
