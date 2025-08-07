@@ -2820,6 +2820,9 @@
                     cart = window.sharedDataManager.getCart(currentUser.email);
                     console.log('Loaded cart for user:', currentUser.email, cart);
 
+                    // Validate cart integrity after loading
+                    validateCartIntegrity();
+
                     showLoggedInState();
                     closeModal('loginModal');
                     showPartnerPortal();
@@ -4087,7 +4090,7 @@
             // Update all other views
             updateAllViews();
             
-            showNotification('🖼��� Product images updated across all views!', 'success');
+            showNotification('🖼️ Product images updated across all views!', 'success');
             console.log('✅ All tables updated with product images');
         }
 
@@ -4654,7 +4657,7 @@
                 console.log('🔄 Updating quantity for product:', productId, 'to:', quantity);
 
                 if (!currentUser) {
-                    showNotification('❌ Please log in to update cart', 'error');
+                    showNotification('��� Please log in to update cart', 'error');
                     return;
                 }
 
