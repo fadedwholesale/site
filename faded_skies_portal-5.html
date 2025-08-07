@@ -1733,7 +1733,7 @@
                             </p>
                             <div style="display: flex; gap: 16px; flex-wrap: wrap;">
                                 <button class="btn btn-primary" onclick="createBulkOrder()">📦 Create Bulk Order</button>
-                                <button class="btn btn-secondary" onclick="requestCustomQuote()">💬 Request Custom Quote</button>
+                                <button class="btn btn-secondary" onclick="requestCustomQuote()">��� Request Custom Quote</button>
                                 <button class="btn btn-secondary" onclick="showNotification('📋 No bulk history found yet', 'warning')">📋 View History</button>
                             </div>
                             
@@ -6067,6 +6067,47 @@ Phone: (210) 835-7834
         console.log('📱 Modal triggers work on all devices with comprehensive event handling');
         console.log('📱 Mobile debugging tools available: testMobileFunction(), testMobileInteraction()');
         console.log('🔥 READY FOR MOBILE DEPLOYMENT! 🔥');
+
+        // Test Real-Time System
+        function testRealTimeSystem() {
+            console.log('🧪 Testing real-time system...');
+
+            if (!currentUser) {
+                console.log('❌ No user logged in - cannot test real-time system');
+                return false;
+            }
+
+            console.log('📡 Testing cart sync...');
+
+            // Test 1: Add multiple products to cart
+            const testProducts = window.sharedDataManager.getProducts().slice(0, 3);
+            testProducts.forEach(product => {
+                if (product.status === 'AVAILABLE' && product.stock > 0) {
+                    console.log(`Adding ${product.strain} to cart...`);
+                    addToCart(product.id);
+                }
+            });
+
+            // Test 2: Update quantities
+            setTimeout(() => {
+                if (cart.length > 0) {
+                    console.log('📡 Testing quantity updates...');
+                    const firstItem = cart[0];
+                    updateQuantity(firstItem.id, firstItem.quantity + 1);
+                }
+            }, 1000);
+
+            // Test 3: Real-time broadcasting test
+            setTimeout(() => {
+                console.log('📡 Testing real-time broadcast...');
+                window.sharedDataManager.broadcastRealTimeUpdate('test_update', {
+                    message: 'Real-time system test',
+                    timestamp: new Date().toISOString()
+                });
+            }, 2000);
+
+            return true;
+        }
 
         // Test Cart Functionality
         function testCartFunctionality() {
