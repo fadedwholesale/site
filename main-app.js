@@ -211,9 +211,9 @@ function login(event) {
             }
 
             if (typeof showNotification === 'function') {
-                showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
+                showNotification('Welcome back, ' + currentUser.name + '!', 'success');
             }
-            console.log('✅ User logged in:', currentUser.email);
+            console.log('User logged in:', currentUser.email);
         } else {
             if (typeof showNotification === 'function') {
                 showNotification('❌ Please enter valid credentials', 'error');
