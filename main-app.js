@@ -46,7 +46,7 @@ function initializeApplication() {
     if (savedUser) {
         try {
             const userData = JSON.parse(savedUser);
-            setCurrentUser(userData);
+            setUserGlobally(userData);
             showUserSession();
             console.log('✅ User session restored:', currentUser.email);
         } catch (error) {
