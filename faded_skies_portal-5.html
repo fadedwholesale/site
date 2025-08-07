@@ -4099,10 +4099,15 @@
                 const guestSection = document.getElementById('guestSection');
                 const userSession = document.getElementById('userSession');
                 const userWelcome = document.getElementById('userWelcome');
+                const cartToggle = document.getElementById('cartToggle');
+
                 if (guestSection) guestSection.style.display = 'none';
                 if (userSession) userSession.classList.add('show');
                 if (userWelcome) userWelcome.textContent = `Welcome, ${currentUser.email.split('@')[0]}`;
+                if (cartToggle) cartToggle.style.display = 'inline-flex';
+
                 updateProfileDisplay();
+                console.log('✅ Logged in state displayed, cart button shown');
             } catch (error) {
                 console.error('Error showing logged in state:', error);
             }
