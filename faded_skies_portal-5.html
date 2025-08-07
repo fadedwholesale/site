@@ -2638,7 +2638,7 @@
         console.log(`
 🚀 FADED SKIES WHOLESALE PORTAL - PRODUCTION READY CHECKLIST ✅
 
-�� Authentication System
+✅ Authentication System
    • Secure login/logout with session management
    • Form validation and error handling
    • Session persistence and auto-restore
@@ -2986,7 +2986,7 @@
                 const submitBtn = event.target.querySelector('button[type="submit"]');
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Join Faded Skies ✨';
+                    submitBtn.textContent = 'Join Faded Skies ���';
                 }
             }
         }
@@ -3168,8 +3168,8 @@
 
             // Simulate submission process
             setTimeout(() => {
-                // Send to admin portal for verification
-                sendToAdminForVerification(registrationData, uploadedFiles);
+                // Send to admin portal for processing
+                sendToAdminForProcessing(registrationData, uploadedFiles);
 
                 // Show success modal
                 closeModal('registerModal');
@@ -5057,7 +5057,7 @@
                         <button class="btn btn-secondary" onclick="trackOrderDetailed('${order.id}')">📦 Track Order</button>
                         <button class="btn btn-secondary" onclick="downloadOrderInvoice('${order.id}')">📄 Download Invoice</button>
                         ${order.status === 'PENDING' ? `<button class="btn btn-primary" onclick="this.closest('.modal').remove(); setTimeout(function(){editOrder('${order.id}')}, 200);">✏️ Edit Order</button>` : ''}
-                        <button class="btn btn-secondary" onclick="reorderItems('${order.id}')">��� Reorder</button>
+                        <button class="btn btn-secondary" onclick="reorderItems('${order.id}')">🔄 Reorder</button>
                     </div>
                 </div>
             `;
