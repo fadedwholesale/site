@@ -2729,7 +2729,7 @@
                     showNotification('📊 Live inventory displayed with product images!', 'success');
                 } else {
                     inventory.classList.remove('show');
-                    showNotification('📊 Live inventory hidden', 'info');
+                    showNotification('��� Live inventory hidden', 'info');
                 }
                 
                 console.log('📊 Live inventory toggled:', inventoryVisible ? 'SHOWN' : 'HIDDEN');
@@ -3738,7 +3738,7 @@
 
         // Enhanced initialization with mobile-first approach and image support
         function initializeApp() {
-            console.log('🌿 Initializing Faded Skies Wholesale Portal...');
+            console.log('���� Initializing Faded Skies Wholesale Portal...');
             
             try {
                 // Check for existing session first
@@ -4540,38 +4540,23 @@
         function updateQuantity(productId, quantity) {
             try {
                 console.log('🔄 Updating quantity for product:', productId, 'to:', quantity);
-                
-                const item = cart.find(item => item.id === productId);
-                const product = products.find(p => p.id === productId);
-                
-                if (!item || !product) {
-                    console.error('Item or product not found:', { item, product });
-                    showNotification('❌ Item not found in cart', 'error');
+
+                if (!currentUser) {
+                    showNotification('❌ Please log in to update cart', 'error');
                     return;
                 }
-                
-                const oldQuantity = item.quantity;
-                
-                // If quantity is 0 or less, remove the item
-                if (quantity <= 0) {
-                    console.log('🗑️ Removing item from cart (quantity <= 0)');
-                    removeFromCart(productId);
-                    return;
-                }
-                
-                // Check stock limit
-                if (quantity > product.stock) {
-                    console.log('⚠️ Quantity exceeds stock limit');
-                    showNotification(`⚠️ Maximum available quantity is ${product.stock}`, 'warning');
-                    item.quantity = product.stock;
-                    updateCartDisplay();
-                    return;
-                }
-                
-                // Update quantity
-                item.quantity = quantity;
+
+                const oldCart = [...cart];
+                const oldItem = cart.find(item => item.id === productId);
+                const oldQuantity = oldItem ? oldItem.quantity : 0;
+
+                // Use shared data manager to update quantity
+                const updatedCart = window.sharedDataManager.updateCartQuantity(currentUser.email, productId, quantity);
+                cart = updatedCart; // Update local cart reference
+
                 console.log('✅ Quantity updated:', { productId, oldQuantity, newQuantity: quantity });
                 updateCartDisplay();
+
                 // Show feedback for quantity changes
                 if (quantity > oldQuantity) {
                     showNotification(`⬆️ Increased ${product.strain} quantity to ${quantity}`, 'success');
