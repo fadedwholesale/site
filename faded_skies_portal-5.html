@@ -4730,7 +4730,7 @@
                 productId = parseInt(productId);
                 quantity = parseInt(quantity);
 
-                console.log('🔄 Updating quantity for product:', productId, 'to:', quantity);
+                console.log('�� Updating quantity for product:', productId, 'to:', quantity);
 
                 if (!currentUser) {
                     showNotification('❌ Please log in to update cart', 'error');
@@ -4788,6 +4788,12 @@
         }
 
         function checkout() {
+            // Use new CartManager if available
+            if (window.cartManager) {
+                return window.cartManager.checkout();
+            }
+
+            // Fallback to old implementation
             if (!currentUser) {
                 showNotification('🔒 Please log in to complete checkout', 'error');
                 return;
