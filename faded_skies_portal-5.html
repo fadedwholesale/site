@@ -6225,7 +6225,7 @@ Phone: (210) 835-7834
             cart.forEach(cartItem => {
                 const product = sharedProducts.find(p => p.id === cartItem.id);
                 if (!product) {
-                    console.log(`  ❌ Invalid cart item: ${cartItem.strain} (ID: ${cartItem.id})`);
+                    console.log(`  ��� Invalid cart item: ${cartItem.strain} (ID: ${cartItem.id})`);
                     allItemsValid = false;
                 } else {
                     console.log(`  ✅ Valid cart item: ${cartItem.strain} (${cartItem.quantity}x)`);
@@ -6675,10 +6675,8 @@ Phone: (210) 835-7834
         };
 
         function setupModernLogin() {
-            var loginForm = document.getElementById('loginForm');
-            if (loginForm) {
-                loginForm.addEventListener('submit', window.performLogin || window.login);
-            }
+            // The auth-override.js file handles form setup
+            console.log('Login setup handled by auth-override.js');
         }
 
         function updateAuthenticatedUI(user) {
