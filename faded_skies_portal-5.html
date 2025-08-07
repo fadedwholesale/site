@@ -6692,27 +6692,38 @@ Phone: (210) 835-7834
                     const email = document.getElementById('email').value;
                     const password = document.getElementById('password').value;
 
-                    if (window.authManager) {
-                        const result = await window.authManager.login({ email, password });
+                    try {
+                        if (window.authManager) {
+                            const result = await window.authManager.login({ email, password });
 
-                        if (result.success) {
-                            // Update UI to show authenticated state
-                            updateAuthenticatedUI(result.user);
+                            if (result.success) {
+                                // Update UI to show authenticated state
+                                updateAuthenticatedUI(result.user);
 
-                            // Close login modal
-                            if (window.closeModal) {
-                                window.closeModal('loginModal');
+                                // Close login modal
+                                if (window.closeModal) {
+                                    window.closeModal('loginModal');
+                                }
+
+                                // Show partner portal
+                                if (window.showPartnerPortal) {
+                                    window.showPartnerPortal();
+                                }
+
+                                window.showNotification(`Welcome back, ${result.user.name}! 🎉`, 'success');
+                            } else {
+                                window.showNotification(result.error || 'Login failed', 'error');
                             }
-
-                            // Show partner portal
-                            if (window.showPartnerPortal) {
-                                window.showPartnerPortal();
-                            }
-
-                            window.showNotification(`Welcome back, ${result.user.name}! 🎉`, 'success');
                         } else {
-                            window.showNotification(result.error || 'Login failed', 'error');
+                            // Fallback to legacy login if auth manager not available
+                            console.log('Falling back to legacy login');
+                            if (window.login) {
+                                window.login(e);
+                            }
                         }
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        window.showNotification('Login system error', 'error');
                     }
                 });
             }
