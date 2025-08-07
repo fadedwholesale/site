@@ -145,22 +145,24 @@ function login(event) {
             event.preventDefault();
         }
 
-        console.log('🔐 Login function called');
+        console.log('Login function called');
 
         const emailEl = document.getElementById('email');
         const passwordEl = document.getElementById('password');
 
         if (!emailEl || !passwordEl) {
             console.error('Login form elements not found');
-            showNotification('❌ Login form not available', 'error');
+            if (window.showNotification) {
+                showNotification('Login form not available', 'error');
+            }
             return;
         }
 
         const email = emailEl.value;
         const password = passwordEl.value;
 
-        console.log('📧 Email entered:', email ? 'yes' : 'no');
-        console.log('🔑 Password entered:', password ? 'yes' : 'no');
+        console.log('Email entered:', email ? 'yes' : 'no');
+        console.log('Password entered:', password ? 'yes' : 'no');
 
         // Simple authentication (in real app, this would be server-side)
         if (email && password) {
