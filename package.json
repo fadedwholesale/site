@@ -1,0 +1,23 @@
+{
+  "name": "faded-skies-portal",
+  "version": "1.0.0",
+  "description": "Faded Skies Cannabis Wholesale Portal - Static HTML application",
+  "main": "faded_skies_portal-5.html",
+  "scripts": {
+    "dev": "npx http-server . -p 3000 -o",
+    "start": "npx http-server . -p 3000",
+    "build": "echo 'No build process needed for static HTML'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": ["cannabis", "wholesale", "portal", "static-site"],
+  "author": "Faded Skies",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "."
+  },
+  "homepage": "./faded_skies_portal-5.html"
+}
