@@ -228,6 +228,21 @@ class SharedDataManager {
             if (e.key === this.storageKey) {
                 this.notifyChange('external_update', JSON.parse(e.newValue || '{}'));
             }
+
+            // Listen for real-time updates
+            if (e.key === 'fadedSkiesRealTimeUpdate') {
+                try {
+                    const updateData = JSON.parse(e.newValue || '{}');
+                    console.log('📡 Received real-time update:', updateData);
+
+                    // Dispatch the real-time update
+                    window.dispatchEvent(new CustomEvent('realTimeUpdate', {
+                        detail: updateData
+                    }));
+                } catch (error) {
+                    console.error('Error processing real-time update:', error);
+                }
+            }
         });
     }
 
