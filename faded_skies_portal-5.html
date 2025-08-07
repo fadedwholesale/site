@@ -1931,7 +1931,7 @@
                         <label>Business License *</label>
                         <div class="file-upload-area" onclick="document.getElementById('businessLicense').click()">
                             <div class="upload-content">
-                                <span class="upload-icon">���</span>
+                                <span class="upload-icon">📋</span>
                                 <span class="upload-text">Click to upload business license</span>
                                 <span class="upload-subtext">PDF, JPG, or PNG (max 10MB)</span>
                             </div>
@@ -4861,7 +4861,7 @@
                 } else if (quantity < oldQuantity && product) {
                     showNotification(`⬇️ Decreased ${product.strain} quantity to ${quantity}`, 'success');
                 } else if (quantity === 0) {
-                    showNotification(`����️ Removed item from cart`, 'success');
+                    showNotification(`������ Removed item from cart`, 'success');
                 }
             } catch (error) {
                 console.error('Error updating quantity:', error);
@@ -6591,7 +6591,7 @@ Phone: (210) 835-7834
                     </div>
                 </div>
                 <div class="card" style="margin-bottom: 32px;">
-                    <h3>�� Recent Orders</h3>
+                    <h3>📝 Recent Orders</h3>
                     <table class="data-table" style="margin-top: 12px;">
                         <thead>
                             <tr>
@@ -6678,18 +6678,13 @@ Phone: (210) 835-7834
         // Override legacy toggleCart function
         window.toggleCart = function() {
             try {
-                if (window.modernCart && window.cartUI) {
-                    window.modernCart.toggleCart();
-                } else if (window.simpleCartUI) {
-                    window.toggleSimpleCart();
+                if (window.toggleFixedCart) {
+                    window.toggleFixedCart();
                 } else {
-                    console.log('No cart UI available');
+                    console.log('Fixed cart not available yet');
                 }
             } catch (error) {
                 console.error('Error toggling cart:', error);
-                if (window.simpleCartUI) {
-                    window.toggleSimpleCart();
-                }
             }
         };
 
