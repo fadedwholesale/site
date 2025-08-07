@@ -671,10 +671,18 @@ class ModernCartManager {
 }
 
 // Create global cart manager instance
-window.modernCart = new ModernCartManager();
+try {
+    window.modernCart = new ModernCartManager();
 
-// Legacy compatibility
-window.cartManager = window.modernCart;
+    // Legacy compatibility - but don't override if main-app.js already set it
+    if (!window.cartManager) {
+        window.cartManager = window.modernCart;
+    }
+
+    console.log('✅ Modern cart manager created successfully');
+} catch (error) {
+    console.error('❌ Failed to create modern cart manager:', error);
+}
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
