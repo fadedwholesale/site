@@ -2124,12 +2124,17 @@
 
             // Add a test button to check auth state
             window.debugCartAuth = function() {
-                console.log('🔍 Cart Auth Debug:', {
-                    currentUser: window.currentUser,
-                    cartManager: window.cartManager,
-                    cartManagerExists: !!window.cartManager,
-                    userInCartManager: window.cartManager ? !!window.cartManager.currentUser : 'no cart manager'
-                });
+                try {
+                    console.log('🔍 Cart Auth Debug:', {
+                        currentUser: !!window.currentUser,
+                        userEmail: window.currentUser?.email,
+                        cartManager: !!window.cartManager,
+                        modernCart: !!window.modernCart,
+                        fixedCartUI: !!window.updateFixedCartDisplay
+                    });
+                } catch (error) {
+                    console.log('Debug function error:', error.message);
+                }
             };
 
             // Test adding to cart manually
