@@ -52,10 +52,11 @@ class CartManager {
 
     // Load cart from shared data manager
     loadCart() {
-        if (!window.currentUser || !window.sharedDataManager) return;
-        
+        if (!window.sharedDataManager) return;
+
         try {
-            const savedCart = window.sharedDataManager.getCart(window.currentUser.email);
+            const userEmail = window.currentUser?.email || 'guest';
+            const savedCart = window.sharedDataManager.getCart(userEmail);
             this.cart = savedCart || [];
             console.log('📦 Cart loaded:', this.cart.length, 'items');
             this.updateDisplay();
@@ -67,10 +68,11 @@ class CartManager {
 
     // Save cart to shared data manager
     saveCart() {
-        if (!window.currentUser || !window.sharedDataManager) return;
-        
+        if (!window.sharedDataManager) return;
+
         try {
-            window.sharedDataManager.updateCart(window.currentUser.email, this.cart);
+            const userEmail = window.currentUser?.email || 'guest';
+            window.sharedDataManager.updateCart(userEmail, this.cart);
             console.log('💾 Cart saved:', this.cart.length, 'items');
         } catch (error) {
             console.error('Error saving cart:', error);
