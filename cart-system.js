@@ -73,6 +73,16 @@ class CartManager {
         this.addToCartLock = true;
         setTimeout(() => { this.addToCartLock = false; }, 300);
 
+        // Enhanced debugging for authentication check
+        console.log('🔍 Cart: Authentication check debug', {
+            windowCurrentUser: window.currentUser,
+            hasCurrentUser: !!window.currentUser,
+            hasEmail: window.currentUser?.email,
+            windowHasCurrentUser: 'currentUser' in window,
+            localStorageUser: localStorage.getItem('currentUser'),
+            globalCurrentUser: typeof currentUser !== 'undefined' ? currentUser : 'undefined'
+        });
+
         // Check for authentication - ensure current user exists
         if (!window.currentUser || !window.currentUser.email) {
             this.showNotification('🔒 Please log in to add items to cart', 'error');
