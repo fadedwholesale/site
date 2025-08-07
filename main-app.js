@@ -104,96 +104,49 @@ function handleSharedDataChange(event) {
     }
 }
 
-// Authentication Functions
 function login(event) {
-    try {
-        if (event && event.preventDefault) {
-            event.preventDefault();
+    if (event && event.preventDefault) {
+        event.preventDefault();
+    }
+
+    var emailEl = document.getElementById('email');
+    var passwordEl = document.getElementById('password');
+
+    if (!emailEl || !passwordEl) {
+        alert('Login form not found');
+        return;
+    }
+
+    var email = emailEl.value;
+    var password = passwordEl.value;
+
+    if (email && password) {
+        var userData = {
+            email: email,
+            name: email.split('@')[0],
+            tier: 'Gold Partner',
+            loginTime: new Date().toISOString()
+        };
+
+        setCurrentUser(userData);
+
+        if (window.showUserSession) {
+            window.showUserSession();
         }
 
-        console.log('Login function called');
-
-        const emailEl = document.getElementById('email');
-        const passwordEl = document.getElementById('password');
-
-        if (!emailEl || !passwordEl) {
-            console.error('Login form elements not found');
-            if (window.showNotification) {
-                showNotification('Login form not available', 'error');
-            }
-            return;
+        if (window.closeModal) {
+            window.closeModal('loginModal');
         }
 
-        const email = emailEl.value;
-        const password = passwordEl.value;
-
-        console.log('Email entered:', email ? 'yes' : 'no');
-        console.log('Password entered:', password ? 'yes' : 'no');
-
-        // Simple authentication (in real app, this would be server-side)
-        if (email && password) {
-            const userData = {
-                email: email,
-                name: email.split('@')[0],
-                tier: 'Gold Partner',
-                loginTime: new Date().toISOString()
-            };
-
-            console.log('User data created for:', email);
-
-            // Set user with proper synchronization
-            setCurrentUser(userData);
-
-            // Update UI
-            try {
-                if (typeof showUserSession === 'function') {
-                    showUserSession();
-                }
-            } catch (error) {
-                console.warn('Error showing user session:', error);
-            }
-
-            try {
-                if (typeof closeModal === 'function') {
-                    closeModal('loginModal');
-                }
-            } catch (error) {
-                console.warn('Error closing modal:', error);
-            }
-
-            try {
-                if (typeof showPartnerPortal === 'function') {
-                    showPartnerPortal();
-                }
-            } catch (error) {
-                console.warn('Error showing partner portal:', error);
-            }
-
-            // Notify all systems of authentication
-            try {
-                window.dispatchEvent(new CustomEvent('userAuthenticated', { detail: currentUser }));
-            } catch (error) {
-                console.warn('Error dispatching auth event:', error);
-            }
-
-            if (typeof showNotification === 'function') {
-                showNotification('Welcome back, ' + currentUser.name + '!', 'success');
-            }
-            console.log('User logged in:', currentUser.email);
-        } else {
-            if (typeof showNotification === 'function') {
-                showNotification('Please enter valid credentials', 'error');
-            } else {
-                alert('Please enter valid credentials');
-            }
+        if (window.showPartnerPortal) {
+            window.showPartnerPortal();
         }
-    } catch (error) {
-        console.error('Login function error:', error);
-        if (typeof showNotification === 'function') {
-            showNotification('Login system error', 'error');
-        } else {
-            alert('Login system error');
+
+        if (window.showNotification) {
+            window.showNotification('Welcome back!', 'success');
         }
+    } else {
+        alert('Please enter email and password');
     }
 }
 
