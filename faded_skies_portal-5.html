@@ -2734,7 +2734,7 @@
                     showNotification('📊 Live inventory hidden', 'info');
                 }
                 
-                console.log('📊 Live inventory toggled:', inventoryVisible ? 'SHOWN' : 'HIDDEN');
+                console.log('�� Live inventory toggled:', inventoryVisible ? 'SHOWN' : 'HIDDEN');
             } catch (error) {
                 console.error('Error toggling live inventory:', error);
                 showNotification('Inventory toggle error. Please try again.', 'error');
@@ -3776,7 +3776,7 @@
                 case 'product_deleted':
                     products = products.filter(p => p.id !== data.id);
                     updateAllViews();
-                    showNotification(`🗑️ Product removed: ${data.strain}`, 'warning');
+                    showNotification(`����️ Product removed: ${data.strain}`, 'warning');
                     break;
                 case 'cart_updated':
                     if (currentUser && data.userEmail === currentUser.email) {
@@ -3806,6 +3806,9 @@
 
                 // Listen for shared data changes
                 window.addEventListener('sharedDataChange', handleSharedDataChange);
+
+                // Listen for real-time updates
+                window.addEventListener('realTimeUpdate', handleRealTimeUpdate);
 
                 updateAllViews();
                 showPublicWebsite();
@@ -4653,7 +4656,7 @@
                     });
                     showNotification(`✅ Added ${product.strain} to cart! (${quantity} total)`, 'success');
                 } else {
-                    console.error('❌ Product not found in shared data manager:', productId);
+                    console.error('��� Product not found in shared data manager:', productId);
                 }
 
                 updateCartDisplay(); // Ensure cart is always updated
@@ -4826,7 +4829,7 @@
                     showNotification(`🎉 Order placed successfully! Order ID: ${newOrder.id}`, 'success');
                     
                     setTimeout(() => {
-                        showNotification(`��� Order confirmation sent to ${currentUser.email}`, 'success');
+                        showNotification(`📧 Order confirmation sent to ${currentUser.email}`, 'success');
                     }, 2000);
                     
                     setTimeout(() => {
