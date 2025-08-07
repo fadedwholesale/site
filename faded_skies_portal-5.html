@@ -1413,7 +1413,7 @@
             <div id="liveInventorySection" class="live-inventory">
                 <div class="container">
                     <div class="section-header">
-                        <h2 class="section-title">Live Wholesale Inventory ��</h2>
+                        <h2 class="section-title">Live Wholesale Inventory 📊</h2>
                         <p class="section-subtitle">Real-time pricing and availability - synchronized with admin systems</p>
                     </div>
                     
@@ -2637,7 +2637,7 @@
 
 ✅ Performance & Security
    • Error logging and monitoring
-   • Data backup and recovery
+   �� Data backup and recovery
    • Input validation and sanitization
    • Session security and timeouts
 
@@ -3977,7 +3977,7 @@
                     setTimeout(() => {
                         const testBtn = document.querySelector('.btn-primary');
                         if (testBtn) {
-                            console.log('📱 Mobile test button found:', testBtn.textContent);
+                            console.log('�� Mobile test button found:', testBtn.textContent);
                         }
                     }, 1000);
                 }
@@ -4732,7 +4732,7 @@
             addToCartLock = true;
             setTimeout(() => { addToCartLock = false; }, 300);
 
-            if (!currentUser) {
+            if (!window.currentUser) {
                 console.log('❌ Legacy addToCart: No authenticated user');
                 showNotification('🔒 Please log in as a partner to add items to cart', 'error');
                 openModal('loginModal');
@@ -4761,7 +4761,7 @@
                 }
 
                 updateCartDisplay(); // Ensure cart is always updated
-                console.log('���� Cart after adding item:', cart.map(item => `${item.strain} (${item.quantity}x)`));
+                console.log('🛒 Cart after adding item:', cart.map(item => `${item.strain} (${item.quantity}x)`));
 
                 // Auto-open cart if it's the first item
                 if (cart.length === 1) {
@@ -4959,7 +4959,7 @@
                     showNotification(`🎉 Order placed successfully! Order ID: ${newOrder.id}`, 'success');
                     
                     setTimeout(() => {
-                        showNotification(`�� Order confirmation sent to ${currentUser.email}`, 'success');
+                        showNotification(`📧 Order confirmation sent to ${currentUser.email}`, 'success');
                     }, 2000);
                     
                     setTimeout(() => {
