@@ -857,6 +857,155 @@
             background: var(--surface-elevated);
         }
 
+        /* Registration Steps */
+        .registration-step {
+            display: none;
+        }
+
+        .registration-step.active {
+            display: block;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--border-subtle);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--surface-dark);
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--brand-green);
+            background: rgba(0, 200, 81, 0.05);
+        }
+
+        .upload-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .upload-text {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .upload-subtext {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .file-preview {
+            margin-top: 10px;
+        }
+
+        .file-preview-item {
+            background: var(--surface-elevated);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-icon {
+            font-size: 1.5rem;
+        }
+
+        .file-details {
+            flex: 1;
+        }
+
+        .file-name {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .file-size {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .file-status {
+            color: var(--brand-green);
+            font-size: 1.2rem;
+        }
+
+        .review-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--surface-elevated);
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .review-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .review-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .review-item label {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .review-item span {
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .review-documents {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .doc-item {
+            color: var(--text-primary);
+            font-size: 14px;
+            padding: 8px 12px;
+            background: var(--surface-dark);
+            border-radius: 6px;
+            border-left: 3px solid var(--brand-green);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin: 0;
+            margin-top: 2px;
+        }
+
         /* Modal System */
         .modal {
             display: none;
@@ -2153,7 +2302,7 @@
                         
                         /* Mobile debug indicator */
                         .mobile-device::before {
-                            content: "���� Mobile Mode";
+                            content: "📱 Mobile Mode";
                             position: fixed;
                             top: 5px;
                             right: 5px;
@@ -3580,7 +3729,7 @@
             // Update all other views
             updateAllViews();
             
-            showNotification('🖼��� Product images updated across all views!', 'success');
+            showNotification('🖼️ Product images updated across all views!', 'success');
             console.log('✅ All tables updated with product images');
         }
 
@@ -3692,7 +3841,7 @@
                     <td><strong>${product.grade}</strong></td>
                     <td>
                         <strong>${product.strain}</strong><br>
-                        ${product.thca > 0 ? product.thca + '% �� ' : ''}${product.type}
+                        ${product.thca > 0 ? product.thca + '% • ' : ''}${product.type}
                     </td>
                     <td><strong>$${product.price}${getUnitLabel(product.grade)}</strong></td>
                     <td>${product.thca > 0 ? product.thca + '%' : '-'}</td>
@@ -4650,7 +4799,7 @@ Phone: (210) 835-7834
                             <h4 style="color: var(--brand-green); margin-bottom: 16px;">🆘 Quick Support Options</h4>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                                 <button class="btn btn-primary" onclick="contactOrderSupport()">📦 Order Issues</button>
-                                <button class="btn btn-secondary" onclick="contactShippingSupport()">🚚 Shipping Questions</button>
+                                <button class="btn btn-secondary" onclick="contactShippingSupport()">��� Shipping Questions</button>
                                 <button class="btn btn-secondary" onclick="contactBillingSupport()">💳 Billing Support</button>
                                 <button class="btn btn-secondary" onclick="contactGeneralSupport()">💬 General Inquiry</button>
                             </div>
@@ -5522,7 +5671,7 @@ Phone: (210) 835-7834
                     };
                     img.onerror = () => {
                         errorCount++;
-                        console.log(`❌ Image failed: ${product.strain} - ${product.image}`);
+                        console.log(`�� Image failed: ${product.strain} - ${product.image}`);
                         
                         if (successCount + errorCount === products.length) {
                             showNotification(`🖼️ Image test complete: ${successCount}/${products.length} loaded successfully`, successCount > errorCount ? 'success' : 'warning');
