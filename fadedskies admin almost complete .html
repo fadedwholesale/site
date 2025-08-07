@@ -2728,10 +2728,17 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
         function syncToPortal() {
             updateSyncStatus('syncing');
-            
+
+            // Actually sync products to shared data manager
+            window.sharedDataManager.updateProducts(products);
+            console.log('🔄 Synced', products.length, 'products to shared data manager');
+
             setTimeout(() => {
                 updateSyncStatus('connected');
                 showNotification('📊 Inventory synced to partner portal successfully!', 'success');
+
+                // Update last sync timestamp
+                document.getElementById('lastSync').textContent = 'Just now';
             }, 1500);
         }
 
