@@ -1,5 +1,5 @@
 // Faded Skies Cart and Checkout System
-// Complete implementation with real-time updates
+// Complete rewrite for proper functionality
 
 class CartManager {
     constructor() {
@@ -8,76 +8,89 @@ class CartManager {
         this.listeners = [];
         this.addToCartLock = false;
         
-        // Initialize cart from shared data manager
+        // Initialize cart system
         this.initialize();
     }
 
     initialize() {
-        // Set up event listeners for cart updates
-        window.addEventListener('cartUpdate', (event) => {
-            this.updateDisplay();
-        });
-
-        // Listen for authentication state changes
-        window.addEventListener('userAuthenticated', (event) => {
-            console.log('🔐 Cart: User authenticated event received');
-            this.refreshUserState();
-        });
-
-        // Load existing cart if user is logged in
-        if (window.currentUser) {
-            this.loadCart();
-        }
-    }
-
-    // Refresh authentication state and reload cart
-    refreshUserState() {
-        console.log('🔄 Cart: Refreshing user state', {
-            windowCurrentUser: !!window.currentUser,
-            localStorage: !!localStorage.getItem('currentUser')
-        });
-
-        // Try to restore user from localStorage if window.currentUser is missing
-        if (!window.currentUser && localStorage.getItem('currentUser')) {
-            try {
-                window.currentUser = JSON.parse(localStorage.getItem('currentUser'));
-                console.log('🔄 Cart: Restored user from localStorage:', window.currentUser.email);
-            } catch (error) {
-                console.error('🔄 Cart: Error restoring user from localStorage:', error);
-            }
-        }
-
-        if (window.currentUser) {
-            this.loadCart();
-            this.updateDisplay();
-            console.log('✅ Cart: User state refreshed successfully');
-        }
-    }
-
-    // Load cart from shared data manager
-    loadCart() {
-        if (!window.currentUser || !window.sharedDataManager) return;
+        console.log('🛒 Initializing cart manager...');
         
+        // Set up event listeners
+        window.addEventListener('cartUpdate', () => this.updateDisplay());
+        window.addEventListener('userAuthenticated', () => this.handleUserAuthentication());
+        
+        // Load existing cart if user is authenticated
+        this.loadCartFromStorage();
+        this.updateDisplay();
+        
+        console.log('✅ Cart manager initialized');
+    }
+
+    // Handle user authentication events
+    handleUserAuthentication() {
+        console.log('🔐 User authentication event received');
+        this.loadCartFromStorage();
+        this.updateDisplay();
+    }
+
+    // Get current authenticated user
+    getCurrentUser() {
+        // Check multiple sources for user data
+        if (window.currentUser) {
+            return window.currentUser;
+        }
+        
+        // Try to get from localStorage as fallback
         try {
-            const savedCart = window.sharedDataManager.getCart(window.currentUser.email);
-            this.cart = savedCart || [];
-            console.log('📦 Cart loaded:', this.cart.length, 'items');
-            this.updateDisplay();
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                window.currentUser = user; // Set it for future use
+                return user;
+            }
         } catch (error) {
-            console.error('Error loading cart:', error);
+            console.error('Error loading user from localStorage:', error);
+        }
+        
+        return null;
+    }
+
+    // Load cart from storage
+    loadCartFromStorage() {
+        const user = this.getCurrentUser();
+        if (!user || !user.email) {
+            console.log('🛒 No authenticated user, clearing cart');
+            this.cart = [];
+            return;
+        }
+
+        try {
+            const cartKey = `cart_${user.email}`;
+            const savedCart = localStorage.getItem(cartKey);
+            if (savedCart) {
+                this.cart = JSON.parse(savedCart);
+                console.log(`🛒 Loaded cart for ${user.email}:`, this.cart.length, 'items');
+            } else {
+                this.cart = [];
+                console.log(`🛒 No saved cart found for ${user.email}`);
+            }
+        } catch (error) {
+            console.error('Error loading cart from storage:', error);
             this.cart = [];
         }
     }
 
-    // Save cart to shared data manager
-    saveCart() {
-        if (!window.currentUser || !window.sharedDataManager) return;
-        
+    // Save cart to storage
+    saveCartToStorage() {
+        const user = this.getCurrentUser();
+        if (!user || !user.email) return;
+
         try {
-            window.sharedDataManager.updateCart(window.currentUser.email, this.cart);
-            console.log('💾 Cart saved:', this.cart.length, 'items');
+            const cartKey = `cart_${user.email}`;
+            localStorage.setItem(cartKey, JSON.stringify(this.cart));
+            console.log(`💾 Cart saved for ${user.email}:`, this.cart.length, 'items');
         } catch (error) {
-            console.error('Error saving cart:', error);
+            console.error('Error saving cart to storage:', error);
         }
     }
 
@@ -87,48 +100,24 @@ class CartManager {
         this.addToCartLock = true;
         setTimeout(() => { this.addToCartLock = false; }, 300);
 
-        // Enhanced debugging for authentication check
-        console.log('🔍 Cart: Authentication check debug', {
-            windowCurrentUser: window.currentUser,
-            hasCurrentUser: !!window.currentUser,
-            hasEmail: window.currentUser?.email,
-            windowHasCurrentUser: 'currentUser' in window,
-            localStorageUser: localStorage.getItem('currentUser'),
-            globalCurrentUser: typeof currentUser !== 'undefined' ? currentUser : 'undefined'
-        });
-
-        // Check for authentication - ensure current user exists
-        if (!window.currentUser || !window.currentUser.email) {
-            // Try to restore from localStorage as fallback
-            if (localStorage.getItem('currentUser')) {
-                try {
-                    window.currentUser = JSON.parse(localStorage.getItem('currentUser'));
-                    console.log('🔄 Cart: Restored user from localStorage during addProduct:', window.currentUser.email);
-                } catch (error) {
-                    console.error('🔄 Cart: Error restoring user during addProduct:', error);
-                }
-            }
-
-            // Check again after restoration attempt
-            if (!window.currentUser || !window.currentUser.email) {
-                this.showNotification('🔒 Please log in to add items to cart', 'error');
-                console.log('❌ Cart: No authenticated user found', {
-                    hasCurrentUser: !!window.currentUser,
-                    hasEmail: window.currentUser?.email,
-                    windowHasCurrentUser: 'currentUser' in window
-                });
-                return false;
-            }
+        // Check authentication
+        const user = this.getCurrentUser();
+        if (!user || !user.email) {
+            this.showNotification('🔒 Please log in to add items to cart', 'error');
+            console.log('❌ Cart: No authenticated user found');
+            return false;
         }
 
-        console.log('✅ Cart: Authenticated user found:', window.currentUser.email);
+        console.log(`🛒 Adding product ${productId} (qty: ${quantity}) to cart for ${user.email}`);
 
         try {
-            const products = window.sharedDataManager?.getProducts() || window.products || [];
+            // Get products from shared data manager or window.products
+            const products = this.getProducts();
             const product = products.find(p => p.id == productId);
             
             if (!product) {
                 this.showNotification('❌ Product not found', 'error');
+                console.error('Product not found:', productId);
                 return false;
             }
 
@@ -137,26 +126,32 @@ class CartManager {
                 return false;
             }
 
-            // Check if product already exists in cart
-            const existingItem = this.cart.find(item => item.id == productId);
+            // Check if item already exists in cart
+            const existingItemIndex = this.cart.findIndex(item => item.id == productId);
             
-            if (existingItem) {
+            if (existingItemIndex !== -1) {
+                // Update existing item
+                const existingItem = this.cart[existingItemIndex];
                 const newQuantity = Math.min(existingItem.quantity + quantity, product.stock);
+                
                 if (newQuantity === existingItem.quantity) {
-                    this.showNotification(`⚠️ Maximum quantity (${product.stock}) reached for ${product.strain}`, 'warning');
+                    this.showNotification(`⚠️ Maximum stock (${product.stock}) reached for ${product.strain}`, 'warning');
                     return false;
                 }
+                
                 existingItem.quantity = newQuantity;
                 this.showNotification(`⬆️ Updated ${product.strain} quantity to ${newQuantity}`, 'success');
             } else {
+                // Add new item
                 const cartItem = {
                     id: product.id,
                     strain: product.strain,
                     grade: product.grade,
-                    price: product.price,
+                    price: this.getPartnerPrice(product.price),
+                    originalPrice: product.price,
                     quantity: Math.min(quantity, product.stock),
                     maxStock: product.stock,
-                    image: product.image || 'https://via.placeholder.com/60x60/1a1a1a/00C851?text=' + product.grade,
+                    image: product.image || this.getPlaceholderImage(product.grade),
                     addedAt: new Date().toISOString()
                 };
                 
@@ -164,7 +159,8 @@ class CartManager {
                 this.showNotification(`✅ Added ${product.strain} to cart!`, 'success');
             }
 
-            this.saveCart();
+            // Save and update display
+            this.saveCartToStorage();
             this.updateDisplay();
             this.notifyListeners('item_added', { productId, quantity });
 
@@ -196,7 +192,7 @@ class CartManager {
             }
 
             const removedItem = this.cart.splice(itemIndex, 1)[0];
-            this.saveCart();
+            this.saveCartToStorage();
             this.updateDisplay();
             this.notifyListeners('item_removed', { productId });
             
@@ -228,7 +224,8 @@ class CartManager {
                 return false;
             }
 
-            const products = window.sharedDataManager?.getProducts() || window.products || [];
+            // Check stock availability
+            const products = this.getProducts();
             const product = products.find(p => p.id == productId);
             const maxQuantity = product ? product.stock : item.maxStock;
 
@@ -240,7 +237,7 @@ class CartManager {
             const oldQuantity = item.quantity;
             item.quantity = newQuantity;
 
-            this.saveCart();
+            this.saveCartToStorage();
             this.updateDisplay();
             this.notifyListeners('quantity_updated', { productId, oldQuantity, newQuantity });
 
@@ -269,7 +266,7 @@ class CartManager {
         if (confirm('Are you sure you want to clear your entire cart? This action cannot be undone.')) {
             const itemCount = this.cart.length;
             this.cart = [];
-            this.saveCart();
+            this.saveCartToStorage();
             this.updateDisplay();
             this.notifyListeners('cart_cleared', { itemCount });
             
@@ -296,7 +293,7 @@ class CartManager {
     // Update cart display
     updateDisplay() {
         try {
-            console.log('🔄 Updating cart display with', this.cart.length, 'unique items');
+            console.log('🔄 Updating cart display...', this.cart.length, 'items');
             
             const cartItems = document.getElementById('cartItems');
             const cartCount = document.getElementById('cartCount');
@@ -308,37 +305,32 @@ class CartManager {
             // Update cart counters
             if (cartCount) {
                 cartCount.textContent = totals.totalItems;
-                console.log('✅ Updated cartCount to:', totals.totalItems);
             }
             if (cartCount2) {
                 cartCount2.textContent = totals.totalItems;
-                console.log('✅ Updated cartCount2 to:', totals.totalItems);
             }
 
-            if (!cartItems || !cartTotal) {
-                console.warn('Cart elements not found');
-                return;
+            // Update cart items if cart is open
+            if (cartItems) {
+                if (this.cart.length === 0) {
+                    cartItems.innerHTML = this.getEmptyCartHTML();
+                } else {
+                    cartItems.innerHTML = this.cart.map(item => this.getCartItemHTML(item)).join('');
+                }
             }
 
             // Update cart total
-            cartTotal.textContent = totals.total.toFixed(2);
-
-            // Generate cart items HTML
-            if (this.cart.length === 0) {
-                cartItems.innerHTML = this.getEmptyCartHTML();
-            } else {
-                cartItems.innerHTML = this.cart.map(item => this.getCartItemHTML(item)).join('');
+            if (cartTotal) {
+                cartTotal.textContent = totals.total.toFixed(2);
             }
 
             // Update cart total section
             this.updateCartTotalSection(totals);
 
             console.log('✅ Cart display updated successfully');
-            console.log('📊 Cart stats:', totals);
 
         } catch (error) {
             console.error('Error updating cart display:', error);
-            this.showNotification('❌ Error updating cart display', 'error');
         }
     }
 
@@ -358,19 +350,17 @@ class CartManager {
 
     // Generate cart item HTML
     getCartItemHTML(item) {
-        const products = window.sharedDataManager?.getProducts() || window.products || [];
-        const product = products.find(p => p.id == item.id);
-        const maxStock = product ? product.stock : item.maxStock;
         const currentQuantity = parseInt(item.quantity) || 1;
         const decreaseQuantity = Math.max(0, currentQuantity - 1);
         const increaseQuantity = currentQuantity + 1;
+        const maxStock = item.maxStock || 999;
 
         return `
             <div class="cart-item" data-product-id="${item.id}">
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
                     <img src="${item.image}" alt="${item.strain}" class="cart-product-image" 
                          style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover;"
-                         onerror="this.src='https://via.placeholder.com/60x60/1a1a1a/00C851?text=${item.grade}'" />
+                         onerror="this.src='${this.getPlaceholderImage(item.grade)}'" />
                     <div style="flex: 1;">
                         <h4 style="margin: 0; font-size: 14px; font-weight: 600;">${item.strain}</h4>
                         <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 12px;">
@@ -383,21 +373,21 @@ class CartManager {
                         <button class="quantity-btn" 
                                 onclick="window.cartManager.updateQuantity(${item.id}, ${decreaseQuantity})"
                                 ${currentQuantity <= 1 ? 'disabled' : ''}
-                                style="background: var(--accent-red); color: white; border: none; border-radius: 4px; width: 30px; height: 30px; cursor: pointer;"
+                                style="background: var(--accent-red); color: white; border: none; border-radius: 4px; width: 30px; height: 30px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;"
                                 title="Decrease quantity">-</button>
-                        <span class="quantity-display" style="font-weight: 600; min-width: 20px; text-align: center;">${currentQuantity}</span>
+                        <span class="quantity-display" style="font-weight: 600; min-width: 30px; text-align: center; font-size: 16px;">${currentQuantity}</span>
                         <button class="quantity-btn" 
                                 onclick="window.cartManager.updateQuantity(${item.id}, ${increaseQuantity})"
                                 ${currentQuantity >= maxStock ? 'disabled' : ''}
-                                style="background: var(--brand-green); color: white; border: none; border-radius: 4px; width: 30px; height: 30px; cursor: pointer;"
+                                style="background: var(--brand-green); color: white; border: none; border-radius: 4px; width: 30px; height: 30px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;"
                                 title="Increase quantity">+</button>
                     </div>
                     <button class="btn btn-danger btn-sm" 
                             onclick="window.cartManager.removeProduct(${item.id})" 
-                            style="padding: 4px 8px; font-size: 12px;"
+                            style="padding: 6px 12px; font-size: 12px; background: var(--accent-red); border: none; color: white; border-radius: 4px; cursor: pointer;"
                             title="Remove from cart">Remove</button>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-subtle);">
                     <small style="color: var(--text-muted);">${maxStock} available</small>
                     <p style="font-weight: 700; color: var(--brand-green); margin: 0; font-size: 16px;">
                         $${(item.price * currentQuantity).toFixed(2)}
@@ -410,7 +400,7 @@ class CartManager {
     // Update cart total section
     updateCartTotalSection(totals) {
         const cartTotalSection = document.querySelector('.cart-total');
-        if (cartTotalSection) {
+        if (cartTotalSection && this.cart.length > 0) {
             cartTotalSection.innerHTML = `
                 <div style="margin-bottom: 16px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
@@ -423,22 +413,36 @@ class CartManager {
                             ${totals.shipping === 0 ? 'FREE' : '$' + totals.shipping.toFixed(2)}
                         </span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; border-top: 1px solid var(--border-color); padding-top: 8px;">
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; border-top: 1px solid var(--border-subtle); padding-top: 8px;">
                         <span>Total:</span>
                         <span style="color: var(--brand-green);">$${totals.total.toFixed(2)}</span>
                     </div>
+                    ${totals.shipping === 0 ? '<p style="color: var(--brand-green); font-size: 12px; margin: 8px 0 0 0;">🚚 FREE shipping on orders over $1,000!</p>' : ''}
                 </div>
-                <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 16px; font-weight: 600;" onclick="window.cartManager.checkout()">
+                <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 16px; font-weight: 600; background: var(--brand-green); border: none; color: white; border-radius: 8px; cursor: pointer;" onclick="window.cartManager.checkout()">
                     Place Order 🚀
                 </button>
-                <button class="btn btn-secondary" style="width: 100%; margin-top: 8px;" onclick="window.cartManager.clear()">
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 8px; padding: 8px; background: var(--surface-elevated); border: 1px solid var(--border-subtle); color: var(--text-primary); border-radius: 8px; cursor: pointer;" onclick="window.cartManager.clear()">
                     Clear Cart
                 </button>
             `;
         }
     }
 
-    // Get unit label based on grade
+    // Helper methods
+    getProducts() {
+        return window.sharedDataManager?.getProducts() || window.products || [];
+    }
+
+    getPartnerPrice(originalPrice) {
+        // 20% discount for partners
+        return Math.round(originalPrice * 0.8);
+    }
+
+    getPlaceholderImage(grade) {
+        return `https://via.placeholder.com/60x60/1a1a1a/00C851?text=${encodeURIComponent(grade)}`;
+    }
+
     getUnitLabel(grade) {
         if (!grade) return '/unit';
         
@@ -452,7 +456,7 @@ class CartManager {
         }
     }
 
-    // Toggle cart open/close
+    // Cart UI methods
     toggle() {
         if (this.isOpen) {
             this.close();
@@ -461,17 +465,15 @@ class CartManager {
         }
     }
 
-    // Open cart
     open() {
         this.isOpen = true;
         const cartEl = document.getElementById('cart');
         if (cartEl) {
             cartEl.classList.add('open');
-            this.updateDisplay(); // Refresh cart display when opening
+            this.updateDisplay();
         }
     }
 
-    // Close cart
     close() {
         this.isOpen = false;
         const cartEl = document.getElementById('cart');
@@ -483,20 +485,14 @@ class CartManager {
     // Checkout process
     async checkout() {
         try {
-            if (!window.currentUser) {
+            const user = this.getCurrentUser();
+            if (!user) {
                 this.showNotification('🔒 Please log in to complete checkout', 'error');
                 return false;
             }
 
             if (this.cart.length === 0) {
                 this.showNotification('⚠️ Your cart is empty! Add some products first.', 'error');
-                return false;
-            }
-
-            // Validate cart items
-            const validation = this.validateCart();
-            if (!validation.valid) {
-                this.showNotification('🔄 Please review your cart and try again', 'warning');
                 return false;
             }
 
@@ -521,42 +517,9 @@ class CartManager {
 
         } catch (error) {
             console.error('Checkout error:', error);
-            this.showNotification('❌ Checkout failed. Please try again or contact support.', 'error');
+            this.showNotification('❌ Checkout failed. Please try again.', 'error');
             return false;
         }
-    }
-
-    // Validate cart before checkout
-    validateCart() {
-        const issues = [];
-        const products = window.sharedDataManager?.getProducts() || window.products || [];
-
-        this.cart.forEach(cartItem => {
-            const product = products.find(p => p.id == cartItem.id);
-            
-            if (!product) {
-                issues.push(`${cartItem.strain} is no longer available`);
-                return;
-            }
-            
-            if (product.status !== 'AVAILABLE') {
-                issues.push(`${cartItem.strain} is no longer available`);
-                return;
-            }
-            
-            if (cartItem.quantity > product.stock) {
-                issues.push(`Only ${product.stock} units of ${cartItem.strain} available`);
-                cartItem.quantity = product.stock;
-                this.updateDisplay();
-            }
-        });
-
-        if (issues.length > 0) {
-            issues.forEach(issue => this.showNotification(`⚠️ ${issue}`, 'warning'));
-            return { valid: false, issues };
-        }
-
-        return { valid: true, issues: [] };
     }
 
     // Process order
@@ -564,13 +527,14 @@ class CartManager {
         return new Promise((resolve) => {
             setTimeout(() => {
                 try {
+                    const user = this.getCurrentUser();
                     const totals = this.getTotals();
                     const orderItems = this.cart.map(item => `${item.strain} (x${item.quantity})`).join(', ');
                     
                     const newOrder = {
-                        id: `ORD-${String((window.sharedDataManager?.getOrders()?.length || 0) + 1).padStart(3, '0')}`,
-                        partner: window.currentUser.email,
-                        partnerName: window.currentUser.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') + ' Store',
+                        id: `ORD-${Date.now()}`,
+                        partner: user.email,
+                        partnerName: user.name || user.email.split('@')[0],
                         items: orderItems,
                         itemDetails: this.cart.map(item => ({
                             id: item.id,
@@ -583,8 +547,6 @@ class CartManager {
                         total: totals.total,
                         status: 'PENDING',
                         date: new Date().toISOString().split('T')[0],
-                        notes: '',
-                        delivery: totals.total > 1000 ? 'priority' : 'standard',
                         created: new Date().toISOString()
                     };
 
@@ -593,27 +555,14 @@ class CartManager {
                         window.sharedDataManager.addOrder(newOrder);
                     }
 
-                    // Update inventory
-                    this.updateInventoryAfterOrder();
-
                     // Clear cart
                     this.cart = [];
-                    this.saveCart();
+                    this.saveCartToStorage();
                     this.updateDisplay();
                     this.close();
 
-                    // Show success notifications
+                    // Show success notification
                     this.showNotification(`🎉 Order placed successfully! Order ID: ${newOrder.id}`, 'success');
-                    
-                    setTimeout(() => {
-                        this.showNotification(`📧 Order confirmation sent to ${window.currentUser.email}`, 'success');
-                    }, 2000);
-
-                    if (totals.total > 1000) {
-                        setTimeout(() => {
-                            this.showNotification('🚚 FREE priority shipping included with your order!', 'success');
-                        }, 4000);
-                    }
 
                     // Update all views
                     if (window.updateAllViews) {
@@ -631,30 +580,11 @@ class CartManager {
         });
     }
 
-    // Update inventory after successful order
-    updateInventoryAfterOrder() {
-        if (!window.sharedDataManager) return;
-
-        this.cart.forEach(cartItem => {
-            const product = window.sharedDataManager.getProducts().find(p => p.id == cartItem.id);
-            if (product) {
-                const newStock = Math.max(0, product.stock - cartItem.quantity);
-                const newStatus = newStock === 0 ? 'SOLD OUT' : product.status;
-                
-                window.sharedDataManager.updateProduct(product.id, {
-                    stock: newStock,
-                    status: newStatus
-                });
-            }
-        });
-    }
-
-    // Add event listener
+    // Event system
     addListener(callback) {
         this.listeners.push(callback);
     }
 
-    // Notify listeners of cart changes
     notifyListeners(event, data) {
         this.listeners.forEach(callback => {
             try {
@@ -674,24 +604,24 @@ class CartManager {
         }
     }
 
-    // Get cart state for debugging
+    // Debug method
     getState() {
         return {
             cart: this.cart,
             isOpen: this.isOpen,
             totals: this.getTotals(),
-            hasUser: !!window.currentUser
+            hasUser: !!this.getCurrentUser()
         };
     }
 }
 
-// Initialize cart manager when DOM is ready
+// Initialize cart manager
 if (typeof window !== 'undefined') {
     window.CartManager = CartManager;
     
     // Initialize cart manager if not already done
     if (!window.cartManager) {
         window.cartManager = new CartManager();
-        console.log('🛒 Cart manager initialized');
+        console.log('🛒 Cart manager initialized and ready');
     }
 }
