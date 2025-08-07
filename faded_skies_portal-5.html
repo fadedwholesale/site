@@ -4329,23 +4329,8 @@
         }
 
         function clearCart() {
-            if (cart.length === 0) {
-                showNotification('🛒 Cart is already empty', 'warning');
-                return;
-            }
-
-            if (!currentUser) {
-                showNotification('❌ Please log in to clear cart', 'error');
-                return;
-            }
-
-            if (confirm('Are you sure you want to clear your entire cart? This action cannot be undone.')) {
-                const itemCount = cart.length;
-                // Use shared data manager to clear cart
-                window.sharedDataManager.clearCart(currentUser.email);
-                cart = []; // Update local cart reference
-                updateCartDisplay();
-                showNotification(`🗑️ Cart cleared successfully (${itemCount} items removed)`, 'success');
+            if (window.cartManager) {
+                return window.cartManager.clear();
             }
         }
 
