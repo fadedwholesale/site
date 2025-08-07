@@ -3114,10 +3114,14 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         function deleteProduct(productId) {
             const product = products.find(p => p.id === productId);
             if (product && confirm(`Are you sure you want to delete ${product.strain}?`)) {
+                // Remove from local array
                 products = products.filter(p => p.id !== productId);
+
+                // Remove from shared data manager (this will notify partner portals)
+                window.sharedDataManager.deleteProduct(productId);
+
                 updateAllDashboardViews();
                 showNotification(`🗑️ Product ${product.strain} deleted`, 'success');
-                syncToPortal();
             }
         }
 
