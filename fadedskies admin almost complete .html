@@ -1222,7 +1222,7 @@
                         <div class="action-group">
                             <button class="btn btn-primary" onclick="openModal('addProductModal')">➕ Add Product</button>
                             <button class="btn btn-secondary" onclick="openModal('bulkImportModal')">📥 Bulk Import</button>
-                            <button class="btn btn-secondary" onclick="exportInventory()">📄 Export CSV</button>
+                            <button class="btn btn-secondary" onclick="exportInventory()">�� Export CSV</button>
                             <button class="btn btn-secondary" onclick="syncToPortal()">🔄 Sync to Portal</button>
                         </div>
                     </div>
@@ -2258,6 +2258,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             </div>
         </div>
     </div>
+
+    <!-- Include Shared Data Manager -->
+    <script src="shared-data.js"></script>
 
     <script>
         // Global State Management
@@ -3579,7 +3582,7 @@ Faded Skies Wholesale Team
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 600px;">
                     <div class="modal-header">
-                        <h3 class="modal-title">✏️ Edit Order - ${order.id}</h3>
+                        <h3 class="modal-title">��️ Edit Order - ${order.id}</h3>
                         <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
                     </div>
                     <form id="editOrderForm">
