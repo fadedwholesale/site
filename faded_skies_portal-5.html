@@ -2126,7 +2126,7 @@
 
     <script>
         // Global State Management
-        let currentUser = null;
+        window.currentUser = null;
         let currentView = 'public';
         let currentPortalTab = 'dashboard';
         let inventoryVisible = false;
@@ -5068,7 +5068,7 @@
                         <button class="btn btn-secondary" onclick="trackOrderDetailed('${order.id}')">📦 Track Order</button>
                         <button class="btn btn-secondary" onclick="downloadOrderInvoice('${order.id}')">📄 Download Invoice</button>
                         ${order.status === 'PENDING' ? `<button class="btn btn-primary" onclick="this.closest('.modal').remove(); setTimeout(function(){editOrder('${order.id}')}, 200);">✏️ Edit Order</button>` : ''}
-                        <button class="btn btn-secondary" onclick="reorderItems('${order.id}')">���� Reorder</button>
+                        <button class="btn btn-secondary" onclick="reorderItems('${order.id}')">🔄 Reorder</button>
                     </div>
                 </div>
             `;
@@ -6206,7 +6206,7 @@ Phone: (210) 835-7834
             const sharedProducts = window.sharedDataManager.getProducts();
             const sharedCart = window.sharedDataManager.getCart(currentUser.email);
 
-            console.log('���� Cart Test Results:');
+            console.log('����� Cart Test Results:');
             console.log('  Local cart items:', cart.length);
             console.log('  Shared cart items:', sharedCart.length);
             console.log('  Available products:', sharedProducts.length);
