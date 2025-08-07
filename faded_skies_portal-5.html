@@ -1222,6 +1222,22 @@
             .portal-tabs {
                 flex-direction: column;
             }
+
+            .review-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .file-upload-area {
+                padding: 20px;
+            }
+
+            .upload-text {
+                font-size: 14px;
+            }
+
+            .upload-subtext {
+                font-size: 12px;
+            }
         }
 
         /* Prevent background scroll when modal is open */
@@ -4799,7 +4815,7 @@ Phone: (210) 835-7834
                             <h4 style="color: var(--brand-green); margin-bottom: 16px;">🆘 Quick Support Options</h4>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                                 <button class="btn btn-primary" onclick="contactOrderSupport()">📦 Order Issues</button>
-                                <button class="btn btn-secondary" onclick="contactShippingSupport()">��� Shipping Questions</button>
+                                <button class="btn btn-secondary" onclick="contactShippingSupport()">🚚 Shipping Questions</button>
                                 <button class="btn btn-secondary" onclick="contactBillingSupport()">💳 Billing Support</button>
                                 <button class="btn btn-secondary" onclick="contactGeneralSupport()">💬 General Inquiry</button>
                             </div>
@@ -5671,7 +5687,7 @@ Phone: (210) 835-7834
                     };
                     img.onerror = () => {
                         errorCount++;
-                        console.log(`�� Image failed: ${product.strain} - ${product.image}`);
+                        console.log(`❌ Image failed: ${product.strain} - ${product.image}`);
                         
                         if (successCount + errorCount === products.length) {
                             showNotification(`🖼️ Image test complete: ${successCount}/${products.length} loaded successfully`, successCount > errorCount ? 'success' : 'warning');
