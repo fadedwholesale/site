@@ -1350,7 +1350,7 @@
                             <div class="quality-badge">🌿 Organic Hemp</div>
                             <div class="quality-badge">🚫 GMO-Free</div>
                             <div class="quality-badge">⭐ cGMP Certified</div>
-                            <div class="quality-badge">📋 Farm Bill Compliant</div>
+                            <div class="quality-badge">��� Farm Bill Compliant</div>
                         </div>
                         
                         <div style="margin: 40px 0;">
@@ -1526,7 +1526,7 @@
                         </div>
 
                         <div class="card">
-                            <h3>��� Quick Actions</h3>
+                            <h3>🎯 Quick Actions</h3>
                             <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px;">
                                 <button class="btn btn-primary" onclick="switchPortalTab('products')">🛒 Browse Products</button>
                                 <button class="btn btn-secondary" onclick="switchPortalTab('orders')">📋 View Orders</button>
@@ -4753,7 +4753,8 @@
                 console.log('🛒 Adding product to cart:', productId);
 
                 // Use shared data manager to add to cart
-                const updatedCart = window.sharedDataManager.addToCart(currentUser.email, productId, 1);
+                const userEmail = window.currentUser?.email || 'guest@example.com';
+                const updatedCart = window.sharedDataManager.addToCart(userEmail, productId, 1);
                 cart = updatedCart; // Update local cart reference
 
                 const product = window.sharedDataManager.getProducts().find(p => p.id === productId);
