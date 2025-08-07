@@ -2072,6 +2072,8 @@
 
     <!-- Include Shared Data Manager -->
     <script src="shared-data.js"></script>
+    <!-- Include Test Functionality -->
+    <script src="test-functionality.js"></script>
 
     <script>
         // Global State Management
@@ -2430,7 +2432,7 @@
         // New function to specifically fix toggle button functionality
         function initializeToggleButtons() {
             try {
-                console.log('��� Initializing toggle button functionality...');
+                console.log('🔧 Initializing toggle button functionality...');
                 
                 // Ensure all onclick handlers are working
                 const clickableElements = document.querySelectorAll('[onclick]');
@@ -4382,7 +4384,7 @@
                                      onerror="this.src='https://via.placeholder.com/60x60/1a1a1a/00C851?text=${item.grade}'" />
                                 <div style="flex: 1;">
                                     <h4>${item.strain}</h4>
-                                    <p>${item.grade} • $${item.price}${getUnitLabel(item.grade)}</p>
+                                    <p>${item.grade} �� $${item.price}${getUnitLabel(item.grade)}</p>
                                 </div>
                             </div>
                             <div class="cart-item-controls">
