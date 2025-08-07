@@ -2289,7 +2289,7 @@
         // Initialize Application with Session Restoration and Mobile Support - FIXED
         document.addEventListener('DOMContentLoaded', function() {
             try {
-                console.log('🚀 DOM Content Loaded - Starting initialization...');
+                console.log('�� DOM Content Loaded - Starting initialization...');
                 
                 // Detect mobile device
                 const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -3278,6 +3278,12 @@
                     if (sessionAge < 8 * 60 * 60 * 1000) {
                         window.currentUser = session;
                         showLoggedInState();
+
+                        // Initialize cart manager for restored session
+                        if (window.cartManager) {
+                            window.cartManager.refreshUserState();
+                        }
+
                         showNotification('👋 Welcome back! Your session has been restored.', 'success');
                         return true;
                     } else {
@@ -4431,7 +4437,7 @@
                 // Update cart counters immediately at start of function
                 if (cartCount) {
                     cartCount.textContent = totalItems;
-                    console.log('��� Updated cartCount to:', totalItems);
+                    console.log('✅ Updated cartCount to:', totalItems);
                 }
                 if (cartCount2) {
                     cartCount2.textContent = totalItems;
