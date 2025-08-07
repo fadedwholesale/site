@@ -2070,6 +2070,9 @@
         </div>
     </div>
 
+    <!-- Include Shared Data Manager -->
+    <script src="shared-data.js"></script>
+
     <script>
         // Global State Management
         let currentUser = null;
@@ -2790,7 +2793,7 @@
                     }
                     
                     if (!isValid) {
-                        showNotification('❌ Invalid credentials. Please check your email and password.', 'error');
+                        showNotification('�� Invalid credentials. Please check your email and password.', 'error');
                         submitBtn.textContent = originalText;
                         submitBtn.disabled = false;
                         return;
