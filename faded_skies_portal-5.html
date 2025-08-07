@@ -3559,7 +3559,7 @@
                         
                         const match = e.target.getAttribute('onclick').match(/removeFromCart\((\d+)\)/);
                         if (match) {
-                            console.log('���� Mobile remove button pressed for product:', match[1]);
+                            console.log('����� Mobile remove button pressed for product:', match[1]);
                             removeFromCart(parseInt(match[1]));
                         }
                     }
@@ -4573,9 +4573,9 @@
         }
 
         function validateCartIntegrity() {
-            if (!currentUser) return true;
+            if (!window.currentUser) return true;
 
-            const sharedCart = window.sharedDataManager.getCart(currentUser.email);
+            const sharedCart = window.sharedDataManager.getCart(window.currentUser.email);
             const sharedProducts = window.sharedDataManager.getProducts();
 
             // Check if local cart is in sync with shared cart
@@ -4757,7 +4757,7 @@
                     });
                     showNotification(`✅ Added ${product.strain} to cart! (${quantity} total)`, 'success');
                 } else {
-                    console.error('����� Product not found in shared data manager:', productId);
+                    console.error('��� Product not found in shared data manager:', productId);
                 }
 
                 updateCartDisplay(); // Ensure cart is always updated
@@ -4855,7 +4855,7 @@
             } catch (error) {
                 console.error('Error updating quantity:', error);
                 console.error('Error details:', { productId, quantity, currentUser: !!currentUser, cartLength: cart.length });
-                showNotification('❌ Error updating quantity. Please try again.', 'error');
+                showNotification('��� Error updating quantity. Please try again.', 'error');
             }
         }
 
