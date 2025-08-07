@@ -67,6 +67,22 @@ Both portals share the same data structures and sync in real-time:
 - Orders appear instantly in admin dashboard
 - Partner data syncs between systems
 - Pricing changes reflect immediately
+- **Registration applications** flow from public portal to admin for verification
+
+## 📝 Registration Workflow
+
+### User Registration Process:
+1. **Step 1**: Business information (name, contact, license, etc.)
+2. **Step 2**: Document upload (business license, cannabis license, tax ID)
+3. **Step 3**: Review and submit with terms acceptance
+4. **Automatic**: Application sent to admin portal for verification
+
+### Admin Verification Process:
+1. New applications appear in admin dashboard
+2. Admin reviews business information and documents
+3. License verification and compliance check
+4. Partner approval and tier assignment
+5. Email confirmation sent to partner with login credentials
 
 ## 🛠️ Technical Details
 
