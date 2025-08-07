@@ -319,7 +319,7 @@ class ModernCartManager {
         return basePrice;
     }
 
-    validateQuantity(quantity, product) {
+    processQuantity(quantity, product) {
         quantity = Math.max(1, parseInt(quantity) || 1);
         quantity = Math.min(quantity, product.stock || 999);
         quantity = Math.min(quantity, this.config.maxQuantityPerItem);
