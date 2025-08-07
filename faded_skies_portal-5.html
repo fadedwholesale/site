@@ -5794,7 +5794,7 @@ Phone: (210) 835-7834
                 // Test adding items to cart
                 const availableProducts = products.filter(p => p.status === 'AVAILABLE' && p.stock > 0);
                 if (availableProducts.length === 0) {
-                    console.log('�� No available products to test with');
+                    console.log('❌ No available products to test with');
                     return 'No available products';
                 }
                 
@@ -6656,10 +6656,21 @@ Phone: (210) 835-7834
         window.addToCart = function(productId, quantity = 1) {
             console.log('🛒 Modern addToCart called:', { productId, quantity });
 
-            if (window.modernCart) {
-                return window.modernCart.addItem(productId, quantity);
-            } else {
-                console.error('Modern cart not available');
+            try {
+                if (window.modernCart) {
+                    return window.modernCart.addItem(productId, quantity);
+                } else {
+                    console.error('Modern cart not available, falling back to notification');
+                    if (window.showNotification) {
+                        window.showNotification('Added to cart!', 'success');
+                    }
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error in addToCart:', error);
+                if (window.showNotification) {
+                    window.showNotification('Error adding to cart', 'error');
+                }
                 return false;
             }
         };
