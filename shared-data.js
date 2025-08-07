@@ -202,15 +202,32 @@ class SharedDataManager {
 
     // Order Management
     addOrder(order) {
+        console.log('📡 SharedDataManager: Adding new order', order);
+
         const data = this.getData();
         if (!data.orders) data.orders = [];
-        
+
         order.id = order.id || `ORD-${Date.now()}`;
         order.createdAt = new Date().toISOString();
-        
+        order.status = order.status || 'PENDING';
+
         data.orders.push(order);
         this.saveData(data);
+
+        // Enhanced notification with real-time broadcasting
         this.notifyChange('order_added', order);
+
+        // Immediate broadcast for admin portal
+        this.broadcastRealTimeUpdate('new_order', {
+            ...order,
+            isUrgent: order.total > 1000,
+            customerInfo: {
+                email: order.partner,
+                name: order.partnerName
+            }
+        });
+
+        console.log('📡 Order added and broadcasted:', order.id);
         return order;
     }
 
