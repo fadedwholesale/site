@@ -571,7 +571,8 @@ class CartManager {
                     this.showNotification(`🎉 Order placed successfully! Order ID: ${newOrder.id}`, 'success');
                     
                     setTimeout(() => {
-                        this.showNotification(`📧 Order confirmation sent to ${window.currentUser.email}`, 'success');
+                        const userEmail = window.currentUser?.email || 'your email';
+                        this.showNotification(`📧 Order confirmation sent to ${userEmail}`, 'success');
                     }, 2000);
 
                     if (totals.total > 1000) {
