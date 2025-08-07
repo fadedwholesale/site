@@ -141,6 +141,7 @@ function logout() {
     if (currentUser) {
         const userName = currentUser.name;
         currentUser = null;
+        window.currentUser = null;
         localStorage.removeItem('currentUser');
         
         // Clear cart
