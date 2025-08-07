@@ -884,7 +884,41 @@ function showNotification(message, type = 'info') {
     }, 4000);
 }
 
+// Debug function to check authentication state
+function debugAuthState() {
+    console.log('🔍 AUTHENTICATION DEBUG STATE:', {
+        localCurrentUser: currentUser,
+        windowCurrentUser: window.currentUser,
+        localStorageUser: localStorage.getItem('currentUser'),
+        cartManager: !!window.cartManager,
+        cartState: window.cartManager ? window.cartManager.getState() : 'not available'
+    });
+    return {
+        isAuthenticated: !!(currentUser || window.currentUser),
+        userEmail: currentUser?.email || window.currentUser?.email,
+        cartAvailable: !!window.cartManager
+    };
+}
+
+// Test function to force authentication
+function forceLogin(email = 'test@example.com') {
+    console.log('🧪 Force login for testing...');
+    const userData = {
+        email: email,
+        name: email.split('@')[0],
+        tier: 'Gold Partner',
+        loginTime: new Date().toISOString()
+    };
+    setCurrentUser(userData);
+    showUserSession();
+    showPartnerPortal();
+    showNotification(`🧪 Test login successful: ${userData.name}`, 'success');
+    return userData;
+}
+
 // Make functions globally available
+window.debugAuthState = debugAuthState;
+window.forceLogin = forceLogin;
 window.login = login;
 window.logout = logout;
 window.showPublicWebsite = showPublicWebsite;
