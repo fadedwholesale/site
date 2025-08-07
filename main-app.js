@@ -17,16 +17,15 @@ function setCurrentUser(user) {
         console.log('✅ User logged out globally');
     }
     
-    // Immediately notify cart manager of auth state change
+    // Notify cart system of auth change if available
     try {
-        if (window.modernCart && typeof window.modernCart.notifyListeners === 'function') {
-            console.log('🔄 Refreshing cart manager after auth change');
-            window.modernCart.notifyListeners('auth_changed', { user });
-        } else {
-            console.log('🔄 Modern cart not available yet, skipping notification');
+        if (user && window.updateFixedCartDisplay) {
+            setTimeout(function() {
+                window.updateFixedCartDisplay();
+            }, 100);
         }
     } catch (error) {
-        console.warn('Error notifying cart of auth change:', error);
+        console.warn('Error updating cart after auth change:', error);
     }
     
     return user;
