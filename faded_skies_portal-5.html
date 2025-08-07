@@ -2074,8 +2074,12 @@
     <script src="shared-data.js"></script>
     <!-- Include Cart System -->
     <script src="cart-system.js"></script>
+    <!-- Include Main Application -->
+    <script src="main-app.js"></script>
     <!-- Include Test Functionality -->
     <script src="test-functionality.js"></script>
+    <!-- Include Integration Tests -->
+    <script src="test-integration.js"></script>
 
     <!-- Initialize Cart System -->
     <script>
@@ -4591,7 +4595,7 @@
 
             // Check if local cart is in sync with shared cart
             if (JSON.stringify(cart) !== JSON.stringify(sharedCart)) {
-                console.warn('🔄 Cart out of sync - updating from shared data manager');
+                console.warn('��� Cart out of sync - updating from shared data manager');
                 cart = sharedCart;
                 updateCartDisplay();
                 return false;
