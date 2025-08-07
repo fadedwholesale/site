@@ -1499,7 +1499,7 @@
                         <button class="portal-tab active" onclick="switchPortalTab('dashboard')">📊 Dashboard</button>
                         <button class="portal-tab" onclick="switchPortalTab('products')">🛒 Shop Products</button>
                         <button class="portal-tab" onclick="switchPortalTab('orders')">📋 My Orders</button>
-                        <button class="portal-tab" onclick="switchPortalTab('analytics')">���� Analytics</button>
+                        <button class="portal-tab" onclick="switchPortalTab('analytics')">📈 Analytics</button>
                         <button class="portal-tab" onclick="switchPortalTab('profile')">👤 Profile</button>
                         <button class="portal-tab" onclick="switchPortalTab('bulk')">📦 Bulk Orders</button>
                     </div>
@@ -2577,7 +2577,7 @@
 �� Partner Portal
    • Complete dashboard with 6 functional tabs
    • Order management (view, track, edit, cancel)
-   �� Product browsing with search and filters
+   • Product browsing with search and filters
    • Analytics and reporting
 
 ✅ User Experience
@@ -2840,7 +2840,7 @@
                 
             } catch (error) {
                 console.error('Login error:', error);
-                showNotification('❌ Login error. Please try again or contact support.', 'error');
+                showNotification('�� Login error. Please try again or contact support.', 'error');
                 const submitBtn = event.target.querySelector('button[type="submit"]');
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -4999,7 +4999,7 @@ Phone: (210) 835-7834
                         break;
                     default:
                         statusMessage = 'Status information not available.';
-                        statusIcon = '���';
+                        statusIcon = '❓';
                         statusColor = 'var(--text-secondary)';
                 }
 
@@ -5966,6 +5966,41 @@ Phone: (210) 835-7834
         console.log('📱 Modal triggers work on all devices with comprehensive event handling');
         console.log('📱 Mobile debugging tools available: testMobileFunction(), testMobileInteraction()');
         console.log('🔥 READY FOR MOBILE DEPLOYMENT! 🔥');
+
+        // Test Cart Functionality
+        function testCartFunctionality() {
+            console.log('🧪 Testing cart functionality...');
+
+            if (!currentUser) {
+                console.log('❌ No user logged in - cannot test cart');
+                return false;
+            }
+
+            const sharedProducts = window.sharedDataManager.getProducts();
+            const sharedCart = window.sharedDataManager.getCart(currentUser.email);
+
+            console.log('📊 Cart Test Results:');
+            console.log('  Local cart items:', cart.length);
+            console.log('  Shared cart items:', sharedCart.length);
+            console.log('  Available products:', sharedProducts.length);
+            console.log('  Cart sync status:', JSON.stringify(cart) === JSON.stringify(sharedCart) ? '✅ In sync' : '❌ Out of sync');
+
+            // Test cart integrity
+            let allItemsValid = true;
+            cart.forEach(cartItem => {
+                const product = sharedProducts.find(p => p.id === cartItem.id);
+                if (!product) {
+                    console.log(`  ❌ Invalid cart item: ${cartItem.strain} (ID: ${cartItem.id})`);
+                    allItemsValid = false;
+                } else {
+                    console.log(`  ✅ Valid cart item: ${cartItem.strain} (${cartItem.quantity}x)`);
+                }
+            });
+
+            console.log('  Cart integrity:', allItemsValid ? '✅ All items valid' : '❌ Some items invalid');
+
+            return allItemsValid && cart.length === sharedCart.length;
+        }
 
         // Debug Function to Check System Status
         function debugSystemStatus() {
