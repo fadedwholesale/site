@@ -57,10 +57,15 @@ class CartManager {
         this.addToCartLock = true;
         setTimeout(() => { this.addToCartLock = false; }, 300);
 
-        if (!window.currentUser) {
+        // Check for authentication - ensure current user exists
+        const currentUser = window.currentUser;
+        if (!currentUser || !currentUser.email) {
             this.showNotification('🔒 Please log in to add items to cart', 'error');
+            console.log('❌ Cart: No authenticated user found', { currentUser: !!currentUser, hasEmail: currentUser?.email });
             return false;
         }
+
+        console.log('✅ Cart: Authenticated user found:', currentUser.email);
 
         try {
             const products = window.sharedDataManager?.getProducts() || window.products || [];
