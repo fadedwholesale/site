@@ -270,22 +270,59 @@ class CartUIManager {
     renderCartItem(item) {
         const maxQuantity = 10; // Could be from product data
         const unitLabel = this.getUnitLabel(item.grade);
-        
-        return this.templates.cartItem
-            .replace(/\{\{id\}\}/g, item.id)
-            .replace(/\{\{name\}\}/g, this.escapeHtml(item.name))
-            .replace(/\{\{grade\}\}/g, this.escapeHtml(item.grade))
-            .replace(/\{\{price\}\}/g, item.price.toFixed(2))
-            .replace(/\{\{unitLabel\}\}/g, unitLabel)
-            .replace(/\{\{quantity\}\}/g, item.quantity)
-            .replace(/\{\{maxQuantity\}\}/g, maxQuantity)
-            .replace(/\{\{subtotal\}\}/g, (item.price * item.quantity).toFixed(2))
-            .replace(/\{\{image\}\}/g, item.image)
-            .replace(/\{\{fallbackImage\}\}/g, this.getDefaultImage(item.grade))
-            .replace(/\{\{#if isMinQuantity\}\}disabled\{\{\/if\}\}/g, item.quantity <= 1 ? 'disabled' : '')
-            .replace(/\{\{#if isMaxQuantity\}\}disabled\{\{\/if\}\}/g, item.quantity >= maxQuantity ? 'disabled' : '')
-            .replace(/\{\{#if metadata\.thca\}\}[\s\S]*?\{\{\/if\}\}/g, 
-                item.metadata?.thca ? `<p class="item-meta">${item.metadata.thca}% THCa</p>` : '');
+        const subtotal = (item.price * item.quantity).toFixed(2);
+        const isMinQuantity = item.quantity <= 1;
+        const isMaxQuantity = item.quantity >= maxQuantity;
+        const metaHTML = item.metadata?.thca ? `<p class="item-meta">${item.metadata.thca}% THCa</p>` : '';
+
+        return `
+            <div class="cart-item" data-item-id="${item.id}" role="listitem">
+                <div class="item-image">
+                    <img src="${item.image}" alt="${this.escapeHtml(item.name)}" loading="lazy"
+                         onerror="this.src='${this.getDefaultImage(item.grade)}'">
+                </div>
+
+                <div class="item-details">
+                    <h4 class="item-name">${this.escapeHtml(item.name)}</h4>
+                    <p class="item-grade">${this.escapeHtml(item.grade)}</p>
+                    <p class="item-price">$${item.price.toFixed(2)} ${unitLabel}</p>
+                    ${metaHTML}
+                </div>
+
+                <div class="item-controls">
+                    <div class="quantity-controls">
+                        <button class="qty-btn qty-decrease" aria-label="Decrease quantity"
+                                data-item-id="${item.id}" ${isMinQuantity ? 'disabled' : ''}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+
+                        <input type="number" class="qty-input" value="${item.quantity}"
+                               min="1" max="${maxQuantity}" data-item-id="${item.id}"
+                               aria-label="Quantity for ${this.escapeHtml(item.name)}">
+
+                        <button class="qty-btn qty-increase" aria-label="Increase quantity"
+                                data-item-id="${item.id}" ${isMaxQuantity ? 'disabled' : ''}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <p class="item-subtotal">$${subtotal}</p>
+
+                    <button class="remove-btn" aria-label="Remove ${this.escapeHtml(item.name)} from cart"
+                            data-item-id="${item.id}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3,6 5,6 21,6"></polyline>
+                            <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `;
     }
 
     renderCartSummary(totals) {
