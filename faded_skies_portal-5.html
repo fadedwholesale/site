@@ -2014,7 +2014,7 @@
                 </div>
 
                 <div style="background: var(--surface-elevated); padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <h5 style="color: var(--accent-orange); margin-bottom: 8px;">⏳ What happens next?</h5>
+                    <h5 style="color: var(--accent-orange); margin-bottom: 8px;">��� What happens next?</h5>
                     <ul style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
                         <li>Your application will be sent to our admin team for review</li>
                         <li>We'll verify your documents and business license within 24-48 hours</li>
@@ -2077,9 +2077,56 @@
     <!-- Include Test Functionality -->
     <script src="test-functionality.js"></script>
 
+    <!-- Initialize Cart System -->
+    <script>
+        // Ensure cart manager is properly initialized
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 DOM Content Loaded - Initializing cart system');
+
+            // Double check cart manager is available
+            if (!window.cartManager) {
+                console.log('🛒 Creating cart manager instance');
+                window.cartManager = new window.CartManager();
+            }
+
+            // Check if user is already logged in from session
+            if (window.currentUser) {
+                console.log('🔐 User already authenticated, refreshing cart state');
+                window.cartManager.refreshUserState();
+            }
+
+            console.log('✅ Cart system initialization complete', {
+                hasCartManager: !!window.cartManager,
+                hasSharedDataManager: !!window.sharedDataManager,
+                hasCurrentUser: !!window.currentUser,
+                userEmail: window.currentUser?.email
+            });
+
+            // Add a test button to check auth state
+            window.debugCartAuth = function() {
+                console.log('🔍 Cart Auth Debug:', {
+                    currentUser: window.currentUser,
+                    cartManager: window.cartManager,
+                    cartManagerExists: !!window.cartManager,
+                    userInCartManager: window.cartManager ? !!window.cartManager.currentUser : 'no cart manager'
+                });
+            };
+
+            // Test adding to cart manually
+            window.testAddToCart = function() {
+                console.log('🧪 Testing add to cart with productId 1');
+                if (window.addToCart) {
+                    window.addToCart(1);
+                } else {
+                    console.log('❌ addToCart function not found');
+                }
+            };
+        });
+    </script>
+
     <script>
         // Global State Management
-        let currentUser = null;
+        window.currentUser = null;
         let currentView = 'public';
         let currentPortalTab = 'dashboard';
         let inventoryVisible = false;
@@ -2803,8 +2850,8 @@
                         return;
                     }
                     
-                    currentUser = { 
-                        email, 
+                    window.currentUser = {
+                        email,
                         role: 'partner',
                         loginTime: new Date().toISOString(),
                         sessionId: generateSessionId()
@@ -2813,19 +2860,24 @@
                     // Store session for persistence
                     try {
                         // Note: In production, use secure session management
-                        sessionStorage.setItem('fadedSkiesSession', JSON.stringify(currentUser));
+                        sessionStorage.setItem('fadedSkiesSession', JSON.stringify(window.currentUser));
                     } catch (e) {
                         console.warn('Session storage not available');
                     }
                     
                     // Load user's cart from shared data manager
-                    cart = window.sharedDataManager.getCart(currentUser.email);
-                    console.log('Loaded cart for user:', currentUser.email, cart);
+                    cart = window.sharedDataManager.getCart(window.currentUser.email);
+                    console.log('Loaded cart for user:', window.currentUser.email, cart);
 
                     // Initialize and sync CartManager
                     if (window.cartManager) {
                         window.cartManager.loadCart();
                     }
+
+                    // Dispatch authentication event for cart manager
+                    window.dispatchEvent(new CustomEvent('userAuthenticated', {
+                        detail: { user: currentUser }
+                    }));
 
                     // Validate cart integrity after loading
                     validateCartIntegrity();
@@ -3224,8 +3276,19 @@
                     
                     // Session expires after 8 hours
                     if (sessionAge < 8 * 60 * 60 * 1000) {
-                        currentUser = session;
+                        window.currentUser = session;
                         showLoggedInState();
+
+                        // Initialize cart manager for restored session
+                        if (window.cartManager) {
+                            window.cartManager.refreshUserState();
+                        }
+
+                        // Dispatch authentication event for cart manager
+                        window.dispatchEvent(new CustomEvent('userAuthenticated', {
+                            detail: { user: window.currentUser }
+                        }));
+
                         showNotification('👋 Welcome back! Your session has been restored.', 'success');
                         return true;
                     } else {
@@ -3507,7 +3570,7 @@
                         
                         const match = e.target.getAttribute('onclick').match(/removeFromCart\((\d+)\)/);
                         if (match) {
-                            console.log('���� Mobile remove button pressed for product:', match[1]);
+                            console.log('����� Mobile remove button pressed for product:', match[1]);
                             removeFromCart(parseInt(match[1]));
                         }
                     }
@@ -3734,7 +3797,7 @@
                         console.warn('Could not clear session storage');
                     }
                     
-                    currentUser = null;
+                    window.currentUser = null;
                     cart = [];
                     cartOpen = false;
                     
@@ -4094,10 +4157,15 @@
                 const guestSection = document.getElementById('guestSection');
                 const userSession = document.getElementById('userSession');
                 const userWelcome = document.getElementById('userWelcome');
+                const cartToggle = document.getElementById('cartToggle');
+
                 if (guestSection) guestSection.style.display = 'none';
                 if (userSession) userSession.classList.add('show');
-                if (userWelcome) userWelcome.textContent = `Welcome, ${currentUser.email.split('@')[0]}`;
+                if (userWelcome) userWelcome.textContent = `Welcome, ${window.currentUser.email.split('@')[0]}`;
+                if (cartToggle) cartToggle.style.display = 'inline-flex';
+
                 updateProfileDisplay();
+                console.log('✅ Logged in state displayed, cart button shown');
             } catch (error) {
                 console.error('Error showing logged in state:', error);
             }
@@ -4516,9 +4584,9 @@
         }
 
         function validateCartIntegrity() {
-            if (!currentUser) return true;
+            if (!window.currentUser) return true;
 
-            const sharedCart = window.sharedDataManager.getCart(currentUser.email);
+            const sharedCart = window.sharedDataManager.getCart(window.currentUser.email);
             const sharedProducts = window.sharedDataManager.getProducts();
 
             // Check if local cart is in sync with shared cart
@@ -4656,17 +4724,27 @@
         });
 
         function addToCart(productId) {
+            console.log('🛒 addToCart called with productId:', productId);
+            console.log('🔍 Current auth state:', {
+                hasCurrentUser: !!window.currentUser,
+                userEmail: window.currentUser?.email,
+                hasCartManager: !!window.cartManager
+            });
+
             // Use new CartManager if available
             if (window.cartManager) {
+                console.log('✅ Using CartManager for addToCart');
                 return window.cartManager.addProduct(productId, 1);
             }
 
             // Fallback to old implementation
+            console.log('⚠️ Falling back to legacy addToCart implementation');
             if (addToCartLock) return;
             addToCartLock = true;
             setTimeout(() => { addToCartLock = false; }, 300);
 
-            if (!currentUser) {
+            if (!window.currentUser) {
+                console.log('❌ Legacy addToCart: No authenticated user');
                 showNotification('🔒 Please log in as a partner to add items to cart', 'error');
                 openModal('loginModal');
                 return;
@@ -4737,7 +4815,7 @@
 
                 console.log('🔄 Updating quantity for product:', productId, 'to:', quantity);
 
-                if (!currentUser) {
+                if (!window.currentUser) {
                     showNotification('❌ Please log in to update cart', 'error');
                     return;
                 }
@@ -4788,7 +4866,7 @@
             } catch (error) {
                 console.error('Error updating quantity:', error);
                 console.error('Error details:', { productId, quantity, currentUser: !!currentUser, cartLength: cart.length });
-                showNotification('❌ Error updating quantity. Please try again.', 'error');
+                showNotification('��� Error updating quantity. Please try again.', 'error');
             }
         }
 
@@ -4799,7 +4877,7 @@
             }
 
             // Fallback to old implementation
-            if (!currentUser) {
+            if (!window.currentUser) {
                 showNotification('🔒 Please log in to complete checkout', 'error');
                 return;
             }
@@ -5275,7 +5353,7 @@ Phone: (210) 835-7834
 
         function quickOrder() {
             try {
-                showNotification('⚡ Quick order feature coming soon! Use the products tab to add items to cart.', 'success');
+                showNotification('�� Quick order feature coming soon! Use the products tab to add items to cart.', 'success');
             } catch (error) {
                 console.error('Error with quick order:', error);
             }
@@ -5884,7 +5962,7 @@ Phone: (210) 835-7834
                     currentUser.email = modal.querySelector('#editProfileEmail').value.trim();
                     currentUser.license = modal.querySelector('#editLicense').value.trim();
                     try {
-                        sessionStorage.setItem('fadedSkiesSession', JSON.stringify(currentUser));
+                        sessionStorage.setItem('fadedSkiesSession', JSON.stringify(window.currentUser));
                     } catch (e) {}
                     updateProfileDisplay();
                     showNotification('✅ Profile updated successfully!', 'success');

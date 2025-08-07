@@ -18,9 +18,25 @@ class CartManager {
             this.updateDisplay();
         });
 
+        // Listen for authentication state changes
+        window.addEventListener('userAuthenticated', (event) => {
+            console.log('🔐 Cart: User authenticated event received');
+            this.refreshUserState();
+        });
+
         // Load existing cart if user is logged in
         if (window.currentUser) {
             this.loadCart();
+        }
+    }
+
+    // Refresh authentication state and reload cart
+    refreshUserState() {
+        console.log('🔄 Cart: Refreshing user state', { currentUser: !!window.currentUser });
+        if (window.currentUser) {
+            this.loadCart();
+            this.updateDisplay();
+            console.log('✅ Cart: User state refreshed successfully');
         }
     }
 
@@ -57,10 +73,18 @@ class CartManager {
         this.addToCartLock = true;
         setTimeout(() => { this.addToCartLock = false; }, 300);
 
-        if (!window.currentUser) {
+        // Check for authentication - ensure current user exists
+        if (!window.currentUser || !window.currentUser.email) {
             this.showNotification('🔒 Please log in to add items to cart', 'error');
+            console.log('❌ Cart: No authenticated user found', {
+                hasCurrentUser: !!window.currentUser,
+                hasEmail: window.currentUser?.email,
+                windowHasCurrentUser: 'currentUser' in window
+            });
             return false;
         }
+
+        console.log('✅ Cart: Authenticated user found:', window.currentUser.email);
 
         try {
             const products = window.sharedDataManager?.getProducts() || window.products || [];
