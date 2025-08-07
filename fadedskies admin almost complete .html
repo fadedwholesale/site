@@ -1221,7 +1221,7 @@
                         </div>
                         <div class="action-group">
                             <button class="btn btn-primary" onclick="openModal('addProductModal')">➕ Add Product</button>
-                            <button class="btn btn-secondary" onclick="openModal('bulkImportModal')">📥 Bulk Import</button>
+                            <button class="btn btn-secondary" onclick="openModal('bulkImportModal')">���� Bulk Import</button>
                             <button class="btn btn-secondary" onclick="exportInventory()">�� Export CSV</button>
                             <button class="btn btn-secondary" onclick="syncToPortal()">🔄 Sync to Portal</button>
                         </div>
@@ -2583,6 +2583,13 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Force sync default products to shared data manager
                 console.log('📦 No shared products found, syncing defaults...');
                 window.sharedDataManager.updateProducts(products);
+            }
+
+            // Load orders from shared data manager
+            const sharedOrders = window.sharedDataManager.getOrders();
+            if (sharedOrders.length > 0) {
+                orders = sharedOrders;
+                console.log('📦 Loaded', orders.length, 'orders from shared data manager');
             }
 
             // Listen for shared data changes
@@ -4599,7 +4606,7 @@ Faded Skies Wholesale Team
                 <div class="modal-content" style="max-width: 800px;">
                     <div class="modal-header">
                         <h3 class="modal-title">✏️ Edit Partner - ${partner.businessName}</h3>
-                        <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
+                        <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">��</button>
                     </div>
                     <form id="editPartnerForm">
                         <div class="form-row">
