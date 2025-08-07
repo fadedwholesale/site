@@ -4265,7 +4265,7 @@
                     <td><strong>${product.grade}</strong></td>
                     <td>
                         <strong>${product.strain}</strong><br>
-                        ${product.thca > 0 ? product.thca + '% • ' : ''}${product.type}
+                        ${product.thca > 0 ? product.thca + '% �� ' : ''}${product.type}
                     </td>
                     <td><strong>$${product.price}${getUnitLabel(product.grade)}</strong></td>
                     <td>${product.thca > 0 ? product.thca + '%' : '-'}</td>
@@ -4900,7 +4900,7 @@
             });
 
             if (hasIssues) {
-                showNotification('��� Please review your cart and try again', 'warning');
+                showNotification('🔄 Please review your cart and try again', 'warning');
                 return;
             }
 
@@ -5436,7 +5436,7 @@ Phone: (210) 835-7834
 
         function contactShippingSupport() {
             try {
-                showNotification('🚚 Connecting you with shipping support...', 'success');
+                showNotification('��� Connecting you with shipping support...', 'success');
                 closeOrderModal();
             } catch (error) {
                 console.error('Error contacting shipping support:', error);
@@ -6678,8 +6678,19 @@ Phone: (210) 835-7834
 
         // Override legacy toggleCart function
         window.toggleCart = function() {
-            if (window.modernCart) {
-                window.modernCart.toggleCart();
+            try {
+                if (window.modernCart && window.cartUI) {
+                    window.modernCart.toggleCart();
+                } else if (window.simpleCartUI) {
+                    window.toggleSimpleCart();
+                } else {
+                    console.log('No cart UI available');
+                }
+            } catch (error) {
+                console.error('Error toggling cart:', error);
+                if (window.simpleCartUI) {
+                    window.toggleSimpleCart();
+                }
             }
         };
 
