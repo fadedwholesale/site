@@ -99,13 +99,26 @@ class CartManager {
 
         // Check for authentication - ensure current user exists
         if (!window.currentUser || !window.currentUser.email) {
-            this.showNotification('🔒 Please log in to add items to cart', 'error');
-            console.log('❌ Cart: No authenticated user found', {
-                hasCurrentUser: !!window.currentUser,
-                hasEmail: window.currentUser?.email,
-                windowHasCurrentUser: 'currentUser' in window
-            });
-            return false;
+            // Try to restore from localStorage as fallback
+            if (localStorage.getItem('currentUser')) {
+                try {
+                    window.currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                    console.log('🔄 Cart: Restored user from localStorage during addProduct:', window.currentUser.email);
+                } catch (error) {
+                    console.error('🔄 Cart: Error restoring user during addProduct:', error);
+                }
+            }
+
+            // Check again after restoration attempt
+            if (!window.currentUser || !window.currentUser.email) {
+                this.showNotification('🔒 Please log in to add items to cart', 'error');
+                console.log('❌ Cart: No authenticated user found', {
+                    hasCurrentUser: !!window.currentUser,
+                    hasEmail: window.currentUser?.email,
+                    windowHasCurrentUser: 'currentUser' in window
+                });
+                return false;
+            }
         }
 
         console.log('✅ Cart: Authenticated user found:', window.currentUser.email);
