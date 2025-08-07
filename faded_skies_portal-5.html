@@ -4265,7 +4265,7 @@
                     <td><strong>${product.grade}</strong></td>
                     <td>
                         <strong>${product.strain}</strong><br>
-                        ${product.thca > 0 ? product.thca + '% �� ' : ''}${product.type}
+                        ${product.thca > 0 ? product.thca + '% • ' : ''}${product.type}
                     </td>
                     <td><strong>$${product.price}${getUnitLabel(product.grade)}</strong></td>
                     <td>${product.thca > 0 ? product.thca + '%' : '-'}</td>
@@ -4728,7 +4728,7 @@
         });
 
         function addToCart(productId) {
-            console.log('🛒 addToCart called with productId:', productId);
+            console.log('���� addToCart called with productId:', productId);
             console.log('🔍 Current auth state:', {
                 hasCurrentUser: !!window.currentUser,
                 userEmail: window.currentUser?.email,
@@ -5436,7 +5436,7 @@ Phone: (210) 835-7834
 
         function contactShippingSupport() {
             try {
-                showNotification('��� Connecting you with shipping support...', 'success');
+                showNotification('🚚 Connecting you with shipping support...', 'success');
                 closeOrderModal();
             } catch (error) {
                 console.error('Error contacting shipping support:', error);
@@ -6800,7 +6800,15 @@ Phone: (210) 835-7834
             const cartToggle = document.getElementById('cartToggle');
             if (cartToggle) {
                 cartToggle.onclick = function() {
-                    window.toggleCart();
+                    try {
+                        window.toggleCart();
+                    } catch (error) {
+                        console.error('Cart toggle error:', error);
+                        // Fallback to simple notification
+                        if (window.showNotification) {
+                            window.showNotification('Cart system loading...', 'info');
+                        }
+                    }
                 };
             }
         }
