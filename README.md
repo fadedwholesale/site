@@ -43,11 +43,13 @@ npm start           # Start production server on port 3000
 ## 🌐 Portal Features
 
 ### Public Portal (`faded_skies_portal-5.html`)
-- Partner registration and login
+- **Enhanced Partner Registration**: Multi-step process with document upload
+- Partner login and authentication
 - Live inventory viewing with real-time sync
 - Product catalog with images and pricing
 - Shopping cart and order management
 - Partner dashboard with order history
+- Document verification workflow
 - Responsive design for mobile/desktop
 
 ### Admin Dashboard (`fadedskies admin almost complete .html`)
