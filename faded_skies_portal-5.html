@@ -2695,7 +2695,7 @@
                     showNotification('🌐 Switched to public website', 'success');
                 } else {
                     console.error('Public view element not found');
-                    showNotification('❌ Navigation error. Please refresh the page.', 'error');
+                    showNotification('��� Navigation error. Please refresh the page.', 'error');
                 }
                 
                 console.log('Switched to public website view');
@@ -2986,7 +2986,7 @@
                 const submitBtn = event.target.querySelector('button[type="submit"]');
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Join Faded Skies ���';
+                    submitBtn.textContent = 'Join Faded Skies ✨';
                 }
             }
         }
@@ -3185,7 +3185,7 @@
             }, 2000);
         }
 
-        function sendToAdminForVerification(applicationData, documents) {
+        function sendToAdminForProcessing(applicationData, documents) {
             // Create application record for admin portal
             const application = {
                 ...applicationData,
@@ -4861,7 +4861,7 @@
             console.log('✅ Legacy checkout: proceeding without authentication check');
 
             if (cart.length === 0) {
-                showNotification('⚠️ Your cart is empty! Add some products first.', 'error');
+                showNotification('⚠�� Your cart is empty! Add some products first.', 'error');
                 return;
             }
 
