@@ -2860,7 +2860,7 @@
                     // Store session for persistence
                     try {
                         // Note: In production, use secure session management
-                        sessionStorage.setItem('fadedSkiesSession', JSON.stringify(currentUser));
+                        sessionStorage.setItem('fadedSkiesSession', JSON.stringify(window.currentUser));
                     } catch (e) {
                         console.warn('Session storage not available');
                     }
