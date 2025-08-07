@@ -18,9 +18,15 @@ function setCurrentUser(user) {
     }
     
     // Immediately notify cart manager of auth state change
-    if (window.modernCart) {
-        console.log('🔄 Refreshing cart manager after auth change');
-        window.modernCart.notifyListeners('auth_changed', { user });
+    try {
+        if (window.modernCart && typeof window.modernCart.notifyListeners === 'function') {
+            console.log('🔄 Refreshing cart manager after auth change');
+            window.modernCart.notifyListeners('auth_changed', { user });
+        } else {
+            console.log('🔄 Modern cart not available yet, skipping notification');
+        }
+    } catch (error) {
+        console.warn('Error notifying cart of auth change:', error);
     }
     
     return user;
