@@ -2827,6 +2827,11 @@
                         window.cartManager.loadCart();
                     }
 
+                    // Dispatch authentication event for cart manager
+                    window.dispatchEvent(new CustomEvent('userAuthenticated', {
+                        detail: { user: currentUser }
+                    }));
+
                     // Validate cart integrity after loading
                     validateCartIntegrity();
 
@@ -5275,7 +5280,7 @@ Phone: (210) 835-7834
 
         function quickOrder() {
             try {
-                showNotification('⚡ Quick order feature coming soon! Use the products tab to add items to cart.', 'success');
+                showNotification('�� Quick order feature coming soon! Use the products tab to add items to cart.', 'success');
             } catch (error) {
                 console.error('Error with quick order:', error);
             }
