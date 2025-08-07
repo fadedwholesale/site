@@ -159,9 +159,8 @@ function logout() {
         const userName = currentUser.name;
         
         // Clear cart first
-        if (window.cartManager) {
-            window.cartManager.cart = [];
-            window.cartManager.updateDisplay();
+        if (window.modernCart) {
+            window.modernCart.clearCart();
         }
 
         // Clear authentication state
