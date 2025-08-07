@@ -32,25 +32,31 @@ class CartManager {
 
     // Refresh authentication state and reload cart
     refreshUserState() {
-        console.log('🔄 Cart: Refreshing user state', { currentUser: !!window.currentUser });
-        if (window.currentUser) {
+        console.log('🔄 Cart: Refreshing user state', {
+            currentUser: !!window.currentUser,
+            userEmail: window.currentUser?.email,
+            localStorage: !!localStorage.getItem('currentUser')
+        });
+
+        if (window.currentUser && window.currentUser.email) {
+            console.log('✅ Cart: Valid user found, loading cart');
             this.loadCart();
             this.updateDisplay();
             console.log('✅ Cart: User state refreshed successfully');
         } else {
-            // Clear cart if no user
+            console.log('⚠️ Cart: No valid user found during refresh');
             this.cart = [];
             this.updateDisplay();
-            console.log('🧹 Cart: Cleared due to no authenticated user');
         }
     }
 
     // Load cart from shared data manager
     loadCart() {
-        if (!window.currentUser || !window.sharedDataManager) return;
-        
+        if (!window.sharedDataManager) return;
+
         try {
-            const savedCart = window.sharedDataManager.getCart(window.currentUser.email);
+            const userEmail = window.currentUser?.email || 'guest';
+            const savedCart = window.sharedDataManager.getCart(userEmail);
             this.cart = savedCart || [];
             console.log('📦 Cart loaded:', this.cart.length, 'items');
             this.updateDisplay();
@@ -62,10 +68,11 @@ class CartManager {
 
     // Save cart to shared data manager
     saveCart() {
-        if (!window.currentUser || !window.sharedDataManager) return;
-        
+        if (!window.sharedDataManager) return;
+
         try {
-            window.sharedDataManager.updateCart(window.currentUser.email, this.cart);
+            const userEmail = window.currentUser?.email || 'guest';
+            window.sharedDataManager.updateCart(userEmail, this.cart);
             console.log('💾 Cart saved:', this.cart.length, 'items');
         } catch (error) {
             console.error('Error saving cart:', error);
@@ -78,23 +85,7 @@ class CartManager {
         this.addToCartLock = true;
         setTimeout(() => { this.addToCartLock = false; }, 300);
 
-        // Check for authentication - ensure current user exists
-        if (!window.currentUser || !window.currentUser.email) {
-            this.showNotification('🔒 Please log in to add items to cart', 'error');
-            console.log('❌ Cart: No authenticated user found', {
-                hasCurrentUser: !!window.currentUser,
-                hasEmail: window.currentUser?.email,
-                windowHasCurrentUser: 'currentUser' in window
-            });
-
-            // Open login modal automatically
-            if (window.openModal) {
-                setTimeout(() => {
-                    window.openModal('loginModal');
-                }, 500);
-            }
-            return false;
-        }
+        console.log('📝 Cart: Adding product', { productId, quantity });
 
         console.log('✅ Cart: Authenticated user found:', window.currentUser.email);
 
@@ -458,15 +449,6 @@ class CartManager {
     // Checkout process
     async checkout() {
         try {
-            if (!window.currentUser || !window.currentUser.email) {
-                this.showNotification('🔒 Please log in to complete checkout', 'error');
-                if (window.openModal) {
-                    setTimeout(() => {
-                        window.openModal('loginModal');
-                    }, 500);
-                }
-                return false;
-            }
 
             if (this.cart.length === 0) {
                 this.showNotification('⚠️ Your cart is empty! Add some products first.', 'error');
@@ -547,10 +529,13 @@ class CartManager {
                     const totals = this.getTotals();
                     const orderItems = this.cart.map(item => `${item.strain} (x${item.quantity})`).join(', ');
                     
+                    const userEmail = window.currentUser?.email || 'guest@example.com';
+                    const userName = window.currentUser?.name || 'Guest User';
+
                     const newOrder = {
                         id: `ORD-${String((window.sharedDataManager?.getOrders()?.length || 0) + 1).padStart(3, '0')}`,
-                        partner: window.currentUser.email,
-                        partnerName: window.currentUser.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') + ' Store',
+                        partner: userEmail,
+                        partnerName: userName + ' Store',
                         items: orderItems,
                         itemDetails: this.cart.map(item => ({
                             id: item.id,
@@ -586,7 +571,8 @@ class CartManager {
                     this.showNotification(`🎉 Order placed successfully! Order ID: ${newOrder.id}`, 'success');
                     
                     setTimeout(() => {
-                        this.showNotification(`📧 Order confirmation sent to ${window.currentUser.email}`, 'success');
+                        const userEmail = window.currentUser?.email || 'your email';
+                        this.showNotification(`📧 Order confirmation sent to ${userEmail}`, 'success');
                     }, 2000);
 
                     if (totals.total > 1000) {

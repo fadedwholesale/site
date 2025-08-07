@@ -4278,7 +4278,7 @@
                             (product.status === 'AVAILABLE' && product.stock > 0 ? 
                                 `<button class="btn btn-primary btn-sm" onclick="addToCart(${product.id})">Add to Cart</button>` : 
                                 '<button class="btn btn-secondary btn-sm" disabled>Unavailable</button>') :
-                            '<button class="btn btn-secondary btn-sm" onclick="openModal(\'loginModal\')">Login to Order</button>'}
+                            '<button class="btn btn-primary btn-sm" onclick="addToCart(' + product.id + ')">🛒 Add to Cart</button>'}
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -4747,18 +4747,14 @@
             addToCartLock = true;
             setTimeout(() => { addToCartLock = false; }, 300);
 
-            if (!window.currentUser) {
-                console.log('❌ Legacy addToCart: No authenticated user');
-                showNotification('🔒 Please log in as a partner to add items to cart', 'error');
-                openModal('loginModal');
-                return;
-            }
+            console.log('✅ Legacy addToCart: proceeding without authentication check');
 
             try {
                 console.log('🛒 Adding product to cart:', productId);
 
                 // Use shared data manager to add to cart
-                const updatedCart = window.sharedDataManager.addToCart(currentUser.email, productId, 1);
+                const userEmail = window.currentUser?.email || 'guest@example.com';
+                const updatedCart = window.sharedDataManager.addToCart(userEmail, productId, 1);
                 cart = updatedCart; // Update local cart reference
 
                 const product = window.sharedDataManager.getProducts().find(p => p.id === productId);
@@ -4881,10 +4877,7 @@
             }
 
             // Fallback to old implementation
-            if (!window.currentUser) {
-                showNotification('🔒 Please log in to complete checkout', 'error');
-                return;
-            }
+            console.log('✅ Legacy checkout: proceeding without authentication check');
 
             if (cart.length === 0) {
                 showNotification('⚠️ Your cart is empty! Add some products first.', 'error');
@@ -5390,7 +5383,7 @@ Phone: (210) 835-7834
                 modal.innerHTML = `
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h3 class="modal-title">📞 Contact Support</h3>
+                            <h3 class="modal-title">���� Contact Support</h3>
                             <button class="modal-close" onclick="closeOrderModal()">×</button>
                         </div>
                         <div style="margin-bottom: 24px;">

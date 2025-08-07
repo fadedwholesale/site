@@ -1,8 +1,32 @@
 // Main Application JavaScript for Faded Skies Portal
 // Complete implementation with cart, orders, and profile functionality
 
-// Global Variables
+// Global Variables - Authentication State
 let currentUser = null;
+
+// Ensure window.currentUser is always synchronized
+function setCurrentUser(user) {
+    currentUser = user;
+    window.currentUser = user;
+    
+    if (user) {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        console.log('✅ User authenticated globally:', user.email);
+    } else {
+        localStorage.removeItem('currentUser');
+        console.log('✅ User logged out globally');
+    }
+    
+    // Immediately notify cart manager of auth state change
+    if (window.cartManager) {
+        console.log('🔄 Refreshing cart manager after auth change');
+        window.cartManager.refreshUserState();
+        window.cartManager.updateDisplay();
+    }
+    
+    return user;
+}
+
 let currentView = 'public';
 let activePortalTab = 'dashboard';
 let liveInventoryVisible = false;
@@ -22,7 +46,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeApplication() {
     // Initialize cart manager if not already done
     if (!window.cartManager) {
+        console.log('🛒 Initializing cart manager...');
         window.cartManager = new CartManager();
+        console.log('✅ Cart manager initialized');
     }
     
     // Setup shared data manager event listeners
@@ -32,8 +58,8 @@ function initializeApplication() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
         try {
-            currentUser = JSON.parse(savedUser);
-            window.currentUser = currentUser;
+            const userData = JSON.parse(savedUser);
+            setCurrentUser(userData);
             showUserSession();
             console.log('✅ User session restored:', currentUser.email);
         } catch (error) {
@@ -102,31 +128,28 @@ function handleSharedDataChange(event) {
 // Authentication Functions
 function login(event) {
     event.preventDefault();
-
+    
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
     // Simple authentication (in real app, this would be server-side)
     if (email && password) {
-        currentUser = {
+        const userData = {
             email: email,
             name: email.split('@')[0],
             tier: 'Gold Partner',
             loginTime: new Date().toISOString()
         };
 
-        // Set global window.currentUser for cart access
-        window.currentUser = currentUser;
-
-        // Save user session
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        // Set user with proper synchronization
+        setCurrentUser(userData);
 
         // Update UI
         showUserSession();
         closeModal('loginModal');
         showPartnerPortal();
 
-        // Notify cart manager
+        // Notify all systems of authentication
         window.dispatchEvent(new CustomEvent('userAuthenticated', { detail: currentUser }));
 
         showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
@@ -139,16 +162,16 @@ function login(event) {
 function logout() {
     if (currentUser) {
         const userName = currentUser.name;
-        currentUser = null;
-        window.currentUser = null;
-        localStorage.removeItem('currentUser');
-
-        // Clear cart
+        
+        // Clear cart first
         if (window.cartManager) {
             window.cartManager.cart = [];
             window.cartManager.updateDisplay();
         }
 
+        // Clear authentication state
+        setCurrentUser(null);
+        
         // Update UI
         showGuestSession();
         showPublicWebsite();
@@ -266,30 +289,13 @@ function toggleCart() {
 }
 
 function addToCart(productId, quantity = 1) {
-    console.log('🛒 addToCart called:', { productId, quantity, currentUser: !!currentUser, windowCurrentUser: !!window.currentUser });
-
-    if (!currentUser || !window.currentUser) {
-        console.log('❌ Authentication check failed:', {
-            localCurrentUser: !!currentUser,
-            windowCurrentUser: !!window.currentUser,
-            localUserEmail: currentUser?.email,
-            windowUserEmail: window.currentUser?.email
-        });
-        showNotification('🔒 Please log in to add items to cart', 'error');
-        openModal('loginModal');
-        return false;
-    }
-
-    console.log('✅ Authentication check passed, calling cart manager');
-
     if (window.cartManager) {
         return window.cartManager.addProduct(productId, quantity);
     } else {
         console.error('❌ Cart manager not found');
         showNotification('❌ Cart system not available', 'error');
+        return false;
     }
-
-    return false;
 }
 
 function clearCart() {
@@ -354,8 +360,8 @@ function updatePublicInventoryDisplay() {
                 <td><span style="color: var(--brand-green); font-weight: 700;">${product.thca}%</span></td>
                 <td><span class="status-available">${product.stock} Available</span></td>
                 <td>
-                    <button class="btn btn-primary btn-sm" onclick="openModal('loginModal')">
-                        🔒 Login to Order
+                    <button class="btn btn-primary btn-sm" onclick="addToCart(${product.id})">
+                        🛒 Add to Cart
                     </button>
                 </td>
             </tr>
@@ -863,7 +869,41 @@ function showNotification(message, type = 'info') {
     }, 4000);
 }
 
+// Debug function to check authentication state
+function debugAuthState() {
+    console.log('🔍 AUTHENTICATION DEBUG STATE:', {
+        localCurrentUser: currentUser,
+        windowCurrentUser: window.currentUser,
+        localStorageUser: localStorage.getItem('currentUser'),
+        cartManager: !!window.cartManager,
+        cartState: window.cartManager ? window.cartManager.getState() : 'not available'
+    });
+    return {
+        isAuthenticated: !!(currentUser || window.currentUser),
+        userEmail: currentUser?.email || window.currentUser?.email,
+        cartAvailable: !!window.cartManager
+    };
+}
+
+// Test function to force authentication
+function forceLogin(email = 'test@example.com') {
+    console.log('🧪 Force login for testing...');
+    const userData = {
+        email: email,
+        name: email.split('@')[0],
+        tier: 'Gold Partner',
+        loginTime: new Date().toISOString()
+    };
+    setCurrentUser(userData);
+    showUserSession();
+    showPartnerPortal();
+    showNotification(`🧪 Test login successful: ${userData.name}`, 'success');
+    return userData;
+}
+
 // Make functions globally available
+window.debugAuthState = debugAuthState;
+window.forceLogin = forceLogin;
 window.login = login;
 window.logout = logout;
 window.showPublicWebsite = showPublicWebsite;
