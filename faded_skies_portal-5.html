@@ -2330,7 +2330,7 @@
                 document.addEventListener('touchstart', function(e) {
                     const target = e.target;
                     if (target.classList.contains('btn') || target.hasAttribute('onclick')) {
-                        console.log('���� Touch started on:', target.tagName, target.textContent?.slice(0, 20));
+                        console.log('📱 Touch started on:', target.tagName, target.textContent?.slice(0, 20));
                         target.style.backgroundColor = 'rgba(0, 200, 81, 0.2)';
                     }
                 });
@@ -5383,7 +5383,7 @@ Phone: (210) 835-7834
                 modal.innerHTML = `
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h3 class="modal-title">����� Contact Support</h3>
+                            <h3 class="modal-title">���� Contact Support</h3>
                             <button class="modal-close" onclick="closeOrderModal()">×</button>
                         </div>
                         <div style="margin-bottom: 24px;">
@@ -6655,27 +6655,14 @@ Phone: (210) 835-7834
         // Modern System Integration
         console.log('🔗 Integrating modern systems...');
 
-        // Override legacy addToCart function with modern implementation
-        window.addToCart = function(productId, quantity = 1) {
-            console.log('🛒 Modern addToCart called:', { productId, quantity });
-
-            try {
-                if (window.modernCart) {
-                    return window.modernCart.addItem(productId, quantity);
-                } else {
-                    console.error('Modern cart not available, falling back to notification');
-                    if (window.showNotification) {
-                        window.showNotification('Added to cart!', 'success');
-                    }
-                    return true;
-                }
-            } catch (error) {
-                console.error('Error in addToCart:', error);
-                if (window.showNotification) {
-                    window.showNotification('Error adding to cart', 'error');
-                }
-                return false;
+        window.addToCart = function(productId, quantity) {
+            if (window.modernCart && window.modernCart.addItem) {
+                return window.modernCart.addItem(productId, quantity || 1);
             }
+            if (window.showNotification) {
+                window.showNotification('Added to cart!', 'success');
+            }
+            return true;
         };
 
         // Override legacy toggleCart function
