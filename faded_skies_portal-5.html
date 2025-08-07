@@ -4341,6 +4341,12 @@
         }
 
         function updateCartDisplay() {
+            // Use new CartManager if available
+            if (window.cartManager) {
+                return window.cartManager.updateDisplay();
+            }
+
+            // Fallback to old implementation
             try {
                 // Ensure we have the latest cart data from shared data manager
                 if (currentUser) {
