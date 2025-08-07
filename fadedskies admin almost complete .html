@@ -2571,13 +2571,27 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
         function initializeAdminDashboard() {
             console.log('🔧 Initializing Faded Skies Admin Dashboard...');
-            
+
+            // Load products from shared data manager
+            const sharedProducts = window.sharedDataManager.getProducts();
+            if (sharedProducts.length > 0) {
+                products = sharedProducts;
+                console.log('📦 Loaded', products.length, 'products from shared data manager');
+            } else {
+                // Force sync default products to shared data manager
+                console.log('📦 No shared products found, syncing defaults...');
+                window.sharedDataManager.updateProducts(products);
+            }
+
+            // Listen for shared data changes
+            window.addEventListener('sharedDataChange', handleAdminSharedDataChange);
+
             // Start portal sync monitoring
             startPortalSync();
-            
+
             // Show login screen
             showLoginScreen();
-            
+
             console.log('✅ Admin dashboard initialized');
             console.log('🔐 Secure admin portal ready');
             console.log('🔄 Portal sync monitoring active');
