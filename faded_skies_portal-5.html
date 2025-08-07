@@ -1668,42 +1668,240 @@
 
     <!-- Register Modal -->
     <div id="registerModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
-                <h3 class="modal-title">Register</h3>
+                <h3 class="modal-title">🌿 Partner Registration</h3>
                 <button class="modal-close" onclick="closeModal('registerModal')">×</button>
             </div>
-            <form onsubmit="register(event)">
-                <div class="form-group">
-                    <label for="businessName">Business Name *</label>
-                    <input type="text" id="businessName" required placeholder="Your licensed business name">
+
+            <!-- Step 1: Business Information -->
+            <div id="registrationStep1" class="registration-step active">
+                <div style="margin-bottom: 20px; padding: 15px; background: var(--surface-elevated); border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                    <h4 style="color: var(--brand-green); margin-bottom: 8px;">📋 Step 1: Business Information</h4>
+                    <p style="color: var(--text-muted); font-size: 14px;">Tell us about your licensed cannabis business</p>
                 </div>
-                <div class="form-group">
-                    <label for="contactName">Contact Name *</label>
-                    <input type="text" id="contactName" required placeholder="Your name">
+
+                <form id="businessInfoForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="businessName">Business Name *</label>
+                            <input type="text" id="businessName" required placeholder="Your licensed business name">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactName">Contact Name *</label>
+                            <input type="text" id="contactName" required placeholder="Your full name">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="businessEmail">Business Email *</label>
+                            <input type="email" id="businessEmail" required placeholder="business@yourstore.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" required placeholder="(555) 123-4567">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="businessAddress">Business Address *</label>
+                        <input type="text" id="businessAddress" required placeholder="123 Main St, City, State, ZIP">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="businessType">Business Type *</label>
+                            <select id="businessType" required>
+                                <option value="">Select your business type</option>
+                                <option value="Licensed Dispensary">Licensed Dispensary</option>
+                                <option value="Smoke Shop">Smoke Shop</option>
+                                <option value="CBD Store">CBD/Hemp Store</option>
+                                <option value="Wholesale Distributor">Wholesale Distributor</option>
+                                <option value="Delivery Service">Delivery Service</option>
+                                <option value="Manufacturer">Licensed Manufacturer</option>
+                                <option value="Testing Lab">Testing Laboratory</option>
+                                <option value="Other">Other Licensed Business</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="licenseNumber">License Number *</label>
+                            <input type="text" id="licenseNumber" required placeholder="e.g., CDPH-10001234">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="yearsInBusiness">Years in Business</label>
+                        <select id="yearsInBusiness">
+                            <option value="">Select experience level</option>
+                            <option value="New">New Business (0-1 years)</option>
+                            <option value="2-3">2-3 years</option>
+                            <option value="4-5">4-5 years</option>
+                            <option value="6-10">6-10 years</option>
+                            <option value="10+">10+ years</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="estimatedMonthlyVolume">Estimated Monthly Purchase Volume *</label>
+                        <select id="estimatedMonthlyVolume" required>
+                            <option value="">Select expected volume</option>
+                            <option value="$3,500-$10,000">$3,500 - $10,000 (Starter)</option>
+                            <option value="$10,000-$25,000">$10,000 - $25,000 (Professional)</option>
+                            <option value="$25,000-$50,000">$25,000 - $50,000 (Enterprise)</option>
+                            <option value="$50,000+">$50,000+ (Premium Enterprise)</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 12px; margin-top: 30px;">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('registerModal')">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="nextRegistrationStep()" style="flex: 1;">Next: Upload Documents 📄</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Step 2: Document Upload -->
+            <div id="registrationStep2" class="registration-step">
+                <div style="margin-bottom: 20px; padding: 15px; background: var(--surface-elevated); border-radius: 8px; border-left: 4px solid var(--accent-orange);">
+                    <h4 style="color: var(--accent-orange); margin-bottom: 8px;">📄 Step 2: Required Documents</h4>
+                    <p style="color: var(--text-muted); font-size: 14px;">Upload required licensing and verification documents</p>
                 </div>
-                <div class="form-group">
-                    <label for="businessEmail">Business Email *</label>
-                    <input type="email" id="businessEmail" required placeholder="business@yourstore.com">
+
+                <div class="document-upload-section">
+                    <div class="form-group">
+                        <label>Business License *</label>
+                        <div class="file-upload-area" onclick="document.getElementById('businessLicense').click()">
+                            <div class="upload-content">
+                                <span class="upload-icon">📋</span>
+                                <span class="upload-text">Click to upload business license</span>
+                                <span class="upload-subtext">PDF, JPG, or PNG (max 10MB)</span>
+                            </div>
+                            <input type="file" id="businessLicense" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" onchange="handleFileUpload(this, 'businessLicense')">
+                        </div>
+                        <div id="businessLicensePreview" class="file-preview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cannabis License *</label>
+                        <div class="file-upload-area" onclick="document.getElementById('cannabisLicense').click()">
+                            <div class="upload-content">
+                                <span class="upload-icon">🌿</span>
+                                <span class="upload-text">Click to upload cannabis license</span>
+                                <span class="upload-subtext">State-issued cannabis/hemp license</span>
+                            </div>
+                            <input type="file" id="cannabisLicense" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" onchange="handleFileUpload(this, 'cannabisLicense')">
+                        </div>
+                        <div id="cannabisLicensePreview" class="file-preview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tax ID/EIN Document *</label>
+                        <div class="file-upload-area" onclick="document.getElementById('taxId').click()">
+                            <div class="upload-content">
+                                <span class="upload-icon">💼</span>
+                                <span class="upload-text">Click to upload Tax ID/EIN</span>
+                                <span class="upload-subtext">IRS EIN letter or state tax document</span>
+                            </div>
+                            <input type="file" id="taxId" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" onchange="handleFileUpload(this, 'taxId')">
+                        </div>
+                        <div id="taxIdPreview" class="file-preview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Additional Documents (Optional)</label>
+                        <div class="file-upload-area" onclick="document.getElementById('additionalDocs').click()">
+                            <div class="upload-content">
+                                <span class="upload-icon">📎</span>
+                                <span class="upload-text">Upload additional documents</span>
+                                <span class="upload-subtext">Insurance, certifications, etc.</span>
+                            </div>
+                            <input type="file" id="additionalDocs" accept=".pdf,.jpg,.jpeg,.png" multiple style="display: none;" onchange="handleFileUpload(this, 'additionalDocs')">
+                        </div>
+                        <div id="additionalDocsPreview" class="file-preview"></div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="phone">Phone Number *</label>
-                    <input type="tel" id="phone" required placeholder="(555) 123-4567">
+
+                <div style="display: flex; gap: 12px; margin-top: 30px;">
+                    <button type="button" class="btn btn-secondary" onclick="previousRegistrationStep()">← Back</button>
+                    <button type="button" class="btn btn-primary" onclick="nextRegistrationStep()" id="proceedToReview" style="flex: 1;" disabled>Review & Submit 📋</button>
                 </div>
-                <div class="form-group">
-                    <label for="businessType">Business Type *</label>
-                    <select id="businessType" required>
-                        <option value="">Select your business type</option>
-                        <option value="dispensary">Licensed Dispensary</option>
-                        <option value="smoke-shop">Smoke Shop</option>
-                        <option value="cbd-store">CBD/Hemp Store</option>
-                        <option value="distributor">Wholesale Distributor</option>
-                        <option value="delivery">Delivery Service</option>
-                        <option value="other">Other Licensed Retailer</option>
-                    </select>
+            </div>
+
+            <!-- Step 3: Review & Submit -->
+            <div id="registrationStep3" class="registration-step">
+                <div style="margin-bottom: 20px; padding: 15px; background: var(--surface-elevated); border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                    <h4 style="color: var(--brand-green); margin-bottom: 8px;">✅ Step 3: Review & Submit</h4>
+                    <p style="color: var(--text-muted); font-size: 14px;">Review your information and submit for admin verification</p>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Register</button>
-            </form>
+
+                <div id="registrationReview" class="registration-review">
+                    <!-- Review content will be populated here -->
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="termsAccept" required>
+                        <span class="checkmark"></span>
+                        I agree to the <a href="#" style="color: var(--brand-green);">Terms of Service</a> and <a href="#" style="color: var(--brand-green);">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="verifyInfo" required>
+                        <span class="checkmark"></span>
+                        I verify that all information provided is accurate and complete
+                    </label>
+                </div>
+
+                <div style="background: var(--surface-elevated); padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <h5 style="color: var(--accent-orange); margin-bottom: 8px;">⏳ What happens next?</h5>
+                    <ul style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+                        <li>Your application will be sent to our admin team for review</li>
+                        <li>We'll verify your documents and business license within 24-48 hours</li>
+                        <li>You'll receive an email confirmation once approved</li>
+                        <li>Upon approval, you'll get login credentials to access the partner portal</li>
+                        <li>Start ordering immediately with your assigned tier discount</li>
+                    </ul>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 30px;">
+                    <button type="button" class="btn btn-secondary" onclick="previousRegistrationStep()">← Back</button>
+                    <button type="button" class="btn btn-primary" onclick="submitRegistration()" id="submitRegistration" style="flex: 1;">Submit Application 🚀</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Success Modal -->
+    <div id="registrationSuccessModal" class="modal">
+        <div class="modal-content" style="max-width: 600px; text-align: center;">
+            <div class="modal-header">
+                <h3 class="modal-title">🎉 Application Submitted!</h3>
+                <button class="modal-close" onclick="closeModal('registrationSuccessModal')">×</button>
+            </div>
+            <div style="padding: 20px 0;">
+                <div style="font-size: 4rem; margin-bottom: 20px;">✅</div>
+                <h4 style="color: var(--brand-green); margin-bottom: 15px;">Thank you for your application!</h4>
+                <p style="color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6;">
+                    Your partner application has been successfully submitted and sent to our admin team for review.
+                </p>
+
+                <div style="background: var(--surface-elevated); padding: 20px; border-radius: 12px; margin: 20px 0; text-align: left;">
+                    <h5 style="color: var(--brand-green); margin-bottom: 12px;">📋 Next Steps:</h5>
+                    <ul style="color: var(--text-muted); line-height: 1.8; margin: 0; padding-left: 20px;">
+                        <li><strong>Review Process:</strong> 24-48 hours for document verification</li>
+                        <li><strong>Email Confirmation:</strong> You'll receive updates at your business email</li>
+                        <li><strong>Portal Access:</strong> Login credentials sent upon approval</li>
+                        <li><strong>Start Ordering:</strong> Immediate access to wholesale pricing</li>
+                    </ul>
+                </div>
+
+                <div style="background: var(--surface-card); padding: 15px; border-radius: 8px; border: 1px solid var(--brand-green); margin: 20px 0;">
+                    <p style="color: var(--brand-green); font-weight: 600; margin: 0;">
+                        📧 Application ID: <span id="applicationId">APP-</span>
+                    </p>
+                    <p style="color: var(--text-muted); font-size: 13px; margin: 5px 0 0 0;">
+                        Keep this ID for reference when contacting support
+                    </p>
+                </div>
+
+                <button class="btn btn-primary" onclick="closeModal('registrationSuccessModal')" style="margin-top: 20px;">Continue Browsing 🌿</button>
+            </div>
         </div>
     </div>
 
@@ -1955,7 +2153,7 @@
                         
                         /* Mobile debug indicator */
                         .mobile-device::before {
-                            content: "📱 Mobile Mode";
+                            content: "���� Mobile Mode";
                             position: fixed;
                             top: 5px;
                             right: 5px;
@@ -3382,7 +3580,7 @@
             // Update all other views
             updateAllViews();
             
-            showNotification('🖼️ Product images updated across all views!', 'success');
+            showNotification('🖼��� Product images updated across all views!', 'success');
             console.log('✅ All tables updated with product images');
         }
 
@@ -3494,7 +3692,7 @@
                     <td><strong>${product.grade}</strong></td>
                     <td>
                         <strong>${product.strain}</strong><br>
-                        ${product.thca > 0 ? product.thca + '% • ' : ''}${product.type}
+                        ${product.thca > 0 ? product.thca + '% �� ' : ''}${product.type}
                     </td>
                     <td><strong>$${product.price}${getUnitLabel(product.grade)}</strong></td>
                     <td>${product.thca > 0 ? product.thca + '%' : '-'}</td>
@@ -5552,4 +5750,3 @@ Phone: (210) 835-7834
     </script>
 </body>
 </html>
-            
