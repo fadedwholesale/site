@@ -2430,7 +2430,7 @@
         // New function to specifically fix toggle button functionality
         function initializeToggleButtons() {
             try {
-                console.log('🔧 Initializing toggle button functionality...');
+                console.log('��� Initializing toggle button functionality...');
                 
                 // Ensure all onclick handlers are working
                 const clickableElements = document.querySelectorAll('[onclick]');
@@ -3738,6 +3738,47 @@
             } catch (error) {
                 console.error('Logout error:', error);
                 showNotification('❌ Logout error. Please refresh the page.', 'error');
+            }
+        }
+
+        // Handle shared data changes from admin portal
+        function handleSharedDataChange(event) {
+            const { type, data } = event.detail;
+            console.log('📡 Received shared data change:', type, data);
+
+            switch (type) {
+                case 'products_updated':
+                    products = data;
+                    updateAllViews();
+                    console.log('🔄 Products updated from admin portal');
+                    break;
+                case 'product_added':
+                    const existingProduct = products.find(p => p.id === data.id);
+                    if (!existingProduct) {
+                        products.push(data);
+                        updateAllViews();
+                        showNotification(`✨ New product added: ${data.strain}`, 'success');
+                    }
+                    break;
+                case 'product_updated':
+                    const productIndex = products.findIndex(p => p.id === data.id);
+                    if (productIndex !== -1) {
+                        products[productIndex] = data;
+                        updateAllViews();
+                        showNotification(`📝 Product updated: ${data.strain}`, 'success');
+                    }
+                    break;
+                case 'product_deleted':
+                    products = products.filter(p => p.id !== data.id);
+                    updateAllViews();
+                    showNotification(`🗑️ Product removed: ${data.strain}`, 'warning');
+                    break;
+                case 'cart_updated':
+                    if (currentUser && data.userEmail === currentUser.email) {
+                        cart = data.cart;
+                        updateCartDisplay();
+                    }
+                    break;
             }
         }
 
