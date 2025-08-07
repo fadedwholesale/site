@@ -6,29 +6,49 @@ let currentUser = null;
 
 // Ensure window.currentUser is always synchronized
 function setCurrentUser(user) {
-    currentUser = user;
-    window.currentUser = user;
-    
-    if (user) {
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        console.log('✅ User authenticated globally:', user.email);
-    } else {
-        localStorage.removeItem('currentUser');
-        console.log('✅ User logged out globally');
-    }
-    
-    // Notify cart system of auth change if available
     try {
-        if (user && window.updateFixedCartDisplay) {
-            setTimeout(function() {
-                window.updateFixedCartDisplay();
-            }, 100);
+        console.log('🔄 Setting current user:', user ? user.email : 'null');
+
+        // Set both local and global references
+        currentUser = user;
+        window.currentUser = user;
+
+        // Handle localStorage operations safely
+        try {
+            if (user) {
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                console.log('✅ User authenticated globally:', user.email);
+            } else {
+                localStorage.removeItem('currentUser');
+                console.log('✅ User logged out globally');
+            }
+        } catch (storageError) {
+            console.warn('LocalStorage operation failed:', storageError);
         }
+
+        // Notify cart system of auth change if available
+        try {
+            if (user && typeof window.updateFixedCartDisplay === 'function') {
+                setTimeout(function() {
+                    try {
+                        window.updateFixedCartDisplay();
+                    } catch (updateError) {
+                        console.warn('Cart update failed:', updateError);
+                    }
+                }, 100);
+            }
+        } catch (error) {
+            console.warn('Error scheduling cart update:', error);
+        }
+
+        return user;
     } catch (error) {
-        console.warn('Error updating cart after auth change:', error);
+        console.error('❌ setCurrentUser failed:', error);
+        // Ensure we at least set the basic variables
+        currentUser = user;
+        window.currentUser = user;
+        return user;
     }
-    
-    return user;
 }
 
 let currentView = 'public';
