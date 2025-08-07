@@ -44,16 +44,9 @@ class CartManager {
             this.updateDisplay();
             console.log('✅ Cart: User state refreshed successfully');
         } else {
-<<<<<<< HEAD
             console.log('⚠️ Cart: No valid user found during refresh');
             this.cart = [];
             this.updateDisplay();
-=======
-            // Clear cart if no user
-            this.cart = [];
-            this.updateDisplay();
-            console.log('🧹 Cart: Cleared due to no authenticated user');
->>>>>>> origin/main
         }
     }
 
@@ -92,27 +85,7 @@ class CartManager {
         this.addToCartLock = true;
         setTimeout(() => { this.addToCartLock = false; }, 300);
 
-<<<<<<< HEAD
         console.log('📝 Cart: Adding product', { productId, quantity });
-=======
-        // Check for authentication - ensure current user exists
-        if (!window.currentUser || !window.currentUser.email) {
-            this.showNotification('🔒 Please log in to add items to cart', 'error');
-            console.log('❌ Cart: No authenticated user found', {
-                hasCurrentUser: !!window.currentUser,
-                hasEmail: window.currentUser?.email,
-                windowHasCurrentUser: 'currentUser' in window
-            });
-
-            // Open login modal automatically
-            if (window.openModal) {
-                setTimeout(() => {
-                    window.openModal('loginModal');
-                }, 500);
-            }
-            return false;
-        }
->>>>>>> origin/main
 
         console.log('✅ Cart: Authenticated user found:', window.currentUser.email);
 
@@ -476,18 +449,6 @@ class CartManager {
     // Checkout process
     async checkout() {
         try {
-<<<<<<< HEAD
-=======
-            if (!window.currentUser || !window.currentUser.email) {
-                this.showNotification('🔒 Please log in to complete checkout', 'error');
-                if (window.openModal) {
-                    setTimeout(() => {
-                        window.openModal('loginModal');
-                    }, 500);
-                }
-                return false;
-            }
->>>>>>> origin/main
 
             if (this.cart.length === 0) {
                 this.showNotification('⚠️ Your cart is empty! Add some products first.', 'error');
