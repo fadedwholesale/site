@@ -4626,10 +4626,13 @@
                 console.log('✅ Quantity updated:', { productId, oldQuantity, newQuantity: quantity });
                 updateCartDisplay();
 
+                // Get product information for notification
+                const product = window.sharedDataManager.getProducts().find(p => p.id === productId);
+
                 // Show feedback for quantity changes
-                if (quantity > oldQuantity) {
+                if (quantity > oldQuantity && product) {
                     showNotification(`⬆️ Increased ${product.strain} quantity to ${quantity}`, 'success');
-                } else if (quantity < oldQuantity) {
+                } else if (quantity < oldQuantity && product) {
                     showNotification(`⬇️ Decreased ${product.strain} quantity to ${quantity}`, 'success');
                 }
             } catch (error) {
@@ -5948,7 +5951,7 @@ Phone: (210) 835-7834
         // Simulate Admin-Side Product Updates (Demo Function)
         function simulateAdminUpdate() {
             try {
-                console.log('🔧 Simulating admin-side product update...');
+                console.log('���� Simulating admin-side product update...');
                 
                 // Simulate updating a product (change stock, price, or image)
                 const productToUpdate = products[1]; // Blue Gelatti
