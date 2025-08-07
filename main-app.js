@@ -127,8 +127,13 @@ function login(event) {
         closeModal('loginModal');
         showPartnerPortal();
         
-        // Notify cart manager
+        // Notify cart manager and refresh its state
         window.dispatchEvent(new CustomEvent('userAuthenticated', { detail: currentUser }));
+
+        // Explicitly refresh cart manager state
+        if (window.cartManager) {
+            window.cartManager.refreshUserState();
+        }
         
         showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
         console.log('✅ User logged in:', currentUser.email);
