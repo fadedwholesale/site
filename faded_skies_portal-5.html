@@ -1587,7 +1587,7 @@
                             </div>
                             <div class="action-group">
                                 <button class="btn btn-primary" onclick="quickOrder()">⚡ Quick Order</button>
-                                <button class="btn btn-secondary" onclick="downloadOrderHistory()">📄 Download History</button>
+                                <button class="btn btn-secondary" onclick="downloadOrderHistory()">���� Download History</button>
                                 <button class="btn btn-secondary" onclick="openSupportModal()">📞 Contact Support</button>
                             </div>
                         </div>
@@ -3056,16 +3056,6 @@
             };
         }
 
-        function validateRequiredDocuments() {
-            const requiredDocs = ['businessLicense', 'cannabisLicense', 'taxId'];
-
-            for (let doc of requiredDocs) {
-                if (!uploadedFiles[doc]) {
-                    return false;
-                }
-            }
-            return true;
-        }
 
         function handleFileUpload(input, documentType) {
             const files = input.files;
