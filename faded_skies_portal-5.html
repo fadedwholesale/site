@@ -2014,7 +2014,7 @@
                 </div>
 
                 <div style="background: var(--surface-elevated); padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <h5 style="color: var(--accent-orange); margin-bottom: 8px;">⏳ What happens next?</h5>
+                    <h5 style="color: var(--accent-orange); margin-bottom: 8px;">�� What happens next?</h5>
                     <ul style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
                         <li>Your application will be sent to our admin team for review</li>
                         <li>We'll verify your documents and business license within 24-48 hours</li>
@@ -2736,7 +2736,7 @@
                     showNotification('📊 Live inventory hidden', 'info');
                 }
                 
-                console.log('�� Live inventory toggled:', inventoryVisible ? 'SHOWN' : 'HIDDEN');
+                console.log('���� Live inventory toggled:', inventoryVisible ? 'SHOWN' : 'HIDDEN');
             } catch (error) {
                 console.error('Error toggling live inventory:', error);
                 showNotification('Inventory toggle error. Please try again.', 'error');
@@ -3761,7 +3761,7 @@
             switch (type) {
                 case 'cart_updated':
                     if (currentUser && data.userEmail === currentUser.email) {
-                        console.log('🔄 Real-time cart update for current user');
+                        console.log('��� Real-time cart update for current user');
                         cart = data.cart;
                         updateCartDisplay();
                         showNotification('🔄 Cart updated in real-time', 'info');
@@ -6323,7 +6323,8 @@ Phone: (210) 835-7834
                 window.testProductImages = testProductImages;
                 window.addNewProduct = addNewProduct;
                 window.forceUpdateWithImages = forceUpdateWithImages;
-                window.testCartFunctionality = testCartFunctionality; // New cart test function
+                window.testCartFunctionality = testCartFunctionality; // Legacy cart test function
+                window.testCartSystem = testCartSystem; // New cart system test function
                 window.showInventoryWithImages = function() {
                     try {
                         console.log('🖼️ Showing inventory with images...');
