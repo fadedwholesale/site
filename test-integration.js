@@ -229,7 +229,7 @@ function testModalIntegration() {
 
 // Run comprehensive test
 function runComprehensiveTest() {
-    console.log('🚀 Running Comprehensive Integration Test Suite...');\n    
+    console.log('🚀 Running Comprehensive Integration Test Suite...');    
     const results = {
         cart: testCartIntegration(),
         orders: testOrdersIntegration(),
