@@ -173,7 +173,7 @@ function login(event) {
                 loginTime: new Date().toISOString()
             };
 
-            console.log('👤 User data created:', userData);
+            console.log('User data created for:', email);
 
             // Set user with proper synchronization
             setCurrentUser(userData);
