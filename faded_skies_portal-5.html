@@ -4325,8 +4325,14 @@
 
         function updateCartDisplay() {
             try {
+                // Ensure we have the latest cart data from shared data manager
+                if (currentUser) {
+                    cart = window.sharedDataManager.getCart(currentUser.email);
+                }
+
                 console.log('🔄 Updating cart display with', cart.length, 'unique items');
-                
+                console.log('🛒 Current cart contents:', cart.map(item => `${item.strain} (${item.quantity}x)`));
+
                 const cartItems = document.getElementById('cartItems');
                 const cartCount = document.getElementById('cartCount');
                 const cartCount2 = document.getElementById('cartCount2');
@@ -5086,7 +5092,7 @@ Phone: (210) 835-7834
                 });
                 
                 updateCartDisplay();
-                showNotification(`🔄 ${itemsAdded} items from order ${orderId} added to cart!`, 'success');
+                showNotification(`�� ${itemsAdded} items from order ${orderId} added to cart!`, 'success');
                 
                 if (itemsAdded < itemStrings.length) {
                     setTimeout(() => {
