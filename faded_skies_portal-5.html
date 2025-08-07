@@ -5794,7 +5794,7 @@ Phone: (210) 835-7834
                 // Test adding items to cart
                 const availableProducts = products.filter(p => p.status === 'AVAILABLE' && p.stock > 0);
                 if (availableProducts.length === 0) {
-                    console.log('❌ No available products to test with');
+                    console.log('�� No available products to test with');
                     return 'No available products';
                 }
                 
@@ -6641,5 +6641,198 @@ Phone: (210) 835-7834
             }
         }
     </script>
+
+    <!-- Modern Authentication and Cart Systems -->
+    <script src="auth-system.js"></script>
+    <script src="cart-system-v2.js"></script>
+    <script src="cart-ui.js"></script>
+
+    <!-- Integration Script -->
+    <script>
+        // Modern System Integration
+        console.log('🔗 Integrating modern systems...');
+
+        // Override legacy addToCart function with modern implementation
+        window.addToCart = function(productId, quantity = 1) {
+            console.log('🛒 Modern addToCart called:', { productId, quantity });
+
+            if (window.modernCart) {
+                return window.modernCart.addItem(productId, quantity);
+            } else {
+                console.error('Modern cart not available');
+                return false;
+            }
+        };
+
+        // Override legacy toggleCart function
+        window.toggleCart = function() {
+            if (window.modernCart) {
+                window.modernCart.toggleCart();
+            }
+        };
+
+        // Setup modern login integration
+        function setupModernLogin() {
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+
+                    if (window.authManager) {
+                        const result = await window.authManager.login({ email, password });
+
+                        if (result.success) {
+                            // Update UI to show authenticated state
+                            updateAuthenticatedUI(result.user);
+
+                            // Close login modal
+                            if (window.closeModal) {
+                                window.closeModal('loginModal');
+                            }
+
+                            // Show partner portal
+                            if (window.showPartnerPortal) {
+                                window.showPartnerPortal();
+                            }
+
+                            window.showNotification(`Welcome back, ${result.user.name}! 🎉`, 'success');
+                        } else {
+                            window.showNotification(result.error || 'Login failed', 'error');
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateAuthenticatedUI(user) {
+            // Update user session display
+            const guestSection = document.getElementById('guestSection');
+            const userSession = document.getElementById('userSession');
+            const userWelcome = document.getElementById('userWelcome');
+            const userBadge = document.getElementById('userBadge');
+            const cartToggle = document.getElementById('cartToggle');
+
+            if (guestSection) guestSection.style.display = 'none';
+            if (userSession) userSession.classList.add('show');
+            if (userWelcome) userWelcome.textContent = `Welcome, ${user.name}`;
+            if (userBadge) userBadge.textContent = user.tier || 'PARTNER';
+            if (cartToggle) cartToggle.style.display = 'inline-flex';
+
+            // Update global user references for compatibility
+            window.currentUser = user;
+
+            // Update all views
+            if (window.updateAllViews) {
+                window.updateAllViews();
+            }
+        }
+
+        // Setup modern logout
+        window.logout = function() {
+            if (window.authManager) {
+                window.authManager.logout();
+
+                // Update UI to show guest state
+                const guestSection = document.getElementById('guestSection');
+                const userSession = document.getElementById('userSession');
+                const cartToggle = document.getElementById('cartToggle');
+
+                if (guestSection) guestSection.style.display = 'flex';
+                if (userSession) userSession.classList.remove('show');
+                if (cartToggle) cartToggle.style.display = 'none';
+
+                // Clear global user reference
+                window.currentUser = null;
+
+                // Clear cart
+                if (window.modernCart) {
+                    window.modernCart.clearCart();
+                }
+
+                // Show public website
+                if (window.showPublicWebsite) {
+                    window.showPublicWebsite();
+                }
+
+                window.showNotification('Goodbye! 👋', 'success');
+            }
+        };
+
+        // Update cart toggle button to use modern cart
+        function updateCartToggleButton() {
+            const cartToggle = document.getElementById('cartToggle');
+            if (cartToggle) {
+                cartToggle.onclick = function() {
+                    window.toggleCart();
+                };
+            }
+        }
+
+        // Setup authentication state restoration
+        if (window.authManager) {
+            window.authManager.on('restore', (event, data) => {
+                updateAuthenticatedUI(data.user);
+            });
+
+            window.authManager.on('login', (event, data) => {
+                updateAuthenticatedUI(data.user);
+            });
+
+            window.authManager.on('logout', () => {
+                // Handle logout UI updates
+                const guestSection = document.getElementById('guestSection');
+                const userSession = document.getElementById('userSession');
+                const cartToggle = document.getElementById('cartToggle');
+
+                if (guestSection) guestSection.style.display = 'flex';
+                if (userSession) userSession.classList.remove('show');
+                if (cartToggle) cartToggle.style.display = 'none';
+
+                window.currentUser = null;
+
+                if (window.showPublicWebsite) {
+                    window.showPublicWebsite();
+                }
+            });
+        }
+
+        // Initialize modern systems
+        function initializeModernSystems() {
+            setupModernLogin();
+            updateCartToggleButton();
+
+            // Check if user is already authenticated
+            if (window.authManager && window.authManager.isAuthenticated()) {
+                const user = window.authManager.getUser();
+                updateAuthenticatedUI(user);
+            }
+
+            console.log('✅ Modern systems integrated successfully');
+        }
+
+        // Wait for all systems to load
+        setTimeout(initializeModernSystems, 100);
+
+        // Global functions for easy testing
+        window.testModernCart = function() {
+            console.log('🧪 Testing modern cart...');
+            console.log('Auth Manager:', window.authManager?.getDebugInfo());
+            console.log('Modern Cart:', window.modernCart?.getDebugInfo());
+            console.log('Cart UI:', window.cartUI?.isOpen());
+        };
+
+        window.forceModernLogin = function(email = 'test@fadedskies.com') {
+            if (window.authManager) {
+                window.authManager.login({ email, password: 'test123' });
+            }
+        };
+
+        console.log('🚀 Modern authentication and cart systems loaded!');
+        console.log('🧪 Test functions: testModernCart(), forceModernLogin()');
+    </script>
+
 </body>
 </html>
