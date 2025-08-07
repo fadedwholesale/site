@@ -3044,13 +3044,21 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         function updateProductPrice(productId, newPrice) {
             const product = products.find(p => p.id === productId);
             if (product) {
-                product.price = parseFloat(newPrice);
-                product.lastModified = new Date().toISOString();
-                product.modifiedBy = currentUser.email;
+                const updates = {
+                    price: parseFloat(newPrice),
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: currentUser.email
+                };
+
+                // Update local array
+                Object.assign(product, updates);
+
+                // Update shared data manager (this will notify partner portals)
+                window.sharedDataManager.updateProduct(productId, updates);
+
                 updatePricingTable();
                 updateDashboardStats();
                 showNotification(`💰 Price updated for ${product.strain}`, 'success');
-                syncToPortal();
             }
         }
 
