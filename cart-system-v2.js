@@ -483,35 +483,6 @@ class ModernCartManager {
         return false;
     }
 
-    async validateCartForCheckout() {
-        const issues = [];
-        
-        for (const item of this.state.items) {
-            const product = await this.getProductData(item.productId);
-            
-            if (!product) {
-                issues.push(`${item.name} is no longer available`);
-                continue;
-            }
-            
-            if (product.status !== 'AVAILABLE') {
-                issues.push(`${item.name} is no longer available`);
-                continue;
-            }
-            
-            if (item.quantity > product.stock) {
-                issues.push(`Only ${product.stock} units of ${item.name} available`);
-                this.updateItemQuantity(item.id, product.stock);
-            }
-        }
-
-        if (issues.length > 0) {
-            issues.forEach(issue => this.showNotification(issue, 'warning'));
-            return { valid: false, issues };
-        }
-
-        return { valid: true, issues: [] };
-    }
 
     async processCheckout() {
         // Simulate order processing
