@@ -4373,7 +4373,7 @@
 
                 // Generate cart items HTML with proper quantity controls
                 cartItems.innerHTML = cart.map(item => {
-                    const product = products.find(p => p.id === item.id);
+                    const product = window.sharedDataManager.getProducts().find(p => p.id === item.id);
                     const maxStock = product ? product.stock : item.maxStock;
                     const productImage = product ? product.image : 'https://via.placeholder.com/60x60/1a1a1a/00C851?text=' + item.grade;
                     
@@ -4655,7 +4655,7 @@
             // Validate cart items against current inventory
             let hasIssues = false;
             cart.forEach(cartItem => {
-                const product = products.find(p => p.id === cartItem.id);
+                const product = window.sharedDataManager.getProducts().find(p => p.id === cartItem.id);
                 if (!product || product.status !== 'AVAILABLE') {
                     showNotification(`❌ ${cartItem.strain} is no longer available`, 'error');
                     hasIssues = true;
@@ -4701,7 +4701,7 @@
                     
                     // Update inventory
                     cart.forEach(cartItem => {
-                        const product = products.find(p => p.id === cartItem.id);
+                        const product = window.sharedDataManager.getProducts().find(p => p.id === cartItem.id);
                         if (product) {
                             product.stock = Math.max(0, product.stock - cartItem.quantity);
                             if (product.stock === 0) {
@@ -5142,7 +5142,7 @@ Phone: (210) 835-7834
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                                 <button class="btn btn-primary" onclick="contactOrderSupport()">📦 Order Issues</button>
                                 <button class="btn btn-secondary" onclick="contactShippingSupport()">���� Shipping Questions</button>
-                                <button class="btn btn-secondary" onclick="contactBillingSupport()">💳 Billing Support</button>
+                                <button class="btn btn-secondary" onclick="contactBillingSupport()">��� Billing Support</button>
                                 <button class="btn btn-secondary" onclick="contactGeneralSupport()">💬 General Inquiry</button>
                             </div>
                         </div>
