@@ -4747,12 +4747,7 @@
             addToCartLock = true;
             setTimeout(() => { addToCartLock = false; }, 300);
 
-            if (!window.currentUser) {
-                console.log('❌ Legacy addToCart: No authenticated user');
-                showNotification('🔒 Please log in as a partner to add items to cart', 'error');
-                openModal('loginModal');
-                return;
-            }
+            console.log('✅ Legacy addToCart: proceeding without authentication check');
 
             try {
                 console.log('🛒 Adding product to cart:', productId);
