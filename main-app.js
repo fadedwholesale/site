@@ -4,43 +4,9 @@
 // Global Variables - Authentication State
 let currentUser = null;
 
-// Ensure window.currentUser is always synchronized
 function setCurrentUser(user) {
-    // Basic assignments first - these should never fail
     currentUser = user;
     window.currentUser = user;
-
-    // Safe logging without special characters
-    try {
-        if (user && user.email) {
-            console.log('Setting current user:', user.email);
-        } else {
-            console.log('Clearing current user');
-        }
-    } catch (logError) {
-        // Ignore logging errors
-    }
-
-    // Safe localStorage operations
-    try {
-        if (user) {
-            localStorage.setItem('currentUser', JSON.stringify(user));
-        } else {
-            localStorage.removeItem('currentUser');
-        }
-    } catch (storageError) {
-        // Ignore storage errors
-    }
-
-    // Safe cart update
-    try {
-        if (user && window.updateFixedCartDisplay) {
-            setTimeout(window.updateFixedCartDisplay, 100);
-        }
-    } catch (cartError) {
-        // Ignore cart errors
-    }
-
     return user;
 }
 
