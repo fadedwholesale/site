@@ -33,6 +33,7 @@ function initializeApplication() {
     if (savedUser) {
         try {
             currentUser = JSON.parse(savedUser);
+            window.currentUser = currentUser;
             showUserSession();
             console.log('✅ User session restored:', currentUser.email);
         } catch (error) {
@@ -101,10 +102,10 @@ function handleSharedDataChange(event) {
 // Authentication Functions
 function login(event) {
     event.preventDefault();
-    
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    
+
     // Simple authentication (in real app, this would be server-side)
     if (email && password) {
         currentUser = {
@@ -113,18 +114,21 @@ function login(event) {
             tier: 'Gold Partner',
             loginTime: new Date().toISOString()
         };
-        
+
+        // Set global window.currentUser for cart access
+        window.currentUser = currentUser;
+
         // Save user session
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
+
         // Update UI
         showUserSession();
         closeModal('loginModal');
         showPartnerPortal();
-        
+
         // Notify cart manager
         window.dispatchEvent(new CustomEvent('userAuthenticated', { detail: currentUser }));
-        
+
         showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
         console.log('✅ User logged in:', currentUser.email);
     } else {
@@ -136,18 +140,19 @@ function logout() {
     if (currentUser) {
         const userName = currentUser.name;
         currentUser = null;
+        window.currentUser = null;
         localStorage.removeItem('currentUser');
-        
+
         // Clear cart
         if (window.cartManager) {
             window.cartManager.cart = [];
             window.cartManager.updateDisplay();
         }
-        
+
         // Update UI
         showGuestSession();
         showPublicWebsite();
-        
+
         showNotification(`Goodbye, ${userName}! 👋`, 'success');
         console.log('✅ User logged out');
     }
@@ -159,12 +164,17 @@ function showUserSession() {
     const userWelcome = document.getElementById('userWelcome');
     const userBadge = document.getElementById('userBadge');
     const cartToggle = document.getElementById('cartToggle');
-    
+
     if (guestSection) guestSection.style.display = 'none';
     if (userSession) userSession.classList.add('show');
     if (userWelcome) userWelcome.textContent = `Welcome, ${currentUser.name}`;
     if (userBadge) userBadge.textContent = currentUser.tier || 'PARTNER';
     if (cartToggle) cartToggle.style.display = 'inline-flex';
+
+    // Update cart display immediately for authenticated user
+    if (window.cartManager) {
+        window.cartManager.updateDisplay();
+    }
 }
 
 function showGuestSession() {
@@ -256,16 +266,29 @@ function toggleCart() {
 }
 
 function addToCart(productId, quantity = 1) {
-    if (!currentUser) {
+    console.log('🛒 addToCart called:', { productId, quantity, currentUser: !!currentUser, windowCurrentUser: !!window.currentUser });
+
+    if (!currentUser || !window.currentUser) {
+        console.log('❌ Authentication check failed:', {
+            localCurrentUser: !!currentUser,
+            windowCurrentUser: !!window.currentUser,
+            localUserEmail: currentUser?.email,
+            windowUserEmail: window.currentUser?.email
+        });
         showNotification('🔒 Please log in to add items to cart', 'error');
         openModal('loginModal');
         return false;
     }
-    
+
+    console.log('✅ Authentication check passed, calling cart manager');
+
     if (window.cartManager) {
         return window.cartManager.addProduct(productId, quantity);
+    } else {
+        console.error('❌ Cart manager not found');
+        showNotification('❌ Cart system not available', 'error');
     }
-    
+
     return false;
 }
 
@@ -380,11 +403,11 @@ function updatePartnerProductsDisplay() {
                 <td>${product.stock}</td>
                 <td><span class="status-${product.status.toLowerCase().replace(' ', '')}\">${product.status}</span></td>
                 <td>
-                    ${isAvailable ? 
-                        `<button class="btn btn-primary btn-sm" onclick="addToCart(${product.id})">
+                    ${isAvailable ?
+                        `<button class="btn btn-primary btn-sm" onclick="addToCart(${product.id}, 1)" title="Add ${product.strain} to cart">
                             🛒 Add to Cart
                         </button>` :
-                        `<button class="btn btn-secondary btn-sm" disabled>
+                        `<button class="btn btn-secondary btn-sm" disabled title="${product.status}">
                             ${product.status}
                         </button>`
                     }

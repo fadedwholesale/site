@@ -37,6 +37,11 @@ class CartManager {
             this.loadCart();
             this.updateDisplay();
             console.log('✅ Cart: User state refreshed successfully');
+        } else {
+            // Clear cart if no user
+            this.cart = [];
+            this.updateDisplay();
+            console.log('🧹 Cart: Cleared due to no authenticated user');
         }
     }
 
@@ -81,6 +86,13 @@ class CartManager {
                 hasEmail: window.currentUser?.email,
                 windowHasCurrentUser: 'currentUser' in window
             });
+
+            // Open login modal automatically
+            if (window.openModal) {
+                setTimeout(() => {
+                    window.openModal('loginModal');
+                }, 500);
+            }
             return false;
         }
 
@@ -217,7 +229,7 @@ class CartManager {
 
         } catch (error) {
             console.error('Error updating quantity:', error);
-            this.showNotification('❌ Error updating quantity', 'error');
+            this.showNotification('��� Error updating quantity', 'error');
             return false;
         }
     }
@@ -297,7 +309,7 @@ class CartManager {
             this.updateCartTotalSection(totals);
 
             console.log('✅ Cart display updated successfully');
-            console.log('📊 Cart stats:', totals);
+            console.log('���� Cart stats:', totals);
 
         } catch (error) {
             console.error('Error updating cart display:', error);
@@ -446,8 +458,13 @@ class CartManager {
     // Checkout process
     async checkout() {
         try {
-            if (!window.currentUser) {
+            if (!window.currentUser || !window.currentUser.email) {
                 this.showNotification('🔒 Please log in to complete checkout', 'error');
+                if (window.openModal) {
+                    setTimeout(() => {
+                        window.openModal('loginModal');
+                    }, 500);
+                }
                 return false;
             }
 
