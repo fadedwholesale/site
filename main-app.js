@@ -22,8 +22,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeApplication() {
     // Initialize cart manager if not already done
-    if (!window.cartManager) {
+    if (!window.cartManager && window.CartManager) {
         window.cartManager = new CartManager();
+        console.log('🛒 Cart manager initialized in main app');
     }
     
     // Setup shared data manager event listeners
