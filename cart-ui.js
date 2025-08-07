@@ -123,56 +123,8 @@ class CartUIManager {
     }
 
     loadTemplates() {
-        this.templates.cartItem = `
-            <div class="cart-item" data-item-id="{{id}}" role="listitem">
-                <div class="item-image">
-                    <img src="{{image}}" alt="{{name}}" loading="lazy" 
-                         onerror="this.src='{{fallbackImage}}'">
-                </div>
-                
-                <div class="item-details">
-                    <h4 class="item-name">{{name}}</h4>
-                    <p class="item-grade">{{grade}}</p>
-                    <p class="item-price">${{price}} {{unitLabel}}</p>
-                    {{#if metadata.thca}}
-                    <p class="item-meta">{{metadata.thca}}% THCa</p>
-                    {{/if}}
-                </div>
-                
-                <div class="item-controls">
-                    <div class="quantity-controls">
-                        <button class="qty-btn qty-decrease" aria-label="Decrease quantity" 
-                                data-item-id="{{id}}" {{#if isMinQuantity}}disabled{{/if}}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                        </button>
-                        
-                        <input type="number" class="qty-input" value="{{quantity}}" 
-                               min="1" max="{{maxQuantity}}" data-item-id="{{id}}"
-                               aria-label="Quantity for {{name}}">
-                        
-                        <button class="qty-btn qty-increase" aria-label="Increase quantity" 
-                                data-item-id="{{id}}" {{#if isMaxQuantity}}disabled{{/if}}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                        </button>
-                    </div>
-                    
-                    <p class="item-subtotal">${{subtotal}}</p>
-                    
-                    <button class="remove-btn" aria-label="Remove {{name}} from cart" 
-                            data-item-id="{{id}}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3,6 5,6 21,6"></polyline>
-                            <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        `;
+        // Simple template - will be populated with string replacement
+        this.templates.cartItem = 'CART_ITEM_TEMPLATE';
     }
 
     setupEventListeners() {
