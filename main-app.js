@@ -164,12 +164,17 @@ function showUserSession() {
     const userWelcome = document.getElementById('userWelcome');
     const userBadge = document.getElementById('userBadge');
     const cartToggle = document.getElementById('cartToggle');
-    
+
     if (guestSection) guestSection.style.display = 'none';
     if (userSession) userSession.classList.add('show');
     if (userWelcome) userWelcome.textContent = `Welcome, ${currentUser.name}`;
     if (userBadge) userBadge.textContent = currentUser.tier || 'PARTNER';
     if (cartToggle) cartToggle.style.display = 'inline-flex';
+
+    // Update cart display immediately for authenticated user
+    if (window.cartManager) {
+        window.cartManager.updateDisplay();
+    }
 }
 
 function showGuestSession() {
