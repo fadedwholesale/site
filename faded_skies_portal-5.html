@@ -3746,6 +3746,34 @@
             }
         }
 
+        // Handle real-time updates
+        function handleRealTimeUpdate(event) {
+            const { type, data, timestamp } = event.detail;
+            console.log('📡 Received real-time update:', type, data);
+
+            switch (type) {
+                case 'cart_updated':
+                    if (currentUser && data.userEmail === currentUser.email) {
+                        console.log('🔄 Real-time cart update for current user');
+                        cart = data.cart;
+                        updateCartDisplay();
+                        showNotification('🔄 Cart updated in real-time', 'info');
+                    }
+                    break;
+                case 'product_updated':
+                case 'product_added':
+                case 'product_deleted':
+                    console.log('🔄 Real-time product update');
+                    products = window.sharedDataManager.getProducts();
+                    updateAllViews();
+                    showNotification(`📦 Product inventory updated`, 'info');
+                    break;
+                case 'new_order':
+                    // Don't show order notifications to partner portal (only admin needs these)
+                    break;
+            }
+        }
+
         // Handle shared data changes from admin portal
         function handleSharedDataChange(event) {
             const { type, data } = event.detail;
@@ -4480,7 +4508,7 @@
                 const finalTotalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
                 if (cartCount) {
                     cartCount.textContent = finalTotalItems;
-                    console.log('🎯 Final cartCount update:', finalTotalItems);
+                    console.log('��� Final cartCount update:', finalTotalItems);
                 }
                 if (cartCount2) {
                     cartCount2.textContent = finalTotalItems;
