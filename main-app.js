@@ -663,46 +663,11 @@ let registrationData = {};
 
 function nextRegistrationStep() {
     if (currentRegistrationStep === 1) {
-        // Validate step 1
-        const form = document.getElementById('businessInfoForm');
-        const formData = new FormData(form);
-        let isValid = true;
-        
-        // Basic validation
-        const requiredFields = ['businessName', 'contactName', 'businessEmail', 'phone', 'businessAddress', 'businessType', 'licenseNumber', 'estimatedMonthlyVolume'];
-        requiredFields.forEach(field => {
-            const input = document.getElementById(field);
-            if (!input.value.trim()) {
-                isValid = false;
-                input.style.borderColor = 'var(--accent-red)';
-            } else {
-                input.style.borderColor = 'var(--border-subtle)';
-                registrationData[field] = input.value;
-            }
-        });
-        
-        if (!isValid) {
-            showNotification('❌ Please fill in all required fields', 'error');
-            return;
-        }
-        
         // Proceed to step 2
         document.getElementById('registrationStep1').classList.remove('active');
         document.getElementById('registrationStep2').classList.add('active');
         currentRegistrationStep = 2;
     } else if (currentRegistrationStep === 2) {
-        // Check if required documents are uploaded
-        const requiredDocs = ['businessLicense', 'cannabisLicense', 'taxId'];
-        const uploadedDocs = requiredDocs.filter(doc => {
-            const input = document.getElementById(doc);
-            return input && input.files.length > 0;
-        });
-        
-        if (uploadedDocs.length < 3) {
-            showNotification('❌ Please upload all required documents', 'error');
-            return;
-        }
-        
         // Proceed to step 3
         generateRegistrationReview();
         document.getElementById('registrationStep2').classList.remove('active');
