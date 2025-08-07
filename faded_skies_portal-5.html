@@ -1350,7 +1350,7 @@
                             <div class="quality-badge">🌿 Organic Hemp</div>
                             <div class="quality-badge">🚫 GMO-Free</div>
                             <div class="quality-badge">⭐ cGMP Certified</div>
-                            <div class="quality-badge">��� Farm Bill Compliant</div>
+                            <div class="quality-badge">📋 Farm Bill Compliant</div>
                         </div>
                         
                         <div style="margin: 40px 0;">
@@ -4278,7 +4278,7 @@
                             (product.status === 'AVAILABLE' && product.stock > 0 ? 
                                 `<button class="btn btn-primary btn-sm" onclick="addToCart(${product.id})">Add to Cart</button>` : 
                                 '<button class="btn btn-secondary btn-sm" disabled>Unavailable</button>') :
-                            '<button class="btn btn-secondary btn-sm" onclick="openModal(\'loginModal\')">Login to Order</button>'}
+                            '<button class="btn btn-primary btn-sm" onclick="addToCart(' + product.id + ')">🛒 Add to Cart</button>'}
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -5383,7 +5383,7 @@ Phone: (210) 835-7834
                 modal.innerHTML = `
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h3 class="modal-title">📞 Contact Support</h3>
+                            <h3 class="modal-title">���� Contact Support</h3>
                             <button class="modal-close" onclick="closeOrderModal()">×</button>
                         </div>
                         <div style="margin-bottom: 24px;">
