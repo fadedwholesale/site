@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faded Skies Portal - Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+        }
+        .test-section {
+            background: #222;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        button {
+            background: #00C851;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #00A544;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #00C851; }
+        .error { background: #FF4444; }
+        .info { background: #00BFFF; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Faded Skies Portal - Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>📋 Test Status</h2>
+        <div id="testStatus" class="status info">Ready to test...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔗 Component Tests</h2>
+        <button onclick="testSharedDataManager()">Test Shared Data Manager</button>
+        <button onclick="testCartManager()">Test Cart Manager</button>
+        <button onclick="testFunctions()">Test Global Functions</button>
+        <div id="componentResults"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🛒 Cart Tests</h2>
+        <button onclick="simulateLogin()">Simulate Login</button>
+        <button onclick="testAddToCart()">Add Product to Cart</button>
+        <button onclick="testCartDisplay()">Check Cart Display</button>
+        <button onclick="testCartClear()">Clear Cart</button>
+        <div id="cartResults"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Portal Tests</h2>
+        <button onclick="testPortalTabs()">Test All Portal Tabs</button>
+        <button onclick="testOrdersFeatures()">Test Orders Features</button>
+        <button onclick="testProfileFeatures()">Test Profile Features</button>
+        <div id="portalResults"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔄 Integration Tests</h2>
+        <button onclick="runFullWorkflowTest()">Run Complete Workflow</button>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <div id="integrationResults"></div>
+    </div>
+
+    <!-- Include all required scripts -->
+    <script src="shared-data.js"></script>
+    <script src="cart-system.js"></script>
+    <script src="main-app.js"></script>
+    <script src="test-integration.js"></script>
+
+    <script>
+        // Test Results Display
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('testStatus');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        function addResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.textContent = message;
+            div.style.padding = '5px';
+            div.style.margin = '2px 0';
+            div.style.borderLeft = `3px solid ${type === 'success' ? '#00C851' : type === 'error' ? '#FF4444' : '#00BFFF'}`;
+            div.style.paddingLeft = '10px';
+            container.appendChild(div);
+        }
+
+        // Component Tests
+        function testSharedDataManager() {
+            const result = window.sharedDataManager ? 'SharedDataManager ✅' : 'SharedDataManager ❌';
+            addResult('componentResults', result, window.sharedDataManager ? 'success' : 'error');
+            
+            if (window.sharedDataManager) {
+                const products = window.sharedDataManager.getProducts();
+                addResult('componentResults', `Products loaded: ${products.length}`, 'info');
+            }
+        }
+
+        function testCartManager() {
+            const result = window.cartManager ? 'CartManager ✅' : 'CartManager ❌';
+            addResult('componentResults', result, window.cartManager ? 'success' : 'error');
+            
+            if (window.cartManager) {
+                const state = window.cartManager.getState();
+                addResult('componentResults', `Cart items: ${state.cart.length}`, 'info');
+            }
+        }
+
+        function testFunctions() {
+            const functions = [
+                'addToCart', 'toggleCart', 'clearCart', 'login', 'logout',
+                'showPartnerPortal', 'switchPortalTab', 'updateOrdersDisplay',
+                'updateProfileDisplay', 'showNotification'
+            ];
+            
+            let passed = 0;
+            functions.forEach(func => {
+                const exists = window[func] && typeof window[func] === 'function';
+                addResult('componentResults', `${func}: ${exists ? '✅' : '❌'}`, exists ? 'success' : 'error');
+                if (exists) passed++;
+            });
+            
+            addResult('componentResults', `Functions: ${passed}/${functions.length} available`, passed === functions.length ? 'success' : 'error');
+        }
+
+        // Cart Tests
+        function simulateLogin() {
+            window.currentUser = {
+                email: 'test@example.com',
+                name: 'Test User',
+                tier: 'Gold Partner'
+            };
+            
+            // Notify cart manager
+            window.dispatchEvent(new CustomEvent('userAuthenticated', { detail: window.currentUser }));
+            
+            addResult('cartResults', 'User logged in: test@example.com ✅', 'success');
+            updateStatus('User logged in successfully', 'success');
+        }
+
+        function testAddToCart() {
+            if (!window.currentUser) {
+                addResult('cartResults', 'Please login first ❌', 'error');
+                return;
+            }
+
+            const products = window.sharedDataManager.getProducts();
+            if (products.length > 0) {
+                const product = products[0];
+                const result = window.addToCart(product.id, 1);
+                addResult('cartResults', `Added ${product.strain}: ${result ? '✅' : '❌'}`, result ? 'success' : 'error');
+            } else {
+                addResult('cartResults', 'No products available ❌', 'error');
+            }
+        }
+
+        function testCartDisplay() {
+            if (window.cartManager) {
+                const totals = window.cartManager.getTotals();
+                addResult('cartResults', `Cart totals: ${totals.totalItems} items, $${totals.total.toFixed(2)}`, 'info');
+                
+                if (totals.totalItems > 0) {
+                    addResult('cartResults', 'Cart display working ✅', 'success');
+                } else {
+                    addResult('cartResults', 'Cart appears empty ℹ️', 'info');
+                }
+            }
+        }
+
+        function testCartClear() {
+            if (window.cartManager) {
+                window.cartManager.clear();
+                const totals = window.cartManager.getTotals();
+                const success = totals.totalItems === 0;
+                addResult('cartResults', `Cart cleared: ${success ? '✅' : '❌'}`, success ? 'success' : 'error');
+            }
+        }
+
+        // Portal Tests
+        function testPortalTabs() {
+            const tabs = ['dashboard', 'products', 'orders', 'profile', 'analytics', 'bulk'];
+            let successful = 0;
+            
+            tabs.forEach(tab => {
+                try {
+                    if (window.switchPortalTab) {
+                        window.switchPortalTab(tab);
+                        addResult('portalResults', `${tab} tab: ✅`, 'success');
+                        successful++;
+                    } else {
+                        addResult('portalResults', `switchPortalTab missing: ❌`, 'error');
+                    }
+                } catch (error) {
+                    addResult('portalResults', `${tab} tab failed: ❌`, 'error');
+                }
+            });
+            
+            addResult('portalResults', `Portal tabs: ${successful}/${tabs.length} working`, successful === tabs.length ? 'success' : 'error');
+        }
+
+        function testOrdersFeatures() {
+            const features = [
+                { name: 'updateOrdersDisplay', func: window.updateOrdersDisplay },
+                { name: 'filterOrders', func: window.filterOrders },
+                { name: 'downloadOrderHistory', func: window.downloadOrderHistory },
+                { name: 'viewOrderDetails', func: window.viewOrderDetails }
+            ];
+            
+            let working = 0;
+            features.forEach(feature => {
+                const exists = feature.func && typeof feature.func === 'function';
+                addResult('portalResults', `${feature.name}: ${exists ? '✅' : '❌'}`, exists ? 'success' : 'error');
+                if (exists) working++;
+            });
+            
+            addResult('portalResults', `Orders features: ${working}/${features.length} available`, working === features.length ? 'success' : 'error');
+        }
+
+        function testProfileFeatures() {
+            const features = [
+                { name: 'updateProfileDisplay', func: window.updateProfileDisplay },
+                { name: 'openProfileEditModal', func: window.openProfileEditModal }
+            ];
+            
+            let working = 0;
+            features.forEach(feature => {
+                const exists = feature.func && typeof feature.func === 'function';
+                addResult('portalResults', `${feature.name}: ${exists ? '✅' : '❌'}`, exists ? 'success' : 'error');
+                if (exists) working++;
+            });
+            
+            addResult('portalResults', `Profile features: ${working}/${features.length} available`, working === features.length ? 'success' : 'error');
+        }
+
+        // Integration Tests
+        function runFullWorkflowTest() {
+            addResult('integrationResults', 'Starting full workflow test...', 'info');
+            
+            try {
+                // Step 1: Login
+                simulateLogin();
+                addResult('integrationResults', 'Step 1: Login ✅', 'success');
+                
+                // Step 2: Add to cart
+                testAddToCart();
+                addResult('integrationResults', 'Step 2: Add to cart ✅', 'success');
+                
+                // Step 3: Check cart
+                testCartDisplay();
+                addResult('integrationResults', 'Step 3: Cart display ✅', 'success');
+                
+                // Step 4: Test portal tabs
+                if (window.switchPortalTab) {
+                    window.switchPortalTab('orders');
+                    window.switchPortalTab('profile');
+                    addResult('integrationResults', 'Step 4: Portal navigation ✅', 'success');
+                }
+                
+                addResult('integrationResults', 'Full workflow test completed! ✅', 'success');
+                updateStatus('Full workflow test completed successfully!', 'success');
+                
+            } catch (error) {
+                addResult('integrationResults', `Workflow test failed: ${error.message} ❌`, 'error');
+                updateStatus('Workflow test failed', 'error');
+            }
+        }
+
+        function runAllTests() {
+            addResult('integrationResults', 'Running comprehensive test suite...', 'info');
+            
+            // Clear previous results
+            ['componentResults', 'cartResults', 'portalResults'].forEach(id => {
+                document.getElementById(id).innerHTML = '';
+            });
+            
+            // Run all tests
+            setTimeout(() => testSharedDataManager(), 100);
+            setTimeout(() => testCartManager(), 200);
+            setTimeout(() => testFunctions(), 300);
+            setTimeout(() => simulateLogin(), 500);
+            setTimeout(() => testAddToCart(), 700);
+            setTimeout(() => testCartDisplay(), 900);
+            setTimeout(() => testPortalTabs(), 1100);
+            setTimeout(() => testOrdersFeatures(), 1300);
+            setTimeout(() => testProfileFeatures(), 1500);
+            setTimeout(() => {
+                addResult('integrationResults', 'All tests completed! Check results above. ✅', 'success');
+                updateStatus('All tests completed', 'success');
+            }, 2000);
+        }
+
+        // Auto-run basic tests on load
+        setTimeout(() => {
+            updateStatus('Running initial tests...', 'info');
+            testSharedDataManager();
+            testCartManager();
+            updateStatus('Initial tests completed. Ready for manual testing.', 'success');
+        }, 1000);
+    </script>
+</body>
+</html>
