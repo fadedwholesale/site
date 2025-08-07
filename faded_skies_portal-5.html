@@ -4824,10 +4824,18 @@
                     const orderItems = cart.map(item => `${item.strain} (x${item.quantity})`).join(', ');
                     
                     const newOrder = {
-                        id: `ORD-${String(orders.length + 1).padStart(3, '0')}`,
+                        id: `ORD-${String(window.sharedDataManager.getOrders().length + 1).padStart(3, '0')}`,
                         partner: currentUser.email,
                         partnerName: currentUser.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') + ' Store',
                         items: orderItems,
+                        itemDetails: cart.map(item => ({
+                            id: item.id,
+                            strain: item.strain,
+                            grade: item.grade,
+                            quantity: item.quantity,
+                            price: item.price,
+                            subtotal: item.price * item.quantity
+                        })),
                         total: total,
                         status: 'PENDING',
                         date: new Date().toISOString().split('T')[0],
@@ -4835,19 +4843,28 @@
                         delivery: total > 1000 ? 'priority' : 'standard',
                         created: new Date().toISOString()
                     };
-                    
-                    orders.push(newOrder);
-                    
-                    // Update inventory
+
+                    // Add order to shared data manager (this will broadcast to admin portal)
+                    const savedOrder = window.sharedDataManager.addOrder(newOrder);
+                    orders.push(savedOrder);
+
+                    // Update inventory through shared data manager
                     cart.forEach(cartItem => {
                         const product = window.sharedDataManager.getProducts().find(p => p.id === cartItem.id);
                         if (product) {
-                            product.stock = Math.max(0, product.stock - cartItem.quantity);
-                            if (product.stock === 0) {
-                                product.status = 'SOLD OUT';
-                            }
+                            const newStock = Math.max(0, product.stock - cartItem.quantity);
+                            const newStatus = newStock === 0 ? 'SOLD OUT' : product.status;
+
+                            // Update product in shared data manager
+                            window.sharedDataManager.updateProduct(product.id, {
+                                stock: newStock,
+                                status: newStatus
+                            });
                         }
                     });
+
+                    // Clear cart from shared data manager
+                    window.sharedDataManager.clearCart(currentUser.email);
 
                     cart = [];
                     updateAllViews();
