@@ -1805,7 +1805,7 @@
             </div>
             <div style="border-top: 1px solid var(--border-subtle); padding-top: 30px; text-align: center;">
                 <p style="margin-bottom: 8px; font-weight: 600;">&copy; 2025 Faded Skies Wholesale. Licensed Hemp Processor | Farm Bill Compliant</p>
-                <p>📧 info@fadedskieswholesale.com | 📞 (210) 835-7834 | ���� Austin, TX | Premium Quality Guaranteed 🌿</p>
+                <p>📧 info@fadedskieswholesale.com | 📞 (210) 835-7834 | 📍 Austin, TX | Premium Quality Guaranteed 🌿</p>
             </div>
         </div>
     </footer>
@@ -3786,7 +3786,7 @@
                         console.warn('Could not clear session storage');
                     }
                     
-                    currentUser = null;
+                    window.currentUser = null;
                     cart = [];
                     cartOpen = false;
                     
@@ -3863,7 +3863,7 @@
                 case 'product_deleted':
                     products = products.filter(p => p.id !== data.id);
                     updateAllViews();
-                    showNotification(`������️ Product removed: ${data.strain}`, 'warning');
+                    showNotification(`����️ Product removed: ${data.strain}`, 'warning');
                     break;
                 case 'cart_updated':
                     if (currentUser && data.userEmail === currentUser.email) {
