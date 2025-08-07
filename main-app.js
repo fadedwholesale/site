@@ -390,11 +390,11 @@ function updatePartnerProductsDisplay() {
                 <td>${product.stock}</td>
                 <td><span class="status-${product.status.toLowerCase().replace(' ', '')}\">${product.status}</span></td>
                 <td>
-                    ${isAvailable ? 
-                        `<button class="btn btn-primary btn-sm" onclick="addToCart(${product.id})">
+                    ${isAvailable ?
+                        `<button class="btn btn-primary btn-sm" onclick="addToCart(${product.id}, 1)" title="Add ${product.strain} to cart">
                             🛒 Add to Cart
                         </button>` :
-                        `<button class="btn btn-secondary btn-sm" disabled>
+                        `<button class="btn btn-secondary btn-sm" disabled title="${product.status}">
                             ${product.status}
                         </button>`
                     }
