@@ -895,7 +895,7 @@ function forceLogin(email = 'test@example.com') {
         tier: 'Gold Partner',
         loginTime: new Date().toISOString()
     };
-    setCurrentUser(userData);
+    setUserGlobally(userData);
     showUserSession();
     showPartnerPortal();
     showNotification(`🧪 Test login successful: ${userData.name}`, 'success');
