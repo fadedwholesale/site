@@ -288,12 +288,17 @@ function addToCart(productId, quantity = 1) {
 function clearCart() {
     if (window.cartManager) {
         window.cartManager.clear();
+    } else {
+        showNotification('❌ Cart system not ready', 'error');
     }
 }
 
 function checkout() {
     if (window.cartManager) {
         return window.cartManager.checkout();
+    } else {
+        showNotification('❌ Cart system not ready', 'error');
+        return false;
     }
 }
 
