@@ -4252,10 +4252,17 @@
                 showNotification('🛒 Cart is already empty', 'warning');
                 return;
             }
-            
+
+            if (!currentUser) {
+                showNotification('❌ Please log in to clear cart', 'error');
+                return;
+            }
+
             if (confirm('Are you sure you want to clear your entire cart? This action cannot be undone.')) {
                 const itemCount = cart.length;
-                cart = [];
+                // Use shared data manager to clear cart
+                window.sharedDataManager.clearCart(currentUser.email);
+                cart = []; // Update local cart reference
                 updateCartDisplay();
                 showNotification(`🗑️ Cart cleared successfully (${itemCount} items removed)`, 'success');
             }
@@ -5528,7 +5535,7 @@ Phone: (210) 835-7834
                                     }, 1000);
                                 } else {
                                     console.log('❌ Quantity increase test failed');
-                                    showNotification('❌ Quantity increase test failed', 'error');
+                                    showNotification('��� Quantity increase test failed', 'error');
                                 }
                             }, 500);
                         }, 1000);
