@@ -373,8 +373,8 @@ class ModernCartManager {
             if (stored) {
                 const cartData = JSON.parse(stored);
                 
-                // Validate cart data
-                if (this.isValidCartData(cartData)) {
+                // Load cart data
+                if (cartData && cartData.items) {
                     this.state = {
                         ...this.state,
                         ...cartData,
