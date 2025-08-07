@@ -145,20 +145,46 @@ class SharedDataManager {
     }
 
     updateCartQuantity(userEmail, productId, quantity) {
-        const cart = this.getCart(userEmail);
-        const item = cart.find(item => item.id === productId);
-        
-        if (item) {
-            if (quantity <= 0) {
-                return this.removeFromCart(userEmail, productId);
-            } else {
-                const products = this.getProducts();
-                const product = products.find(p => p.id === productId);
-                item.quantity = Math.min(quantity, product ? product.stock : item.maxStock);
-                this.updateCart(userEmail, cart);
+        try {
+            console.log('📡 SharedDataManager: updateCartQuantity called', { userEmail, productId, quantity });
+
+            if (!userEmail || !productId) {
+                console.error('❌ SharedDataManager: Invalid parameters', { userEmail, productId, quantity });
+                throw new Error('Invalid parameters for updateCartQuantity');
             }
+
+            const cart = this.getCart(userEmail);
+            const item = cart.find(item => item.id == productId); // Use loose equality to handle string/number mismatch
+
+            console.log('📡 SharedDataManager: Found cart item:', item);
+
+            if (item) {
+                if (quantity <= 0) {
+                    console.log('📡 SharedDataManager: Removing item with zero/negative quantity');
+                    return this.removeFromCart(userEmail, productId);
+                } else {
+                    const products = this.getProducts();
+                    const product = products.find(p => p.id == productId); // Use loose equality
+                    console.log('📡 SharedDataManager: Found product:', product);
+
+                    const maxAllowed = product ? product.stock : (item.maxStock || 999);
+                    const newQuantity = Math.min(quantity, maxAllowed);
+
+                    console.log('📡 SharedDataManager: Updating quantity', { oldQuantity: item.quantity, newQuantity, maxAllowed });
+
+                    item.quantity = newQuantity;
+                    this.updateCart(userEmail, cart);
+                }
+            } else {
+                console.warn('📡 SharedDataManager: Item not found in cart', { productId, cartItems: cart.map(i => i.id) });
+            }
+
+            console.log('📡 SharedDataManager: Returning updated cart with', cart.length, 'items');
+            return cart;
+        } catch (error) {
+            console.error('❌ SharedDataManager: Error in updateCartQuantity:', error);
+            throw error;
         }
-        return cart;
     }
 
     clearCart(userEmail) {
