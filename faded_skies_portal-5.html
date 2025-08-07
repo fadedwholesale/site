@@ -2695,7 +2695,7 @@
                     showNotification('🌐 Switched to public website', 'success');
                 } else {
                     console.error('Public view element not found');
-                    showNotification('��� Navigation error. Please refresh the page.', 'error');
+                    showNotification('❌ Navigation error. Please refresh the page.', 'error');
                 }
                 
                 console.log('Switched to public website view');
@@ -2904,8 +2904,7 @@
                         detail: { user: currentUser }
                     }));
 
-                    // Validate cart integrity after loading
-                    validateCartIntegrity();
+                    // Cart loaded successfully
 
                     showLoggedInState();
                     closeModal('loginModal');
@@ -4544,7 +4543,7 @@
                 }
                 
                 console.log('✅ Cart display updated successfully');
-                console.log('📊 Final cart stats:', { 
+                console.log('��� Final cart stats:', { 
                     items: cart.length, 
                     totalQuantity: totalItems, 
                     subtotal: subtotal.toFixed(2), 
@@ -4861,7 +4860,7 @@
             console.log('✅ Legacy checkout: proceeding without authentication check');
 
             if (cart.length === 0) {
-                showNotification('⚠�� Your cart is empty! Add some products first.', 'error');
+                showNotification('⚠️ Your cart is empty! Add some products first.', 'error');
                 return;
             }
 
@@ -6257,7 +6256,7 @@ Phone: (210) 835-7834
         // Simulate Admin-Side Product Updates (Demo Function)
         function simulateAdminUpdate() {
             try {
-                console.log('���� Simulating admin-side product update...');
+                console.log('������ Simulating admin-side product update...');
                 
                 // Simulate updating a product (change stock, price, or image)
                 const productToUpdate = products[1]; // Blue Gelatti
