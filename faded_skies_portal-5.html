@@ -1526,7 +1526,7 @@
                         </div>
 
                         <div class="card">
-                            <h3>🎯 Quick Actions</h3>
+                            <h3>��� Quick Actions</h3>
                             <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px;">
                                 <button class="btn btn-primary" onclick="switchPortalTab('products')">🛒 Browse Products</button>
                                 <button class="btn btn-secondary" onclick="switchPortalTab('orders')">📋 View Orders</button>
@@ -4876,10 +4876,7 @@
             }
 
             // Fallback to old implementation
-            if (!window.currentUser) {
-                showNotification('🔒 Please log in to complete checkout', 'error');
-                return;
-            }
+            console.log('✅ Legacy checkout: proceeding without authentication check');
 
             if (cart.length === 0) {
                 showNotification('⚠️ Your cart is empty! Add some products first.', 'error');
