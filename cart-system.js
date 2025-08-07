@@ -74,21 +74,24 @@ class CartManager {
         setTimeout(() => { this.addToCartLock = false; }, 300);
 
         // Check for authentication - ensure current user exists
-        const currentUser = window.currentUser;
-        if (!currentUser || !currentUser.email) {
+        if (!window.currentUser || !window.currentUser.email) {
             this.showNotification('🔒 Please log in to add items to cart', 'error');
-            console.log('❌ Cart: No authenticated user found', { currentUser: !!currentUser, hasEmail: currentUser?.email });
+            console.log('❌ Cart: No authenticated user found', {
+                hasCurrentUser: !!window.currentUser,
+                hasEmail: window.currentUser?.email,
+                windowHasCurrentUser: 'currentUser' in window
+            });
             return false;
         }
 
-        console.log('✅ Cart: Authenticated user found:', currentUser.email);
+        console.log('✅ Cart: Authenticated user found:', window.currentUser.email);
 
         try {
             const products = window.sharedDataManager?.getProducts() || window.products || [];
             const product = products.find(p => p.id == productId);
             
             if (!product) {
-                this.showNotification('�� Product not found', 'error');
+                this.showNotification('❌ Product not found', 'error');
                 return false;
             }
 
