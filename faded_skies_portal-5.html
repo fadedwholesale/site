@@ -2025,7 +2025,7 @@
                 </div>
 
                 <div style="display: flex; gap: 12px; margin-top: 30px;">
-                    <button type="button" class="btn btn-secondary" onclick="previousRegistrationStep()">��� Back</button>
+                    <button type="button" class="btn btn-secondary" onclick="previousRegistrationStep()">← Back</button>
                     <button type="button" class="btn btn-primary" onclick="submitRegistration()" id="submitRegistration" style="flex: 1;">Submit Application 🚀</button>
                 </div>
             </div>
@@ -4431,7 +4431,7 @@
                 }
 
                 console.log('🔄 Updating cart display with', cart.length, 'unique items');
-                console.log('��� Current cart contents:', cart.map(item => `${item.strain} (${item.quantity}x)`));
+                console.log('🛒 Current cart contents:', cart.map(item => `${item.strain} (${item.quantity}x)`));
 
                 const cartItems = document.getElementById('cartItems');
                 const cartCount = document.getElementById('cartCount');
@@ -5167,7 +5167,7 @@ Phone: (210) 835-7834
                 
                 const trackingNumber = `FS${orderId.slice(-3)}2025`;
                 let statusMessage = '';
-                let statusIcon = '📦';
+                let statusIcon = '���';
                 let statusColor = 'var(--brand-green)';
                 
                 switch(order.status) {
@@ -6591,7 +6591,7 @@ Phone: (210) 835-7834
                     </div>
                 </div>
                 <div class="card" style="margin-bottom: 32px;">
-                    <h3>📝 Recent Orders</h3>
+                    <h3>�� Recent Orders</h3>
                     <table class="data-table" style="margin-top: 12px;">
                         <thead>
                             <tr>
@@ -6844,7 +6844,7 @@ Phone: (210) 835-7834
         }
 
         // Wait for all systems to load
-        setTimeout(initializeModernSystems, 100);
+        setTimeout(initializeModernSystems, 1000);
 
         // Global functions for easy testing
         window.testModernCart = function() {
