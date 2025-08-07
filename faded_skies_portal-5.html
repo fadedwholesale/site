@@ -3753,10 +3753,17 @@
                 if (hasSession) {
                     restoreSessionData();
                 }
-                
+
+                // Sync products with shared data manager
+                products = window.sharedDataManager.getProducts();
+                console.log('📦 Loaded', products.length, 'products from shared data manager');
+
+                // Listen for shared data changes
+                window.addEventListener('sharedDataChange', handleSharedDataChange);
+
                 updateAllViews();
                 showPublicWebsite();
-                
+
                 // Force update tables with images after a short delay
                 setTimeout(() => {
                     forceUpdateWithImages();
