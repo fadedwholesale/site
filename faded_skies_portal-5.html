@@ -1794,7 +1794,7 @@
                     • Live Resin Vape Cartridges<br>
                     • Bulk Orders (20lb+ available)<br>
                     • Custom Packaging Solutions<br>
-                    • White Label Opportunities</p>
+                    ��� White Label Opportunities</p>
                 </div>
                 <div class="footer-section">
                     <h4>Partnership Support</h4>
@@ -2076,6 +2076,33 @@
     <script src="cart-system.js"></script>
     <!-- Include Test Functionality -->
     <script src="test-functionality.js"></script>
+
+    <!-- Initialize Cart System -->
+    <script>
+        // Ensure cart manager is properly initialized
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 DOM Content Loaded - Initializing cart system');
+
+            // Double check cart manager is available
+            if (!window.cartManager) {
+                console.log('🛒 Creating cart manager instance');
+                window.cartManager = new window.CartManager();
+            }
+
+            // Check if user is already logged in from session
+            if (window.currentUser) {
+                console.log('🔐 User already authenticated, refreshing cart state');
+                window.cartManager.refreshUserState();
+            }
+
+            console.log('✅ Cart system initialization complete', {
+                hasCartManager: !!window.cartManager,
+                hasSharedDataManager: !!window.sharedDataManager,
+                hasCurrentUser: !!window.currentUser,
+                userEmail: window.currentUser?.email
+            });
+        });
+    </script>
 
     <script>
         // Global State Management
