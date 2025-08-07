@@ -2966,6 +2966,24 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             });
         }
 
+        function updateOrdersDisplay() {
+            // Update the orders section if it exists
+            const ordersCount = orders.length;
+            const pendingOrders = orders.filter(o => o.status === 'PENDING').length;
+
+            // Update dashboard metrics
+            const orderElements = document.querySelectorAll('[data-metric="orders"]');
+            orderElements.forEach(el => el.textContent = ordersCount);
+
+            const pendingElements = document.querySelectorAll('[data-metric="pending-orders"]');
+            pendingElements.forEach(el => el.textContent = pendingOrders);
+
+            // Update orders table
+            updateOrdersTable();
+
+            console.log('📊 Orders display updated:', { total: ordersCount, pending: pendingOrders });
+        }
+
         function updateOrdersTable() {
             const tbody = document.getElementById('ordersBody');
             if (!tbody) return;
