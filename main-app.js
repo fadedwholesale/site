@@ -354,8 +354,8 @@ function updatePublicInventoryDisplay() {
                 <td><span style="color: var(--brand-green); font-weight: 700;">${product.thca}%</span></td>
                 <td><span class="status-available">${product.stock} Available</span></td>
                 <td>
-                    <button class="btn btn-primary btn-sm" onclick="openModal('loginModal')">
-                        🔒 Login to Order
+                    <button class="btn btn-primary btn-sm" onclick="addToCart(${product.id})">
+                        🛒 Add to Cart
                     </button>
                 </td>
             </tr>
@@ -832,7 +832,7 @@ function createBulkOrder() {
 }
 
 function requestCustomQuote() {
-    showNotification('💬 Custom quote request feature coming soon!', 'info');
+    showNotification('��� Custom quote request feature coming soon!', 'info');
 }
 
 function openSupportModal() {
