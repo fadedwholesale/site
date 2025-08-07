@@ -3834,6 +3834,12 @@
                 products = window.sharedDataManager.getProducts();
                 console.log('📦 Loaded', products.length, 'products from shared data manager');
 
+                // Initialize CartManager
+                if (window.CartManager && !window.cartManager) {
+                    window.cartManager = new window.CartManager();
+                    console.log('🛒 Cart manager initialized');
+                }
+
                 // Listen for shared data changes
                 window.addEventListener('sharedDataChange', handleSharedDataChange);
 
