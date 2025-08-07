@@ -2014,7 +2014,7 @@
                 </div>
 
                 <div style="background: var(--surface-elevated); padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <h5 style="color: var(--accent-orange); margin-bottom: 8px;">�� What happens next?</h5>
+                    <h5 style="color: var(--accent-orange); margin-bottom: 8px;">⏳ What happens next?</h5>
                     <ul style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
                         <li>Your application will be sent to our admin team for review</li>
                         <li>We'll verify your documents and business license within 24-48 hours</li>
@@ -2736,7 +2736,7 @@
                     showNotification('📊 Live inventory hidden', 'info');
                 }
                 
-                console.log('���� Live inventory toggled:', inventoryVisible ? 'SHOWN' : 'HIDDEN');
+                console.log('�� Live inventory toggled:', inventoryVisible ? 'SHOWN' : 'HIDDEN');
             } catch (error) {
                 console.error('Error toggling live inventory:', error);
                 showNotification('Inventory toggle error. Please try again.', 'error');
@@ -3761,7 +3761,7 @@
             switch (type) {
                 case 'cart_updated':
                     if (currentUser && data.userEmail === currentUser.email) {
-                        console.log('��� Real-time cart update for current user');
+                        console.log('🔄 Real-time cart update for current user');
                         cart = data.cart;
                         updateCartDisplay();
                         showNotification('🔄 Cart updated in real-time', 'info');
@@ -6325,6 +6325,73 @@ Phone: (210) 835-7834
                 window.forceUpdateWithImages = forceUpdateWithImages;
                 window.testCartFunctionality = testCartFunctionality; // Legacy cart test function
                 window.testCartSystem = testCartSystem; // New cart system test function
+
+                // Test New Cart System
+                function testCartSystem() {
+                    console.log('🧪 Testing new cart system...');
+
+                    if (!currentUser) {
+                        console.log('❌ No user logged in - cannot test cart');
+                        return false;
+                    }
+
+                    if (!window.cartManager) {
+                        console.log('❌ CartManager not initialized');
+                        return false;
+                    }
+
+                    console.log('📊 Cart System Test Results:');
+
+                    // Get cart state
+                    const cartState = window.cartManager.getState();
+                    console.log('  Cart state:', cartState);
+
+                    // Test adding products
+                    const availableProducts = window.sharedDataManager.getProducts().filter(p => p.status === 'AVAILABLE' && p.stock > 0);
+                    if (availableProducts.length === 0) {
+                        console.log('  ⚠️ No available products to test with');
+                        return false;
+                    }
+
+                    // Clear cart first
+                    window.cartManager.clear();
+
+                    // Test 1: Add first product
+                    console.log('  🧪 Testing addProduct...');
+                    const product1 = availableProducts[0];
+                    const addResult1 = window.cartManager.addProduct(product1.id, 1);
+                    console.log(`    Add product 1 result: ${addResult1 ? '✅' : '❌'}`);
+
+                    // Test 2: Add second product if available
+                    if (availableProducts.length > 1) {
+                        console.log('  🧪 Testing multiple products...');
+                        const product2 = availableProducts[1];
+                        const addResult2 = window.cartManager.addProduct(product2.id, 2);
+                        console.log(`    Add product 2 result: ${addResult2 ? '✅' : '❌'}`);
+                    }
+
+                    // Test 3: Update quantity
+                    console.log('  🧪 Testing updateQuantity...');
+                    const updateResult = window.cartManager.updateQuantity(product1.id, 3);
+                    console.log(`    Update quantity result: ${updateResult ? '✅' : '❌'}`);
+
+                    // Test 4: Check cart totals
+                    console.log('  🧪 Testing getTotals...');
+                    const totals = window.cartManager.getTotals();
+                    console.log('    Cart totals:', totals);
+
+                    // Test 5: Remove product
+                    console.log('  🧪 Testing removeProduct...');
+                    const removeResult = window.cartManager.removeProduct(product1.id);
+                    console.log(`    Remove product result: ${removeResult ? '✅' : '❌'}`);
+
+                    // Final state
+                    const finalState = window.cartManager.getState();
+                    console.log('  📊 Final cart state:', finalState);
+
+                    console.log('✅ Cart system test completed');
+                    return true;
+                }
                 window.showInventoryWithImages = function() {
                     try {
                         console.log('🖼️ Showing inventory with images...');
