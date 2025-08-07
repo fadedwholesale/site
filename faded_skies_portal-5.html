@@ -4563,7 +4563,7 @@
                 }
                 
                 console.log('✅ Cart display updated successfully');
-                console.log('���� Final cart stats:', { 
+                console.log('📊 Final cart stats:', { 
                     items: cart.length, 
                     totalQuantity: totalItems, 
                     subtotal: subtotal.toFixed(2), 
@@ -6500,7 +6500,7 @@ Phone: (210) 835-7834
 
         console.log('🌿 Faded Skies Wholesale Portal - CART FIXED VERSION! 🚀');
         console.log('📊 All template literals replaced with string concatenation');
-        console.log('�� Cart quantity +/- buttons now work properly and update ticker');
+        console.log('🛒 Cart quantity +/- buttons now work properly and update ticker');
         console.log('🖼️ Product images ready');
         console.log('🔄 Test functions available:');
         console.log('   - testToggle() - Test toggle functions');
@@ -6692,46 +6692,27 @@ Phone: (210) 835-7834
         function setupModernLogin() {
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
-                loginForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
+                console.log('✅ Found login form, setting up handler');
 
-                    const email = document.getElementById('email').value;
-                    const password = document.getElementById('password').value;
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('📝 Login form submitted');
 
                     try {
-                        if (window.authManager) {
-                            const result = await window.authManager.login({ email, password });
-
-                            if (result.success) {
-                                // Update UI to show authenticated state
-                                updateAuthenticatedUI(result.user);
-
-                                // Close login modal
-                                if (window.closeModal) {
-                                    window.closeModal('loginModal');
-                                }
-
-                                // Show partner portal
-                                if (window.showPartnerPortal) {
-                                    window.showPartnerPortal();
-                                }
-
-                                window.showNotification(`Welcome back, ${result.user.name}! 🎉`, 'success');
-                            } else {
-                                window.showNotification(result.error || 'Login failed', 'error');
-                            }
+                        // Always use the native login function for reliability
+                        if (typeof window.login === 'function') {
+                            window.login(e);
                         } else {
-                            // Fallback to legacy login if auth manager not available
-                            console.log('Falling back to legacy login');
-                            if (window.login) {
-                                window.login(e);
-                            }
+                            console.error('Login function not available');
+                            alert('Login system not available');
                         }
                     } catch (error) {
-                        console.error('Login error:', error);
-                        window.showNotification('Login system error', 'error');
+                        console.error('Login submission error:', error);
+                        alert('Login error: ' + error.message);
                     }
                 });
+            } else {
+                console.warn('Login form not found');
             }
         }
 
