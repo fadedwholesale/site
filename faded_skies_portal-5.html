@@ -4645,6 +4645,12 @@
         });
 
         function addToCart(productId) {
+            // Use new CartManager if available
+            if (window.cartManager) {
+                return window.cartManager.addProduct(productId, 1);
+            }
+
+            // Fallback to old implementation
             if (addToCartLock) return;
             addToCartLock = true;
             setTimeout(() => { addToCartLock = false; }, 300);
@@ -5728,7 +5734,7 @@ Phone: (210) 835-7834
                                         setTimeout(() => {
                                             const finalQuantity = cart.find(item => item.id === testProduct.id)?.quantity;
                                             if (finalQuantity === oldQuantity) {
-                                                console.log('✅ Quantity decrease test passed');
+                                                console.log('��� Quantity decrease test passed');
                                                 showNotification('🎉 Cart functionality test completed successfully!', 'success');
                                             } else {
                                                 console.log('❌ Quantity decrease test failed');
