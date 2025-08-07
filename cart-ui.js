@@ -194,9 +194,11 @@ class CartUIManager {
     setupCartIntegration() {
         if (!window.modernCart) {
             console.warn('Modern cart not found, retrying...');
-            setTimeout(() => this.setupCartIntegration(), 100);
+            setTimeout(() => this.setupCartIntegration(), 500);
             return;
         }
+
+        console.log('✅ Cart integration established');
 
         // Listen to cart events
         window.modernCart.on('state_changed', () => {
