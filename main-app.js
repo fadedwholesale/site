@@ -70,7 +70,7 @@ function loadInitialData() {
 function setupEventListeners() {
     // Listen for authentication events
     window.addEventListener('userAuthenticated', function(event) {
-        console.log('🔐 User authenticated event received');
+        console.log('���� User authenticated event received');
         if (window.cartManager) {
             window.cartManager.refreshUserState();
         }
@@ -273,17 +273,15 @@ function toggleCart() {
 }
 
 function addToCart(productId, quantity = 1) {
-    if (!currentUser) {
-        showNotification('🔒 Please log in to add items to cart', 'error');
-        openModal('loginModal');
-        return false;
-    }
-    
+    console.log('🛒 addToCart called:', { productId, quantity, hasCartManager: !!window.cartManager });
+
     if (window.cartManager) {
         return window.cartManager.addProduct(productId, quantity);
+    } else {
+        console.error('Cart manager not found');
+        showNotification('❌ Cart system not ready', 'error');
+        return false;
     }
-    
-    return false;
 }
 
 function clearCart() {
