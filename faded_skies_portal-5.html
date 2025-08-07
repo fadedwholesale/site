@@ -4663,6 +4663,23 @@
 
         function updateQuantity(productId, quantity) {
             try {
+                // Input validation
+                if (typeof productId === 'undefined' || productId === null) {
+                    console.error('❌ Invalid productId:', productId);
+                    showNotification('❌ Invalid product. Please refresh the page.', 'error');
+                    return;
+                }
+
+                if (typeof quantity === 'undefined' || quantity === null || isNaN(quantity)) {
+                    console.error('❌ Invalid quantity:', quantity);
+                    showNotification('❌ Invalid quantity. Please try again.', 'error');
+                    return;
+                }
+
+                // Convert to numbers to ensure proper comparison
+                productId = parseInt(productId);
+                quantity = parseInt(quantity);
+
                 console.log('🔄 Updating quantity for product:', productId, 'to:', quantity);
 
                 if (!currentUser) {
@@ -4670,12 +4687,33 @@
                     return;
                 }
 
+                // Validate quantity is positive
+                if (quantity < 0) {
+                    console.error('❌ Negative quantity not allowed:', quantity);
+                    showNotification('❌ Quantity cannot be negative.', 'error');
+                    return;
+                }
+
                 const oldCart = [...cart];
                 const oldItem = cart.find(item => item.id === productId);
                 const oldQuantity = oldItem ? oldItem.quantity : 0;
 
+                // Check if item exists in cart
+                if (!oldItem && quantity > 0) {
+                    console.error('❌ Item not found in cart:', productId);
+                    showNotification('❌ Item not found in cart. Please refresh the page.', 'error');
+                    return;
+                }
+
                 // Use shared data manager to update quantity
                 const updatedCart = window.sharedDataManager.updateCartQuantity(currentUser.email, productId, quantity);
+
+                if (!updatedCart) {
+                    console.error('❌ Failed to update cart in shared data manager');
+                    showNotification('❌ Failed to update cart. Please try again.', 'error');
+                    return;
+                }
+
                 cart = updatedCart; // Update local cart reference
 
                 console.log('✅ Quantity updated:', { productId, oldQuantity, newQuantity: quantity });
@@ -4689,9 +4727,12 @@
                     showNotification(`⬆️ Increased ${product.strain} quantity to ${quantity}`, 'success');
                 } else if (quantity < oldQuantity && product) {
                     showNotification(`⬇️ Decreased ${product.strain} quantity to ${quantity}`, 'success');
+                } else if (quantity === 0) {
+                    showNotification(`🗑️ Removed item from cart`, 'success');
                 }
             } catch (error) {
                 console.error('Error updating quantity:', error);
+                console.error('Error details:', { productId, quantity, currentUser: !!currentUser, cartLength: cart.length });
                 showNotification('❌ Error updating quantity. Please try again.', 'error');
             }
         }
