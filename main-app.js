@@ -18,10 +18,9 @@ function setCurrentUser(user) {
     }
     
     // Immediately notify cart manager of auth state change
-    if (window.cartManager) {
+    if (window.modernCart) {
         console.log('🔄 Refreshing cart manager after auth change');
-        window.cartManager.refreshUserState();
-        window.cartManager.updateDisplay();
+        window.modernCart.notifyListeners('auth_changed', { user });
     }
     
     return user;
