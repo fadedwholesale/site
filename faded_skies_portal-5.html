@@ -3502,7 +3502,7 @@
                         
                         const match = e.target.getAttribute('onclick').match(/removeFromCart\((\d+)\)/);
                         if (match) {
-                            console.log('📱 Mobile remove button pressed for product:', match[1]);
+                            console.log('���� Mobile remove button pressed for product:', match[1]);
                             removeFromCart(parseInt(match[1]));
                         }
                     }
@@ -4323,18 +4323,8 @@
         }
 
         function removeFromCart(productId) {
-            if (!currentUser) {
-                showNotification('❌ Please log in to modify cart', 'error');
-                return;
-            }
-
-            const item = cart.find(item => item.id === productId);
-            if (item) {
-                // Use shared data manager to remove from cart
-                const updatedCart = window.sharedDataManager.removeFromCart(currentUser.email, productId);
-                cart = updatedCart; // Update local cart reference
-                updateCartDisplay();
-                showNotification(`🗑️ Removed ${item.strain} from cart`, 'success');
+            if (window.cartManager) {
+                return window.cartManager.removeProduct(productId);
             }
         }
 
