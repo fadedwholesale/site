@@ -109,31 +109,40 @@ class SharedDataManager {
     }
 
     addToCart(userEmail, productId, quantity = 1) {
+        console.log('📡 SharedDataManager: addToCart called', { userEmail, productId, quantity });
+
         const cart = this.getCart(userEmail);
         const products = this.getProducts();
-        const product = products.find(p => p.id === productId);
-        
+        const product = products.find(p => p.id == productId); // Use loose equality
+
         if (!product) {
+            console.error('❌ Product not found:', productId);
             throw new Error('Product not found');
         }
 
-        const existingItem = cart.find(item => item.id === productId);
-        
+        const existingItem = cart.find(item => item.id == productId);
+
         if (existingItem) {
-            existingItem.quantity = Math.min(existingItem.quantity + quantity, product.stock);
+            const newQuantity = Math.min(existingItem.quantity + quantity, product.stock);
+            console.log('📡 Updating existing item quantity:', existingItem.quantity, '->', newQuantity);
+            existingItem.quantity = newQuantity;
         } else {
-            cart.push({
+            const newItem = {
                 id: product.id,
                 strain: product.strain,
                 grade: product.grade,
                 price: product.price,
                 quantity: Math.min(quantity, product.stock),
                 maxStock: product.stock,
-                image: product.image
-            });
+                image: product.image,
+                addedAt: new Date().toISOString()
+            };
+            console.log('📡 Adding new item to cart:', newItem);
+            cart.push(newItem);
         }
 
         this.updateCart(userEmail, cart);
+        console.log('📡 Cart after add:', cart.map(item => `${item.strain}: ${item.quantity}x`));
         return cart;
     }
 
