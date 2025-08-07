@@ -2014,7 +2014,7 @@
                 </div>
 
                 <div style="background: var(--surface-elevated); padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <h5 style="color: var(--accent-orange); margin-bottom: 8px;">���� What happens next?</h5>
+                    <h5 style="color: var(--accent-orange); margin-bottom: 8px;">��� What happens next?</h5>
                     <ul style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
                         <li>Your application will be sent to our admin team for review</li>
                         <li>We'll verify your documents and business license within 24-48 hours</li>
@@ -2330,7 +2330,7 @@
                 document.addEventListener('touchstart', function(e) {
                     const target = e.target;
                     if (target.classList.contains('btn') || target.hasAttribute('onclick')) {
-                        console.log('📱 Touch started on:', target.tagName, target.textContent?.slice(0, 20));
+                        console.log('���� Touch started on:', target.tagName, target.textContent?.slice(0, 20));
                         target.style.backgroundColor = 'rgba(0, 200, 81, 0.2)';
                     }
                 });
@@ -5383,7 +5383,7 @@ Phone: (210) 835-7834
                 modal.innerHTML = `
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h3 class="modal-title">���� Contact Support</h3>
+                            <h3 class="modal-title">����� Contact Support</h3>
                             <button class="modal-close" onclick="closeOrderModal()">×</button>
                         </div>
                         <div style="margin-bottom: 24px;">
@@ -6691,31 +6691,10 @@ Phone: (210) 835-7834
             }
         };
 
-        // Setup modern login integration
         function setupModernLogin() {
-            const loginForm = document.getElementById('loginForm');
+            var loginForm = document.getElementById('loginForm');
             if (loginForm) {
-                console.log('✅ Found login form, setting up handler');
-
-                loginForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    console.log('📝 Login form submitted');
-
-                    try {
-                        // Always use the native login function for reliability
-                        if (typeof window.login === 'function') {
-                            window.login(e);
-                        } else {
-                            console.error('Login function not available');
-                            alert('Login system not available');
-                        }
-                    } catch (error) {
-                        console.error('Login submission error:', error);
-                        alert('Login error: ' + error.message);
-                    }
-                });
-            } else {
-                console.warn('Login form not found');
+                loginForm.addEventListener('submit', window.login);
             }
         }
 
