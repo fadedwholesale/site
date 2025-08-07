@@ -4798,7 +4798,7 @@
             try {
                 // Input validation
                 if (typeof productId === 'undefined' || productId === null) {
-                    console.error('❌ Invalid productId:', productId);
+                    console.error('�� Invalid productId:', productId);
                     showNotification('❌ Invalid product. Please refresh the page.', 'error');
                     return;
                 }
@@ -5567,7 +5567,7 @@ Phone: (210) 835-7834
                     }, 100);
                     
                     // Add visual feedback for mobile
-                    showNotification('📱 Modal opened - tap outside or × to close', 'info');
+                    showNotification('📱 Modal opened - tap outside or �� to close', 'info');
 
                     // Initialize registration modal if opened
                     if (modalId === 'registerModal') {
@@ -6665,16 +6665,9 @@ Phone: (210) 835-7834
             return true;
         };
 
-        // Override legacy toggleCart function
         window.toggleCart = function() {
-            try {
-                if (window.toggleFixedCart) {
-                    window.toggleFixedCart();
-                } else {
-                    console.log('Fixed cart not available yet');
-                }
-            } catch (error) {
-                console.error('Error toggling cart:', error);
+            if (window.toggleFixedCart) {
+                window.toggleFixedCart();
             }
         };
 
