@@ -3740,7 +3740,7 @@
                     showLoggedOutState();
                     showPublicWebsite();
                     updateCartDisplay();
-                    showNotification('🔒 Successfully logged out. Thank you for using Faded Skies!', 'success');
+                    showNotification('�� Successfully logged out. Thank you for using Faded Skies!', 'success');
                 }
             } catch (error) {
                 console.error('Logout error:', error);
@@ -4547,6 +4547,12 @@
         }
 
         function toggleCart() {
+            // Use new CartManager if available
+            if (window.cartManager) {
+                return window.cartManager.toggle();
+            }
+
+            // Fallback to old implementation
             const cartEl = document.getElementById('cart');
             cartOpen = !cartOpen;
 
@@ -4945,7 +4951,7 @@
                         </div>
                     </div>
                     <div style="margin-bottom: 24px;">
-                        <h4 style="color: var(--brand-green); margin-bottom: 12px;">📦 Order Items</h4>
+                        <h4 style="color: var(--brand-green); margin-bottom: 12px;">���� Order Items</h4>
                         <div style="background: var(--surface-card); padding: 16px; border-radius: 12px; border: 1px solid var(--border-subtle);">
                             <p style="color: var(--text-primary); line-height: 1.6;">${order.items}</p>
                         </div>
@@ -6122,7 +6128,7 @@ Phone: (210) 835-7834
             const sharedProducts = window.sharedDataManager.getProducts();
             const sharedCart = window.sharedDataManager.getCart(currentUser.email);
 
-            console.log('📊 Cart Test Results:');
+            console.log('���� Cart Test Results:');
             console.log('  Local cart items:', cart.length);
             console.log('  Shared cart items:', sharedCart.length);
             console.log('  Available products:', sharedProducts.length);
