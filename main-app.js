@@ -127,35 +127,92 @@ function handleSharedDataChange(event) {
 
 // Authentication Functions
 function login(event) {
-    event.preventDefault();
-    
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    try {
+        if (event && event.preventDefault) {
+            event.preventDefault();
+        }
 
-    // Simple authentication (in real app, this would be server-side)
-    if (email && password) {
-        const userData = {
-            email: email,
-            name: email.split('@')[0],
-            tier: 'Gold Partner',
-            loginTime: new Date().toISOString()
-        };
+        console.log('🔐 Login function called');
 
-        // Set user with proper synchronization
-        setCurrentUser(userData);
+        const emailEl = document.getElementById('email');
+        const passwordEl = document.getElementById('password');
 
-        // Update UI
-        showUserSession();
-        closeModal('loginModal');
-        showPartnerPortal();
+        if (!emailEl || !passwordEl) {
+            console.error('Login form elements not found');
+            showNotification('❌ Login form not available', 'error');
+            return;
+        }
 
-        // Notify all systems of authentication
-        window.dispatchEvent(new CustomEvent('userAuthenticated', { detail: currentUser }));
+        const email = emailEl.value;
+        const password = passwordEl.value;
 
-        showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
-        console.log('✅ User logged in:', currentUser.email);
-    } else {
-        showNotification('❌ Please enter valid credentials', 'error');
+        console.log('📧 Email entered:', email ? 'yes' : 'no');
+        console.log('🔑 Password entered:', password ? 'yes' : 'no');
+
+        // Simple authentication (in real app, this would be server-side)
+        if (email && password) {
+            const userData = {
+                email: email,
+                name: email.split('@')[0],
+                tier: 'Gold Partner',
+                loginTime: new Date().toISOString()
+            };
+
+            console.log('👤 User data created:', userData);
+
+            // Set user with proper synchronization
+            setCurrentUser(userData);
+
+            // Update UI
+            try {
+                if (typeof showUserSession === 'function') {
+                    showUserSession();
+                }
+            } catch (error) {
+                console.warn('Error showing user session:', error);
+            }
+
+            try {
+                if (typeof closeModal === 'function') {
+                    closeModal('loginModal');
+                }
+            } catch (error) {
+                console.warn('Error closing modal:', error);
+            }
+
+            try {
+                if (typeof showPartnerPortal === 'function') {
+                    showPartnerPortal();
+                }
+            } catch (error) {
+                console.warn('Error showing partner portal:', error);
+            }
+
+            // Notify all systems of authentication
+            try {
+                window.dispatchEvent(new CustomEvent('userAuthenticated', { detail: currentUser }));
+            } catch (error) {
+                console.warn('Error dispatching auth event:', error);
+            }
+
+            if (typeof showNotification === 'function') {
+                showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
+            }
+            console.log('✅ User logged in:', currentUser.email);
+        } else {
+            if (typeof showNotification === 'function') {
+                showNotification('❌ Please enter valid credentials', 'error');
+            } else {
+                alert('Please enter valid credentials');
+            }
+        }
+    } catch (error) {
+        console.error('❌ Login function error:', error);
+        if (typeof showNotification === 'function') {
+            showNotification('❌ Login system error', 'error');
+        } else {
+            alert('Login system error');
+        }
     }
 }
 
