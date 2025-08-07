@@ -4046,10 +4046,7 @@
                 });
                 
                 // Add form validation styling
-                document.querySelectorAll('input, select, textarea').forEach(input => {
-                    input.addEventListener('blur', validateInput);
-                    input.addEventListener('input', clearValidationError);
-                });
+                // Input setup complete
                 
                 // Add keyboard shortcuts
                 document.addEventListener('keydown', handleKeyboardShortcuts);
@@ -4543,7 +4540,7 @@
                 }
                 
                 console.log('✅ Cart display updated successfully');
-                console.log('��� Final cart stats:', { 
+                console.log('📊 Final cart stats:', { 
                     items: cart.length, 
                     totalQuantity: totalItems, 
                     subtotal: subtotal.toFixed(2), 
@@ -6256,7 +6253,7 @@ Phone: (210) 835-7834
         // Simulate Admin-Side Product Updates (Demo Function)
         function simulateAdminUpdate() {
             try {
-                console.log('������ Simulating admin-side product update...');
+                console.log('���� Simulating admin-side product update...');
                 
                 // Simulate updating a product (change stock, price, or image)
                 const productToUpdate = products[1]; // Blue Gelatti
@@ -6383,7 +6380,7 @@ Phone: (210) 835-7834
 
                 // Test New Cart System
                 function testCartSystem() {
-                    console.log('🧪 Testing new cart system...');
+                    console.log('�� Testing new cart system...');
 
                     if (!currentUser) {
                         console.log('❌ No user logged in - cannot test cart');
