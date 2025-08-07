@@ -3065,13 +3065,21 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         function updateProductStatus(productId, newStatus) {
             const product = products.find(p => p.id === productId);
             if (product) {
-                product.status = newStatus;
-                product.lastModified = new Date().toISOString();
-                product.modifiedBy = currentUser.email;
+                const updates = {
+                    status: newStatus,
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: currentUser.email
+                };
+
+                // Update local array
+                Object.assign(product, updates);
+
+                // Update shared data manager (this will notify partner portals)
+                window.sharedDataManager.updateProduct(productId, updates);
+
                 updateInventoryTable();
                 updateDashboardStats();
                 showNotification(`📊 Status updated for ${product.strain}`, 'success');
-                syncToPortal();
             }
         }
 
