@@ -112,7 +112,7 @@ function handleSharedDataChange(event) {
     }
 }
 
-function login(event) {
+function performLogin(event) {
     if (event && event.preventDefault) {
         event.preventDefault();
     }
@@ -136,7 +136,7 @@ function login(event) {
             loginTime: new Date().toISOString()
         };
 
-        setCurrentUser(userData);
+        setUserGlobally(userData);
 
         if (window.showUserSession) {
             window.showUserSession();
@@ -157,6 +157,9 @@ function login(event) {
         alert('Please enter email and password');
     }
 }
+
+// Alias for compatibility
+window.login = performLogin;
 
 function logout() {
     if (currentUser) {
