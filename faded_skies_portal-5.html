@@ -4757,7 +4757,7 @@
                     });
                     showNotification(`✅ Added ${product.strain} to cart! (${quantity} total)`, 'success');
                 } else {
-                    console.error('��� Product not found in shared data manager:', productId);
+                    console.error('����� Product not found in shared data manager:', productId);
                 }
 
                 updateCartDisplay(); // Ensure cart is always updated
@@ -4866,7 +4866,7 @@
             }
 
             // Fallback to old implementation
-            if (!currentUser) {
+            if (!window.currentUser) {
                 showNotification('🔒 Please log in to complete checkout', 'error');
                 return;
             }
