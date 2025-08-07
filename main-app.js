@@ -77,7 +77,7 @@ function setupEventListeners() {
 
 function handleSharedDataChange(event) {
     const { type, data } = event.detail;
-    console.log('📡 Shared data changed:', type, data);
+    console.log('��� Shared data changed:', type, data);
     
     switch (type) {
         case 'products_updated':
@@ -114,7 +114,10 @@ function login(event) {
             tier: 'Gold Partner',
             loginTime: new Date().toISOString()
         };
-        
+
+        // Set global user reference for cart manager
+        window.currentUser = currentUser;
+
         // Save user session
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         
