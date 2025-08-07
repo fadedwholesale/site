@@ -875,7 +875,7 @@ function debugAuthState() {
     return {
         isAuthenticated: !!(currentUser || window.currentUser),
         userEmail: currentUser?.email || window.currentUser?.email,
-        cartAvailable: !!window.cartManager
+        cartAvailable: !!window.modernCart
     };
 }
 
