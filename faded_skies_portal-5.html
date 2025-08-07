@@ -4700,6 +4700,12 @@
         }
 
         function updateQuantity(productId, quantity) {
+            // Use new CartManager if available
+            if (window.cartManager) {
+                return window.cartManager.updateQuantity(productId, quantity);
+            }
+
+            // Fallback to old implementation
             try {
                 // Input validation
                 if (typeof productId === 'undefined' || productId === null) {
