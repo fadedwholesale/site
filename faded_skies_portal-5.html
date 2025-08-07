@@ -1388,7 +1388,7 @@
                     </div>
                     <div class="grid">
                         <div class="card">
-                            <h3>🌿 THCA Flower</h3>
+                            <h3>���� THCA Flower</h3>
                             <p>Premium indoor and outdoor strains with exceptional terpene profiles. Consistent quality that drives customer loyalty.</p>
                             <div class="price" id="flowerStartingPrice">Starting at $550/lb</div>
                             <button class="btn btn-primary" onclick="toggleLiveInventory()">Browse Strains</button>
@@ -1733,7 +1733,7 @@
                             </p>
                             <div style="display: flex; gap: 16px; flex-wrap: wrap;">
                                 <button class="btn btn-primary" onclick="createBulkOrder()">📦 Create Bulk Order</button>
-                                <button class="btn btn-secondary" onclick="requestCustomQuote()">��� Request Custom Quote</button>
+                                <button class="btn btn-secondary" onclick="requestCustomQuote()">���� Request Custom Quote</button>
                                 <button class="btn btn-secondary" onclick="showNotification('📋 No bulk history found yet', 'warning')">📋 View History</button>
                             </div>
                             
@@ -2088,9 +2088,15 @@
             console.log('🚀 DOM Content Loaded - Initializing cart system');
 
             // Double check cart manager is available
-            if (!window.cartManager) {
-                console.log('🛒 Creating cart manager instance');
-                window.cartManager = new window.CartManager();
+            try {
+                if (!window.cartManager && window.CartManager) {
+                    console.log('🛒 Creating cart manager instance');
+                    window.cartManager = new window.CartManager();
+                } else if (!window.cartManager) {
+                    console.log('🛒 CartManager class not available, skipping');
+                }
+            } catch (error) {
+                console.log('Cart manager creation failed:', error.message);
             }
 
             // Check if user is already logged in from session
