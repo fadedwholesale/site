@@ -34,6 +34,7 @@ function initializeApplication() {
     if (savedUser) {
         try {
             currentUser = JSON.parse(savedUser);
+            window.currentUser = currentUser;
             showUserSession();
             console.log('✅ User session restored:', currentUser.email);
         } catch (error) {
@@ -77,7 +78,7 @@ function setupEventListeners() {
 
 function handleSharedDataChange(event) {
     const { type, data } = event.detail;
-    console.log('��� Shared data changed:', type, data);
+    console.log('📡 Shared data changed:', type, data);
     
     switch (type) {
         case 'products_updated':
