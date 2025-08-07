@@ -35,7 +35,7 @@ let currentFilter = 'all';
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('�� Faded Skies Portal initializing...');
+    console.log('🚀 Faded Skies Portal initializing...');
     initializeApplication();
     loadInitialData();
     setupEventListeners();
@@ -869,8 +869,8 @@ function debugAuthState() {
         localCurrentUser: currentUser,
         windowCurrentUser: window.currentUser,
         localStorageUser: localStorage.getItem('currentUser'),
-        cartManager: !!window.cartManager,
-        cartState: window.cartManager ? window.cartManager.getState() : 'not available'
+        modernCart: !!window.modernCart,
+        cartState: window.modernCart ? window.modernCart.getState() : 'not available'
     });
     return {
         isAuthenticated: !!(currentUser || window.currentUser),
