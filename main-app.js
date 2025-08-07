@@ -266,14 +266,27 @@ function toggleCart() {
 }
 
 function addToCart(productId, quantity = 1) {
+    console.log('🛒 addToCart called:', { productId, quantity, currentUser: !!currentUser, windowCurrentUser: !!window.currentUser });
+
     if (!currentUser || !window.currentUser) {
+        console.log('❌ Authentication check failed:', {
+            localCurrentUser: !!currentUser,
+            windowCurrentUser: !!window.currentUser,
+            localUserEmail: currentUser?.email,
+            windowUserEmail: window.currentUser?.email
+        });
         showNotification('🔒 Please log in to add items to cart', 'error');
         openModal('loginModal');
         return false;
     }
 
+    console.log('✅ Authentication check passed, calling cart manager');
+
     if (window.cartManager) {
         return window.cartManager.addProduct(productId, quantity);
+    } else {
+        console.error('❌ Cart manager not found');
+        showNotification('❌ Cart system not available', 'error');
     }
 
     return false;
