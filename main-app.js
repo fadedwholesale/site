@@ -57,8 +57,13 @@ function initializeApplication() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
         try {
+<<<<<<< HEAD
             const userData = JSON.parse(savedUser);
             setCurrentUser(userData);
+=======
+            currentUser = JSON.parse(savedUser);
+            window.currentUser = currentUser;
+>>>>>>> origin/main
             showUserSession();
             console.log('✅ User session restored:', currentUser.email);
         } catch (error) {
@@ -127,10 +132,10 @@ function handleSharedDataChange(event) {
 // Authentication Functions
 function login(event) {
     event.preventDefault();
-    
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    
+
     // Simple authentication (in real app, this would be server-side)
     if (email && password) {
         const userData = {
@@ -140,15 +145,27 @@ function login(event) {
             loginTime: new Date().toISOString()
         };
 
+<<<<<<< HEAD
         // Set user with proper synchronization
         setCurrentUser(userData);
+=======
+        // Set global window.currentUser for cart access
+        window.currentUser = currentUser;
+
+        // Save user session
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+>>>>>>> origin/main
 
         // Update UI
         showUserSession();
         closeModal('loginModal');
         showPartnerPortal();
 
+<<<<<<< HEAD
         // Notify all systems of authentication
+=======
+        // Notify cart manager
+>>>>>>> origin/main
         window.dispatchEvent(new CustomEvent('userAuthenticated', { detail: currentUser }));
 
         showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
@@ -161,16 +178,27 @@ function login(event) {
 function logout() {
     if (currentUser) {
         const userName = currentUser.name;
+<<<<<<< HEAD
 
         // Clear cart first
+=======
+        currentUser = null;
+        window.currentUser = null;
+        localStorage.removeItem('currentUser');
+
+        // Clear cart
+>>>>>>> origin/main
         if (window.cartManager) {
             window.cartManager.cart = [];
             window.cartManager.updateDisplay();
         }
 
+<<<<<<< HEAD
         // Clear authentication state
         setCurrentUser(null);
 
+=======
+>>>>>>> origin/main
         // Update UI
         showGuestSession();
         showPublicWebsite();
@@ -186,12 +214,17 @@ function showUserSession() {
     const userWelcome = document.getElementById('userWelcome');
     const userBadge = document.getElementById('userBadge');
     const cartToggle = document.getElementById('cartToggle');
-    
+
     if (guestSection) guestSection.style.display = 'none';
     if (userSession) userSession.classList.add('show');
     if (userWelcome) userWelcome.textContent = `Welcome, ${currentUser.name}`;
     if (userBadge) userBadge.textContent = currentUser.tier || 'PARTNER';
     if (cartToggle) cartToggle.style.display = 'inline-flex';
+
+    // Update cart display immediately for authenticated user
+    if (window.cartManager) {
+        window.cartManager.updateDisplay();
+    }
 }
 
 function showGuestSession() {
@@ -283,13 +316,38 @@ function toggleCart() {
 }
 
 function addToCart(productId, quantity = 1) {
+<<<<<<< HEAD
+=======
+    console.log('🛒 addToCart called:', { productId, quantity, currentUser: !!currentUser, windowCurrentUser: !!window.currentUser });
+
+    if (!currentUser || !window.currentUser) {
+        console.log('❌ Authentication check failed:', {
+            localCurrentUser: !!currentUser,
+            windowCurrentUser: !!window.currentUser,
+            localUserEmail: currentUser?.email,
+            windowUserEmail: window.currentUser?.email
+        });
+        showNotification('🔒 Please log in to add items to cart', 'error');
+        openModal('loginModal');
+        return false;
+    }
+
+    console.log('✅ Authentication check passed, calling cart manager');
+
+>>>>>>> origin/main
     if (window.cartManager) {
         return window.cartManager.addProduct(productId, quantity);
     } else {
         console.error('❌ Cart manager not found');
         showNotification('❌ Cart system not available', 'error');
+<<<<<<< HEAD
         return false;
     }
+=======
+    }
+
+    return false;
+>>>>>>> origin/main
 }
 
 function clearCart() {
@@ -403,11 +461,11 @@ function updatePartnerProductsDisplay() {
                 <td>${product.stock}</td>
                 <td><span class="status-${product.status.toLowerCase().replace(' ', '')}\">${product.status}</span></td>
                 <td>
-                    ${isAvailable ? 
-                        `<button class="btn btn-primary btn-sm" onclick="addToCart(${product.id})">
+                    ${isAvailable ?
+                        `<button class="btn btn-primary btn-sm" onclick="addToCart(${product.id}, 1)" title="Add ${product.strain} to cart">
                             🛒 Add to Cart
                         </button>` :
-                        `<button class="btn btn-secondary btn-sm" disabled>
+                        `<button class="btn btn-secondary btn-sm" disabled title="${product.status}">
                             ${product.status}
                         </button>`
                     }
