@@ -2014,7 +2014,7 @@
                 </div>
 
                 <div style="background: var(--surface-elevated); padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <h5 style="color: var(--accent-orange); margin-bottom: 8px;">⏳ What happens next?</h5>
+                    <h5 style="color: var(--accent-orange); margin-bottom: 8px;">��� What happens next?</h5>
                     <ul style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
                         <li>Your application will be sent to our admin team for review</li>
                         <li>We'll verify your documents and business license within 24-48 hours</li>
@@ -2289,7 +2289,7 @@
         // Initialize Application with Session Restoration and Mobile Support - FIXED
         document.addEventListener('DOMContentLoaded', function() {
             try {
-                console.log('�� DOM Content Loaded - Starting initialization...');
+                console.log('🚀 DOM Content Loaded - Starting initialization...');
                 
                 // Detect mobile device
                 const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -3283,6 +3283,11 @@
                         if (window.cartManager) {
                             window.cartManager.refreshUserState();
                         }
+
+                        // Dispatch authentication event for cart manager
+                        window.dispatchEvent(new CustomEvent('userAuthenticated', {
+                            detail: { user: window.currentUser }
+                        }));
 
                         showNotification('👋 Welcome back! Your session has been restored.', 'success');
                         return true;
