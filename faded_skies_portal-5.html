@@ -3891,7 +3891,7 @@
 
         // Enhanced initialization with mobile-first approach and image support
         function initializeApp() {
-            console.log('🌿 Initializing Faded Skies Wholesale Portal...');
+            console.log('���� Initializing Faded Skies Wholesale Portal...');
             
             try {
                 // Check for existing session first
@@ -4861,7 +4861,7 @@
                 } else if (quantity < oldQuantity && product) {
                     showNotification(`⬇️ Decreased ${product.strain} quantity to ${quantity}`, 'success');
                 } else if (quantity === 0) {
-                    showNotification(`������ Removed item from cart`, 'success');
+                    showNotification(`����️ Removed item from cart`, 'success');
                 }
             } catch (error) {
                 console.error('Error updating quantity:', error);
@@ -4978,7 +4978,7 @@
                     
                     // Show order details
                     setTimeout(() => {
-                        if (confirm('🎯 Order created successfully! Would you like to view order details?')) {
+                        if (confirm('�� Order created successfully! Would you like to view order details?')) {
                             viewOrderDetails(newOrder.id);
                         }
                     }, 5000);
@@ -6867,8 +6867,8 @@ Phone: (210) 835-7834
             console.log('📊 System status:');
             console.log('  - Auth Manager:', !!window.authManager);
             console.log('  - Modern Cart:', !!window.modernCart);
-            console.log('  - Cart UI:', !!window.cartUI);
-            console.log('  - Simple Cart UI:', !!window.simpleCartUI);
+            console.log('  - Fixed Cart UI:', !!window.toggleFixedCart);
+            console.log('  - Update Function:', !!window.updateFixedCartDisplay);
         }
 
         // Wait for all systems to load
