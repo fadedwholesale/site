@@ -1760,7 +1760,7 @@
     <div id="cart" class="cart">
         <div class="cart-header">
             <h3 class="cart-title">Shopping Cart</h3>
-            <button class="cart-close" onclick="toggleCart()">��</button>
+            <button class="cart-close" onclick="toggleCart()">×</button>
         </div>
         <div class="cart-items" id="cartItems">
             <!-- Cart items will be added here -->
@@ -4511,7 +4511,7 @@
                 }
                 if (cartCount2) {
                     cartCount2.textContent = finalTotalItems;
-                    console.log('��� Final cartCount2 update:', finalTotalItems);
+                    console.log('🎯 Final cartCount2 update:', finalTotalItems);
                 }
                 
             } catch (error) {
@@ -4675,11 +4675,13 @@
             }
 
             // Fallback to old implementation
+            console.log('⚠️ Falling back to legacy addToCart implementation');
             if (addToCartLock) return;
             addToCartLock = true;
             setTimeout(() => { addToCartLock = false; }, 300);
 
             if (!currentUser) {
+                console.log('❌ Legacy addToCart: No authenticated user');
                 showNotification('🔒 Please log in as a partner to add items to cart', 'error');
                 openModal('loginModal');
                 return;
@@ -5770,7 +5772,7 @@ Phone: (210) 835-7834
                                         setTimeout(() => {
                                             const finalQuantity = cart.find(item => item.id === testProduct.id)?.quantity;
                                             if (finalQuantity === oldQuantity) {
-                                                console.log('���� Quantity decrease test passed');
+                                                console.log('��� Quantity decrease test passed');
                                                 showNotification('🎉 Cart functionality test completed successfully!', 'success');
                                             } else {
                                                 console.log('❌ Quantity decrease test failed');
