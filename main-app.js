@@ -36,6 +36,12 @@ function initializeApplication() {
             currentUser = JSON.parse(savedUser);
             window.currentUser = currentUser;
             showUserSession();
+
+            // Refresh cart manager if it exists
+            if (window.cartManager) {
+                window.cartManager.refreshUserState();
+            }
+
             console.log('✅ User session restored:', currentUser.email);
         } catch (error) {
             console.error('Error restoring user session:', error);
@@ -789,7 +795,7 @@ function handleFileUpload(input, documentType) {
             previewContainer.innerHTML = `
                 <div class="file-preview-item">
                     <div class="file-info">
-                        <span class="file-icon">📄</span>
+                        <span class="file-icon">����</span>
                         <div class="file-details">
                             <div class="file-name">${file.name}</div>
                             <div class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
