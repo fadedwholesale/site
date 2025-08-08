@@ -514,19 +514,28 @@ class LiveDataManager {
                     orderId: order.id
                 });
 
-                // Check for low stock
-                if (newStock <= 5) {
-                    this.log('warning', 'Low stock alert', {
-                        productId: product.id,
-                        strain: product.strain,
-                        currentStock: newStock
-                    });
+                // Check for low stock with realistic threshold and rate limiting
+                if (newStock <= 3 && newStock > 0) {
+                    const alertKey = `lowStockAlert_${product.id}`;
+                    const lastAlert = localStorage.getItem(alertKey);
+                    const now = Date.now();
 
-                    if (window.showNotification) {
-                        window.showNotification(
-                            `⚠️ Low stock alert: ${product.strain} (${newStock} remaining)`,
-                            'warning'
-                        );
+                    // Only send alert once per hour to prevent spam
+                    if (!lastAlert || (now - parseInt(lastAlert)) > 3600000) {
+                        this.log('warning', 'Low stock alert', {
+                            productId: product.id,
+                            strain: product.strain,
+                            currentStock: newStock
+                        });
+
+                        if (window.showNotification) {
+                            window.showNotification(
+                                `⚠️ Low Stock: ${product.strain} (${newStock} remaining)`,
+                                'warning'
+                            );
+                        }
+
+                        localStorage.setItem(alertKey, now.toString());
                     }
                 }
             }
