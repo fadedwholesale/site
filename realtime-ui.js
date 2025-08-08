@@ -284,10 +284,18 @@ class RealTimeUI {
             window.updateAllViews();
         }
         
-        // Show stock alert if low
-        if (inventoryData.newStock !== undefined && inventoryData.newStock < 5) {
-            if (window.showNotification) {
-                window.showNotification(`⚠️ Low stock alert: ${inventoryData.productName} (${inventoryData.newStock} remaining)`, 'warning');
+        // Show stock alert if genuinely low (3 or fewer)
+        if (inventoryData.newStock !== undefined && inventoryData.newStock <= 3 && inventoryData.newStock > 0) {
+            const alertKey = `lowStockAlert_${inventoryData.productId}`;
+            const lastAlert = localStorage.getItem(alertKey);
+            const now = Date.now();
+
+            // Only show alert once per hour to prevent spam
+            if (!lastAlert || (now - parseInt(lastAlert)) > 3600000) {
+                if (window.showNotification) {
+                    window.showNotification(`⚠️ Low Stock: ${inventoryData.productName} (${inventoryData.newStock} remaining)`, 'warning');
+                }
+                localStorage.setItem(alertKey, now.toString());
             }
         }
     }
