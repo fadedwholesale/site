@@ -2403,7 +2403,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
     <div id="orderDetailsModal" class="modal">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
-                <h3 class="modal-title">Order Details 📋</h3>
+                <h3 class="modal-title">Order Details ����</h3>
                 <button class="modal-close" onclick="closeModal('orderDetailsModal')">×</button>
             </div>
             <div id="orderDetailsContent">
@@ -3742,8 +3742,8 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             document.getElementById('newDescription').value = product.description || '';
             // Photo preview
             const photoPreview = document.getElementById('photoPreview');
-            if (product.photo) {
-                photoPreview.innerHTML = `<img src="${product.photo}" alt="Photo" style="width:80px;height:80px;object-fit:cover;border-radius:8px;">`;
+            if (product.image || product.photo) {
+                photoPreview.innerHTML = `<img src="${product.image || product.photo}" alt="Photo" style="width:80px;height:80px;object-fit:cover;border-radius:8px;">`;
             } else {
                 photoPreview.innerHTML = '';
             }
