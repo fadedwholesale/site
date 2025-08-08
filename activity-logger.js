@@ -134,13 +134,14 @@ class ActivityLogger {
             }
         };
 
-        // Add to session events
+        // Add to session events (simplified to prevent circular references)
         if (this.currentSession) {
             this.currentSession.events.push({
                 timestamp: logEntry.timestamp,
                 level: level,
                 message: message,
-                data: data
+                dataType: typeof data,
+                hasData: data !== null && data !== undefined
             });
 
             // Limit session events
@@ -549,54 +550,87 @@ class ActivityLogger {
     }
 
     // Safe JSON serialization that handles circular references
-    safeJSONStringify(obj, maxDepth = 10) {
+    safeJSONStringify(obj, maxDepth = 5) {
         const seen = new WeakSet();
-        let depth = 0;
+        const stack = [];
 
         const replacer = (key, value) => {
+            // Skip problematic keys that often cause circular references
+            if (key === 'events' && Array.isArray(value) && value.length > 10) {
+                return `[${value.length} events - truncated for safety]`;
+            }
+
+            if (key === 'data' && typeof value === 'object' && value !== null) {
+                // Check if this data object contains session references
+                if (value.sessionId || value.currentSession) {
+                    return '[Data object - truncated to prevent circular reference]';
+                }
+            }
+
+            // Handle null and primitives
+            if (value === null || typeof value !== 'object') {
+                if (typeof value === 'function') return '[Function]';
+                if (value === undefined) return '[Undefined]';
+                return value;
+            }
+
             // Handle circular references
-            if (typeof value === 'object' && value !== null) {
-                if (seen.has(value)) {
-                    return '[Circular Reference]';
-                }
-                seen.add(value);
+            if (seen.has(value)) {
+                return '[Circular Reference]';
             }
 
-            // Handle functions
-            if (typeof value === 'function') {
-                return '[Function]';
+            // Check stack depth
+            if (stack.length >= maxDepth) {
+                return '[Maximum depth reached]';
             }
 
-            // Handle undefined
-            if (value === undefined) {
-                return '[Undefined]';
-            }
+            seen.add(value);
+            stack.push(value);
 
-            // Handle large arrays/objects by limiting depth
-            if (typeof value === 'object' && value !== null) {
-                depth++;
-                if (depth > maxDepth) {
-                    depth--;
-                    return '[Maximum depth reached]';
+            try {
+                // Handle arrays
+                if (Array.isArray(value)) {
+                    if (value.length > 50) {
+                        const result = `[Array with ${value.length} items - truncated]`;
+                        stack.pop();
+                        return result;
+                    }
                 }
 
-                // Create a safe copy for complex objects
-                if (Array.isArray(value) && value.length > 100) {
-                    depth--;
-                    return `[Array with ${value.length} items - truncated]`;
+                // For objects, create a simplified version
+                if (typeof value === 'object') {
+                    const keys = Object.keys(value);
+                    if (keys.length > 20) {
+                        const result = `[Object with ${keys.length} properties - truncated]`;
+                        stack.pop();
+                        return result;
+                    }
                 }
 
-                depth--;
+                stack.pop();
+                return value;
+            } catch (error) {
+                stack.pop();
+                return '[Error serializing object]';
             }
-
-            return value;
         };
 
         try {
-            return JSON.stringify(obj, replacer);
+            return JSON.stringify(obj, replacer, 2);
         } catch (error) {
-            console.warn('JSON stringify fallback:', error);
-            return JSON.stringify({ error: 'Failed to serialize', message: error.message });
+            // Complete fallback - return basic info only
+            try {
+                const basic = {
+                    error: 'Serialization failed',
+                    message: error.message,
+                    type: typeof obj,
+                    isArray: Array.isArray(obj),
+                    timestamp: new Date().toISOString()
+                };
+                return JSON.stringify(basic);
+            } catch (fallbackError) {
+                return '{"error":"Complete serialization failure"}';
+            }
         }
     }
 
