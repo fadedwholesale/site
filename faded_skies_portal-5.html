@@ -2004,14 +2004,20 @@
                 <button class="modal-close" onclick="closeModal('profileEditModal')">×</button>
             </div>
             <form onsubmit="updateProfile(event)">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="editBusinessName">Business Name *</label>
-                        <input type="text" id="editBusinessName" required placeholder="Your licensed business name">
-                    </div>
-                    <div class="form-group">
-                        <label for="editContactName">Contact Name *</label>
-                        <input type="text" id="editContactName" required placeholder="Your full name">
+                <!-- Business Information Section -->
+                <div class="form-section" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);">
+                    <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        🏢 Business Information
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editBusinessName">Business Name *</label>
+                            <input type="text" id="editBusinessName" required placeholder="Your licensed business name">
+                        </div>
+                        <div class="form-group">
+                            <label for="editContactName">Contact Name *</label>
+                            <input type="text" id="editContactName" required placeholder="Your full name">
+                        </div>
                     </div>
                 </div>
                 <div class="form-row">
@@ -2873,7 +2879,7 @@
 ✅ E-commerce Functionality
    • Shopping cart with real-time inventory checking
    • Order processing with status tracking
-   • Invoice generation and download
+   �� Invoice generation and download
 
 ✅ Partner Portal
    • Complete dashboard with 6 functional tabs
@@ -2955,7 +2961,7 @@
                     showNotification('📊 Welcome to your Partner Portal!', 'success');
                 } else {
                     console.error('Partner view element not found');
-                    showNotification('�� Portal loading error. Please try again.', 'error');
+                    showNotification('❌ Portal loading error. Please try again.', 'error');
                 }
                 
                 console.log('Switched to partner portal view');
@@ -4955,7 +4961,7 @@ Phone: (210) 835-7834
                             <div style="color: var(--text-primary); font-size: 15px;">${order.delivery ? order.delivery.charAt(0).toUpperCase() + order.delivery.slice(1) : 'Standard'}</div>
                         </div>
                         <div style="display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
-                            <button class="btn btn-secondary" onclick="window.open('https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}','_blank')">�� Track on Carrier</button>
+                            <button class="btn btn-secondary" onclick="window.open('https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}','_blank')">🔗 Track on Carrier</button>
                             <button class="btn btn-secondary" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">Close</button>
                         </div>
                     </div>
@@ -5829,7 +5835,7 @@ Phone: (210) 835-7834
                     });
                 });
                 
-                console.log(`✅ Modal triggers setup complete (${uniqueTriggers.length} triggers found)`);
+                console.log(`�� Modal triggers setup complete (${uniqueTriggers.length} triggers found)`);
                 
             } catch (error) {
                 console.error('Error setting up modal triggers:', error);
