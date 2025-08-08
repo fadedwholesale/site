@@ -2125,7 +2125,7 @@
                     </div>
                     <div class="grid">
                         <div class="card">
-                            <h3>🌿 THCA Flower</h3>
+                            <h3>��� THCA Flower</h3>
                             <p>Premium indoor and outdoor strains with exceptional terpene profiles. Consistent quality that drives customer loyalty.</p>
                             <div class="price" id="flowerStartingPrice">Starting at $550/lb</div>
                             <button class="btn btn-primary" onclick="toggleLiveInventory()">Browse Strains</button>
@@ -4118,7 +4118,7 @@
                 console.log('Switched to public website view');
             } catch (error) {
                 console.error('Error showing public website:', error);
-                showNotification('❌ Navigation error. Please refresh the page.', 'error');
+                showNotification('�� Navigation error. Please refresh the page.', 'error');
             }
         }
 
@@ -4981,6 +4981,21 @@
                 console.error('❌ Error loading system logos:', error);
             }
         }
+
+        // Handle logo updates
+        function handleLogoUpdate(logos) {
+            console.log('📷 Handling logo update:', logos);
+            loadSystemLogos();
+            showNotification('📷 Logo updated successfully', 'success');
+        }
+
+        // Listen for shared data changes including logo updates
+        window.addEventListener('sharedDataChange', function(event) {
+            const { type, data } = event.detail;
+            if (type === 'logos_updated' || type === 'system_config_updated') {
+                handleLogoUpdate(data);
+            }
+        });
 
         // Enhanced initialization with mobile-first approach and image support
         function initializeApp() {
