@@ -307,7 +307,7 @@ class CartManager {
             }
             if (cartCount2) {
                 cartCount2.textContent = totals.totalItems;
-                console.log('��� Updated cartCount2 to:', totals.totalItems);
+                console.log('✅ Updated cartCount2 to:', totals.totalItems);
             }
 
             if (!cartItems) {
@@ -338,7 +338,7 @@ class CartManager {
                 }).join('');
 
                 cartItems.innerHTML = cartItemsHTML;
-                console.log('��� Cart items HTML updated with', this.cart.length, 'items');
+                console.log('✅ Cart items HTML updated with', this.cart.length, 'items');
 
                 // Verify DOM update
                 setTimeout(() => {
@@ -452,30 +452,35 @@ class CartManager {
     updateCartTotalSection(totals) {
         const cartTotalSection = document.querySelector('.cart-total');
         if (cartTotalSection) {
+            console.log('💰 Updating cart total section with:', totals);
             cartTotalSection.innerHTML = `
-                <div style="margin-bottom: 16px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span>Subtotal:</span>
-                        <span>$${totals.subtotal.toFixed(2)}</span>
+                <div style="margin-bottom: 20px; padding: 16px; background: var(--surface-elevated); border-radius: 12px; border: 1px solid var(--border-subtle);">
+                    <h4 style="margin: 0 0 12px 0; color: var(--brand-green); font-size: 16px;">Order Summary</h4>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--text-primary);">
+                        <span>Subtotal (${totals.itemCount} items):</span>
+                        <span style="font-weight: 600;">$${totals.subtotal.toFixed(2)}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; color: var(--text-primary);">
                         <span>Shipping:</span>
-                        <span style="color: ${totals.shipping === 0 ? 'var(--brand-green)' : 'var(--text-primary)'};">
-                            ${totals.shipping === 0 ? 'FREE' : '$' + totals.shipping.toFixed(2)}
+                        <span style="color: ${totals.shipping === 0 ? 'var(--brand-green)' : 'var(--text-primary)'}; font-weight: 600;">
+                            ${totals.shipping === 0 ? 'FREE 🚚' : '$' + totals.shipping.toFixed(2)}
                         </span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; border-top: 1px solid var(--border-color); padding-top: 8px;">
+                    ${totals.shipping === 0 ? '<div style="color: var(--brand-green); font-size: 12px; margin-bottom: 12px;">✅ Free shipping on orders over $1,000!</div>' : ''}
+                    <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 20px; border-top: 2px solid var(--border-subtle); padding-top: 12px; color: var(--text-primary);">
                         <span>Total:</span>
                         <span style="color: var(--brand-green);">$${totals.total.toFixed(2)}</span>
                     </div>
                 </div>
-                <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 16px; font-weight: 600;" onclick="window.cartManager.checkout()">
-                    Place Order 🚀
+                <button class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 700; border-radius: 8px;" onclick="window.cartManager.checkout()">
+                    🚀 Place Order - $${totals.total.toFixed(2)}
                 </button>
-                <button class="btn btn-secondary" style="width: 100%; margin-top: 8px;" onclick="window.cartManager.clear()">
-                    Clear Cart
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 8px; padding: 10px; border-radius: 8px;" onclick="window.cartManager.clear()">
+                    🗑️ Clear Cart
                 </button>
             `;
+        } else {
+            console.warn('Cart total section not found');
         }
     }
 
