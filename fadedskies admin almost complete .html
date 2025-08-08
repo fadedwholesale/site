@@ -2748,7 +2748,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 });
 
                 console.log('✅ System logo updated:', updatedLogos);
-                showNotification('📷 Logo updated and synced to all portals!', 'success');
+                showNotification('���� Logo updated and synced to all portals!', 'success');
 
                 // Immediately refresh logos
                 loadSystemLogos();
@@ -6322,7 +6322,7 @@ Faded Skies Wholesale Team`
                         <td>
                             <div style="display: flex; gap: 8px;">
                                 <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openApplicationReview('${app.applicationId}')">
-                                    📋 Review
+                                    ���� Review
                                 </button>
                                 ${app.status === 'pending' ? `
                                     <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); quickApproveApplication('${app.applicationId}')">
@@ -6899,6 +6899,56 @@ Faded Skies Partnership Team`
         window.quickApproveApplication = quickApproveApplication;
         window.quickRejectApplication = quickRejectApplication;
 
+        // Initialize logger status monitoring
+        function updateLoggerStatus() {
+            const loggerStatusDiv = document.getElementById('loggerStatus');
+            const loggerStatusText = document.getElementById('loggerStatusText');
+
+            if (window.simpleLogger && window.simpleLogger.getStatus) {
+                const status = window.simpleLogger.getStatus();
+                const stats = window.simpleLogger.getStats();
+
+                if (status.initialized) {
+                    loggerStatusDiv.style.display = 'flex';
+                    loggerStatusText.textContent = `Logger Active (${stats.total || 0} logs)`;
+                    loggerStatusDiv.style.borderColor = 'var(--brand-green)';
+                    loggerStatusDiv.style.color = 'var(--brand-green)';
+                } else {
+                    loggerStatusDiv.style.display = 'flex';
+                    loggerStatusText.textContent = 'Logger Inactive';
+                    loggerStatusDiv.style.borderColor = 'var(--accent-orange)';
+                    loggerStatusDiv.style.color = 'var(--accent-orange)';
+                }
+            } else {
+                loggerStatusDiv.style.display = 'flex';
+                loggerStatusText.textContent = 'Logger Loading...';
+                loggerStatusDiv.style.borderColor = 'var(--accent-orange)';
+                loggerStatusDiv.style.color = 'var(--accent-orange)';
+            }
+        }
+
+        // Enhanced system communication test
+        function testSystemCommunication() {
+            if (window.simpleLogger) {
+                window.simpleLogger.system('Admin portal system communication test', {
+                    admin: currentUser?.email || 'system',
+                    timestamp: new Date().toISOString(),
+                    portalType: 'admin',
+                    testType: 'communication_verification',
+                    sharedDataManager: !!window.sharedDataManager,
+                    realTimeSync: !!window.realTimeSync,
+                    system: 'admin-portal'
+                });
+
+                // Update status display
+                updateLoggerStatus();
+
+                console.log('📊 Admin Portal: System communication test completed');
+                return true;
+            }
+            return false;
+        }
+
         // Initialize live systems when everything is loaded
         document.addEventListener('DOMContentLoaded', function() {
             // Wait for all scripts to load, then initialize live systems
@@ -6906,6 +6956,19 @@ Faded Skies Partnership Team`
                 if (typeof initializeLiveSystems === 'function') {
                     initializeLiveSystems();
                 }
+
+                // Initialize logger status monitoring
+                updateLoggerStatus();
+
+                // Test system communication every 30 seconds
+                setInterval(() => {
+                    updateLoggerStatus();
+                }, 30000);
+
+                // Test communication immediately
+                setTimeout(() => {
+                    testSystemCommunication();
+                }, 2000);
             }, 1000);
         });
     </script>
