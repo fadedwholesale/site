@@ -491,8 +491,8 @@ class CartManager {
                         <span style="color: var(--brand-green);">$${totals.total.toFixed(2)}</span>
                     </div>
                 </div>
-                <button class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 700; border-radius: 8px;" onclick="window.cartManager.checkout()">
-                    🚀 Place Order - $${totals.total.toFixed(2)}
+                <button class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 700; border-radius: 8px;" onclick="window.cartManager.openCheckoutModal()">
+                    🛒 Checkout - $${totals.total.toFixed(2)}
                 </button>
                 <button class="btn btn-secondary" style="width: 100%; margin-top: 8px; padding: 10px; border-radius: 8px;" onclick="window.cartManager.clear()">
                     🗑️ Clear Cart
