@@ -1937,7 +1937,7 @@
     <div id="addProductModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Add New Product 🌿</h3>
+                <h3 class="modal-title">Add New Product ����</h3>
                 <button class="modal-close" onclick="closeModal('addProductModal')">×</button>
             </div>
             <form onsubmit="addProduct(event)">
@@ -3168,7 +3168,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     break;
                 case 'cart_updated':
                     if (data.userEmail) {
-                        console.log(`📦 Cart updated for user: ${data.userEmail}`);
+                        console.log(`��� Cart updated for user: ${data.userEmail}`);
                         // Could update user activity indicators here
                     }
                     break;
@@ -3378,10 +3378,10 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         // Authentication Functions
         function adminLogin(event) {
             event.preventDefault();
-            
+
             const email = document.getElementById('adminEmail').value;
             const password = document.getElementById('adminPassword').value;
-            
+
             if (!email || !password) {
                 showNotification('All fields are required', 'error');
                 return;
@@ -3389,21 +3389,49 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
             // Admin authentication
             if (email === 'admin@fadedskies.com' && password === 'admin123') {
-                currentUser = { 
-                    email, 
+                currentUser = {
+                    email,
                     role: 'admin',
                     loginTime: new Date().toISOString()
                 };
-                
+
+                // Log successful admin login
+                if (window.simpleLogger) {
+                    window.simpleLogger.system('Admin login successful', {
+                        admin: email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
                 showAdminDashboard();
                 showNotification('🔧 Welcome to Admin Dashboard!', 'success');
             } else {
+                // Log failed login attempt
+                if (window.simpleLogger) {
+                    window.simpleLogger.warning('Admin login failed', {
+                        attemptedEmail: email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
                 showNotification('Invalid admin credentials', 'error');
             }
         }
 
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
+                // Log admin logout
+                if (window.simpleLogger && currentUser) {
+                    window.simpleLogger.system('Admin logout', {
+                        admin: currentUser.email,
+                        sessionDuration: currentUser.loginTime ?
+                            Math.round((Date.now() - new Date(currentUser.loginTime).getTime()) / 1000 / 60) + ' minutes' : 'unknown',
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
                 currentUser = null;
                 showLoginScreen();
                 showNotification('🔒 Logged out successfully', 'success');
@@ -3421,7 +3449,16 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             document.getElementById('adminDashboard').classList.add('active');
             document.getElementById('adminSession').style.display = 'block';
             document.getElementById('adminWelcome').textContent = `Welcome, ${currentUser.email.split('@')[0]}`;
-            
+
+            // Log dashboard access
+            if (window.simpleLogger) {
+                window.simpleLogger.info('Admin dashboard accessed', {
+                    admin: currentUser.email,
+                    timestamp: new Date().toISOString(),
+                    system: 'admin-portal'
+                });
+            }
+
             // Load dashboard data
             updateAllDashboardViews();
         }
