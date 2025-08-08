@@ -327,6 +327,11 @@ function switchPortalTab(tabName) {
             break;
         case 'profile':
             updateProfileDisplay();
+            // Refresh profile data to ensure it's current
+            if (currentUser) {
+                console.log('🔄 Profile tab opened, refreshing display with latest user data');
+                setTimeout(() => updateProfileDisplay(), 100);
+            }
             break;
         case 'dashboard':
             updateDashboardStats();
@@ -1225,7 +1230,7 @@ function testCartFunctionality() {
                     // Final validation
                     setTimeout(() => {
                         const cartElements = document.querySelectorAll('.cart-item');
-                        console.log('���� Final test results:', {
+                        console.log('🧪 Final test results:', {
                             expectedItems: testProductIds.length,
                             cartArrayLength: window.cartManager.cart.length,
                             domElements: cartElements.length,
