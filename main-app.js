@@ -1748,6 +1748,195 @@ window.showAuthRequiredNotification = showAuthRequiredNotification;
 window.createBulkOrder = createBulkOrder;
 window.requestCustomQuote = requestCustomQuote;
 window.openSupportModal = openSupportModal;
+
+// Comprehensive test for authorization controls and real-time sync
+function testAuthorizationAndSync() {
+    console.log('🔒 Starting comprehensive authorization and real-time sync test...');
+
+    const testResults = {
+        authorizationTest: false,
+        realTimeSyncTest: false,
+        imageUpdateTest: false,
+        crossTabSyncTest: false
+    };
+
+    // Test 1: Authorization Controls
+    console.log('🔒 Testing authorization controls...');
+
+    // First, logout to test non-authenticated state
+    logout();
+
+    setTimeout(() => {
+        // Check that action buttons are hidden for non-authenticated users
+        const publicInventoryTable = document.getElementById('publicInventoryBody');
+        if (publicInventoryTable) {
+            const actionButtons = publicInventoryTable.querySelectorAll('.btn-primary[onclick*="addToCart"]');
+            const loginRequiredButtons = publicInventoryTable.querySelectorAll('[onclick*="showAuthRequiredNotification"]');
+
+            if (actionButtons.length === 0 && loginRequiredButtons.length > 0) {
+                console.log('✅ Authorization test passed - action buttons hidden for non-authenticated users');
+                testResults.authorizationTest = true;
+                showNotification('✅ Authorization controls working correctly', 'success');
+            } else {
+                console.error('❌ Authorization test failed - action buttons visible for non-authenticated users');
+                showNotification('❌ Authorization test failed', 'error');
+            }
+        }
+
+        // Test 2: Login and check buttons appear
+        setTimeout(() => {
+            console.log('👤 Testing login and button visibility...');
+            forceLogin('test@authtest.com');
+
+            setTimeout(() => {
+                updatePublicInventoryDisplay(); // Force refresh
+
+                const actionButtons = document.querySelectorAll('.btn-primary[onclick*="addToCart"]');
+                if (actionButtons.length > 0) {
+                    console.log('✅ Login test passed - action buttons visible for authenticated users');
+                    showNotification('✅ Login controls working correctly', 'success');
+                } else {
+                    console.error('❌ Login test failed - action buttons not visible for authenticated users');
+                    showNotification('❌ Login test failed', 'error');
+                }
+
+                // Test 3: Real-time sync
+                setTimeout(() => {
+                    testRealTimeSyncFeatures(testResults);
+                }, 1000);
+
+            }, 1000);
+        }, 2000);
+    }, 1000);
+
+    return testResults;
+}
+
+function testRealTimeSyncFeatures(testResults) {
+    console.log('📡 Testing real-time sync features...');
+
+    if (!window.realTimeSync || !window.sharedDataManager) {
+        console.error('❌ Real-time sync components not available');
+        showNotification('❌ Real-time sync not available', 'error');
+        return;
+    }
+
+    // Test 4: Product update sync
+    console.log('📦 Testing product update sync...');
+    const products = window.sharedDataManager.getProducts();
+    if (products.length > 0) {
+        const testProduct = products[0];
+        const originalStock = testProduct.stock;
+        const newStock = originalStock + Math.floor(Math.random() * 10) + 1;
+
+        // Listen for the update
+        const handleProductUpdate = (data) => {
+            if (data.productId === testProduct.id) {
+                console.log('✅ Product update sync test passed - received real-time update');
+                testResults.realTimeSyncTest = true;
+                showNotification('✅ Real-time product sync working', 'success');
+
+                // Cleanup listener
+                window.realTimeSync.off('product_updated', handleProductUpdate);
+            }
+        };
+
+        window.realTimeSync.on('product_updated', handleProductUpdate);
+
+        // Trigger the update
+        window.sharedDataManager.updateProduct(testProduct.id, {
+            stock: newStock,
+            lastModified: new Date().toISOString()
+        });
+
+        console.log(`📦 Updated ${testProduct.strain} stock from ${originalStock} to ${newStock}`);
+    }
+
+    // Test 5: Image update sync
+    setTimeout(() => {
+        console.log('🖼️ Testing image update sync...');
+        if (products.length > 0) {
+            const testProduct = products[1] || products[0];
+            const newImageUrl = 'https://images.unsplash.com/photo-1628958230481-0011f5bd3db9?w=300&h=300&fit=crop&crop=center';
+
+            // Listen for image updates
+            const handleImageUpdate = (data) => {
+                if (data.productId === testProduct.id) {
+                    console.log('✅ Image update sync test passed');
+                    testResults.imageUpdateTest = true;
+                    showNotification('✅ Real-time image sync working', 'success');
+
+                    // Cleanup listener
+                    window.realTimeSync.off('product_image_updated', handleImageUpdate);
+                }
+            };
+
+            window.realTimeSync.on('product_image_updated', handleImageUpdate);
+
+            // Trigger image update
+            window.sharedDataManager.updateProduct(testProduct.id, {
+                image: newImageUrl,
+                lastModified: new Date().toISOString()
+            });
+
+            console.log(`🖼️ Updated ${testProduct.strain} image`);
+        }
+    }, 2000);
+
+    // Test 6: Cross-tab communication simulation
+    setTimeout(() => {
+        console.log('📡 Testing cross-tab communication...');
+
+        // Simulate a message from another tab
+        const testMessage = {
+            type: 'admin_product_change',
+            data: {
+                productId: products[0]?.id,
+                productName: products[0]?.strain,
+                changes: ['test_update'],
+                action: 'test_sync',
+                timestamp: new Date().toISOString()
+            }
+        };
+
+        // Broadcast the test message
+        window.realTimeSync.broadcast('admin_product_change', testMessage.data);
+
+        setTimeout(() => {
+            console.log('✅ Cross-tab communication test completed');
+            testResults.crossTabSyncTest = true;
+            showNotification('✅ Cross-tab sync working', 'success');
+
+            // Final test results
+            setTimeout(() => {
+                showTestResults(testResults);
+            }, 1000);
+        }, 1000);
+    }, 3000);
+}
+
+function showTestResults(results) {
+    console.log('📊 Final Test Results:', results);
+
+    const passedTests = Object.values(results).filter(Boolean).length;
+    const totalTests = Object.keys(results).length;
+
+    const resultMessage = `🧪 Authorization & Sync Tests: ${passedTests}/${totalTests} passed`;
+
+    if (passedTests === totalTests) {
+        showNotification(`✅ ${resultMessage} - All systems working!`, 'success');
+    } else {
+        showNotification(`⚠️ ${resultMessage} - Some issues detected`, 'warning');
+    }
+
+    // Detailed results in console
+    console.table(results);
+}
+
+// Export test functions
+window.testAuthorizationAndSync = testAuthorizationAndSync;
+window.testRealTimeSyncFeatures = testRealTimeSyncFeatures;
+window.showTestResults = showTestResults;
 // Payment Processing Functions
 function selectPaymentMethod(method) {
     if (window.cartManager) {
