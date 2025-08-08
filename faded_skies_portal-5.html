@@ -2041,8 +2041,8 @@
                         🚚 Shipping Information
                     </h4>
                     <div class="form-group">
-                        <label for="checkoutShippingAddress">Shipping Address *</label>
-                        <textarea id="checkoutShippingAddress" rows="3" required placeholder="Full shipping address including city, state, zip code"></textarea>
+                        <label for="checkoutShippingAddress">Shipping Address * <span class="live-validation-indicator" data-field="checkoutShippingAddress"></span></label>
+                        <textarea id="checkoutShippingAddress" rows="3" required placeholder="Full shipping address including city, state, zip code" oninput="validateFieldLive(this)" onblur="validateFieldLive(this)"></textarea>
                     </div>
 
                     <!-- Delivery Method -->
@@ -2119,7 +2119,7 @@
     <div id="paymentModal" class="modal">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <h3 class="modal-title">💳 Complete Your Order</h3>
+                <h3 class="modal-title">�� Complete Your Order</h3>
                 <button class="modal-close" onclick="closeModal('paymentModal')">×</button>
             </div>
 
@@ -4655,7 +4655,7 @@
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 600px;">
                     <div class="modal-header">
-                        <h3 class="modal-title">���� Order Details - ${order.id}</h3>
+                        <h3 class="modal-title">📋 Order Details - ${order.id}</h3>
                         <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
                     </div>
                     <div style="background: var(--surface-elevated); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
@@ -4835,7 +4835,7 @@ Phone: (210) 835-7834
                         break;
                     default:
                         statusMessage = 'Status information not available.';
-                        statusIcon = '❓';
+                        statusIcon = '��';
                         statusColor = 'var(--text-secondary)';
                 }
 
