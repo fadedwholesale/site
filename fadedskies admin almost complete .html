@@ -3016,6 +3016,125 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             ];
         }
 
+        // Handle new orders from partner portals
+        function handleNewOrderInAdmin(orderData) {
+            try {
+                console.log('🚨 Processing new order in admin:', orderData);
+
+                // Add order to local orders array if not already present
+                const existingOrder = orders.find(o => o.id === orderData.id);
+                if (!existingOrder) {
+                    // Ensure order has proper structure
+                    const formattedOrder = {
+                        ...orderData,
+                        statusHistory: orderData.statusHistory || [{
+                            status: orderData.status || 'PENDING',
+                            timestamp: new Date().toISOString(),
+                            note: 'Order received from partner portal'
+                        }]
+                    };
+
+                    orders.unshift(formattedOrder);
+                    console.log('📋 Added new order to admin view:', formattedOrder.id);
+                }
+
+                // Update inventory to reflect reduced stock
+                updateInventoryAfterOrder(orderData);
+
+                // Refresh admin dashboard
+                loadDataFromSharedManager();
+                updateAllDashboardViews();
+
+                // Show notification with order details
+                const partnerName = orderData.partnerName || orderData.partner || 'Partner';
+                const orderTotal = orderData.total || 0;
+                showNotification(`🚨 NEW ORDER: ${orderData.id} from ${partnerName} - $${orderTotal.toLocaleString()}`, 'success');
+
+                // Play notification sound if available
+                if (window.orderSyncManager && window.orderSyncManager.orderNotificationSound) {
+                    window.orderSyncManager.orderNotificationSound.play().catch(e => {
+                        console.log('Could not play notification sound:', e);
+                    });
+                }
+
+                // Log the order receipt
+                if (window.simpleLogger) {
+                    window.simpleLogger.order('New order received in admin portal', {
+                        orderId: orderData.id,
+                        partner: partnerName,
+                        total: orderTotal,
+                        items: orderData.items,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error handling new order in admin:', error);
+                showNotification('❌ Error processing new order', 'error');
+            }
+        }
+
+        // Update inventory after order placement
+        function updateInventoryAfterOrder(orderData) {
+            try {
+                if (!orderData.items) return;
+
+                let itemStrings = [];
+
+                // Handle different data types for order.items
+                if (typeof orderData.items === 'string') {
+                    itemStrings = orderData.items.split(', ');
+                } else if (Array.isArray(orderData.items)) {
+                    itemStrings = orderData.items.map(item => {
+                        if (typeof item === 'string') {
+                            return item;
+                        } else if (item && typeof item === 'object') {
+                            const name = item.name || item.product || item.strain || 'Unknown Product';
+                            const qty = item.quantity || item.qty || 1;
+                            return `${name} (x${qty})`;
+                        }
+                        return String(item);
+                    });
+                } else {
+                    itemStrings = [String(orderData.items)];
+                }
+
+                // Update stock for each item
+                itemStrings.forEach(itemStr => {
+                    if (!itemStr || typeof itemStr !== 'string') return;
+
+                    const match = itemStr.match(/^(.+?)\s*\(x(\d+)\)$/);
+                    if (match) {
+                        const productName = match[1].trim();
+                        const quantity = parseInt(match[2]);
+
+                        // Find matching product
+                        const product = products.find(p =>
+                            p && p.strain &&
+                            (p.strain.toLowerCase().includes(productName.toLowerCase()) ||
+                            productName.toLowerCase().includes(p.strain.toLowerCase()))
+                        );
+
+                        if (product && product.stock >= quantity) {
+                            const newStock = Math.max(0, product.stock - quantity);
+                            product.stock = newStock;
+
+                            // Update in shared data manager
+                            if (window.sharedDataManager) {
+                                window.sharedDataManager.updateProduct(product.id, { stock: newStock });
+                            }
+
+                            console.log(`📦 Updated stock for ${productName}: ${product.stock + quantity} → ${newStock}`);
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error updating inventory after order:', error);
+            }
+        }
+
         // Enhanced live systems integration - to be loaded after scripts
         function initializeLiveSystems() {
             console.log('🚀 Initializing Admin Live Systems...');
@@ -4403,7 +4522,7 @@ Faded Skies Wholesale Team
             
             console.log('📧 Tracking notification sent to:', order.partner);
             console.log(trackingMessage);
-            showNotification(`📧 Tracking notification sent to ${order.partnerName}`, 'success');
+            showNotification(`���� Tracking notification sent to ${order.partnerName}`, 'success');
         }
 
         function sendOrderStatusEmail(order, status) {
