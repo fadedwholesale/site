@@ -4281,12 +4281,12 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 <div class="card">
                     <h3>📈 Status History</h3>
                     <div style="font-family: monospace; font-size: 12px; line-height: 1.8;">
-                        ${order.statusHistory.map(status => `
+                        ${(order.statusHistory && Array.isArray(order.statusHistory) ? order.statusHistory : []).map(status => `
                             <div style="margin-bottom: 8px; padding: 8px; background: var(--surface-elevated); border-radius: 4px;">
-                                <strong style="color: var(--brand-green);">${status.status}</strong> - ${formatDateTime(status.timestamp)}<br>
-                                <small style="color: var(--text-muted);">${status.note}</small>
+                                <strong style="color: var(--brand-green);">${status?.status || 'Unknown'}</strong> - ${formatDateTime(status?.timestamp || new Date().toISOString())}<br>
+                                <small style="color: var(--text-muted);">${status?.note || 'No note available'}</small>
                             </div>
-                        `).join('')}
+                        `).join('') || '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No status history available</div>'}
                     </div>
                 </div>
                 
@@ -6560,7 +6560,7 @@ Faded Skies Wholesale Team`
             );
 
             if (appIndex === -1) {
-                showNotification('❌ Application not found', 'error');
+                showNotification('�� Application not found', 'error');
                 return;
             }
 
