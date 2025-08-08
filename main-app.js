@@ -498,11 +498,11 @@ function updatePartnerProductsDisplay() {
         const isAvailable = product.status === 'AVAILABLE' && product.stock > 0;
         
         return `
-            <tr>
+            <tr data-product-id="${product.id}">
                 <td class="product-image-container">
-                    <img src="${product.image || 'https://via.placeholder.com/80x80/1a1a1a/00C851?text=' + product.grade}" 
-                         alt="${product.strain}" class="product-image" 
-                         onerror="this.src='https://via.placeholder.com/80x80/1a1a1a/00C851?text=${product.grade}'" />
+                    <img src="${product.image || product.photo || 'https://via.placeholder.com/80x80/1a1a1a/00C851?text=' + encodeURIComponent(product.grade)}"
+                         alt="${product.strain}" class="product-image"
+                         onerror="handleProductImageError(this, ${JSON.stringify(product).replace(/"/g, '&quot;')})" />
                 </td>
                 <td><strong>${product.grade}</strong></td>
                 <td>
@@ -2305,4 +2305,4 @@ window.initializeLiveCheckout = initializeLiveCheckout;
 window.showNotification = showNotification;
 window.updateAllViews = updateAllViews;
 
-console.log('🎯 All global functions loaded and ready');
+console.log('�� All global functions loaded and ready');
