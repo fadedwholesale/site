@@ -7644,6 +7644,29 @@ Phone: (210) 835-7834
                 analyticsDiv.appendChild(logisticsCards[1]);
             }
         }
+
+        // Ensure logo loads on document ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📷 Document ready - loading logos...');
+            if (window.sharedDataManager) {
+                loadSystemLogos();
+            } else {
+                // Wait for shared data manager to load
+                setTimeout(() => {
+                    if (window.sharedDataManager) {
+                        loadSystemLogos();
+                    }
+                }, 500);
+            }
+        });
+
+        // Also trigger on window load as backup
+        window.addEventListener('load', function() {
+            console.log('📷 Window loaded - ensuring logo is displayed...');
+            setTimeout(() => {
+                loadSystemLogos();
+            }, 100);
+        });
     </script>
 </body>
 </html>
