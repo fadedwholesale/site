@@ -455,15 +455,38 @@ class LiveDataManager {
 
     // Process inventory changes from orders
     processOrderInventory(order) {
-        if (!order.items) return;
-
-        // Ensure items is an array
-        if (!Array.isArray(order.items)) {
-            console.warn('⚠️ Order items is not an array:', typeof order.items, order.items);
+        if (!order || typeof order !== 'object') {
+            console.warn('⚠️ Invalid order object:', order);
             return;
         }
 
-        order.items.forEach(item => {
+        if (!order.items) {
+            console.warn('⚠️ Order has no items:', order.id);
+            return;
+        }
+
+        // Ensure items is an array with very defensive approach
+        if (!Array.isArray(order.items)) {
+            console.warn('⚠️ Order items is not an array:', typeof order.items, order.items);
+            // Try to fix corrupted data
+            if (typeof order.items === 'string') {
+                order.items = [];
+                console.warn('⚠️ Converted string items to empty array for order:', order.id);
+            } else {
+                order.items = [];
+                console.warn('⚠️ Set items to empty array for order:', order.id);
+            }
+            return;
+        }
+
+        // Additional safety check
+        if (order.items.length === 0) {
+            console.log('ℹ️ Order has no items to process:', order.id);
+            return;
+        }
+
+        try {
+            order.items.forEach(item => {
             const product = this.data.products.find(p => p.id === item.productId);
             if (product) {
                 const newStock = Math.max(0, (product.stock || 0) - (item.quantity || 0));
@@ -494,7 +517,19 @@ class LiveDataManager {
                     }
                 }
             }
-        });
+            });
+        } catch (error) {
+            console.error('❌ Error processing order inventory:', error, order);
+            // If there's any error with forEach, the order data is corrupted
+            // Reset the items to prevent future errors
+            if (order && order.id) {
+                const orderIndex = this.data.orders.findIndex(o => o.id === order.id);
+                if (orderIndex !== -1) {
+                    this.data.orders[orderIndex].items = [];
+                    console.warn('⚠️ Reset corrupted items for order:', order.id);
+                }
+            }
+        }
     }
 
     // Analytics and metrics
