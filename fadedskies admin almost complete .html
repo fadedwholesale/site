@@ -4857,14 +4857,23 @@ Faded Skies Wholesale Team
             const ordersWithTracking = orders.filter(o => o.trackingNumber).length;
             const fulfillmentRate = totalOrders > 0 ? Math.round((ordersWithTracking / totalOrders) * 100) : 0;
             
-            // Calculate average delivery time
-            const deliveredOrders = orders.filter(o => o.status === 'DELIVERED');
+            // Calculate average delivery time with defensive programming
+            const deliveredOrders = orders.filter(o => o && o.status === 'DELIVERED');
             let avgDeliveryTime = 0;
             if (deliveredOrders.length > 0) {
                 const deliveryTimes = deliveredOrders.map(order => {
+                    // Check if order has required properties
+                    if (!order || !order.createdAt) return 3; // Default delivery time
+
                     const createdDate = new Date(order.createdAt);
-                    const deliveredStatus = order.statusHistory.find(s => s.status === 'DELIVERED');
-                    if (deliveredStatus) {
+
+                    // Check if statusHistory exists and is an array
+                    if (!order.statusHistory || !Array.isArray(order.statusHistory)) {
+                        return 3; // Default delivery time
+                    }
+
+                    const deliveredStatus = order.statusHistory.find(s => s && s.status === 'DELIVERED');
+                    if (deliveredStatus && deliveredStatus.timestamp) {
                         const deliveredDate = new Date(deliveredStatus.timestamp);
                         return Math.ceil((deliveredDate - createdDate) / (1000 * 60 * 60 * 24));
                     }
