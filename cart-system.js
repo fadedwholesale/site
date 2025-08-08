@@ -245,18 +245,47 @@ class CartManager {
 
     // Get cart totals
     getTotals() {
-        const subtotal = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
-        const shipping = subtotal > 1000 ? 0 : 25;
-        const total = subtotal + shipping;
+        try {
+            console.log('💰 Calculating totals for cart items:', this.cart.map(item => `${item.strain}: $${item.price} x ${item.quantity}`));
 
-        return {
-            subtotal: subtotal,
-            shipping: shipping,
-            total: total,
-            totalItems: totalItems,
-            itemCount: this.cart.length
-        };
+            let subtotal = 0;
+            let totalItems = 0;
+
+            this.cart.forEach((item, index) => {
+                const itemPrice = parseFloat(item.price) || 0;
+                const itemQuantity = parseInt(item.quantity) || 0;
+                const itemSubtotal = itemPrice * itemQuantity;
+
+                console.log(`💰 Item ${index + 1} (${item.strain}): $${itemPrice} x ${itemQuantity} = $${itemSubtotal}`);
+
+                subtotal += itemSubtotal;
+                totalItems += itemQuantity;
+            });
+
+            const shipping = subtotal > 1000 ? 0 : 25;
+            const total = subtotal + shipping;
+
+            const totals = {
+                subtotal: Math.round(subtotal * 100) / 100, // Round to 2 decimal places
+                shipping: shipping,
+                total: Math.round(total * 100) / 100, // Round to 2 decimal places
+                totalItems: totalItems,
+                itemCount: this.cart.length
+            };
+
+            console.log('💰 Final totals calculated:', totals);
+            return totals;
+
+        } catch (error) {
+            console.error('Error calculating totals:', error);
+            return {
+                subtotal: 0,
+                shipping: 25,
+                total: 25,
+                totalItems: 0,
+                itemCount: 0
+            };
+        }
     }
 
     // Update cart display
