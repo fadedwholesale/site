@@ -3,17 +3,20 @@
 
 class ActivityLogger {
     constructor() {
+        // EMERGENCY DISABLE to prevent circular reference errors
+        this.emergencyDisabled = true;
+
         this.logStorageKey = 'fadedSkiesActivityLogs';
         this.changeStorageKey = 'fadedSkiesChangeTracking';
         this.sessionStorageKey = 'fadedSkiesSessionLogs';
-        
+
         this.maxLogs = 5000;
         this.maxSessionLogs = 1000;
         this.logBuffer = [];
         this.changeBuffer = [];
         this.batchSize = 10;
         this.flushInterval = 5000; // 5 seconds
-        
+
         this.currentSession = null;
         this.eventQueue = [];
         this.isProcessingQueue = false;
