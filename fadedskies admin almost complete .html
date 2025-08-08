@@ -3083,7 +3083,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     };
 
                     orders.unshift(formattedOrder);
-                    console.log('📋 Added new order to admin view:', formattedOrder.id);
+                    console.log('�� Added new order to admin view:', formattedOrder.id);
                 }
 
                 // Update inventory to reflect reduced stock
@@ -3481,6 +3481,12 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 if (pendingOrders.length > 0) {
                     const randomOrder = pendingOrders[Math.floor(Math.random() * pendingOrders.length)];
                     randomOrder.status = 'PROCESSING';
+
+                    // Ensure statusHistory exists before pushing
+                    if (!randomOrder.statusHistory || !Array.isArray(randomOrder.statusHistory)) {
+                        randomOrder.statusHistory = [];
+                    }
+
                     randomOrder.statusHistory.push({
                         status: 'PROCESSING',
                         timestamp: new Date().toISOString(),
