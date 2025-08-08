@@ -113,6 +113,49 @@ class ActivityLogger {
         return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 
+    // Completely sanitize log data to prevent any circular references
+    sanitizeLogData(data) {
+        if (data === null || data === undefined) {
+            return null;
+        }
+
+        // Convert to string for primitive types
+        if (typeof data !== 'object') {
+            return data;
+        }
+
+        // For objects and arrays, create a completely safe copy
+        try {
+            if (Array.isArray(data)) {
+                return data.slice(0, 5).map(item => {
+                    if (typeof item === 'object') {
+                        return '[Object]';
+                    }
+                    return item;
+                });
+            }
+
+            // For objects, only keep safe primitive properties
+            const safeData = {};
+            const safeKeys = Object.keys(data).slice(0, 10);
+
+            for (const key of safeKeys) {
+                const value = data[key];
+                if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+                    safeData[key] = value;
+                } else if (value === null) {
+                    safeData[key] = null;
+                } else {
+                    safeData[key] = `[${typeof value}]`;
+                }
+            }
+
+            return safeData;
+        } catch (error) {
+            return '[Sanitization Error]';
+        }
+    }
+
     // Main logging method
     log(level, message, data = null, options = {}) {
         // Create completely safe log entry without circular reference risks
