@@ -87,7 +87,7 @@ class CartManager {
 
         console.log('📝 Cart: Adding product', { productId, quantity });
 
-        console.log('✅ Cart: Authenticated user found:', window.currentUser.email);
+        console.log('�� Cart: Authenticated user found:', window.currentUser.email);
 
         try {
             const products = window.sharedDataManager?.getProducts() || window.products || [];
@@ -309,11 +309,25 @@ class CartManager {
             if (cartCount) {
                 cartCount.textContent = totals.totalItems;
                 console.log('✅ Updated cartCount to:', totals.totalItems);
+            } else {
+                console.warn('⚠️ cartCount element not found');
             }
+
             if (cartCount2) {
                 cartCount2.textContent = totals.totalItems;
                 console.log('✅ Updated cartCount2 to:', totals.totalItems);
+            } else {
+                console.warn('⚠️ cartCount2 element not found');
             }
+
+            // Also update any other cart counters in the DOM
+            const allCartCounters = document.querySelectorAll('[id*="cartCount"], .cart-counter');
+            allCartCounters.forEach((counter, index) => {
+                if (counter.id !== 'cartCount' && counter.id !== 'cartCount2') {
+                    counter.textContent = totals.totalItems;
+                    console.log(`✅ Updated additional cart counter ${index}:`, counter.id || counter.className);
+                }
+            });
 
             if (!cartItems) {
                 console.warn('Cart items container not found');
