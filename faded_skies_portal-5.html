@@ -2466,7 +2466,7 @@
                                 <button class="btn btn-primary" onclick="switchPortalTab('products')">🛒 Browse Products</button>
                                 <button class="btn btn-secondary" onclick="switchPortalTab('orders')">📋 View Orders</button>
                                 <button class="btn btn-secondary" onclick="switchPortalTab('bulk')">📦 Bulk Order</button>
-                                <button class="btn btn-secondary" onclick="showNotification('📄 Latest invoice downloaded', 'success')">📄 Download Invoice</button>
+                                <button class="btn btn-secondary" onclick="showNotification('�� Latest invoice downloaded', 'success')">📄 Download Invoice</button>
                             </div>
                         </div>
                     </div>
@@ -5293,6 +5293,127 @@
             } catch (error) {
                 console.error('Initialization error:', error);
                 showNotification('❌ Some features may be limited. Please refresh if you experience issues.', 'warning');
+            }
+        }
+
+        // Real-time sync setup for partner portal
+        function setupPartnerRealTimeSync() {
+            console.log('🔄 Setting up real-time sync for partner portal...');
+
+            // Wait for real-time sync to be available
+            const checkRealTimeSync = () => {
+                if (window.realTimeSync) {
+                    console.log('✅ Real-time sync available, setting up listeners...');
+
+                    // Listen for product updates from admin
+                    window.realTimeSync.on('product_updated', (productData) => {
+                        console.log('📡 Partner: Product updated', productData);
+                        updatePartnerInventoryView(productData);
+                        showNotification(`📦 Product "${productData.strain || 'Unknown'}" updated`, 'info');
+                    });
+
+                    window.realTimeSync.on('product_added', (productData) => {
+                        console.log('📡 Partner: New product added', productData);
+                        refreshAllProducts();
+                        showNotification(`🆕 New product "${productData.strain || 'Unknown'}" added`, 'success');
+                    });
+
+                    window.realTimeSync.on('product_deleted', (productData) => {
+                        console.log('📡 Partner: Product deleted', productData);
+                        removeProductFromView(productData.id);
+                        showNotification(`🗑️ Product removed from inventory`, 'warning');
+                    });
+
+                    // Listen for inventory/stock changes
+                    window.realTimeSync.on('inventory_updated', (data) => {
+                        console.log('📡 Partner: Inventory updated', data);
+                        refreshAllProducts();
+                        showNotification('📊 Inventory updated', 'info');
+                    });
+
+                    // Listen for order confirmations
+                    window.realTimeSync.on('order_confirmed', (orderData) => {
+                        if (orderData.partner === currentUser?.email) {
+                            console.log('📡 Partner: Order confirmed', orderData);
+                            showNotification(`✅ Order ${orderData.id} confirmed by admin`, 'success');
+                            updateOrderStatus(orderData);
+                        }
+                    });
+
+                    console.log('✅ Real-time sync listeners configured for partner portal');
+                } else {
+                    console.log('⏳ Real-time sync not ready, retrying in 1 second...');
+                    setTimeout(checkRealTimeSync, 1000);
+                }
+            };
+
+            checkRealTimeSync();
+        }
+
+        // Update specific product in partner view
+        function updatePartnerInventoryView(productData) {
+            try {
+                // Update products array
+                const productIndex = products.findIndex(p => p.id === productData.id);
+                if (productIndex !== -1) {
+                    products[productIndex] = { ...products[productIndex], ...productData };
+
+                    // Refresh all views to reflect changes
+                    updateAllViews();
+                    forceUpdateWithImages();
+                }
+            } catch (error) {
+                console.error('Error updating partner inventory view:', error);
+            }
+        }
+
+        // Remove product from partner view
+        function removeProductFromView(productId) {
+            try {
+                // Remove from products array
+                products = products.filter(p => p.id !== productId);
+
+                // Refresh all views
+                updateAllViews();
+                forceUpdateWithImages();
+            } catch (error) {
+                console.error('Error removing product from view:', error);
+            }
+        }
+
+        // Refresh all products from shared data
+        function refreshAllProducts() {
+            try {
+                if (window.sharedDataManager) {
+                    const sharedData = window.sharedDataManager.getData();
+                    if (sharedData && sharedData.products) {
+                        products = sharedData.products;
+                        updateAllViews();
+                        forceUpdateWithImages();
+                    }
+                }
+            } catch (error) {
+                console.error('Error refreshing products:', error);
+            }
+        }
+
+        // Update order status in partner view
+        function updateOrderStatus(orderData) {
+            try {
+                // Update orders array if exists
+                if (window.orders) {
+                    const orderIndex = orders.findIndex(o => o.id === orderData.id);
+                    if (orderIndex !== -1) {
+                        orders[orderIndex] = { ...orders[orderIndex], ...orderData };
+
+                        // Update any order displays
+                        if (typeof updateAnalyticsTab === 'function') {
+                            updateAnalyticsTab();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating order status:', error);
             }
         }
 
