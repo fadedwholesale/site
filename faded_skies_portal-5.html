@@ -2071,6 +2071,10 @@
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
                 <h3 class="modal-title">🛒 Checkout Details</h3>
+                <div class="live-update-indicator" style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--brand-green);">
+                    <span class="live-dot" style="width: 8px; height: 8px; background: var(--brand-green); border-radius: 50%; animation: livePulse 2s infinite;"></span>
+                    <span>Live Updates Active</span>
+                </div>
                 <button class="modal-close" onclick="closeModal('checkoutModal')">×</button>
             </div>
 
@@ -4284,7 +4288,7 @@
                 // Update cart counters immediately at start of function
                 if (cartCount) {
                     cartCount.textContent = totalItems;
-                    console.log('��� Updated cartCount to:', totalItems);
+                    console.log('✅ Updated cartCount to:', totalItems);
                 }
                 if (cartCount2) {
                     cartCount2.textContent = totalItems;
@@ -5990,7 +5994,7 @@ Phone: (210) 835-7834
                         console.log(`❌ Image failed: ${product.strain} - ${product.image}`);
                         
                         if (successCount + errorCount === products.length) {
-                            showNotification(`���️ Image test complete: ${successCount}/${products.length} loaded successfully`, successCount > errorCount ? 'success' : 'warning');
+                            showNotification(`🖼️ Image test complete: ${successCount}/${products.length} loaded successfully`, successCount > errorCount ? 'success' : 'warning');
                         }
                     };
                     img.src = product.image;
