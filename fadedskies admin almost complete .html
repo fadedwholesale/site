@@ -2254,7 +2254,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             <div>
                 <div style="display: flex; gap: 16px; margin-bottom: 24px;">
                     <button class="btn btn-primary" onclick="generatePartnerResetLinks()">🔗 Generate Reset Links</button>
-                    <button class="btn btn-secondary" onclick="sendBulkPasswordResets()">�� Send Bulk Reset Emails</button>
+                    <button class="btn btn-secondary" onclick="sendBulkPasswordResets()">📧 Send Bulk Reset Emails</button>
                     <button class="btn btn-secondary" onclick="refreshPasswordResetTable()">🔄 Refresh</button>
                 </div>
                 
@@ -5040,6 +5040,18 @@ Faded Skies Wholesale Team
             // Ensure orders is an array and handle each order safely
             if (!Array.isArray(orders)) {
                 console.warn('Orders is not an array in updateTopProductsAnalytics:', orders);
+
+                // Log this issue
+                if (window.simpleLogger) {
+                    window.simpleLogger.warning('Orders array issue in updateTopProductsAnalytics', {
+                        ordersType: typeof orders,
+                        ordersValue: orders,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
                 return;
             }
 
