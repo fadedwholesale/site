@@ -384,7 +384,7 @@ function addToCart(productId, quantity = 1) {
     if (window.cartManager) {
         return window.cartManager.addProduct(productId, quantity);
     } else {
-        console.error('❌ Cart manager not found');
+        console.error('�� Cart manager not found');
         showNotification('❌ Cart system not available', 'error');
         return false;
     }
@@ -1049,39 +1049,52 @@ function closeModal(modalId) {
     }
 }
 
-// Registration Functions
+// Business Application Functions
 let currentRegistrationStep = 1;
 let registrationData = {};
+let uploadedDocuments = {};
 
 function nextRegistrationStep() {
     if (currentRegistrationStep === 1) {
         // Validate step 1
         const form = document.getElementById('businessInfoForm');
-        const formData = new FormData(form);
         let isValid = true;
-        
-        // Basic validation
+
+        // Required fields validation
         const requiredFields = ['businessName', 'contactName', 'businessEmail', 'phone', 'businessAddress', 'businessType', 'licenseNumber', 'estimatedMonthlyVolume'];
         requiredFields.forEach(field => {
             const input = document.getElementById(field);
-            if (!input.value.trim()) {
+            if (!input || !input.value.trim()) {
                 isValid = false;
-                input.style.borderColor = 'var(--accent-red)';
+                if (input) {
+                    input.style.borderColor = 'var(--accent-red)';
+                }
             } else {
                 input.style.borderColor = 'var(--border-subtle)';
-                registrationData[field] = input.value;
+                registrationData[field] = input.value.trim();
             }
         });
-        
+
+        // Optional fields
+        const optionalFields = ['yearsInBusiness', 'businessDescription'];
+        optionalFields.forEach(field => {
+            const input = document.getElementById(field);
+            if (input && input.value.trim()) {
+                registrationData[field] = input.value.trim();
+            }
+        });
+
         if (!isValid) {
             showNotification('❌ Please fill in all required fields', 'error');
             return;
         }
-        
-        // Proceed to step 2
-        document.getElementById('registrationStep1').classList.remove('active');
-        document.getElementById('registrationStep2').classList.add('active');
+
+        // Update progress and proceed to step 2
+        updateApplicationProgress(2);
+        document.getElementById('registrationStep1').style.display = 'none';
+        document.getElementById('registrationStep2').style.display = 'block';
         currentRegistrationStep = 2;
+
     } else if (currentRegistrationStep === 2) {
         // Check if required documents are uploaded
         const requiredDocs = ['businessLicense', 'cannabisLicense', 'taxId'];
@@ -1089,28 +1102,55 @@ function nextRegistrationStep() {
             const input = document.getElementById(doc);
             return input && input.files.length > 0;
         });
-        
+
         if (uploadedDocs.length < 3) {
-            showNotification('❌ Please upload all required documents', 'error');
+            showNotification('❌ Please upload all required documents (Business License, Cannabis License, Tax ID)', 'error');
             return;
         }
-        
-        // Proceed to step 3
+
+        // Store document information
+        requiredDocs.forEach(doc => {
+            const input = document.getElementById(doc);
+            if (input && input.files.length > 0) {
+                uploadedDocuments[doc] = {
+                    name: input.files[0].name,
+                    size: input.files[0].size,
+                    type: input.files[0].type,
+                    lastModified: input.files[0].lastModified
+                };
+            }
+        });
+
+        // Check for additional docs
+        const additionalInput = document.getElementById('additionalDocs');
+        if (additionalInput && additionalInput.files.length > 0) {
+            uploadedDocuments.additionalDocs = Array.from(additionalInput.files).map(file => ({
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                lastModified: file.lastModified
+            }));
+        }
+
+        // Generate review and proceed to step 3
         generateRegistrationReview();
-        document.getElementById('registrationStep2').classList.remove('active');
-        document.getElementById('registrationStep3').classList.add('active');
+        updateApplicationProgress(3);
+        document.getElementById('registrationStep2').style.display = 'none';
+        document.getElementById('registrationStep3').style.display = 'block';
         currentRegistrationStep = 3;
     }
 }
 
 function previousRegistrationStep() {
     if (currentRegistrationStep === 2) {
-        document.getElementById('registrationStep2').classList.remove('active');
-        document.getElementById('registrationStep1').classList.add('active');
+        updateApplicationProgress(1);
+        document.getElementById('registrationStep2').style.display = 'none';
+        document.getElementById('registrationStep1').style.display = 'block';
         currentRegistrationStep = 1;
     } else if (currentRegistrationStep === 3) {
-        document.getElementById('registrationStep3').classList.remove('active');
-        document.getElementById('registrationStep2').classList.add('active');
+        updateApplicationProgress(2);
+        document.getElementById('registrationStep3').style.display = 'none';
+        document.getElementById('registrationStep2').style.display = 'block';
         currentRegistrationStep = 2;
     }
 }
@@ -1118,10 +1158,28 @@ function previousRegistrationStep() {
 function generateRegistrationReview() {
     const reviewContainer = document.getElementById('registrationReview');
     if (!reviewContainer) return;
-    
+
+    // Generate document list
+    const docsList = Object.keys(uploadedDocuments).map(docType => {
+        if (docType === 'additionalDocs' && Array.isArray(uploadedDocuments[docType])) {
+            return uploadedDocuments[docType].map(doc =>
+                `<div class="doc-item">✅ ${doc.name} (${(doc.size / 1024 / 1024).toFixed(2)} MB)</div>`
+            ).join('');
+        } else if (uploadedDocuments[docType]) {
+            const friendlyNames = {
+                businessLicense: 'Business License',
+                cannabisLicense: 'Cannabis/Hemp License',
+                taxId: 'Tax ID/EIN Document'
+            };
+            const doc = uploadedDocuments[docType];
+            return `<div class="doc-item">✅ ${friendlyNames[docType] || docType}: ${doc.name} (${(doc.size / 1024 / 1024).toFixed(2)} MB)</div>`;
+        }
+        return '';
+    }).join('');
+
     reviewContainer.innerHTML = `
         <div class="review-section">
-            <h4 style="color: var(--brand-green); margin-bottom: 16px;">Business Information</h4>
+            <h4 style="color: var(--brand-green); margin-bottom: 16px;">📋 Business Information</h4>
             <div class="review-grid">
                 <div class="review-item">
                     <label>Business Name</label>
@@ -1147,21 +1205,38 @@ function generateRegistrationReview() {
                     <label>License Number</label>
                     <span>${registrationData.licenseNumber || 'Not provided'}</span>
                 </div>
+                <div class="review-item">
+                    <label>Business Address</label>
+                    <span>${registrationData.businessAddress || 'Not provided'}</span>
+                </div>
+                <div class="review-item">
+                    <label>Estimated Monthly Volume</label>
+                    <span>${registrationData.estimatedMonthlyVolume || 'Not provided'}</span>
+                </div>
             </div>
+            ${registrationData.yearsInBusiness ? `
+                <div style="margin-top: 16px;">
+                    <div class="review-item">
+                        <label>Years in Business</label>
+                        <span>${registrationData.yearsInBusiness}</span>
+                    </div>
+                </div>
+            ` : ''}
+            ${registrationData.businessDescription ? `
+                <div style="margin-top: 16px;">
+                    <div class="review-item">
+                        <label>Business Description</label>
+                        <span style="white-space: pre-wrap;">${registrationData.businessDescription}</span>
+                    </div>
+                </div>
+            ` : ''}
         </div>
-        
+
         <div class="review-section">
-            <h4 style="color: var(--brand-green); margin-bottom: 16px;">Documents Uploaded</h4>
+            <h4 style="color: var(--brand-green); margin-bottom: 16px;">📁 Documents Uploaded</h4>
             <div class="review-documents">
-                <div class="doc-item">✅ Business License</div>
-                <div class="doc-item">✅ Cannabis License</div>
-                <div class="doc-item">✅ Tax ID/EIN Document</div>
+                ${docsList}
             </div>
-        </div>
-        
-        <div style="margin-top: 24px; display: flex; gap: 12px;">
-            <button type="button" class="btn btn-secondary" onclick="previousRegistrationStep()">← Back</button>
-            <button type="button" class="btn btn-primary" onclick="submitRegistration()" style="flex: 1;">Submit Application 🚀</button>
         </div>
     `;
 }
@@ -1170,34 +1245,85 @@ function submitRegistration() {
     // Simulate registration submission
     const submitBtn = document.querySelector('[onclick="submitRegistration()"]');
     if (submitBtn) {
-        submitBtn.textContent = 'Submitting...';
+        submitBtn.textContent = 'Submitting Application...';
         submitBtn.disabled = true;
     }
-    
+
+    // Create complete application data
+    const applicationData = {
+        ...registrationData,
+        documents: uploadedDocuments,
+        submissionDate: new Date().toISOString(),
+        applicationId: 'APP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+        status: 'pending',
+        submissionIP: 'demo-ip',
+        userAgent: navigator.userAgent
+    };
+
+    // Store application in localStorage for admin review
+    const existingApplications = JSON.parse(localStorage.getItem('businessApplications') || '[]');
+    existingApplications.push(applicationData);
+    localStorage.setItem('businessApplications', JSON.stringify(existingApplications));
+
     setTimeout(() => {
         closeModal('registerModal');
-        showNotification('🎉 Registration submitted successfully! You will receive an email confirmation shortly.', 'success');
-        
+        showNotification(`🎉 Application submitted successfully! Application ID: ${applicationData.applicationId}. Our team will review your application within 24-48 hours.`, 'success');
+
+        // Trigger admin notification
+        triggerAdminNotification(applicationData);
+
         // Reset form
-        currentRegistrationStep = 1;
-        registrationData = {};
-        document.getElementById('registrationStep3').classList.remove('active');
-        document.getElementById('registrationStep1').classList.add('active');
+        resetRegistrationForm();
         
         if (submitBtn) {
-            submitBtn.textContent = 'Submit Application ���';
+            submitBtn.textContent = 'Submit Application �����';
             submitBtn.disabled = false;
         }
     }, 2000);
 }
 
 function handleFileUpload(input, documentType) {
+    const previewContainer = document.getElementById(documentType + 'Preview');
+
     if (input.files.length > 0) {
-        const file = input.files[0];
-        const previewContainer = document.getElementById(documentType + 'Preview');
-        
-        if (previewContainer) {
-            previewContainer.innerHTML = `
+        let previewHTML = '';
+
+        if (documentType === 'additionalDocs' && input.files.length > 1) {
+            // Handle multiple files for additional docs
+            Array.from(input.files).forEach(file => {
+                previewHTML += `
+                    <div class="file-preview-item">
+                        <div class="file-info">
+                            <span class="file-icon">📄</span>
+                            <div class="file-details">
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                            </div>
+                            <span class="file-status">✅</span>
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            // Handle single file
+            const file = input.files[0];
+
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showNotification('❌ File size must be less than 10MB', 'error');
+                input.value = '';
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+            if (!allowedTypes.includes(file.type)) {
+                showNotification('❌ File must be PDF, JPG, or PNG format', 'error');
+                input.value = '';
+                return;
+            }
+
+            previewHTML = `
                 <div class="file-preview-item">
                     <div class="file-info">
                         <span class="file-icon">📄</span>
@@ -1210,18 +1336,116 @@ function handleFileUpload(input, documentType) {
                 </div>
             `;
         }
-        
-        // Enable proceed button if all required docs are uploaded
-        const proceedBtn = document.getElementById('proceedToReview');
-        if (proceedBtn) {
-            const requiredDocs = ['businessLicense', 'cannabisLicense', 'taxId'];
-            const uploadedCount = requiredDocs.filter(doc => {
-                const input = document.getElementById(doc);
-                return input && input.files.length > 0;
-            }).length;
-            
-            proceedBtn.disabled = uploadedCount < 3;
+
+        if (previewContainer) {
+            previewContainer.innerHTML = previewHTML;
         }
+
+        // Enable proceed button if all required docs are uploaded
+        updateProceedButtonState();
+    }
+}
+
+function updateApplicationProgress(step) {
+    const progressBar = document.getElementById('progressBar');
+    const progressSteps = document.querySelectorAll('.progress-step');
+
+    // Update progress bar
+    const progressWidth = (step / 3) * 100;
+    if (progressBar) {
+        progressBar.style.width = progressWidth + '%';
+    }
+
+    // Update step indicators
+    progressSteps.forEach((stepEl, index) => {
+        const stepNumber = index + 1;
+        const stepDiv = stepEl.querySelector('div');
+
+        if (stepNumber < step) {
+            stepEl.classList.add('completed');
+            stepEl.classList.remove('active');
+        } else if (stepNumber === step) {
+            stepEl.classList.add('active');
+            stepEl.classList.remove('completed');
+        } else {
+            stepEl.classList.remove('active', 'completed');
+        }
+    });
+}
+
+function updateProceedButtonState() {
+    const proceedBtn = document.getElementById('proceedToReview');
+    if (proceedBtn) {
+        const requiredDocs = ['businessLicense', 'cannabisLicense', 'taxId'];
+        const uploadedCount = requiredDocs.filter(doc => {
+            const input = document.getElementById(doc);
+            return input && input.files.length > 0;
+        }).length;
+
+        proceedBtn.disabled = uploadedCount < 3;
+
+        if (uploadedCount >= 3) {
+            proceedBtn.style.background = 'linear-gradient(135deg, var(--brand-green), var(--brand-green-light))';
+            proceedBtn.style.color = 'white';
+        } else {
+            proceedBtn.style.background = 'var(--surface-elevated)';
+            proceedBtn.style.color = 'var(--text-muted)';
+        }
+    }
+}
+
+function resetRegistrationForm() {
+    currentRegistrationStep = 1;
+    registrationData = {};
+    uploadedDocuments = {};
+
+    // Reset UI
+    const step3 = document.getElementById('registrationStep3');
+    const step1 = document.getElementById('registrationStep1');
+    if (step3) step3.style.display = 'none';
+    if (step1) step1.style.display = 'block';
+    updateApplicationProgress(1);
+
+    // Clear form fields
+    const form = document.getElementById('businessInfoForm');
+    if (form) {
+        form.reset();
+    }
+
+    // Clear file inputs and previews
+    const fileInputs = ['businessLicense', 'cannabisLicense', 'taxId', 'additionalDocs'];
+    fileInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(inputId + 'Preview');
+        if (input) input.value = '';
+        if (preview) preview.innerHTML = '';
+    });
+
+    // Reset proceed button
+    const proceedBtn = document.getElementById('proceedToReview');
+    if (proceedBtn) {
+        proceedBtn.disabled = true;
+    }
+}
+
+function triggerAdminNotification(applicationData) {
+    // Store notification for admin dashboard
+    const adminNotifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+    adminNotifications.unshift({
+        id: 'NOTIF-' + Date.now(),
+        type: 'new_application',
+        title: 'New Business Application',
+        message: `${applicationData.businessName} has submitted a partnership application`,
+        applicationId: applicationData.applicationId,
+        timestamp: new Date().toISOString(),
+        read: false,
+        priority: 'high'
+    });
+    localStorage.setItem('adminNotifications', JSON.stringify(adminNotifications));
+
+    // Update admin dashboard counters if admin is logged in
+    if (window.adminDashboard && typeof window.adminDashboard.updateNotificationBadge === 'function') {
+        window.adminDashboard.updateNotificationBadge();
     }
 }
 
@@ -2754,7 +2978,7 @@ function initializeLiveCheckout() {
         }
     });
 
-    console.log('✅ Live checkout system initialized');
+    console.log('��� Live checkout system initialized');
 }
 
 // Register Modal Functions (simplified version)

@@ -1452,6 +1452,171 @@
                 transform: scale(1);
             }
         }
+
+        /* Business Application Styles */
+        .application-progress {
+            position: relative;
+        }
+
+        .progress-step {
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active {
+            color: var(--brand-green) !important;
+        }
+
+        .progress-step.active div {
+            background: var(--brand-green) !important;
+            color: white !important;
+            border-color: var(--brand-green) !important;
+        }
+
+        .progress-step.completed {
+            color: var(--brand-green) !important;
+        }
+
+        .progress-step.completed div {
+            background: var(--brand-green) !important;
+            color: white !important;
+            border-color: var(--brand-green) !important;
+        }
+
+        .registration-step {
+            min-height: 400px;
+            transition: all 0.3s ease;
+        }
+
+        .registration-step.active {
+            display: block !important;
+        }
+
+        .file-preview {
+            margin-top: 12px;
+            min-height: 60px;
+        }
+
+        .file-preview-item {
+            background: var(--surface-elevated);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle);
+            margin-bottom: 8px;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-icon {
+            font-size: 24px;
+        }
+
+        .file-details {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .file-size {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .file-status {
+            color: var(--brand-green);
+            font-size: 18px;
+        }
+
+        .review-section {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .review-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .review-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .review-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .review-item label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .review-item span {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .review-documents {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .doc-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--brand-green);
+            font-weight: 500;
+        }
+
+        /* Application status styles */
+        .application-status {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            margin: 16px 0;
+        }
+
+        .application-status.pending {
+            background: rgba(255, 165, 0, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid var(--accent-orange);
+        }
+
+        .application-status.approved {
+            background: rgba(0, 200, 81, 0.1);
+            color: var(--brand-green);
+            border: 1px solid var(--brand-green);
+        }
+
+        .application-status.rejected {
+            background: rgba(255, 68, 68, 0.1);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+
+        @media (max-width: 768px) {
+            .review-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2231,44 +2396,193 @@
         </div>
     </div>
 
-    <!-- Register Modal -->
+    <!-- Business Application Modal -->
     <div id="registerModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
-                <h3 class="modal-title">Register</h3>
+                <h3 class="modal-title">Business Partnership Application</h3>
+                <div style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">Complete application for wholesale partnership approval</div>
                 <button class="modal-close" onclick="closeModal('registerModal')">×</button>
             </div>
-            <form onsubmit="register(event)">
-                <div class="form-group">
-                    <label for="businessName">Business Name *</label>
-                    <input type="text" id="businessName" required placeholder="Your licensed business name">
+
+            <!-- Application Progress Indicator -->
+            <div class="application-progress" style="margin-bottom: 30px; padding: 20px; background: var(--surface-elevated); border-radius: 12px; border: 1px solid var(--border-subtle);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div class="progress-step active" id="progressStep1" style="display: flex; align-items: center; gap: 8px; color: var(--brand-green); font-weight: 600;">
+                        <div style="width: 24px; height: 24px; background: var(--brand-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">1</div>
+                        <span>Business Info</span>
+                    </div>
+                    <div class="progress-step" id="progressStep2" style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600;">
+                        <div style="width: 24px; height: 24px; background: var(--surface-card); color: var(--text-muted); border: 2px solid var(--border-subtle); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">2</div>
+                        <span>Documentation</span>
+                    </div>
+                    <div class="progress-step" id="progressStep3" style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600;">
+                        <div style="width: 24px; height: 24px; background: var(--surface-card); color: var(--text-muted); border: 2px solid var(--border-subtle); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">3</div>
+                        <span>Review & Submit</span>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="contactName">Contact Name *</label>
-                    <input type="text" id="contactName" required placeholder="Your name">
+                <div style="width: 100%; height: 4px; background: var(--surface-dark); border-radius: 2px; overflow: hidden;">
+                    <div id="progressBar" style="width: 33%; height: 100%; background: linear-gradient(90deg, var(--brand-green), var(--brand-green-light)); transition: width 0.3s ease;"></div>
                 </div>
-                <div class="form-group">
-                    <label for="businessEmail">Business Email *</label>
-                    <input type="email" id="businessEmail" required placeholder="business@yourstore.com">
+            </div>
+
+            <!-- Step 1: Business Information -->
+            <div id="registrationStep1" class="registration-step active">
+                <h4 style="color: var(--brand-green); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                    🏢 Business Information
+                </h4>
+                <form id="businessInfoForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="businessName">Business Name *</label>
+                            <input type="text" id="businessName" required placeholder="Your licensed business name">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactName">Primary Contact Name *</label>
+                            <input type="text" id="contactName" required placeholder="Your full name">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="businessEmail">Business Email *</label>
+                            <input type="email" id="businessEmail" required placeholder="business@yourstore.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" required placeholder="(555) 123-4567">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="businessAddress">Business Address *</label>
+                        <textarea id="businessAddress" rows="3" required placeholder="Full business address including city, state, zip code"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="businessType">Business Type *</label>
+                            <select id="businessType" required>
+                                <option value="">Select your business type</option>
+                                <option value="Licensed Dispensary">Licensed Dispensary</option>
+                                <option value="Smoke Shop">Smoke Shop</option>
+                                <option value="CBD/Hemp Store">CBD/Hemp Store</option>
+                                <option value="Wholesale Distributor">Wholesale Distributor</option>
+                                <option value="Delivery Service">Delivery Service</option>
+                                <option value="Online Retailer">Online Retailer</option>
+                                <option value="Other Licensed Retailer">Other Licensed Retailer</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="licenseNumber">License Number *</label>
+                            <input type="text" id="licenseNumber" required placeholder="Your business license number">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="estimatedMonthlyVolume">Estimated Monthly Volume *</label>
+                            <select id="estimatedMonthlyVolume" required>
+                                <option value="">Select estimated volume</option>
+                                <option value="$1,000 - $5,000">$1,000 - $5,000</option>
+                                <option value="$5,000 - $15,000">$5,000 - $15,000</option>
+                                <option value="$15,000 - $35,000">$15,000 - $35,000</option>
+                                <option value="$35,000+">$35,000+</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="yearsInBusiness">Years in Business</label>
+                            <select id="yearsInBusiness">
+                                <option value="">Select years</option>
+                                <option value="New Business">New Business</option>
+                                <option value="Less than 1 year">Less than 1 year</option>
+                                <option value="1-3 years">1-3 years</option>
+                                <option value="3-5 years">3-5 years</option>
+                                <option value="5+ years">5+ years</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="businessDescription">Business Description</label>
+                        <textarea id="businessDescription" rows="3" placeholder="Brief description of your business, target market, and current operations..."></textarea>
+                    </div>
+                </form>
+
+                <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+                    <button type="button" class="btn btn-primary" onclick="nextRegistrationStep()">Continue to Documentation →</button>
                 </div>
-                <div class="form-group">
-                    <label for="phone">Phone Number *</label>
-                    <input type="tel" id="phone" required placeholder="(555) 123-4567">
+            </div>
+
+            <!-- Step 2: Documentation Upload -->
+            <div id="registrationStep2" class="registration-step" style="display: none;">
+                <h4 style="color: var(--brand-green); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                    📋 Required Documentation
+                </h4>
+                <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">
+                    Please upload the required business documents for verification. All documents will be securely stored and reviewed by our compliance team.
+                </p>
+
+                <div class="document-upload-section">
+                    <div class="form-group">
+                        <label for="businessLicense">Business License * <span style="color: var(--text-muted); font-size: 12px;">(PDF, JPG, PNG - Max 10MB)</span></label>
+                        <input type="file" id="businessLicense" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this, 'businessLicense')">
+                        <div id="businessLicensePreview" class="file-preview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cannabisLicense">Cannabis/Hemp License * <span style="color: var(--text-muted); font-size: 12px;">(PDF, JPG, PNG - Max 10MB)</span></label>
+                        <input type="file" id="cannabisLicense" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this, 'cannabisLicense')">
+                        <div id="cannabisLicensePreview" class="file-preview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taxId">Tax ID/EIN Document * <span style="color: var(--text-muted); font-size: 12px;">(PDF, JPG, PNG - Max 10MB)</span></label>
+                        <input type="file" id="taxId" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this, 'taxId')">
+                        <div id="taxIdPreview" class="file-preview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="additionalDocs">Additional Documents <span style="color: var(--text-muted); font-size: 12px;">(Optional - Reseller permits, certifications, etc.)</span></label>
+                        <input type="file" id="additionalDocs" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFileUpload(this, 'additionalDocs')">
+                        <div id="additionalDocsPreview" class="file-preview"></div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="businessType">Business Type *</label>
-                    <select id="businessType" required>
-                        <option value="">Select your business type</option>
-                        <option value="dispensary">Licensed Dispensary</option>
-                        <option value="smoke-shop">Smoke Shop</option>
-                        <option value="cbd-store">CBD/Hemp Store</option>
-                        <option value="distributor">Wholesale Distributor</option>
-                        <option value="delivery">Delivery Service</option>
-                        <option value="other">Other Licensed Retailer</option>
-                    </select>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="previousRegistrationStep()">← Back</button>
+                    <button type="button" class="btn btn-primary" id="proceedToReview" onclick="nextRegistrationStep()" disabled>Continue to Review →</button>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Register</button>
-            </form>
+            </div>
+
+            <!-- Step 3: Review and Submit -->
+            <div id="registrationStep3" class="registration-step" style="display: none;">
+                <h4 style="color: var(--brand-green); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                    📋 Review Your Application
+                </h4>
+                <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">
+                    Please review your application details before submission. You will receive an email confirmation once submitted.
+                </p>
+
+                <div id="registrationReview" style="background: var(--surface-elevated); padding: 20px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+                    <!-- Review content will be generated here -->
+                </div>
+
+                <div style="background: var(--surface-card); padding: 16px; border-radius: 8px; margin: 20px 0; border: 1px solid var(--border-subtle);">
+                    <h5 style="color: var(--brand-green); margin-bottom: 12px;">What happens next?</h5>
+                    <ul style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+                        <li>Our compliance team will review your application within 24-48 hours</li>
+                        <li>You'll receive an email notification with approval status</li>
+                        <li>Once approved, you'll get access to wholesale pricing and ordering</li>
+                        <li>A dedicated account manager will contact you to finalize your partnership</li>
+                    </ul>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="previousRegistrationStep()">← Back</button>
+                    <button type="button" class="btn btn-primary" onclick="submitRegistration()" style="flex: 1; margin-left: 12px;">Submit Application 🚀</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -3212,7 +3526,7 @@
 
         // Production deployment checklist logger
         console.log(`
-🚀 FADED SKIES WHOLESALE PORTAL - PRODUCTION READY CHECKLIST ✅
+���� FADED SKIES WHOLESALE PORTAL - PRODUCTION READY CHECKLIST ✅
 
 ✅ Authentication System
    • Secure login/logout with session management
@@ -4940,7 +5254,7 @@
                 
                 // If quantity is 0 or less, remove the item
                 if (quantity <= 0) {
-                    console.log('🗑️ Removing item from cart (quantity <= 0)');
+                    console.log('����️ Removing item from cart (quantity <= 0)');
                     removeFromCart(productId);
                     return;
                 }
