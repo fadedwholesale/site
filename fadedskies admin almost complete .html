@@ -3191,7 +3191,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 case 'product_added':
                 case 'product_deleted':
                     // Always reload data from shared manager to stay in sync
-                    console.log('📡 Admin: Reloading data due to external changes');
+                    console.log('�� Admin: Reloading data due to external changes');
                     loadDataFromSharedManager();
                     updateAllDashboardViews();
                     updateSyncStatus('connected');
@@ -3515,7 +3515,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     </td>
                     <td>
                         <small style="color: var(--text-muted);">${formatDateTime(product.lastModified)}</small><br>
-                        <small style="color: var(--text-muted);">by ${product.modifiedBy.split('@')[0]}</small>
+                        <small style="color: var(--text-muted);">by ${product.modifiedBy ? product.modifiedBy.split('@')[0] : 'system'}</small>
                     </td>
                     <td>
                         <button class="btn btn-secondary btn-sm" onclick="editProduct(${product.id})">Edit</button>
@@ -4903,7 +4903,7 @@ Faded Skies Wholesale Team
                     </div>
                     
                     <div class="header">
-                        <h1>🌿 Faded Skies Wholesale</h1>
+                        <h1>�� Faded Skies Wholesale</h1>
                         <h2>Executive Performance Report</h2>
                         <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
                     </div>
