@@ -68,6 +68,30 @@ Both portals share the same data structures and sync in real-time:
 - Partner data syncs between systems
 - Pricing changes reflect immediately
 - **Registration applications** flow from public portal to admin for verification
+- **System logos** update across all portals instantly
+
+## 📷 Logo Management
+
+The system supports centralized logo management with real-time synchronization:
+
+### Logo Configuration
+- **Main Logo**: Used for primary branding across the system
+- **Partner Header Logo**: Displays in the partner portal header
+- **Admin Header Logo**: Displays in the admin dashboard header
+
+### Logo Features
+- **Real-time Updates**: Logo changes sync instantly across all portals
+- **Fallback System**: Uses main logo if specific portal logos aren't set
+- **Database Storage**: Logos are stored in the shared data system
+- **URL Support**: Accepts any web-accessible image URL
+- **Responsive**: Automatically scales for different screen sizes
+
+### Testing Logo Integration
+Use `test-logo-integration.html` to verify logo functionality:
+```bash
+npm run dev
+# Navigate to http://localhost:3000/test-logo-integration.html
+```
 
 ## 📝 Registration Workflow
 
