@@ -285,10 +285,13 @@ function showGuestSession() {
     const guestSection = document.getElementById('guestSection');
     const userSession = document.getElementById('userSession');
     const cartToggle = document.getElementById('cartToggle');
-    
+
     if (guestSection) guestSection.style.display = 'flex';
     if (userSession) userSession.classList.remove('show');
     if (cartToggle) cartToggle.style.display = 'none';
+
+    // Update public inventory display to hide action buttons for non-authenticated users
+    updatePublicInventoryDisplay();
 }
 
 // View Management Functions
