@@ -1786,6 +1786,32 @@ async function completeOrderWithPayment(paymentResult) {
     }
 }
 
+// Checkout Modal Functions
+function proceedToPayment(event) {
+    event.preventDefault();
+
+    if (window.cartManager) {
+        window.cartManager.processCheckout();
+    }
+}
+
+function updateDeliveryMethod(label) {
+    // Update visual styling for selected delivery method
+    document.querySelectorAll('label:has(input[name="deliveryMethod"])').forEach(l => {
+        l.style.borderColor = 'var(--border-subtle)';
+        l.style.background = 'var(--surface-card)';
+        l.style.boxShadow = 'none';
+    });
+
+    label.style.borderColor = 'var(--brand-green)';
+    label.style.background = 'rgba(0, 200, 81, 0.1)';
+    label.style.boxShadow = '0 0 0 2px rgba(0, 200, 81, 0.2)';
+
+    // Update any pricing based on delivery method if needed
+    const method = label.querySelector('input').value;
+    console.log('Delivery method selected:', method);
+}
+
 // Register Modal Functions (simplified version)
 function register(event) {
     event.preventDefault();
