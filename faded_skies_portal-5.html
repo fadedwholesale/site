@@ -2064,19 +2064,25 @@
                         <textarea id="editBusinessAddress" rows="3" required placeholder="Full business address including city, state, zip"></textarea>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="editTaxId">Tax ID/EIN</label>
-                        <input type="text" id="editTaxId" placeholder="XX-XXXXXXX">
+                <!-- Additional Information Section -->
+                <div class="form-section" style="margin-bottom: 24px;">
+                    <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        📝 Additional Information
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editTaxId">Tax ID/EIN</label>
+                            <input type="text" id="editTaxId" placeholder="XX-XXXXXXX">
+                        </div>
+                        <div class="form-group">
+                            <label for="editWebsite">Website</label>
+                            <input type="url" id="editWebsite" placeholder="https://yourwebsite.com">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="editWebsite">Website</label>
-                        <input type="url" id="editWebsite" placeholder="https://yourwebsite.com">
+                        <label for="editNotes">Additional Notes</label>
+                        <textarea id="editNotes" rows="3" placeholder="Any additional information about your business..."></textarea>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="editNotes">Additional Notes</label>
-                    <textarea id="editNotes" rows="3" placeholder="Any additional information about your business..."></textarea>
                 </div>
                 <div style="display: flex; gap: 12px; margin-top: 24px;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('profileEditModal')">Cancel</button>
@@ -4594,7 +4600,7 @@
 
         function updateQuantity(productId, quantity) {
             try {
-                console.log('��� Updating quantity for product:', productId, 'to:', quantity);
+                console.log('🔄 Updating quantity for product:', productId, 'to:', quantity);
                 
                 const item = cart.find(item => item.id === productId);
                 const product = products.find(p => p.id === productId);
