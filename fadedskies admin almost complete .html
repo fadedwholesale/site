@@ -3281,7 +3281,20 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
         // Handle real-time updates
         function handleAdminRealTimeUpdate(event) {
-            const { type, data, timestamp } = event.detail;
+            // Handle both event objects and direct function calls
+            let type, data, timestamp;
+
+            if (event && event.detail) {
+                // Event object format
+                ({ type, data, timestamp } = event.detail);
+            } else if (event && event.type) {
+                // Direct object format
+                ({ type, data, timestamp } = event);
+            } else {
+                console.error('❌ Invalid event format received:', event);
+                return;
+            }
+
             console.log('📡 Admin received real-time update:', type, data);
 
             switch (type) {
