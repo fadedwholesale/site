@@ -188,7 +188,37 @@ class DataCleanup {
             console.error('❌ Error clearing real-time data:', error);
         }
     }
-    
+
+    static emergencyLogCleanup() {
+        console.log('🚨 Emergency: Clearing all activity logs due to circular reference issues');
+
+        try {
+            // Remove all activity-related storage that might have circular references
+            const keysToRemove = [
+                'fadedSkiesActivityLogs',
+                'fadedSkiesChangeTracking',
+                'fadedSkiesSessionLogs'
+            ];
+
+            keysToRemove.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    localStorage.removeItem(key);
+                    console.log(`🗑️ Removed ${key}`);
+                }
+            });
+
+            // Also clear session storage
+            if (sessionStorage.getItem('fadedSkiesSessionLogs')) {
+                sessionStorage.removeItem('fadedSkiesSessionLogs');
+                console.log('🗑️ Removed session logs');
+            }
+
+            console.log('✅ Emergency log cleanup completed');
+        } catch (error) {
+            console.error('❌ Error in emergency cleanup:', error);
+        }
+    }
+
     static resetAllData() {
         const confirmed = confirm('Are you sure you want to reset all data? This cannot be undone.');
         if (confirmed) {
