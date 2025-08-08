@@ -83,19 +83,54 @@ class DataCleanup {
                 'fadedSkiesChangeTracking',
                 'fadedSkiesSessionLogs'
             ];
-            
+
+            // More aggressive cleanup for circular reference issues
             logKeys.forEach(key => {
                 const data = localStorage.getItem(key);
                 if (data) {
                     try {
-                        JSON.parse(data);
-                        console.log(`✅ ${key} is valid JSON`);
+                        const parsed = JSON.parse(data);
+
+                        // Check for potential circular reference patterns
+                        const hasCircularReference = JSON.stringify(parsed).includes('events') &&
+                                                   JSON.stringify(parsed).includes('currentSession');
+
+                        if (hasCircularReference) {
+                            console.log(`🧹 Removing ${key} due to potential circular references`);
+                            localStorage.removeItem(key);
+                        } else {
+                            console.log(`✅ ${key} is valid JSON`);
+                        }
                     } catch (error) {
-                        console.log(`🧹 Removing corrupted ${key}`);
+                        console.log(`🧹 Removing corrupted ${key}: ${error.message}`);
                         localStorage.removeItem(key);
                     }
                 }
             });
+
+            // Also clear session storage that might have circular references
+            const sessionKey = 'fadedSkiesSessionLogs';
+            const sessionData = sessionStorage.getItem(sessionKey);
+            if (sessionData) {
+                try {
+                    const parsed = JSON.parse(sessionData);
+                    if (parsed.events && Array.isArray(parsed.events) && parsed.events.length > 0) {
+                        // Check if any event has data that could cause circular references
+                        const hasProblematicData = parsed.events.some(event =>
+                            event.data && typeof event.data === 'object' &&
+                            (event.data.sessionId || event.data.currentSession)
+                        );
+
+                        if (hasProblematicData) {
+                            console.log('🧹 Removing session data with potential circular references');
+                            sessionStorage.removeItem(sessionKey);
+                        }
+                    }
+                } catch (error) {
+                    console.log('🧹 Removing corrupted session data');
+                    sessionStorage.removeItem(sessionKey);
+                }
+            }
         } catch (error) {
             console.error('❌ Error cleaning up activity logs:', error);
         }
