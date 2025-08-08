@@ -1004,6 +1004,16 @@ class CartManager {
                         window.sharedDataManager.addOrder(newOrder);
                     }
 
+                    // Broadcast order placement directly for immediate admin notification
+                    if (window.realTimeSync) {
+                        window.realTimeSync.broadcast('order_placed', {
+                            ...newOrder,
+                            isUrgent: totals.total > 1000,
+                            source: 'partner_portal'
+                        });
+                        console.log('📡 Order broadcast to admin portal:', newOrder.id);
+                    }
+
                     // Update inventory
                     this.updateInventoryAfterOrder();
 
