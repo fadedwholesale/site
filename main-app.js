@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeApplication() {
     // Initialize cart manager if not already done
     if (!window.cartManager) {
-        console.log('��� Initializing cart manager...');
+        console.log('🛒 Initializing cart manager...');
         window.cartManager = new CartManager();
         console.log('✅ Cart manager initialized');
     }
@@ -1786,6 +1786,81 @@ async function completeOrderWithPayment(paymentResult) {
     }
 }
 
+// Live Validation Functions
+function validateFieldLive(input) {
+    const fieldId = input.id;
+    const value = input.value.trim();
+    const indicator = document.querySelector(`[data-field="${fieldId}"]`);
+
+    // Show checking state
+    if (indicator) {
+        indicator.className = 'live-validation-indicator checking';
+        indicator.textContent = '⏳';
+    }
+    input.className = input.className.replace(/\b(valid|invalid|checking)\b/g, '') + ' checking';
+
+    // Simulate real-time validation
+    setTimeout(() => {
+        let isValid = false;
+        let message = '';
+
+        switch (fieldId) {
+            case 'checkoutCustomerName':
+                isValid = value.length >= 2;
+                message = isValid ? '✅' : '❌ Name too short';
+                break;
+            case 'checkoutCustomerEmail':
+                isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+                message = isValid ? '✅' : '❌ Invalid email';
+                break;
+            case 'checkoutCustomerPhone':
+                isValid = /^[\+]?[1-9][\d]{0,15}$/.test(value.replace(/\D/g, ''));
+                message = isValid ? '✅' : '❌ Invalid phone';
+                break;
+            case 'checkoutBusinessName':
+                isValid = value.length >= 2;
+                message = isValid ? '✅' : '❌ Business name required';
+                break;
+            case 'checkoutShippingAddress':
+                isValid = value.length >= 10;
+                message = isValid ? '✅' : '❌ Complete address required';
+                break;
+            default:
+                isValid = value.length > 0;
+                message = isValid ? '✅' : '❌';
+        }
+
+        if (indicator) {
+            indicator.className = `live-validation-indicator ${isValid ? 'valid' : 'invalid'}`;
+            indicator.textContent = message;
+        }
+
+        input.className = input.className.replace(/\b(valid|invalid|checking)\b/g, '') + ` ${isValid ? 'valid' : 'invalid'}`;
+
+        // Check if all fields are valid and update proceed button
+        updateProceedButtonState();
+
+    }, 300 + Math.random() * 200); // Simulate API delay
+}
+
+function updateProceedButtonState() {
+    const proceedBtn = document.querySelector('#checkoutModal button[type="submit"]');
+    if (!proceedBtn) return;
+
+    const validFields = document.querySelectorAll('#checkoutModal .live-validation-indicator.valid').length;
+    const totalRequiredFields = document.querySelectorAll('#checkoutModal .live-validation-indicator').length;
+
+    if (validFields === totalRequiredFields && totalRequiredFields > 0) {
+        proceedBtn.disabled = false;
+        proceedBtn.style.opacity = '1';
+        proceedBtn.style.background = 'linear-gradient(135deg, var(--brand-green), var(--brand-green-light))';
+    } else {
+        proceedBtn.disabled = true;
+        proceedBtn.style.opacity = '0.6';
+        proceedBtn.style.background = 'var(--surface-elevated)';
+    }
+}
+
 // Checkout Modal Functions
 function proceedToPayment(event) {
     event.preventDefault();
@@ -1795,7 +1870,7 @@ function proceedToPayment(event) {
     }
 }
 
-function updateDeliveryMethod(label) {
+function updateDeliveryMethodLive(label) {
     // Update visual styling for selected delivery method
     document.querySelectorAll('label:has(input[name="deliveryMethod"])').forEach(l => {
         l.style.borderColor = 'var(--border-subtle)';
@@ -1807,9 +1882,52 @@ function updateDeliveryMethod(label) {
     label.style.background = 'rgba(0, 200, 81, 0.1)';
     label.style.boxShadow = '0 0 0 2px rgba(0, 200, 81, 0.2)';
 
-    // Update any pricing based on delivery method if needed
+    // Get selected delivery method and update pricing in real-time
     const method = label.querySelector('input').value;
-    console.log('Delivery method selected:', method);
+    console.log('⚡ Live delivery method selected:', method);
+
+    // Update live pricing immediately
+    if (window.cartManager) {
+        window.cartManager.updateLivePricing(method);
+    }
+
+    // Show visual feedback
+    showNotification(`🚚 Delivery method updated to ${method}`, 'success');
+}
+
+// Real-time inventory checking
+function checkInventoryLive() {
+    if (!window.cartManager || !window.sharedDataManager) return;
+
+    let hasChanges = false;
+    const products = window.sharedDataManager.getProducts();
+
+    window.cartManager.cart.forEach(cartItem => {
+        const product = products.find(p => p.id === cartItem.id);
+        if (!product || product.status !== 'AVAILABLE' || product.stock < cartItem.quantity) {
+            hasChanges = true;
+            showNotification(`⚠️ ${cartItem.strain} availability changed`, 'warning');
+        }
+    });
+
+    if (hasChanges && window.cartManager.syncCartRealTime) {
+        window.cartManager.syncCartRealTime();
+    }
+}
+
+// Initialize live updates when checkout modal opens
+function initializeLiveCheckout() {
+    // Start real-time inventory checking
+    setInterval(checkInventoryLive, 3000);
+
+    // Add listeners for real-time cart updates
+    window.addEventListener('cartUpdate', () => {
+        if (window.cartManager) {
+            window.cartManager.syncCartRealTime();
+        }
+    });
+
+    console.log('✅ Live checkout system initialized');
 }
 
 // Register Modal Functions (simplified version)
