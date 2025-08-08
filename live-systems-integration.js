@@ -438,14 +438,22 @@ class LiveSystemsIntegrator {
             // Test 2: Activity logger status
             if (this.systems.activityLogger) {
                 try {
-                    const status = this.systems.activityLogger.getStatus();
-                    if (!status || !status.initialized) {
-                        communicationWorking = false;
-                        errors.push('Activity logger not properly initialized');
+                    if (typeof this.systems.activityLogger.getStatus === 'function') {
+                        const status = this.systems.activityLogger.getStatus();
+                        if (!status || !status.initialized) {
+                            communicationWorking = false;
+                            errors.push('Activity logger not properly initialized');
+                        }
+                    } else {
+                        // Fallback: check if it has basic methods
+                        if (!this.systems.activityLogger.log || !this.systems.activityLogger.getLogs) {
+                            communicationWorking = false;
+                            errors.push('Activity logger missing core methods');
+                        }
                     }
                 } catch (error) {
                     communicationWorking = false;
-                    errors.push('Activity logger status check failed');
+                    errors.push(`Activity logger status check failed: ${error.message}`);
                 }
             }
 
