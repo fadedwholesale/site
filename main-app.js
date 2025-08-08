@@ -1234,14 +1234,14 @@ function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
-    
+
     document.body.appendChild(notification);
-    
+
     // Show notification
     setTimeout(() => {
         notification.classList.add('show');
     }, 100);
-    
+
     // Hide notification
     setTimeout(() => {
         notification.classList.remove('show');
@@ -1251,6 +1251,18 @@ function showNotification(message, type = 'info') {
             }
         }, 300);
     }, 4000);
+}
+
+// Authentication required notification
+function showAuthRequiredNotification() {
+    showNotification('🔒 Please log in as a partner to add products to cart', 'warning');
+
+    // Optionally show login modal after a short delay
+    setTimeout(() => {
+        if (confirm('Would you like to log in to your partner account or register as a new partner?')) {
+            openModal('loginModal');
+        }
+    }, 1500);
 }
 
 // Debug function to check authentication state
@@ -2027,7 +2039,7 @@ function validateFieldLive(input) {
                 break;
             case 'checkoutCustomerPhone':
                 isValid = /^[\+]?[1-9][\d]{0,15}$/.test(value.replace(/\D/g, ''));
-                message = isValid ? '✅' : '❌ Invalid phone';
+                message = isValid ? '��' : '❌ Invalid phone';
                 break;
             case 'checkoutBusinessName':
                 isValid = value.length >= 2;
