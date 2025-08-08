@@ -2442,7 +2442,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
     <div id="applicationReviewModal" class="modal">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
-                <h3 class="modal-title">📋 Review Business Application</h3>
+                <h3 class="modal-title">�� Review Business Application</h3>
                 <button class="modal-close" onclick="closeModal('applicationReviewModal')">×</button>
             </div>
 
@@ -4600,11 +4600,32 @@ Faded Skies Wholesale Team
                 return;
             }
             
-            // Parse items into editable fields
-            const itemsArr = order.items.split(', ').map(itemStr => {
-                const match = itemStr.match(/^(.+?) \(x(\d+)\)$/);
-                return match ? { name: match[1], quantity: parseInt(match[2]) } : { name: itemStr, quantity: 1 };
-            });
+            // Parse items into editable fields with safe handling
+            let itemsArr = [];
+
+            if (!order.items) {
+                itemsArr = [{ name: 'Unknown Product', quantity: 1 }];
+            } else if (typeof order.items === 'string') {
+                itemsArr = order.items.split(', ').map(itemStr => {
+                    const match = itemStr.match(/^(.+?) \(x(\d+)\)$/);
+                    return match ? { name: match[1], quantity: parseInt(match[2]) } : { name: itemStr, quantity: 1 };
+                });
+            } else if (Array.isArray(order.items)) {
+                itemsArr = order.items.map(item => {
+                    if (typeof item === 'string') {
+                        const match = item.match(/^(.+?) \(x(\d+)\)$/);
+                        return match ? { name: match[1], quantity: parseInt(match[2]) } : { name: item, quantity: 1 };
+                    } else if (item && typeof item === 'object') {
+                        return {
+                            name: item.name || item.product || item.strain || 'Unknown Product',
+                            quantity: item.quantity || item.qty || 1
+                        };
+                    }
+                    return { name: String(item), quantity: 1 };
+                });
+            } else {
+                itemsArr = [{ name: String(order.items), quantity: 1 }];
+            }
             
             const modal = document.createElement('div');
             modal.className = 'modal';
