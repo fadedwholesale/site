@@ -558,36 +558,18 @@ class LiveDataManager {
 
     // Logging system
     log(level, message, data = null) {
-        const logEntry = {
-            id: this.generateLogId(),
-            timestamp: new Date().toISOString(),
-            level,
-            message,
-            data,
-            session: this.currentSession?.id,
-            user: window.currentUser?.email || 'anonymous',
-            url: window.location.href
-        };
-
-        if (!this.data.logs) {
-            this.data.logs = [];
+        // Use new simple logger if available
+        if (window.simpleLogger) {
+            window.simpleLogger.log(level, message, {
+                system: 'LiveDataManager',
+                sessionId: this.currentSession?.id,
+                ...data
+            });
+        } else {
+            // Fallback to console
+            const consoleMethod = level === 'error' ? 'error' : level === 'warning' ? 'warn' : 'log';
+            console[consoleMethod](`[LiveDataManager-${level.toUpperCase()}]`, message, data);
         }
-
-        this.data.logs.push(logEntry);
-
-        // Keep only recent logs
-        if (this.data.logs.length > this.maxLogs) {
-            this.data.logs = this.data.logs.slice(-this.maxLogs);
-        }
-
-        this.pendingChanges.add('logs');
-
-        // Console logging
-        const consoleMethod = level === 'error' ? 'error' : level === 'warning' ? 'warn' : 'log';
-        console[consoleMethod](`[${level.toUpperCase()}]`, message, data);
-
-        // Also store in separate log storage
-        this.saveLogToStorage(logEntry);
     }
 
     saveLogToStorage(logEntry) {
