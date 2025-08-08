@@ -1893,18 +1893,38 @@
 
                     <!-- Bulk Orders Tab Content -->
                     <div id="portalBulk" class="portal-content">
+                        <div class="stats-grid" style="margin-bottom: 30px;">
+                            <div class="stat-card">
+                                <div class="stat-number" id="bulkOrdersCount">0</div>
+                                <div class="stat-label">Bulk Orders</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="savedPresetsCount">0</div>
+                                <div class="stat-label">Saved Presets</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalBulkValue">$0</div>
+                                <div class="stat-label">Total Bulk Value</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">15%</div>
+                                <div class="stat-label">Max Bulk Discount</div>
+                            </div>
+                        </div>
+
                         <div class="card">
                             <h3>📦 Bulk Order Center</h3>
                             <p style="color: var(--text-secondary); margin-bottom: 16px;">
-                                Place large volume orders with additional discounts. Perfect for stocking up or special promotions.
+                                Place large volume orders with additional discounts. Save presets for easy reordering.
                             </p>
-                            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-                                <button class="btn btn-primary" onclick="createBulkOrder()">📦 Create Bulk Order</button>
-                                <button class="btn btn-secondary" onclick="requestCustomQuote()">💬 Request Custom Quote</button>
-                                <button class="btn btn-secondary" onclick="showNotification('📋 No bulk history found yet', 'warning')">📋 View History</button>
+                            <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px;">
+                                <button class="btn btn-primary" onclick="openBulkOrderModal()">📦 Create Bulk Order</button>
+                                <button class="btn btn-secondary" onclick="openPresetManager()">💾 Manage Presets</button>
+                                <button class="btn btn-secondary" onclick="viewBulkHistory()">📋 View History</button>
+                                <button class="btn btn-secondary" onclick="requestCustomQuote()">💬 Custom Quote</button>
                             </div>
-                            
-                            <div style="background: var(--surface-elevated); padding: 16px; border-radius: 12px; margin-top: 16px;">
+
+                            <div style="background: var(--surface-elevated); padding: 16px; border-radius: 12px; margin-bottom: 20px;">
                                 <h4 style="color: var(--brand-green); margin-bottom: 12px;">🎯 Volume Pricing Tiers</h4>
                                 <div style="margin-bottom: 8px;">
                                     <strong>20+ lbs:</strong> Additional 5% discount
@@ -1916,6 +1936,36 @@
                                     <strong>100+ lbs:</strong> Additional 15% discount + Dedicated logistics support
                                 </div>
                             </div>
+
+                            <!-- Saved Presets Quick Access -->
+                            <div id="savedPresetsSection" style="margin-top: 20px;">
+                                <h4 style="color: var(--brand-green); margin-bottom: 12px;">💾 Your Saved Presets</h4>
+                                <div id="savedPresetsList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+                                    <!-- Presets will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Bulk Orders -->
+                        <div class="card">
+                            <h3>📋 Recent Bulk Orders</h3>
+                            <table class="data-table" id="bulkOrderHistoryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Date</th>
+                                        <th>Items</th>
+                                        <th>Total Weight</th>
+                                        <th>Total Value</th>
+                                        <th>Discount</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bulkOrderHistoryBody">
+                                    <!-- Bulk orders will be loaded here -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -1976,6 +2026,189 @@
             </div>
         </div>
     </footer>
+
+    <!-- Bulk Order Modal -->
+    <div id="bulkOrderModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 class="modal-title">📦 Create Bulk Order</h3>
+                <button class="modal-close" onclick="closeBulkOrderModal()">×</button>
+            </div>
+
+            <!-- Bulk Order Wizard Steps -->
+            <div class="bulk-order-steps" style="display: flex; justify-content: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 20px;">
+                <div class="step active" data-step="1" style="display: flex; align-items: center; padding: 8px 16px; margin: 0 8px; border-radius: 20px; background: var(--brand-green); color: white; font-weight: 600; font-size: 14px;">
+                    <span style="margin-right: 8px;">1</span> Select Products
+                </div>
+                <div class="step" data-step="2" style="display: flex; align-items: center; padding: 8px 16px; margin: 0 8px; border-radius: 20px; background: var(--surface-elevated); color: var(--text-secondary); font-weight: 600; font-size: 14px;">
+                    <span style="margin-right: 8px;">2</span> Set Quantities
+                </div>
+                <div class="step" data-step="3" style="display: flex; align-items: center; padding: 8px 16px; margin: 0 8px; border-radius: 20px; background: var(--surface-elevated); color: var(--text-secondary); font-weight: 600; font-size: 14px;">
+                    <span style="margin-right: 8px;">3</span> Review & Save
+                </div>
+            </div>
+
+            <!-- Step 1: Product Selection -->
+            <div id="bulkStep1" class="bulk-step active">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h4 style="color: var(--brand-green); margin: 0;">Select Products for Bulk Order</h4>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary btn-sm" onclick="selectAllBulkProducts()">✅ Select All</button>
+                        <button class="btn btn-secondary btn-sm" onclick="clearBulkSelection()">❌ Clear All</button>
+                        <button class="btn btn-secondary btn-sm" onclick="loadPresetSelection()">💾 Load Preset</button>
+                    </div>
+                </div>
+
+                <div class="bulk-product-grid" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 16px;">
+                    <div id="bulkProductsList">
+                        <!-- Products will be loaded here -->
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <div style="color: var(--text-secondary);">Selected: <span id="selectedProductsCount">0</span> products</div>
+                    <button class="btn btn-primary" onclick="nextBulkStep()" id="bulkStep1Next">Next: Set Quantities →</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Quantity Selection -->
+            <div id="bulkStep2" class="bulk-step" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h4 style="color: var(--brand-green); margin: 0;">Set Quantities</h4>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary btn-sm" onclick="applyMinimumQuantities()">⬆️ Set Minimums</button>
+                        <button class="btn btn-secondary btn-sm" onclick="optimizeForDiscount()">💰 Optimize Discount</button>
+                    </div>
+                </div>
+
+                <div id="bulkQuantitiesContainer" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 16px;">
+                    <!-- Selected products with quantity inputs will appear here -->
+                </div>
+
+                <!-- Live Pricing Summary -->
+                <div style="background: var(--surface-elevated); padding: 16px; border-radius: 12px; margin: 20px 0; border: 2px solid var(--brand-green);">
+                    <h4 style="color: var(--brand-green); margin: 0 0 12px 0;">📊 Live Pricing Summary</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <div>
+                            <div style="font-size: 14px; color: var(--text-secondary);">Total Weight</div>
+                            <div style="font-size: 20px; font-weight: 700; color: var(--text-primary);" id="bulkTotalWeight">0 lbs</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 14px; color: var(--text-secondary);">Subtotal</div>
+                            <div style="font-size: 20px; font-weight: 700; color: var(--text-primary);" id="bulkSubtotal">$0.00</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 14px; color: var(--text-secondary);">Bulk Discount</div>
+                            <div style="font-size: 20px; font-weight: 700; color: var(--brand-green);" id="bulkDiscount">0%</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 14px; color: var(--text-secondary);">Final Total</div>
+                            <div style="font-size: 24px; font-weight: 700; color: var(--brand-green);" id="bulkFinalTotal">$0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="previousBulkStep()">← Back</button>
+                    <button class="btn btn-primary" onclick="nextBulkStep()" id="bulkStep2Next">Next: Review →</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Review & Save -->
+            <div id="bulkStep3" class="bulk-step" style="display: none;">
+                <h4 style="color: var(--brand-green); margin: 0 0 20px 0;">Review Your Bulk Order</h4>
+
+                <div id="bulkOrderReview" style="margin-bottom: 20px;">
+                    <!-- Order review will be generated here -->
+                </div>
+
+                <!-- Save as Preset Option -->
+                <div style="background: var(--surface-elevated); padding: 16px; border-radius: 12px; margin: 20px 0; border: 1px solid var(--border-subtle);">
+                    <h4 style="color: var(--brand-green); margin: 0 0 12px 0;">💾 Save as Preset</h4>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <input type="checkbox" id="saveAsPreset" style="transform: scale(1.2);">
+                        <label for="saveAsPreset" style="color: var(--text-primary); margin: 0;">Save this order as a preset for future use</label>
+                    </div>
+                    <div id="presetNameSection" style="margin-top: 12px; display: none;">
+                        <input type="text" id="presetName" placeholder="Enter preset name (e.g., 'Monthly Restock', 'Summer Special')" style="width: 100%; padding: 12px; border: 2px solid var(--border-subtle); border-radius: 8px; background: var(--surface-dark); color: var(--text-primary);">
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="previousBulkStep()">← Back</button>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-secondary" onclick="saveBulkPreset()">💾 Save Preset Only</button>
+                        <button class="btn btn-primary" onclick="submitBulkOrder()" id="submitBulkOrder">🛒 Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preset Manager Modal -->
+    <div id="presetManagerModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title">💾 Manage Bulk Order Presets</h3>
+                <button class="modal-close" onclick="closeModal('presetManagerModal')">×</button>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <button class="btn btn-primary" onclick="createNewPreset()">➕ Create New Preset</button>
+                <button class="btn btn-secondary" onclick="importPreset()">📥 Import Preset</button>
+                <button class="btn btn-secondary" onclick="exportAllPresets()">📤 Export All</button>
+            </div>
+
+            <div id="presetsList" style="max-height: 500px; overflow-y: auto;">
+                <!-- Presets will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Order History Modal -->
+    <div id="bulkHistoryModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h3 class="modal-title">📋 Bulk Order History</h3>
+                <button class="modal-close" onclick="closeModal('bulkHistoryModal')">×</button>
+            </div>
+
+            <div class="controls" style="margin-bottom: 20px;">
+                <div class="search-group">
+                    <input type="text" class="search-input" placeholder="Search bulk orders..." onkeyup="filterBulkHistory(this.value)">
+                    <select class="search-input" style="width: auto;" onchange="filterBulkHistoryByStatus(this.value)">
+                        <option value="">All Status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="PROCESSING">Processing</option>
+                        <option value="SHIPPED">Shipped</option>
+                        <option value="DELIVERED">Delivered</option>
+                    </select>
+                </div>
+                <div class="action-group">
+                    <button class="btn btn-primary" onclick="downloadBulkHistory()">📄 Export History</button>
+                    <button class="btn btn-secondary" onclick="refreshBulkHistory()">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <table class="data-table" id="bulkHistoryTable">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Weight</th>
+                        <th>Total</th>
+                        <th>Discount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="bulkHistoryBody">
+                    <!-- History will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- Login Modal -->
     <div id="loginModal" class="modal">
@@ -2442,7 +2675,55 @@
     <script src="notification-system.js"></script>
     <script src="shared-data.js"></script>
     <script src="cart-system.js"></script>
+    <script src="bulk-order-system.js"></script>
     <script src="main-app.js"></script>
+
+    <script>
+        // Immediate bulk order function definitions to prevent undefined errors
+        window.closeBulkOrderModal = window.closeBulkOrderModal || function() {
+            const modal = document.getElementById('bulkOrderModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.classList.remove('modal-open');
+            }
+        };
+
+        window.nextBulkStep = window.nextBulkStep || function() {
+            console.warn('Bulk order manager loading...');
+        };
+
+        window.previousBulkStep = window.previousBulkStep || function() {
+            console.warn('Bulk order manager loading...');
+        };
+
+        window.selectAllBulkProducts = window.selectAllBulkProducts || function() {
+            console.warn('Bulk order manager loading...');
+        };
+
+        window.clearBulkSelection = window.clearBulkSelection || function() {
+            console.warn('Bulk order manager loading...');
+        };
+
+        window.loadPresetSelection = window.loadPresetSelection || function() {
+            console.warn('Bulk order manager loading...');
+        };
+
+        window.applyMinimumQuantities = window.applyMinimumQuantities || function() {
+            console.warn('Bulk order manager loading...');
+        };
+
+        window.optimizeForDiscount = window.optimizeForDiscount || function() {
+            console.warn('Bulk order manager loading...');
+        };
+
+        window.saveBulkPreset = window.saveBulkPreset || function() {
+            console.warn('Bulk order manager loading...');
+        };
+
+        window.submitBulkOrder = window.submitBulkOrder || function() {
+            console.warn('Bulk order manager loading...');
+        };
+    </script>
 
     <script>
         // Global State Management
@@ -2941,7 +3222,7 @@
 ✅ E-commerce Functionality
    • Shopping cart with real-time inventory checking
    • Order processing with status tracking
-   • Invoice generation and download
+   ��� Invoice generation and download
 
 ✅ Partner Portal
    • Complete dashboard with 6 functional tabs

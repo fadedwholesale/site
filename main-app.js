@@ -365,6 +365,9 @@ function switchPortalTab(tabName) {
         case 'dashboard':
             updateDashboardStats();
             break;
+        case 'bulk':
+            updateBulkOrderStats();
+            break;
     }
     
     console.log(`✅ Switched to ${tabName} tab`);
@@ -1224,11 +1227,142 @@ function handleFileUpload(input, documentType) {
 
 // Bulk Order Functions
 function createBulkOrder() {
-    showNotification('📦 Bulk order creation feature coming soon!', 'info');
+    try {
+        if (window.bulkOrderManager) {
+            window.bulkOrderManager.openBulkOrderModal();
+        } else {
+            // Fallback for when bulk order manager isn't loaded yet
+            showNotification('📦 Loading bulk order system...', 'info');
+            setTimeout(() => {
+                if (window.bulkOrderManager) {
+                    window.bulkOrderManager.openBulkOrderModal();
+                } else {
+                    showNotification('❌ Bulk order system not available', 'error');
+                }
+            }, 1000);
+        }
+    } catch (error) {
+        console.error('Error opening bulk order:', error);
+        showNotification('❌ Error opening bulk order system', 'error');
+    }
+}
+
+function openBulkOrderModal() {
+    createBulkOrder();
+}
+
+function openPresetManager() {
+    try {
+        if (window.bulkOrderManager) {
+            window.bulkOrderManager.openPresetManager();
+        } else {
+            showNotification('❌ Bulk order system not available', 'error');
+        }
+    } catch (error) {
+        console.error('Error opening preset manager:', error);
+        showNotification('❌ Error opening preset manager', 'error');
+    }
+}
+
+function viewBulkHistory() {
+    try {
+        if (window.bulkOrderManager) {
+            window.bulkOrderManager.viewBulkHistory();
+        } else {
+            showNotification('❌ Bulk order system not available', 'error');
+        }
+    } catch (error) {
+        console.error('Error opening bulk history:', error);
+        showNotification('❌ Error opening bulk history', 'error');
+    }
 }
 
 function requestCustomQuote() {
-    showNotification('💬 Custom quote request feature coming soon!', 'info');
+    // Create a simple custom quote request modal
+    const quoteModal = `
+        <div id="customQuoteModal" class="modal" style="display: block;">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">💬 Request Custom Quote</h3>
+                    <button class="modal-close" onclick="closeModal('customQuoteModal');">×</button>
+                </div>
+                <form onsubmit="submitCustomQuote(event)">
+                    <div class="form-group">
+                        <label>Business Name</label>
+                        <input type="text" id="quoteBusiness" value="${window.currentUser?.businessName || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Email</label>
+                        <input type="email" id="quoteEmail" value="${window.currentUser?.email || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Estimated Monthly Volume (lbs)</label>
+                        <select id="quoteVolume" required>
+                            <option value="">Select volume...</option>
+                            <option value="20-50">20-50 lbs</option>
+                            <option value="50-100">50-100 lbs</option>
+                            <option value="100-250">100-250 lbs</option>
+                            <option value="250-500">250-500 lbs</option>
+                            <option value="500+">500+ lbs</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Product Interests</label>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px;">
+                            <label style="display: flex; align-items: center; gap: 8px;"><input type="checkbox" value="flower"> THCA Flower</label>
+                            <label style="display: flex; align-items: center; gap: 8px;"><input type="checkbox" value="concentrates"> Concentrates</label>
+                            <label style="display: flex; align-items: center; gap: 8px;"><input type="checkbox" value="vapes"> Vape Products</label>
+                            <label style="display: flex; align-items: center; gap: 8px;"><input type="checkbox" value="custom"> Custom Products</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Special Requirements</label>
+                        <textarea id="quoteRequirements" rows="3" placeholder="Describe any special packaging, processing, or delivery requirements..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Additional Notes</label>
+                        <textarea id="quoteNotes" rows="2" placeholder="Any additional information for your custom quote..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Quote Request 🚀</button>
+                </form>
+            </div>
+        </div>
+    `;
+
+    // Remove existing modal if present
+    const existing = document.getElementById('customQuoteModal');
+    if (existing) existing.remove();
+
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', quoteModal);
+    document.body.classList.add('modal-open');
+}
+
+function submitCustomQuote(event) {
+    event.preventDefault();
+
+    // Collect form data
+    const formData = {
+        business: document.getElementById('quoteBusiness').value,
+        email: document.getElementById('quoteEmail').value,
+        volume: document.getElementById('quoteVolume').value,
+        interests: Array.from(document.querySelectorAll('#customQuoteModal input[type="checkbox"]:checked')).map(cb => cb.value),
+        requirements: document.getElementById('quoteRequirements').value,
+        notes: document.getElementById('quoteNotes').value,
+        submittedAt: new Date().toISOString()
+    };
+
+    // Simulate quote submission
+    setTimeout(() => {
+        closeModal('customQuoteModal');
+        showNotification('✅ Custom quote request submitted successfully!', 'success');
+
+        setTimeout(() => {
+            showNotification('📧 Our team will contact you within 24 hours with a personalized quote', 'info');
+        }, 2000);
+
+        console.log('Custom quote request:', formData);
+    }, 1000);
 }
 
 function openSupportModal() {
@@ -1680,6 +1814,15 @@ function handleProductImageError(img, productData) {
     }
 }
 
+// Update bulk order statistics
+function updateBulkOrderStats() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.updateBulkStats();
+    }
+}
+
+// Bulk order modal navigation functions - these are now defined above as window properties
+
 // Debug real-time system status
 function debugRealTimeSystemStatus() {
     console.log('🔍 Real-Time System Status Debug:');
@@ -1746,8 +1889,183 @@ window.updateProfile = updateProfile;
 window.refreshProfileData = refreshProfileData;
 window.showAuthRequiredNotification = showAuthRequiredNotification;
 window.createBulkOrder = createBulkOrder;
+window.openBulkOrderModal = openBulkOrderModal;
+window.openPresetManager = openPresetManager;
+window.viewBulkHistory = viewBulkHistory;
 window.requestCustomQuote = requestCustomQuote;
+window.submitCustomQuote = submitCustomQuote;
 window.openSupportModal = openSupportModal;
+// Bulk order function safety wrappers - ensure they exist even if manager isn't ready
+window.closeBulkOrderModal = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.closeBulkOrderModal();
+    } else {
+        closeModal('bulkOrderModal');
+    }
+};
+
+window.nextBulkStep = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.nextBulkStep();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.previousBulkStep = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.previousBulkStep();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.selectAllBulkProducts = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.selectAllBulkProducts();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.clearBulkSelection = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.clearBulkSelection();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.loadPresetSelection = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.loadPresetSelection();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.applyMinimumQuantities = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.applyMinimumQuantities();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.optimizeForDiscount = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.optimizeForDiscount();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.saveBulkPreset = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.saveBulkPreset();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.submitBulkOrder = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.submitBulkOrder();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+// Additional bulk order functions
+window.createNewPreset = function() {
+    if (window.bulkOrderManager) {
+        closeModal('presetManagerModal');
+        window.bulkOrderManager.openBulkOrderModal();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.importPreset = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.importPreset();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.exportAllPresets = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.exportAllPresets();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.filterBulkHistory = function(value) {
+    try {
+        const rows = document.querySelectorAll('#bulkHistoryBody tr');
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const matches = text.includes(value.toLowerCase());
+            row.style.display = matches ? '' : 'none';
+        });
+    } catch (error) {
+        console.error('Error filtering bulk history:', error);
+    }
+};
+
+window.filterBulkHistoryByStatus = function(status) {
+    try {
+        const rows = document.querySelectorAll('#bulkHistoryBody tr');
+        rows.forEach(row => {
+            if (!status) {
+                row.style.display = '';
+            } else {
+                const statusCell = row.cells[6]; // Status column
+                const matches = statusCell && statusCell.textContent.includes(status);
+                row.style.display = matches ? '' : 'none';
+            }
+        });
+    } catch (error) {
+        console.error('Error filtering bulk history by status:', error);
+    }
+};
+
+window.downloadBulkHistory = function() {
+    if (window.bulkOrderManager && window.bulkOrderManager.bulkOrderHistory.length > 0) {
+        try {
+            const csvContent = 'Order ID,Date,Items,Weight,Total,Discount,Status\n' +
+                window.bulkOrderManager.bulkOrderHistory.map(o =>
+                    `${o.id},${o.date},"${o.items}",${o.totalWeight},${o.totalValue},${o.discount}%,${o.status}`
+                ).join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bulk-order-history-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            showNotification('📄 Bulk order history downloaded!', 'success');
+        } catch (error) {
+            console.error('Error downloading bulk history:', error);
+            showNotification('❌ Error downloading history', 'error');
+        }
+    } else {
+        showNotification('📦 No bulk order history to download', 'warning');
+    }
+};
+
+window.refreshBulkHistory = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.loadBulkHistoryDisplay();
+        showNotification('🔄 Bulk history refreshed!', 'success');
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
 
 // Comprehensive test for authorization controls and real-time sync
 function testAuthorizationAndSync() {
@@ -1796,7 +2114,7 @@ function testAuthorizationAndSync() {
                     console.log('✅ Login test passed - action buttons visible for authenticated users');
                     showNotification('✅ Login controls working correctly', 'success');
                 } else {
-                    console.error('❌ Login test failed - action buttons not visible for authenticated users');
+                    console.error('�� Login test failed - action buttons not visible for authenticated users');
                     showNotification('❌ Login test failed', 'error');
                 }
 
@@ -1937,6 +2255,47 @@ function showTestResults(results) {
 window.testAuthorizationAndSync = testAuthorizationAndSync;
 window.testRealTimeSyncFeatures = testRealTimeSyncFeatures;
 window.showTestResults = showTestResults;
+
+// Test bulk order functions are properly defined
+window.testBulkOrderFunctions = function() {
+    console.log('🧪 Testing bulk order function definitions...');
+
+    const requiredFunctions = [
+        'openBulkOrderModal', 'closeBulkOrderModal', 'nextBulkStep', 'previousBulkStep',
+        'selectAllBulkProducts', 'clearBulkSelection', 'loadPresetSelection',
+        'applyMinimumQuantities', 'optimizeForDiscount', 'saveBulkPreset', 'submitBulkOrder',
+        'openPresetManager', 'viewBulkHistory', 'createNewPreset', 'importPreset', 'exportAllPresets',
+        'filterBulkHistory', 'filterBulkHistoryByStatus', 'downloadBulkHistory', 'refreshBulkHistory'
+    ];
+
+    const results = {
+        defined: [],
+        undefined: [],
+        total: requiredFunctions.length
+    };
+
+    requiredFunctions.forEach(funcName => {
+        if (typeof window[funcName] === 'function') {
+            results.defined.push(funcName);
+            console.log(`✅ ${funcName} - defined`);
+        } else {
+            results.undefined.push(funcName);
+            console.error(`❌ ${funcName} - undefined`);
+        }
+    });
+
+    console.log(`📊 Bulk Order Functions Test Results: ${results.defined.length}/${results.total} defined`);
+
+    if (results.undefined.length > 0) {
+        console.error('❌ Missing functions:', results.undefined);
+        showNotification(`⚠️ ${results.undefined.length} bulk order functions missing`, 'warning');
+    } else {
+        console.log('✅ All bulk order functions are properly defined');
+        showNotification('✅ All bulk order functions available!', 'success');
+    }
+
+    return results;
+};
 // Payment Processing Functions
 function selectPaymentMethod(method) {
     if (window.cartManager) {
