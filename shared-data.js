@@ -643,6 +643,46 @@ class SharedDataManager {
     getRealTimeSyncStatus() {
         return this.realTimeSync ? this.realTimeSync.getSyncStatus() : null;
     }
+
+    // System Configuration Management
+    getSystemConfig() {
+        const data = this.getData();
+        return data.system || {};
+    }
+
+    updateSystemConfig(config) {
+        const data = this.getData();
+        if (!data.system) data.system = {};
+        data.system = { ...data.system, ...config };
+        this.saveData(data);
+        this.notifyChange('system_config_updated', data.system);
+
+        // Broadcast real-time update
+        if (this.realTimeSync) {
+            this.realTimeSync.broadcast('system_config_updated', data.system);
+        }
+        return data.system;
+    }
+
+    updateLogos(logos) {
+        const data = this.getData();
+        if (!data.system) data.system = {};
+        if (!data.system.logos) data.system.logos = {};
+        data.system.logos = { ...data.system.logos, ...logos };
+        this.saveData(data);
+        this.notifyChange('logos_updated', data.system.logos);
+
+        // Broadcast real-time update
+        if (this.realTimeSync) {
+            this.realTimeSync.broadcast('logos_updated', data.system.logos);
+        }
+        return data.system.logos;
+    }
+
+    getLogos() {
+        const data = this.getData();
+        return data.system?.logos || {};
+    }
 }
 
 // Create global instance
