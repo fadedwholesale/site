@@ -1731,7 +1731,7 @@
                         </div>
 
                         <div class="chart-container">
-                            <h3 class="chart-title">👥 Partner Performance Analysis</h3>
+                            <h3 class="chart-title">��� Partner Performance Analysis</h3>
                             <div id="partnerPerformanceAnalytics">
                                 <!-- Will be populated by updatePartnerPerformanceAnalytics() -->
                             </div>
@@ -3710,6 +3710,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 updatePricingTable();
                 updateDashboardStats();
                 showNotification(`💰 Price updated for ${product.strain}`, 'success');
+
+                // Trigger auto-sync to partner portal
+                triggerAutoSync('price_update');
             }
         }
 
@@ -6603,7 +6606,7 @@ Faded Skies Partnership Team`
             });
             localStorage.setItem('adminNotifications', JSON.stringify(notifications));
             loadApplicationNotifications();
-            showNotification('��� All application notifications marked as read', 'success');
+            showNotification('✅ All application notifications marked as read', 'success');
         }
 
         function clearOldNotifications() {
