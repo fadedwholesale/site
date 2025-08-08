@@ -1158,10 +1158,28 @@ function previousRegistrationStep() {
 function generateRegistrationReview() {
     const reviewContainer = document.getElementById('registrationReview');
     if (!reviewContainer) return;
-    
+
+    // Generate document list
+    const docsList = Object.keys(uploadedDocuments).map(docType => {
+        if (docType === 'additionalDocs' && Array.isArray(uploadedDocuments[docType])) {
+            return uploadedDocuments[docType].map(doc =>
+                `<div class="doc-item">✅ ${doc.name} (${(doc.size / 1024 / 1024).toFixed(2)} MB)</div>`
+            ).join('');
+        } else if (uploadedDocuments[docType]) {
+            const friendlyNames = {
+                businessLicense: 'Business License',
+                cannabisLicense: 'Cannabis/Hemp License',
+                taxId: 'Tax ID/EIN Document'
+            };
+            const doc = uploadedDocuments[docType];
+            return `<div class="doc-item">✅ ${friendlyNames[docType] || docType}: ${doc.name} (${(doc.size / 1024 / 1024).toFixed(2)} MB)</div>`;
+        }
+        return '';
+    }).join('');
+
     reviewContainer.innerHTML = `
         <div class="review-section">
-            <h4 style="color: var(--brand-green); margin-bottom: 16px;">Business Information</h4>
+            <h4 style="color: var(--brand-green); margin-bottom: 16px;">📋 Business Information</h4>
             <div class="review-grid">
                 <div class="review-item">
                     <label>Business Name</label>
@@ -1187,21 +1205,38 @@ function generateRegistrationReview() {
                     <label>License Number</label>
                     <span>${registrationData.licenseNumber || 'Not provided'}</span>
                 </div>
+                <div class="review-item">
+                    <label>Business Address</label>
+                    <span>${registrationData.businessAddress || 'Not provided'}</span>
+                </div>
+                <div class="review-item">
+                    <label>Estimated Monthly Volume</label>
+                    <span>${registrationData.estimatedMonthlyVolume || 'Not provided'}</span>
+                </div>
             </div>
+            ${registrationData.yearsInBusiness ? `
+                <div style="margin-top: 16px;">
+                    <div class="review-item">
+                        <label>Years in Business</label>
+                        <span>${registrationData.yearsInBusiness}</span>
+                    </div>
+                </div>
+            ` : ''}
+            ${registrationData.businessDescription ? `
+                <div style="margin-top: 16px;">
+                    <div class="review-item">
+                        <label>Business Description</label>
+                        <span style="white-space: pre-wrap;">${registrationData.businessDescription}</span>
+                    </div>
+                </div>
+            ` : ''}
         </div>
-        
+
         <div class="review-section">
-            <h4 style="color: var(--brand-green); margin-bottom: 16px;">Documents Uploaded</h4>
+            <h4 style="color: var(--brand-green); margin-bottom: 16px;">📁 Documents Uploaded</h4>
             <div class="review-documents">
-                <div class="doc-item">✅ Business License</div>
-                <div class="doc-item">✅ Cannabis License</div>
-                <div class="doc-item">✅ Tax ID/EIN Document</div>
+                ${docsList}
             </div>
-        </div>
-        
-        <div style="margin-top: 24px; display: flex; gap: 12px;">
-            <button type="button" class="btn btn-secondary" onclick="previousRegistrationStep()">← Back</button>
-            <button type="button" class="btn btn-primary" onclick="submitRegistration()" style="flex: 1;">Submit Application 🚀</button>
         </div>
     `;
 }
@@ -2897,7 +2932,7 @@ function initializeLiveCheckout() {
         }
     });
 
-    console.log('✅ Live checkout system initialized');
+    console.log('��� Live checkout system initialized');
 }
 
 // Register Modal Functions (simplified version)
