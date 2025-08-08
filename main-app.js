@@ -656,6 +656,34 @@ function updateProfileDisplay() {
     console.log('✅ Profile display updated successfully');
 }
 
+function refreshProfileData() {
+    if (!currentUser) {
+        showNotification('❌ No user data to refresh', 'error');
+        return;
+    }
+
+    // Show loading notification
+    showNotification('🔄 Refreshing profile data...', 'info');
+
+    // Simulate data refresh from server
+    setTimeout(() => {
+        // In a real app, this would fetch fresh data from the server
+        // For now, we'll just refresh the display with current data
+        updateProfileDisplay();
+        showNotification('✅ Profile data refreshed!', 'success');
+
+        // Add a small enhancement - show last updated time
+        const lastUpdated = currentUser.lastUpdated ?
+            new Date(currentUser.lastUpdated).toLocaleString() :
+            'Never';
+
+        setTimeout(() => {
+            showNotification(`📅 Last updated: ${lastUpdated}`, 'info');
+        }, 1500);
+
+    }, 1000);
+}
+
 function openProfileEditModal() {
     if (!currentUser) {
         showNotification('❌ Please log in to edit your profile', 'error');
