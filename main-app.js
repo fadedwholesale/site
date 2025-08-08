@@ -64,7 +64,7 @@ function initializeApplication() {
             const userData = JSON.parse(savedUser);
             setCurrentUser(userData);
             showUserSession();
-            console.log('��� User session restored:', currentUser.email);
+            console.log('✅ User session restored:', currentUser.email);
         } catch (error) {
             console.error('Error restoring user session:', error);
             localStorage.removeItem('currentUser');
@@ -454,11 +454,11 @@ function updatePublicInventoryDisplay() {
         }
 
         return `
-            <tr>
+            <tr data-product-id="${product.id}">
                 <td class="product-image-container">
-                    <img src="${product.image || 'https://via.placeholder.com/80x80/1a1a1a/00C851?text=' + product.grade}"
+                    <img src="${product.image || product.photo || 'https://via.placeholder.com/80x80/1a1a1a/00C851?text=' + encodeURIComponent(product.grade)}"
                          alt="${product.strain}" class="product-image"
-                         onerror="this.src='https://via.placeholder.com/80x80/1a1a1a/00C851?text=${product.grade}'" />
+                         onerror="handleProductImageError(this, ${JSON.stringify(product).replace(/"/g, '&quot;')})" />
                 </td>
                 <td><strong>${product.grade}</strong></td>
                 <td>
