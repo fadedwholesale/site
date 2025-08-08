@@ -4890,15 +4890,30 @@ Faded Skies Wholesale Team
         }
 
         function updateFulfillmentMetrics() {
+            // Ensure orders is defined and is an array
+            if (!Array.isArray(orders)) {
+                console.warn('Orders array is not defined or not an array:', orders);
+                return;
+            }
+
             const totalOrders = orders.length;
-            const ordersWithTracking = orders.filter(o => o.trackingNumber).length;
+            const ordersWithTracking = orders.filter(o => o && o.trackingNumber).length;
             const trackingPercentage = totalOrders > 0 ? Math.round((ordersWithTracking / totalOrders) * 100) : 0;
-            
-            // Calculate same-day processing
+
+            // Calculate same-day processing with defensive programming
             const sameDayProcessed = orders.filter(order => {
+                // Check if order exists and has required properties
+                if (!order || !order.createdAt) return false;
+
                 const createdDate = new Date(order.createdAt);
-                const processingStatus = order.statusHistory.find(s => s.status === 'PROCESSING');
-                if (processingStatus) {
+
+                // Check if statusHistory exists and is an array
+                if (!order.statusHistory || !Array.isArray(order.statusHistory)) {
+                    return false;
+                }
+
+                const processingStatus = order.statusHistory.find(s => s && s.status === 'PROCESSING');
+                if (processingStatus && processingStatus.timestamp) {
                     const processedDate = new Date(processingStatus.timestamp);
                     const daysDiff = Math.ceil((processedDate - createdDate) / (1000 * 60 * 60 * 24));
                     return daysDiff <= 1;
@@ -5850,7 +5865,7 @@ Welcome to this month's Faded Skies Wholesale newsletter!
 🎯 THIS MONTH'S HIGHLIGHTS:
 • Industry market trends and insights
 �� New product announcements and arrivals
-• Partnership program updates and tier benefits
+��� Partnership program updates and tier benefits
 • Educational resources and compliance updates
 
 📈 PARTNERSHIP BENEFITS:
