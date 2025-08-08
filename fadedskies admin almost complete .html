@@ -3773,7 +3773,8 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 description: document.getElementById('newDescription').value || '',
                 lastModified: new Date().toISOString(),
                 modifiedBy: currentUser.email,
-                photo: window._productPhotoData || ''
+                photo: window._productPhotoData || '',
+                image: window._productPhotoData || '' // Sync both fields for compatibility
             };
             
             if (window.editingProductId) {
@@ -5754,7 +5755,7 @@ Faded Skies Wholesale Team`
         }
 
         function bulkStatusUpdate() {
-            showNotification('🔄 Bulk status update functionality coming soon!', 'warning');
+            showNotification('�� Bulk status update functionality coming soon!', 'warning');
         }
 
         function generateShippingLabels() {
