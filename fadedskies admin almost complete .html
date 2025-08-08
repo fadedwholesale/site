@@ -1408,7 +1408,7 @@
                         <h3 style="color: var(--brand-green); margin: 0;">Dynamic Pricing Engine</h3>
                         <div class="action-group">
                             <button class="btn btn-primary" onclick="openModal('bulkPriceModal')">📈 Bulk Price Update</button>
-                            <button class="btn btn-secondary" onclick="openModal('priceRulesModal')">⚙️ Pricing Rules</button>
+                            <button class="btn btn-secondary" onclick="openModal('priceRulesModal')">���️ Pricing Rules</button>
                             <button class="btn btn-secondary" onclick="applyMarketAnalysis()">📊 Market Analysis</button>
                             <button class="btn btn-secondary" onclick="exportPricing()">📄 Export Pricing</button>
                         </div>
@@ -2846,6 +2846,21 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 console.error('❌ Error loading system logos:', error);
             }
         }
+
+        // Handle logo updates
+        function handleLogoUpdate(logos) {
+            console.log('📷 Handling logo update:', logos);
+            loadSystemLogos();
+            showNotification('📷 Logo updated successfully', 'success');
+        }
+
+        // Listen for shared data changes including logo updates
+        window.addEventListener('sharedDataChange', function(event) {
+            const { type, data } = event.detail;
+            if (type === 'logos_updated' || type === 'system_config_updated') {
+                handleLogoUpdate(data);
+            }
+        });
 
         function initializeAdminDashboard() {
             console.log('🔧 Initializing Faded Skies Admin Dashboard...');
