@@ -3614,6 +3614,7 @@
     <script src="order-sync-manager.js"></script>
     <script src="activity-logger.js"></script>
     <script src="live-systems-integration.js"></script>
+    <script src="live-demo.js"></script>
     <script src="realtime-ui.js"></script>
     <script src="notification-system.js"></script>
     <script src="shared-data.js"></script>
@@ -4331,7 +4332,7 @@
             try {
                 if (!currentUser) {
                     openModal('loginModal');
-                    showNotification('🔒 Please log in to access the partner portal', 'warning');
+                    showNotification('���� Please log in to access the partner portal', 'warning');
                     return;
                 }
                 
@@ -6124,7 +6125,7 @@
                     showNotification(`❌ ${cartItem.strain} is no longer available`, 'error');
                     hasIssues = true;
                 } else if (cartItem.quantity > product.stock) {
-                    showNotification(`��️ Only ${product.stock} units of ${cartItem.strain} available`, 'warning');
+                    showNotification(`���� Only ${product.stock} units of ${cartItem.strain} available`, 'warning');
                     cartItem.quantity = product.stock;
                     updateCartDisplay();
                     hasIssues = true;
@@ -7419,7 +7420,7 @@ Phone: (210) 835-7834
                         console.log(`�� Image loaded: ${product.strain}`);
                         
                         if (successCount + errorCount === products.length) {
-                            showNotification(`🖼️ Image test complete: ${successCount}/${products.length} loaded successfully`, 'success');
+                            showNotification(`���️ Image test complete: ${successCount}/${products.length} loaded successfully`, 'success');
                         }
                     };
                     img.onerror = () => {
