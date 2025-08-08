@@ -1715,6 +1715,8 @@ window.testDataPersistence = testDataPersistence;
 window.testRealTimeUI = testRealTimeUI;
 window.testCompleteRealTimeSystem = testCompleteRealTimeSystem;
 window.debugRealTimeSystemStatus = debugRealTimeSystemStatus;
+window.highlightUpdatedProduct = highlightUpdatedProduct;
+window.handleProductImageError = handleProductImageError;
 window.login = login;
 window.logout = logout;
 window.showPublicWebsite = showPublicWebsite;
@@ -2305,4 +2307,4 @@ window.initializeLiveCheckout = initializeLiveCheckout;
 window.showNotification = showNotification;
 window.updateAllViews = updateAllViews;
 
-console.log('�� All global functions loaded and ready');
+console.log('🎯 All global functions loaded and ready');
