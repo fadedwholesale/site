@@ -115,13 +115,14 @@ class ActivityLogger {
 
     // Main logging method
     log(level, message, data = null, options = {}) {
+        // Create completely safe log entry without circular reference risks
         const logEntry = {
             id: this.generateLogId(),
             timestamp: new Date().toISOString(),
             level: level,
-            message: message,
-            data: data,
-            sessionId: this.currentSession?.id,
+            message: typeof message === 'string' ? message : String(message),
+            data: this.sanitizeLogData(data),
+            sessionId: this.currentSession?.id || 'unknown',
             userEmail: window.currentUser?.email || 'anonymous',
             userType: this.currentSession?.userType || 'unknown',
             page: window.location.pathname,
@@ -136,21 +137,8 @@ class ActivityLogger {
             }
         };
 
-        // Add to session events (completely safe to prevent circular references)
-        if (this.currentSession) {
-            // Only store basic, safe data in session events
-            this.currentSession.events.push({
-                timestamp: logEntry.timestamp,
-                level: level,
-                message: message.length > 100 ? message.substring(0, 100) + '...' : message,
-                hasData: data !== null && data !== undefined
-            });
-
-            // Limit session events more aggressively
-            if (this.currentSession.events.length > 50) {
-                this.currentSession.events = this.currentSession.events.slice(-50);
-            }
-        }
+        // DO NOT add to session events to completely prevent circular references
+        // Session events are disabled to prevent any possibility of circular references
 
         // Add to buffer for batch processing
         this.logBuffer.push(logEntry);
