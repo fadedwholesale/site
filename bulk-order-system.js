@@ -895,7 +895,7 @@ class BulkOrderManager {
 
     // Reorder from bulk history (create preset from history entry)
     reorderBulk(orderId) {
-        showNotification('���� Bulk reorder feature coming soon!', 'info');
+        showNotification('🔄 Bulk reorder feature coming soon!', 'info');
     }
 
     // Storage functions
@@ -1104,6 +1104,24 @@ class BulkOrderManager {
 if (typeof window !== 'undefined') {
     window.BulkOrderManager = BulkOrderManager;
 
+    // Immediately define placeholder functions to prevent undefined errors
+    window.closeBulkOrderModal = window.closeBulkOrderModal || function() {
+        console.warn('Bulk order manager not ready yet');
+        if (document.getElementById('bulkOrderModal')) {
+            document.getElementById('bulkOrderModal').style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+    };
+    window.nextBulkStep = window.nextBulkStep || function() { console.warn('Bulk order manager not ready yet'); };
+    window.previousBulkStep = window.previousBulkStep || function() { console.warn('Bulk order manager not ready yet'); };
+    window.selectAllBulkProducts = window.selectAllBulkProducts || function() { console.warn('Bulk order manager not ready yet'); };
+    window.clearBulkSelection = window.clearBulkSelection || function() { console.warn('Bulk order manager not ready yet'); };
+    window.loadPresetSelection = window.loadPresetSelection || function() { console.warn('Bulk order manager not ready yet'); };
+    window.applyMinimumQuantities = window.applyMinimumQuantities || function() { console.warn('Bulk order manager not ready yet'); };
+    window.optimizeForDiscount = window.optimizeForDiscount || function() { console.warn('Bulk order manager not ready yet'); };
+    window.saveBulkPreset = window.saveBulkPreset || function() { console.warn('Bulk order manager not ready yet'); };
+    window.submitBulkOrder = window.submitBulkOrder || function() { console.warn('Bulk order manager not ready yet'); };
+
     // Initialize immediately if DOM is already loaded, otherwise wait
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeBulkManager);
@@ -1179,7 +1197,7 @@ if (typeof window !== 'undefined') {
     window.refreshBulkHistory = () => {
         if (window.bulkOrderManager) {
             window.bulkOrderManager.loadBulkHistoryDisplay();
-            showNotification('🔄 Bulk history refreshed!', 'success');
+            showNotification('�� Bulk history refreshed!', 'success');
         }
     };
 }
