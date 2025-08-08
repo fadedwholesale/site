@@ -2920,9 +2920,12 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Listen for order updates
                 window.realTimeSync.on('order_added', (data) => {
                     console.log('📡 Admin: New order received via real-time sync', data);
-                    loadDataFromSharedManager(); // Refresh all data
-                    updateAllDashboardViews();
-                    showNotification(`🚨 NEW ORDER: ${data.id} from ${data.partnerName || 'Partner'} - $${data.total}`, 'success');
+                    handleNewOrderInAdmin(data);
+                });
+
+                window.realTimeSync.on('order_placed', (data) => {
+                    console.log('📡 Admin: Order placed in partner portal', data);
+                    handleNewOrderInAdmin(data);
                 });
 
                 console.log('✅ Real-time sync listeners configured for admin portal');
