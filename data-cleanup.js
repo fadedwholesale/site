@@ -3,66 +3,76 @@
 
 class DataCleanup {
     static cleanupCorruptedData() {
-        console.log('🧹 Starting data cleanup...');
-        
+        console.log('🧹 Starting aggressive data cleanup...');
+
         // Clean up orders with invalid items structure
         this.cleanupOrders();
-        
+
         // Clean up activity logs with circular references
         this.cleanupActivityLogs();
-        
+
         // Clean up session data
         this.cleanupSessionData();
-        
-        console.log('✅ Data cleanup completed');
+
+        // Force clear any corrupted real-time data
+        this.clearCorruptedRealTimeData();
+
+        console.log('✅ Aggressive data cleanup completed');
     }
     
     static cleanupOrders() {
         try {
             const liveDataKey = 'fadedSkiesLiveData';
             const storedData = localStorage.getItem(liveDataKey);
-            
+
             if (storedData) {
-                const data = JSON.parse(storedData);
-                
+                let data;
+                try {
+                    data = JSON.parse(storedData);
+                } catch (parseError) {
+                    console.warn('🧹 Corrupted JSON data, resetting:', parseError);
+                    localStorage.removeItem(liveDataKey);
+                    return;
+                }
+
                 if (data.orders && Array.isArray(data.orders)) {
                     let fixedCount = 0;
-                    
-                    data.orders = data.orders.map(order => {
+                    let removedCount = 0;
+
+                    data.orders = data.orders.filter(order => {
+                        // Remove completely corrupted orders
+                        if (!order || typeof order !== 'object' || !order.id) {
+                            removedCount++;
+                            return false;
+                        }
+
+                        // Fix orders with invalid items
                         if (order.items && !Array.isArray(order.items)) {
                             fixedCount++;
-                            console.log(`Fixing order ${order.id} with invalid items:`, order.items);
-                            
-                            if (typeof order.items === 'string') {
-                                order.items = [{
-                                    productId: 'unknown',
-                                    name: order.items,
-                                    quantity: 1,
-                                    price: order.total || 0
-                                }];
-                            } else {
-                                order.items = [];
-                            }
+                            console.log(`Fixing order ${order.id} with invalid items:`, typeof order.items);
+                            order.items = [];
                         }
-                        
-                        // Ensure other required fields
+
+                        // Ensure required fields
                         order.items = order.items || [];
                         order.total = order.total || 0;
                         order.status = order.status || 'pending';
-                        
-                        return order;
+                        order.created = order.created || new Date().toISOString();
+
+                        return true;
                     });
-                    
-                    if (fixedCount > 0) {
+
+                    if (fixedCount > 0 || removedCount > 0) {
                         localStorage.setItem(liveDataKey, JSON.stringify(data));
-                        console.log(`🔧 Fixed ${fixedCount} corrupted orders`);
+                        console.log(`🔧 Fixed ${fixedCount} and removed ${removedCount} corrupted orders`);
                     } else {
                         console.log('✅ All orders have valid structure');
                     }
                 }
             }
         } catch (error) {
-            console.error('❌ Error cleaning up orders:', error);
+            console.error('❌ Error cleaning up orders, clearing data:', error);
+            localStorage.removeItem('fadedSkiesLiveData');
         }
     }
     
@@ -118,6 +128,26 @@ class DataCleanup {
             }
         } catch (error) {
             console.error('❌ Error cleaning up session data:', error);
+        }
+    }
+
+    static clearCorruptedRealTimeData() {
+        try {
+            // Clear any cached real-time sync data that might be corrupted
+            const keys = Object.keys(localStorage);
+            keys.forEach(key => {
+                if (key.includes('realtime') || key.includes('sync') || key.includes('broadcast')) {
+                    try {
+                        const data = localStorage.getItem(key);
+                        JSON.parse(data); // Test if it's valid JSON
+                    } catch (error) {
+                        console.log(`🧹 Removing corrupted real-time data: ${key}`);
+                        localStorage.removeItem(key);
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('❌ Error clearing real-time data:', error);
         }
     }
     
