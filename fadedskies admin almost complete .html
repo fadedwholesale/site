@@ -5138,11 +5138,17 @@ Faded Skies Wholesale Team
                     const createdDate = new Date(order.createdAt);
 
                     // Check if statusHistory exists and is an array
-                    if (!order.statusHistory || !Array.isArray(order.statusHistory)) {
+                    if (!order.statusHistory || !Array.isArray(order.statusHistory) || order.statusHistory.length === 0) {
                         return 3; // Default delivery time
                     }
 
-                    const deliveredStatus = order.statusHistory.find(s => s && s.status === 'DELIVERED');
+                    // Double-check statusHistory is still valid before calling find
+                    const statusHistory = order.statusHistory;
+                    if (!statusHistory || !Array.isArray(statusHistory)) {
+                        return 3; // Default delivery time
+                    }
+
+                    const deliveredStatus = statusHistory.find(s => s && s.status === 'DELIVERED');
                     if (deliveredStatus && deliveredStatus.timestamp) {
                         const deliveredDate = new Date(deliveredStatus.timestamp);
                         return Math.ceil((deliveredDate - createdDate) / (1000 * 60 * 60 * 24));
