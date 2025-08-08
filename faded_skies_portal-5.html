@@ -4758,18 +4758,32 @@
                             overflow-y: auto;
                         }
                         
+                        .mobile-menu-toggle {
+                            display: block !important;
+                        }
+
                         .nav-links {
                             display: none;
                         }
-                        
-                        .nav-auth {
-                            flex-direction: column;
-                            gap: 8px;
+
+                        .nav-links.open {
+                            display: flex !important;
                         }
-                        
+
+                        .nav-auth {
+                            flex-direction: row;
+                            flex-wrap: wrap;
+                            gap: 6px;
+                        }
+
                         .nav-auth .btn {
-                            width: 100%;
-                            justify-content: center;
+                            font-size: 11px;
+                            padding: 6px 10px;
+                        }
+
+                        .sync-indicator {
+                            font-size: 11px;
+                            padding: 4px 8px;
                         }
                         
                         /* Ensure form elements are mobile-friendly */
