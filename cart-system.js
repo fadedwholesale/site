@@ -962,10 +962,14 @@ class CartManager {
 // Initialize cart manager when DOM is ready
 if (typeof window !== 'undefined') {
     window.CartManager = CartManager;
-    
+
     // Initialize cart manager if not already done
     if (!window.cartManager) {
         window.cartManager = new CartManager();
         console.log('🛒 Cart manager initialized');
     }
+
+    // Make methods globally available for easier access
+    window.openCheckoutModal = () => window.cartManager?.openCheckoutModal();
+    window.processCheckout = () => window.cartManager?.processCheckout();
 }
