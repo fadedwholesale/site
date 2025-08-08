@@ -2966,6 +2966,19 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             }, 2000);
         }
 
+        // Normalize product data to ensure all required fields are present
+        function normalizeProductData(product) {
+            return {
+                ...product,
+                modifiedBy: product.modifiedBy || 'system',
+                lastModified: product.lastModified || new Date().toISOString(),
+                image: product.image || product.photo || '',
+                photo: product.photo || product.image || '',
+                description: product.description || '',
+                type: product.type || 'Unknown'
+            };
+        }
+
         // Load data from shared data manager
         function loadDataFromSharedManager() {
             console.log('📡 Loading data from shared data manager...');
@@ -2975,7 +2988,8 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             const sharedOrders = window.sharedDataManager.getOrders();
 
             if (sharedProducts.length > 0) {
-                products = [...sharedProducts]; // Create a copy to avoid reference issues
+                // Normalize all products to prevent undefined errors
+                products = sharedProducts.map(normalizeProductData);
                 console.log('📦 Loaded', products.length, 'products from shared data manager');
             } else {
                 // If no shared products, initialize with defaults and sync
@@ -5654,7 +5668,7 @@ Welcome to this month's Faded Skies Wholesale newsletter!
 
 🎯 THIS MONTH'S HIGHLIGHTS:
 • Industry market trends and insights
-• New product announcements and arrivals
+�� New product announcements and arrivals
 • Partnership program updates and tier benefits
 • Educational resources and compliance updates
 
