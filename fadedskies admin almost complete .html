@@ -2329,7 +2329,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     <textarea id="emailMessage" required rows="8" placeholder="Enter your message here..."></textarea>
                 </div>
                 <div style="display: flex; gap: 12px;">
-                    <button type="button" class="btn btn-secondary" onclick="previewEmail()" style="flex: 1;">👁️ Preview</button>
+                    <button type="button" class="btn btn-secondary" onclick="previewEmail()" style="flex: 1;">👁�� Preview</button>
                     <button type="submit" class="btn btn-primary" style="flex: 2;">📧 Send Email</button>
                 </div>
             </form>
@@ -4825,7 +4825,7 @@ Faded Skies Wholesale Team
             link.click();
             document.body.removeChild(link);
             
-            showNotification('���� Partners exported successfully!', 'success');
+            showNotification('📄 Partners exported successfully!', 'success');
         }
 
         function exportAnalytics() {
@@ -5971,7 +5971,7 @@ Faded Skies Wholesale Team`
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 800px;">
                     <div class="modal-header">
-                        <h3 class="modal-title">Security Audit Log 🔒</h3>
+                        <h3 class="modal-title">Security Audit Log ����</h3>
                         <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
                     </div>
                     <div>
@@ -7026,6 +7026,11 @@ Faded Skies Partnership Team`
                 // Test communication immediately
                 setTimeout(() => {
                     testSystemCommunication();
+
+                    // Also test cross-portal communication
+                    setTimeout(() => {
+                        verifyCrossPortalCommunication();
+                    }, 1000);
                 }, 2000);
             }, 1000);
         });
