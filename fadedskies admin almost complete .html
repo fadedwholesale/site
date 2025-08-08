@@ -3833,6 +3833,19 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         function deleteProduct(productId) {
             const product = products.find(p => p.id === productId);
             if (product && confirm(`Are you sure you want to delete ${product.strain}?`)) {
+                // Log product deletion
+                if (window.simpleLogger) {
+                    window.simpleLogger.inventory('Product deletion initiated', {
+                        productId: productId,
+                        productName: product.strain,
+                        grade: product.grade,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        action: 'delete',
+                        system: 'admin-portal'
+                    });
+                }
+
                 // Remove from local array
                 products = products.filter(p => p.id !== productId);
 
@@ -3844,6 +3857,17 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
                 updateAllDashboardViews();
                 showNotification(`🗑️ Product ${product.strain} deleted`, 'success');
+
+                // Log successful deletion
+                if (window.simpleLogger) {
+                    window.simpleLogger.inventory('Product deleted successfully', {
+                        productId: productId,
+                        productName: product.strain,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
 
                 // Trigger auto-sync to partner portal
                 triggerAutoSync('product_delete');
@@ -3904,6 +3928,20 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             if (window.editingProductId) {
                 // Edit existing product
                 const product = products.find(p => p.id === window.editingProductId);
+
+                // Log product update
+                if (window.simpleLogger) {
+                    window.simpleLogger.inventory('Product update initiated', {
+                        productId: window.editingProductId,
+                        productName: productData.strain,
+                        changes: Object.keys(productData),
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        action: 'update',
+                        system: 'admin-portal'
+                    });
+                }
+
                 Object.assign(product, productData);
 
                 // Update shared data manager (this will notify partner portals)
@@ -3913,10 +3951,37 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 loadDataFromSharedManager();
 
                 showNotification(`✅ Product ${product.strain} updated successfully!`, 'success');
+
+                // Log successful update
+                if (window.simpleLogger) {
+                    window.simpleLogger.inventory('Product updated successfully', {
+                        productId: window.editingProductId,
+                        productName: productData.strain,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
                 delete window.editingProductId;
             } else {
                 // Add new product
                 productData.id = nextProductId++;
+
+                // Log new product creation
+                if (window.simpleLogger) {
+                    window.simpleLogger.inventory('New product creation initiated', {
+                        productId: productData.id,
+                        productName: productData.strain,
+                        grade: productData.grade,
+                        price: productData.price,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        action: 'create',
+                        system: 'admin-portal'
+                    });
+                }
+
                 products.push(productData);
 
                 // Add to shared data manager (this will notify partner portals)
@@ -3926,6 +3991,17 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 loadDataFromSharedManager();
 
                 showNotification(`✅ Product ${productData.strain} added successfully!`, 'success');
+
+                // Log successful creation
+                if (window.simpleLogger) {
+                    window.simpleLogger.inventory('Product created successfully', {
+                        productId: productData.id,
+                        productName: productData.strain,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
             }
 
             updateAllDashboardViews();
@@ -3945,8 +4021,24 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         function updateOrderStatus(orderId, newStatus) {
             const order = orders.find(o => o.id === orderId);
             if (order) {
+                const oldStatus = order.status;
+
+                // Log order status update
+                if (window.simpleLogger) {
+                    window.simpleLogger.order('Order status update initiated', {
+                        orderId: orderId,
+                        oldStatus: oldStatus,
+                        newStatus: newStatus,
+                        partner: order.partnerName,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        action: 'status_update',
+                        system: 'admin-portal'
+                    });
+                }
+
                 order.status = newStatus;
-                
+
                 // Add to status history
                 order.statusHistory.push({
                     status: newStatus,
@@ -5644,7 +5736,7 @@ This message is to inform you of recent pricing updates in our wholesale catalog
 �� PRICING CHANGES:
 • Effective immediately
 • Updated pricing reflects current market conditions
-• Your tier discounts remain unchanged
+��� Your tier discounts remain unchanged
 
 Please review the updated pricing in your partner portal:
 🌐 https://portal.fadedskies.com
