@@ -148,6 +148,11 @@ class SharedDataManager {
         data.carts[userEmail] = cart;
         this.saveData(data);
         this.notifyChange('cart_updated', { userEmail, cart });
+
+        // Broadcast real-time update
+        if (this.realTimeSync) {
+            this.realTimeSync.broadcast('cart_updated', { userEmail, cart });
+        }
     }
 
     addToCart(userEmail, productId, quantity = 1) {
