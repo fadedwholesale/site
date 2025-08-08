@@ -1999,7 +1999,8 @@
     <div id="profileEditModal" class="modal">
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
-                <h3 class="modal-title">✏️ Edit Profile Settings</h3>
+                <h3 class="modal-title">✏️ Edit Business Profile</h3>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Update your business information and contact details</div>
                 <button class="modal-close" onclick="closeModal('profileEditModal')">×</button>
             </div>
             <form onsubmit="updateProfile(event)">
@@ -2954,7 +2955,7 @@
                     showNotification('📊 Welcome to your Partner Portal!', 'success');
                 } else {
                     console.error('Partner view element not found');
-                    showNotification('❌ Portal loading error. Please try again.', 'error');
+                    showNotification('�� Portal loading error. Please try again.', 'error');
                 }
                 
                 console.log('Switched to partner portal view');
@@ -4954,7 +4955,7 @@ Phone: (210) 835-7834
                             <div style="color: var(--text-primary); font-size: 15px;">${order.delivery ? order.delivery.charAt(0).toUpperCase() + order.delivery.slice(1) : 'Standard'}</div>
                         </div>
                         <div style="display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
-                            <button class="btn btn-secondary" onclick="window.open('https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}','_blank')">🔗 Track on Carrier</button>
+                            <button class="btn btn-secondary" onclick="window.open('https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}','_blank')">�� Track on Carrier</button>
                             <button class="btn btn-secondary" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">Close</button>
                         </div>
                     </div>
