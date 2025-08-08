@@ -542,13 +542,9 @@ class ActivityLogger {
     // Safe JSON serialization that handles circular references
     safeJSONStringify(obj, maxDepth = 10) {
         const seen = new WeakSet();
+        let depth = 0;
 
-        const replacer = (key, value, depth = 0) => {
-            // Limit recursion depth
-            if (depth > maxDepth) {
-                return '[Maximum depth reached]';
-            }
-
+        const replacer = (key, value) => {
             // Handle circular references
             if (typeof value === 'object' && value !== null) {
                 if (seen.has(value)) {
@@ -567,10 +563,32 @@ class ActivityLogger {
                 return '[Undefined]';
             }
 
+            // Handle large arrays/objects by limiting depth
+            if (typeof value === 'object' && value !== null) {
+                depth++;
+                if (depth > maxDepth) {
+                    depth--;
+                    return '[Maximum depth reached]';
+                }
+
+                // Create a safe copy for complex objects
+                if (Array.isArray(value) && value.length > 100) {
+                    depth--;
+                    return `[Array with ${value.length} items - truncated]`;
+                }
+
+                depth--;
+            }
+
             return value;
         };
 
-        return JSON.stringify(obj, replacer);
+        try {
+            return JSON.stringify(obj, replacer);
+        } catch (error) {
+            console.warn('JSON stringify fallback:', error);
+            return JSON.stringify({ error: 'Failed to serialize', message: error.message });
+        }
     }
 
     // Create safe session data without circular references
@@ -647,8 +665,8 @@ class ActivityLogger {
                     afterData: '[Simplified]'
                 }));
 
-                localStorage.setItem(this.logStorageKey, JSON.stringify(safeLogBuffer));
-                localStorage.setItem(this.changeStorageKey, JSON.stringify(safeChangeBuffer));
+                localStorage.setItem(this.logStorageKey, this.safeJSONStringify(safeLogBuffer));
+                localStorage.setItem(this.changeStorageKey, this.safeJSONStringify(safeChangeBuffer));
                 this.logBuffer = [];
                 this.changeBuffer = [];
             } catch (retryError) {
