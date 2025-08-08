@@ -4491,7 +4491,7 @@
                     }
                     
                     if (!isValid) {
-                        showNotification('❌ Invalid credentials. Please check your email and password.', 'error');
+                        showNotification('��� Invalid credentials. Please check your email and password.', 'error');
                         submitBtn.textContent = originalText;
                         submitBtn.disabled = false;
                         return;
@@ -7516,56 +7516,7 @@ Phone: (210) 835-7834
             };
         }
 
-        // Simulate Admin-Side Product Updates (Demo Function)
-        function simulateAdminUpdate() {
-            try {
-                console.log('🔧 Simulating admin-side product update...');
-                
-                // Simulate updating a product (change stock, price, or image)
-                const productToUpdate = products[1]; // Blue Gelatti
-                const originalStock = productToUpdate.stock;
-                const originalPrice = productToUpdate.price;
-                const originalImage = productToUpdate.image;
-                
-                // Update product data (simulating admin changes)
-                productToUpdate.stock = Math.max(0, originalStock - 3);
-                productToUpdate.price = originalPrice + 50;
-                productToUpdate.image = 'https://images.unsplash.com/photo-1536924540902-17d2d1d5a94e?w=200&h=200&fit=crop&crop=center';
-                
-                if (productToUpdate.stock === 0) {
-                    productToUpdate.status = 'SOLD OUT';
-                }
-                
-                // Trigger real-time updates across all views
-                updateAllViews();
-                
-                showNotification('🔄 Admin Update: Blue Gelatti stock reduced, price increased, image updated!', 'success');
-                
-                console.log('📊 Product updated:', {
-                    strain: productToUpdate.strain,
-                    stock: `${originalStock} → ${productToUpdate.stock}`,
-                    price: `${originalPrice} → ${productToUpdate.price}`,
-                    imageChanged: originalImage !== productToUpdate.image
-                });
-                
-                // Simulate another update after 3 seconds
-                setTimeout(() => {
-                    const product2 = products[2]; // Candy Gas
-                    product2.stock += 10;
-                    product2.status = 'AVAILABLE';
-                    product2.image = 'https://images.unsplash.com/photo-1581522721757-ce57567bf47c?w=200&h=200&fit=crop&crop=center';
-                    
-                    updateAllViews();
-                    showNotification('📈 Admin Update: Candy Gas restocked with new product image!', 'success');
-                }, 3000);
-                
-                return 'Admin simulation complete - check both public and partner views!';
-                
-            } catch (error) {
-                console.error('Error simulating admin update:', error);
-                showNotification('❌ Admin simulation error', 'error');
-            }
-        }
+        // Product updates handled by admin portal and real-time sync
 
         // Test Product Image Loading
         function testProductImages() {
@@ -7637,7 +7588,6 @@ Phone: (210) 835-7834
         try {
             if (typeof window !== 'undefined') {
                 window.debugFadedSkies = debugSystemStatus;
-                window.simulateAdminUpdate = simulateAdminUpdate;
                 window.testProductImages = testProductImages;
                 window.addNewProduct = addNewProduct;
                 window.forceUpdateWithImages = forceUpdateWithImages;
@@ -7682,7 +7632,6 @@ Phone: (210) 835-7834
         console.log('   - testCartFunctionality() - Test cart quantity controls');
         console.log('   - showInventoryWithImages() - Show inventory with images');
         console.log('   - testProductImages() - Test image loading');
-        console.log('   - simulateAdminUpdate() - Simulate real-time updates');
         console.log('🔒 Ready for deployment with working cart controls!');
 
         // Auto-run force update after everything loads - SIMPLIFIED AND SAFE
