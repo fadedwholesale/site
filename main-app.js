@@ -589,7 +589,127 @@ function updateProfileDisplay() {
 }
 
 function openProfileEditModal() {
-    showNotification('✏️ Profile editing feature coming soon!', 'info');
+    if (!currentUser) {
+        showNotification('❌ Please log in to edit your profile', 'error');
+        return;
+    }
+
+    // Populate form with current user data
+    populateProfileEditForm();
+
+    // Open the modal
+    openModal('profileEditModal');
+}
+
+function populateProfileEditForm() {
+    // Get current user data or set defaults
+    const userData = {
+        businessName: currentUser.businessName || 'Green Valley Dispensary',
+        contactName: currentUser.contactName || currentUser.name || 'John Smith',
+        businessEmail: currentUser.email || '',
+        phone: currentUser.phone || '(555) 123-4567',
+        businessType: currentUser.businessType || 'dispensary',
+        licenseNumber: currentUser.licenseNumber || 'CA-LICENSE-12345',
+        businessAddress: currentUser.businessAddress || '123 Main St\nAnytown, CA 90210',
+        taxId: currentUser.taxId || '12-3456789',
+        website: currentUser.website || 'https://greenvalleydispensary.com',
+        notes: currentUser.notes || 'Premium cannabis retailer since 2020'
+    };
+
+    // Populate form fields
+    const fields = [
+        'editBusinessName', 'editContactName', 'editBusinessEmail', 'editPhone',
+        'editBusinessType', 'editLicenseNumber', 'editBusinessAddress',
+        'editTaxId', 'editWebsite', 'editNotes'
+    ];
+
+    fields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) {
+            const fieldName = fieldId.replace('edit', '').toLowerCase();
+            const value = userData[fieldName] || '';
+            element.value = value;
+        }
+    });
+
+    console.log('✅ Profile edit form populated with user data');
+}
+
+function updateProfile(event) {
+    event.preventDefault();
+
+    if (!currentUser) {
+        showNotification('❌ User not found', 'error');
+        return;
+    }
+
+    try {
+        // Collect form data
+        const formData = {
+            businessName: document.getElementById('editBusinessName').value,
+            contactName: document.getElementById('editContactName').value,
+            businessEmail: document.getElementById('editBusinessEmail').value,
+            phone: document.getElementById('editPhone').value,
+            businessType: document.getElementById('editBusinessType').value,
+            licenseNumber: document.getElementById('editLicenseNumber').value,
+            businessAddress: document.getElementById('editBusinessAddress').value,
+            taxId: document.getElementById('editTaxId').value,
+            website: document.getElementById('editWebsite').value,
+            notes: document.getElementById('editNotes').value
+        };
+
+        // Validate required fields
+        const requiredFields = ['businessName', 'contactName', 'businessEmail', 'phone', 'businessAddress'];
+        const missingFields = requiredFields.filter(field => !formData[field].trim());
+
+        if (missingFields.length > 0) {
+            showNotification('❌ Please fill in all required fields', 'error');
+            return;
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.businessEmail)) {
+            showNotification('❌ Please enter a valid email address', 'error');
+            return;
+        }
+
+        // Show loading state
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Saving...';
+        submitBtn.disabled = true;
+
+        // Simulate save process
+        setTimeout(() => {
+            // Update current user object
+            Object.assign(currentUser, formData);
+            currentUser.lastUpdated = new Date().toISOString();
+
+            // Update localStorage
+            setCurrentUser(currentUser);
+
+            // Update UI displays
+            updateProfileDisplay();
+
+            // Close modal
+            closeModal('profileEditModal');
+
+            // Show success notification
+            showNotification('✅ Profile updated successfully!', 'success');
+
+            // Restore button state
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+
+            console.log('✅ Profile updated:', currentUser);
+
+        }, 1500);
+
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        showNotification('❌ Error updating profile. Please try again.', 'error');
+    }
 }
 
 // Dashboard Functions
