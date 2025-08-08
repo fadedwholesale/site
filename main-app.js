@@ -991,6 +991,8 @@ function debugCartState() {
 // Make functions globally available
 window.debugAuthState = debugAuthState;
 window.forceLogin = forceLogin;
+window.testCartFunctionality = testCartFunctionality;
+window.debugCartState = debugCartState;
 window.login = login;
 window.logout = logout;
 window.showPublicWebsite = showPublicWebsite;
