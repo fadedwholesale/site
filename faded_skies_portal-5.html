@@ -2382,17 +2382,35 @@
                 <h3 class="modal-title">Partner Login</h3>
                 <button class="modal-close" onclick="closeModal('loginModal')">×</button>
             </div>
+
+            <!-- Demo Credentials Notice -->
+            <div style="background: rgba(0, 200, 81, 0.1); border: 1px solid var(--brand-green); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                <h4 style="color: var(--brand-green); margin: 0 0 8px 0; font-size: 14px;">🔑 Demo Credentials</h4>
+                <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+                    <strong>Partner Account:</strong><br>
+                    Email: <code style="background: var(--surface-dark); padding: 2px 6px; border-radius: 4px; color: var(--brand-green);">partner@greenvalley.com</code><br>
+                    Password: <code style="background: var(--surface-dark); padding: 2px 6px; border-radius: 4px; color: var(--brand-green);">demo123</code>
+                </div>
+            </div>
+
             <form onsubmit="login(event)">
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" required placeholder="partner@yourstore.com">
+                    <input type="email" id="email" required placeholder="partner@greenvalley.com">
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" required placeholder="Your secure password">
+                    <input type="password" id="password" required placeholder="demo123">
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Access Partner Portal 🚀</button>
             </form>
+
+            <div style="text-align: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+                <p style="font-size: 13px; color: var(--text-secondary);">
+                    Don't have an account?
+                    <a href="#" onclick="closeModal('loginModal'); openModal('registerModal');" style="color: var(--brand-green); text-decoration: none;">Apply for Partnership</a>
+                </p>
+            </div>
         </div>
     </div>
 
@@ -5058,7 +5076,7 @@
                 }
                 
                 console.log('✅ Cart display updated successfully');
-                console.log('📊 Final cart stats:', { 
+                console.log('��� Final cart stats:', { 
                     items: cart.length, 
                     totalQuantity: totalItems, 
                     subtotal: subtotal.toFixed(2), 
@@ -5303,7 +5321,7 @@
                     showNotification(`❌ ${cartItem.strain} is no longer available`, 'error');
                     hasIssues = true;
                 } else if (cartItem.quantity > product.stock) {
-                    showNotification(`⚠️ Only ${product.stock} units of ${cartItem.strain} available`, 'warning');
+                    showNotification(`��️ Only ${product.stock} units of ${cartItem.strain} available`, 'warning');
                     cartItem.quantity = product.stock;
                     updateCartDisplay();
                     hasIssues = true;
@@ -6666,7 +6684,7 @@ Phone: (210) 835-7834
                         if (inventorySection) {
                             inventorySection.classList.add('show');
                             updatePublicInventory();
-                            showNotification('📊 Inventory displayed with product images!', 'success');
+                            showNotification('��� Inventory displayed with product images!', 'success');
                         } else {
                             console.error('Inventory section not found');
                         }

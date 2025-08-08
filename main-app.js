@@ -14,7 +14,7 @@ function setCurrentUser(user) {
         console.log('✅ User authenticated globally:', user.email);
     } else {
         localStorage.removeItem('currentUser');
-        console.log('✅ User logged out globally');
+        console.log('��� User logged out globally');
     }
     
     // Immediately notify cart manager of auth state change
@@ -40,6 +40,18 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApplication();
     loadInitialData();
     setupEventListeners();
+
+    // Verify authentication state
+    setTimeout(() => {
+        const authState = debugAuthState();
+        console.log('🔐 Final Authentication State:', authState);
+        if (!authState.isAuthenticated) {
+            console.log('✅ Authentication working correctly - user is NOT automatically logged in');
+        } else {
+            console.warn('⚠️ User is automatically logged in - this may be unintended');
+        }
+    }, 100);
+
     console.log('✅ Application initialized successfully');
 });
 
@@ -57,51 +69,52 @@ function initializeApplication() {
     // Initialize real-time status indicator
     initializeRealTimeStatusIndicator();
 
-    // Check if user is already logged in
+    // Check if user is already logged in from a previous session
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
         try {
             const userData = JSON.parse(savedUser);
-            setCurrentUser(userData);
-            showUserSession();
-            console.log('✅ User session restored:', currentUser.email);
+            // Validate the saved user data has required fields
+            if (userData.email && userData.name) {
+                setCurrentUser(userData);
+                showUserSession();
+                console.log('✅ User session restored:', currentUser.email);
+            } else {
+                console.log('⚠️ Invalid saved user data, clearing session');
+                localStorage.removeItem('currentUser');
+                showGuestSession();
+            }
         } catch (error) {
             console.error('Error restoring user session:', error);
             localStorage.removeItem('currentUser');
+            showGuestSession();
         }
+    } else {
+        // No saved user, start in guest mode
+        console.log('👤 No user session found, showing guest session');
+        showGuestSession();
     }
 
     // Initialize live checkout system
     initializeLiveCheckout();
 
-    // Ensure there's a user for profile editing (auto-login if no user)
-    if (!currentUser) {
-        console.log('🔄 No user found, creating default user for profile editing...');
-        const defaultUser = {
-            email: 'partner@greenvalley.com',
-            name: 'John Smith',
-            businessName: 'Green Valley Dispensary',
-            contactName: 'John Smith',
-            phone: '(555) 123-4567',
-            businessType: 'dispensary',
-            tier: 'Gold Partner',
-            loginTime: new Date().toISOString(),
-            businessAddress: '123 Main Street\nGreen Valley, CA 90210',
-            licenseNumber: 'CA-LICENSE-12345',
-            website: 'https://greenvalleydispensary.com',
-            taxId: '12-3456789',
-            notes: 'Premium cannabis retailer serving the community since 2020'
-        };
-        setCurrentUser(defaultUser);
-        showUserSession();
-        console.log('✅ Default user created for profile editing');
-    }
-
-    // Initialize view state
+    // Initialize view state - only show portal if user is actually logged in
     const urlParams = new URLSearchParams(window.location.search);
     const initialView = urlParams.get('view');
-    if (initialView === 'portal' && currentUser) {
-        showPartnerPortal();
+    if (initialView === 'portal') {
+        if (currentUser) {
+            showPartnerPortal();
+        } else {
+            // Redirect to public view and show login modal
+            showPublicWebsite();
+            setTimeout(() => {
+                showNotification('🔒 Please log in to access the partner portal', 'warning');
+                openModal('loginModal');
+            }, 500);
+        }
+    } else {
+        // Default to public view
+        showPublicWebsite();
     }
 }
 
@@ -206,18 +219,66 @@ function handleSharedDataChange(event) {
 // Authentication Functions
 function login(event) {
     event.preventDefault();
-    
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    // Simple authentication (in real app, this would be server-side)
-    if (email && password) {
-        const userData = {
-            email: email,
-            name: email.split('@')[0],
-            tier: 'Gold Partner',
-            loginTime: new Date().toISOString()
-        };
+    // Enhanced authentication with credential validation
+    if (!email || !password) {
+        showNotification('❌ Please enter both email and password', 'error');
+        return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showNotification('❌ Please enter a valid email address', 'error');
+        return;
+    }
+
+    // Demo credentials for testing (in real app, this would be server-side)
+    const validCredentials = {
+        'partner@greenvalley.com': 'demo123',
+        'admin@fadedskies.com': 'admin123',
+        'test@partner.com': 'test123'
+    };
+
+    if (validCredentials[email] && validCredentials[email] === password) {
+        // Create user data based on email
+        let userData;
+        if (email === 'partner@greenvalley.com') {
+            userData = {
+                email: email,
+                name: 'John Smith',
+                businessName: 'Green Valley Dispensary',
+                contactName: 'John Smith',
+                phone: '(555) 123-4567',
+                businessType: 'dispensary',
+                tier: 'Gold Partner',
+                loginTime: new Date().toISOString(),
+                businessAddress: '123 Main Street\nGreen Valley, CA 90210',
+                licenseNumber: 'CA-LICENSE-12345',
+                website: 'https://greenvalleydispensary.com',
+                taxId: '12-3456789',
+                notes: 'Premium cannabis retailer serving the community since 2020'
+            };
+        } else if (email === 'admin@fadedskies.com') {
+            userData = {
+                email: email,
+                name: 'Admin User',
+                businessName: 'Faded Skies Admin',
+                tier: 'Administrator',
+                loginTime: new Date().toISOString(),
+                isAdmin: true
+            };
+        } else {
+            userData = {
+                email: email,
+                name: email.split('@')[0],
+                tier: 'Partner',
+                loginTime: new Date().toISOString()
+            };
+        }
 
         // Set user with proper synchronization
         setCurrentUser(userData);
@@ -233,7 +294,7 @@ function login(event) {
         showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
         console.log('✅ User logged in:', currentUser.email);
     } else {
-        showNotification('❌ Please enter valid credentials', 'error');
+        showNotification('❌ Invalid email or password. Try: partner@greenvalley.com / demo123', 'error');
     }
 }
 
@@ -811,7 +872,7 @@ function populateProfileEditForm() {
             element.value = value || '';
             console.log(`📝 Populated ${fieldId} with:`, value);
         } else {
-            console.warn(`⚠️ Field ${fieldId} not found in DOM`);
+            console.warn(`⚠��� Field ${fieldId} not found in DOM`);
         }
     });
 
@@ -1619,14 +1680,12 @@ function showNotification(message, type = 'info') {
 
 // Authentication required notification
 function showAuthRequiredNotification() {
-    showNotification('🔒 Please log in as a partner to add products to cart', 'warning');
+    showNotification('🔒 Please log in to access partner features', 'warning');
 
-    // Optionally show login modal after a short delay
+    // Automatically open login modal after a short delay
     setTimeout(() => {
-        if (confirm('Would you like to log in to your partner account or register as a new partner?')) {
-            openModal('loginModal');
-        }
-    }, 1500);
+        openModal('loginModal');
+    }, 1000);
 }
 
 // Debug function to check authentication state
@@ -1659,6 +1718,42 @@ function forceLogin(email = 'test@example.com') {
     showPartnerPortal();
     showNotification(`🧪 Test login successful: ${userData.name}`, 'success');
     return userData;
+}
+
+// Test authentication system
+function testAuthentication() {
+    console.log('🧪 Testing authentication system...');
+
+    // 1. Test initial state (should be logged out)
+    const initialState = debugAuthState();
+    console.log('1️⃣ Initial state:', initialState);
+
+    // 2. Test login with valid credentials
+    console.log('2️⃣ Testing valid login...');
+    document.getElementById('email').value = 'partner@greenvalley.com';
+    document.getElementById('password').value = 'demo123';
+    login({ preventDefault: () => {} });
+
+    setTimeout(() => {
+        const loggedInState = debugAuthState();
+        console.log('3️⃣ After login state:', loggedInState);
+
+        // 3. Test logout
+        console.log('4️⃣ Testing logout...');
+        logout();
+
+        setTimeout(() => {
+            const loggedOutState = debugAuthState();
+            console.log('5️⃣ After logout state:', loggedOutState);
+
+            // Summary
+            console.log('📋 Authentication Test Summary:', {
+                initiallyLoggedOut: !initialState.isAuthenticated,
+                canLogin: loggedInState.isAuthenticated,
+                canLogout: !loggedOutState.isAuthenticated
+            });
+        }, 100);
+    }, 100);
 }
 
 // Test cart functionality with multiple items
@@ -3020,7 +3115,7 @@ function register(event) {
         closeModal('registerModal');
         showPartnerPortal();
 
-        showNotification(`🎉 Welcome to Faded Skies, ${contactName}!`, 'success');
+        showNotification(`��� Welcome to Faded Skies, ${contactName}!`, 'success');
 
         // Restore button state
         submitBtn.textContent = originalText;
