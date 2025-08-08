@@ -1133,7 +1133,37 @@ if (typeof window !== 'undefined') {
         if (!window.bulkOrderManager) {
             window.bulkOrderManager = new BulkOrderManager();
             console.log('📦 Bulk Order Manager initialized');
+
+            // Now replace placeholder functions with actual implementations
+            setupBulkOrderGlobalFunctions();
         }
+    }
+
+    function setupBulkOrderGlobalFunctions() {
+        // Replace all global functions with actual implementations
+        window.openBulkOrderModal = () => window.bulkOrderManager?.openBulkOrderModal();
+        window.openPresetManager = () => window.bulkOrderManager?.openPresetManager();
+        window.viewBulkHistory = () => window.bulkOrderManager?.viewBulkHistory();
+        window.closeBulkOrderModal = () => window.bulkOrderManager?.closeBulkOrderModal();
+        window.nextBulkStep = () => window.bulkOrderManager?.nextBulkStep();
+        window.previousBulkStep = () => window.bulkOrderManager?.previousBulkStep();
+        window.selectAllBulkProducts = () => window.bulkOrderManager?.selectAllBulkProducts();
+        window.clearBulkSelection = () => window.bulkOrderManager?.clearBulkSelection();
+        window.loadPresetSelection = () => window.bulkOrderManager?.loadPresetSelection();
+        window.applyMinimumQuantities = () => window.bulkOrderManager?.applyMinimumQuantities();
+        window.optimizeForDiscount = () => window.bulkOrderManager?.optimizeForDiscount();
+        window.saveBulkPreset = () => window.bulkOrderManager?.saveBulkPreset();
+        window.submitBulkOrder = () => window.bulkOrderManager?.submitBulkOrder();
+        window.createNewPreset = () => {
+            if (window.bulkOrderManager) {
+                window.closeModal('presetManagerModal');
+                window.bulkOrderManager.openBulkOrderModal();
+            }
+        };
+        window.importPreset = () => window.bulkOrderManager?.importPreset();
+        window.exportAllPresets = () => window.bulkOrderManager?.exportAllPresets();
+
+        console.log('✅ Bulk order global functions initialized');
     }
 
     // Make ALL bulk order functions globally available
@@ -1197,7 +1227,7 @@ if (typeof window !== 'undefined') {
     window.refreshBulkHistory = () => {
         if (window.bulkOrderManager) {
             window.bulkOrderManager.loadBulkHistoryDisplay();
-            showNotification('�� Bulk history refreshed!', 'success');
+            showNotification('🔄 Bulk history refreshed!', 'success');
         }
     };
 }
