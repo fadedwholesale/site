@@ -1303,14 +1303,145 @@
             display: inline-block;
         }
 
-        /* Responsive Design */
+        /* Mobile First Responsive Design */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 12px;
+            }
+
+            .hero h1 {
+                font-size: clamp(2rem, 6vw, 3rem);
+                margin-bottom: 16px;
+            }
+
+            .hero-subtitle {
+                font-size: clamp(1rem, 3vw, 1.3rem);
+                margin-bottom: 24px;
+            }
+
+            .quality-badges {
+                gap: 8px;
+                margin: 24px 0;
+            }
+
+            .quality-badge {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin: 24px 0;
+            }
+
+            .stat-card {
+                padding: 16px;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .section {
+                padding: 60px 0;
+            }
+
+            .section-title {
+                font-size: clamp(2rem, 6vw, 3rem);
+                margin-bottom: 16px;
+            }
+
+            .section-subtitle {
+                font-size: 16px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .card {
+                padding: 24px 20px;
+            }
+
+            .btn {
+                padding: 14px 20px;
+                font-size: 16px;
+                min-height: 48px;
+            }
+
+            .btn-sm {
+                padding: 10px 16px;
+                font-size: 14px;
+                min-height: 40px;
+            }
+        }
+
+        /* Tablet and Medium Mobile */
         @media (max-width: 768px) {
             .container {
                 padding: 0 16px;
             }
 
+            /* Enhanced Mobile Navigation */
+            .mobile-menu-toggle {
+                display: block;
+                background: none;
+                border: none;
+                color: var(--text-primary);
+                font-size: 24px;
+                cursor: pointer;
+                padding: 8px;
+                order: -1;
+                min-width: 44px;
+                min-height: 44px;
+            }
+
             .nav-links {
-                display: none;
+                position: fixed;
+                top: 80px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 80px);
+                background: var(--surface-card);
+                border-right: 1px solid var(--border-subtle);
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: stretch;
+                padding: 40px 0;
+                transition: left 0.3s ease;
+                z-index: 999;
+                overflow-y: auto;
+            }
+
+            .nav-links.open {
+                left: 0;
+            }
+
+            .nav-links li {
+                width: 100%;
+                margin: 0;
+            }
+
+            .nav-links a {
+                display: block;
+                padding: 20px 24px;
+                font-size: 18px;
+                border-bottom: 1px solid var(--border-subtle);
+                text-align: center;
+                min-height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .logo img {
+                height: 40px;
             }
 
             .dashboard-title {
@@ -1325,40 +1456,164 @@
             .controls {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 12px;
+            }
+
+            .search-group {
+                flex-direction: column;
+                align-items: stretch;
             }
 
             .search-input {
                 width: 100%;
+                margin-bottom: 12px;
             }
 
+            .action-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-group .btn {
+                margin-bottom: 8px;
+            }
+
+            /* Enhanced Mobile Table */
             .data-table {
                 font-size: 12px;
                 display: block;
                 overflow-x: auto;
                 white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .data-table th,
+            .data-table td {
+                min-width: 120px;
+                padding: 12px 8px;
+            }
+
+            .data-table th:first-child,
+            .data-table td:first-child {
+                min-width: 80px;
             }
 
             .form-row {
                 grid-template-columns: 1fr;
             }
 
+            /* Enhanced Mobile Modal */
             .modal-content {
-                width: 95%;
-                padding: 24px 16px;
+                width: 95vw;
+                max-width: 95vw;
+                margin: 0;
+                padding: 20px 16px;
+                border-radius: 12px;
+                max-height: 90vh;
+                overflow-y: auto;
+                position: fixed;
+                top: 5vh;
+                left: 2.5vw;
+                transform: none;
             }
 
+            .modal-header {
+                margin-bottom: 16px;
+                padding-bottom: 16px;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+
+            .modal-title {
+                font-size: 1.3rem;
+            }
+
+            .modal-close {
+                font-size: 1.8rem;
+                padding: 12px;
+                min-width: 44px;
+                min-height: 44px;
+            }
+
+            /* Enhanced Mobile Cart */
             .cart {
-                width: 100%;
-                right: -100%;
+                width: 100vw;
+                right: -100vw;
+                top: 0;
+                height: 100vh;
+                border-left: none;
+                border-radius: 0;
+            }
+
+            .cart.open {
+                right: 0;
+            }
+
+            .cart-header {
+                padding: 24px 20px;
+                background: var(--surface-elevated);
+                border-bottom: 2px solid var(--border-subtle);
+            }
+
+            .cart-title {
+                font-size: 1.5rem;
+            }
+
+            .cart-close {
+                font-size: 2rem;
+                padding: 12px;
+                min-width: 44px;
+                min-height: 44px;
+            }
+
+            .cart-items {
+                padding: 20px 16px;
+            }
+
+            .cart-item {
+                margin-bottom: 20px;
+                padding: 20px 16px;
             }
 
             .nav-auth {
-                flex-direction: column;
+                flex-direction: row;
+                flex-wrap: wrap;
                 gap: 8px;
             }
 
+            .nav-auth .btn {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+
+            .sync-indicator {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+
+            .user-session {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            #userWelcome {
+                font-size: 12px;
+                flex-basis: 100%;
+                text-align: center;
+                margin-bottom: 8px;
+            }
+
+            /* Portal Tabs Mobile */
             .portal-tabs {
-                flex-direction: column;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .portal-tab {
+                flex: 0 0 auto;
+                min-width: 140px;
+                padding: 16px 20px;
+                font-size: 14px;
             }
         }
 
@@ -3778,7 +4033,7 @@
                     }
                     
                     if (!isValid) {
-                        showNotification('❌ Invalid credentials. Please check your email and password.', 'error');
+                        showNotification('�� Invalid credentials. Please check your email and password.', 'error');
                         submitBtn.textContent = originalText;
                         submitBtn.disabled = false;
                         return;
