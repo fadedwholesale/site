@@ -1707,6 +1707,241 @@
         </div>
     </div>
 
+    <!-- Profile Edit Modal -->
+    <div id="profileEditModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 class="modal-title">✏️ Edit Profile Settings</h3>
+                <button class="modal-close" onclick="closeModal('profileEditModal')">×</button>
+            </div>
+            <form onsubmit="updateProfile(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editBusinessName">Business Name *</label>
+                        <input type="text" id="editBusinessName" required placeholder="Your licensed business name">
+                    </div>
+                    <div class="form-group">
+                        <label for="editContactName">Contact Name *</label>
+                        <input type="text" id="editContactName" required placeholder="Your full name">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editBusinessEmail">Business Email *</label>
+                        <input type="email" id="editBusinessEmail" required placeholder="business@yourstore.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="editPhone">Phone Number *</label>
+                        <input type="tel" id="editPhone" required placeholder="(555) 123-4567">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editBusinessType">Business Type *</label>
+                        <select id="editBusinessType" required>
+                            <option value="">Select your business type</option>
+                            <option value="dispensary">Licensed Dispensary</option>
+                            <option value="smoke-shop">Smoke Shop</option>
+                            <option value="cbd-store">CBD/Hemp Store</option>
+                            <option value="distributor">Wholesale Distributor</option>
+                            <option value="delivery">Delivery Service</option>
+                            <option value="other">Other Licensed Retailer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editLicenseNumber">License Number</label>
+                        <input type="text" id="editLicenseNumber" placeholder="Your business license number">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editBusinessAddress">Business Address *</label>
+                    <textarea id="editBusinessAddress" rows="3" required placeholder="Full business address including city, state, zip"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editTaxId">Tax ID/EIN</label>
+                        <input type="text" id="editTaxId" placeholder="XX-XXXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label for="editWebsite">Website</label>
+                        <input type="url" id="editWebsite" placeholder="https://yourwebsite.com">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editNotes">Additional Notes</label>
+                    <textarea id="editNotes" rows="3" placeholder="Any additional information about your business..."></textarea>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('profileEditModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Checkout Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">💳 Complete Your Order</h3>
+                <button class="modal-close" onclick="closeModal('paymentModal')">×</button>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="order-summary-section" style="background: var(--surface-elevated); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border-subtle);">
+                <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                    ��� Order Summary
+                </h4>
+                <div id="orderSummaryItems" style="margin-bottom: 16px;">
+                    <!-- Order items will be populated here -->
+                </div>
+                <div style="border-top: 2px solid var(--border-subtle); padding-top: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; color: var(--brand-green);">
+                        <span>Total Amount:</span>
+                        <span id="orderTotalAmount">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Method Selection -->
+            <div class="payment-method-section" style="margin-bottom: 24px;">
+                <h4 style="color: var(--text-primary); margin-bottom: 16px;">💳 Payment Method</h4>
+                <div class="payment-method-tabs" style="display: flex; gap: 8px; margin-bottom: 20px; background: var(--surface-card); padding: 8px; border-radius: 12px;">
+                    <button type="button" class="payment-tab active" data-method="card" onclick="selectPaymentMethod('card')" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: var(--brand-green); color: white; cursor: pointer; font-weight: 600;">
+                        💳 Card
+                    </button>
+                    <button type="button" class="payment-tab" data-method="crypto" onclick="selectPaymentMethod('crypto')" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: transparent; color: var(--text-secondary); cursor: pointer; font-weight: 600;">
+                        ₿ Crypto
+                    </button>
+                    <button type="button" class="payment-tab" data-method="bank" onclick="selectPaymentMethod('bank')" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: transparent; color: var(--text-secondary); cursor: pointer; font-weight: 600;">
+                        🏦 Bank Transfer
+                    </button>
+                </div>
+            </div>
+
+            <form onsubmit="processPayment(event)">
+                <!-- Card Payment Form -->
+                <div id="cardPaymentForm" class="payment-form active">
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 2;">
+                            <label for="cardNumber">Card Number *</label>
+                            <input type="text" id="cardNumber" required placeholder="1234 5678 9012 3456" maxlength="19" onkeyup="formatCardNumber(this)">
+                        </div>
+                        <div class="form-group">
+                            <label for="cardCvv">CVV *</label>
+                            <input type="text" id="cardCvv" required placeholder="123" maxlength="4" onkeyup="formatCvv(this)">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cardExpiry">Expiry Date *</label>
+                            <input type="text" id="cardExpiry" required placeholder="MM/YY" maxlength="5" onkeyup="formatExpiry(this)">
+                        </div>
+                        <div class="form-group">
+                            <label for="cardName">Cardholder Name *</label>
+                            <input type="text" id="cardName" required placeholder="John Smith">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="billingAddress">Billing Address *</label>
+                        <textarea id="billingAddress" rows="3" required placeholder="Full billing address including city, state, zip"></textarea>
+                    </div>
+                </div>
+
+                <!-- Crypto Payment Form -->
+                <div id="cryptoPaymentForm" class="payment-form" style="display: none;">
+                    <div class="form-group">
+                        <label for="cryptoType">Cryptocurrency *</label>
+                        <select id="cryptoType" required>
+                            <option value="">Select cryptocurrency</option>
+                            <option value="bitcoin">Bitcoin (BTC)</option>
+                            <option value="ethereum">Ethereum (ETH)</option>
+                            <option value="litecoin">Litecoin (LTC)</option>
+                            <option value="usdc">USD Coin (USDC)</option>
+                            <option value="usdt">Tether (USDT)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cryptoWallet">Wallet Address *</label>
+                        <input type="text" id="cryptoWallet" required placeholder="Your cryptocurrency wallet address">
+                    </div>
+                    <div class="form-group">
+                        <label for="cryptoEmail">Email for Transaction Updates *</label>
+                        <input type="email" id="cryptoEmail" required placeholder="crypto@yourstore.com">
+                    </div>
+                    <div style="background: var(--surface-elevated); padding: 16px; border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                        <p style="color: var(--text-secondary); margin: 0; font-size: 14px;">
+                            📝 Note: You will receive payment instructions via email. Payment must be completed within 30 minutes to reserve your order.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Bank Transfer Form -->
+                <div id="bankPaymentForm" class="payment-form" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bankAccountName">Account Holder Name *</label>
+                            <input type="text" id="bankAccountName" required placeholder="Account holder full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="bankRoutingNumber">Routing Number *</label>
+                            <input type="text" id="bankRoutingNumber" required placeholder="123456789" maxlength="9" onkeyup="formatRoutingNumber(this)">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bankAccountNumber">Account Number *</label>
+                            <input type="text" id="bankAccountNumber" required placeholder="Account number">
+                        </div>
+                        <div class="form-group">
+                            <label for="bankAccountType">Account Type *</label>
+                            <select id="bankAccountType" required>
+                                <option value="">Select account type</option>
+                                <option value="checking">Checking</option>
+                                <option value="savings">Savings</option>
+                                <option value="business">Business Checking</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="bankName">Bank Name *</label>
+                        <input type="text" id="bankName" required placeholder="Bank name">
+                    </div>
+                    <div style="background: var(--surface-elevated); padding: 16px; border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                        <p style="color: var(--text-secondary); margin: 0; font-size: 14px;">
+                            🏦 Note: Bank transfers typically take 1-3 business days to process. Your order will be prepared once payment is confirmed.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Security & Terms -->
+                <div class="security-section" style="background: var(--surface-elevated); padding: 16px; border-radius: 8px; margin: 24px 0; border: 1px solid var(--border-subtle);">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <span style="color: var(--brand-green); font-size: 20px;">🔒</span>
+                        <h4 style="margin: 0; color: var(--text-primary);">Secure Payment</h4>
+                    </div>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">
+                        Your payment information is encrypted and processed securely through our certified payment processor. We never store your payment details.
+                    </p>
+                    <div style="margin-top: 12px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-primary);">
+                            <input type="checkbox" id="agreeTerms" required style="margin: 0;">
+                            <span style="font-size: 14px;">I agree to the <a href="#" style="color: var(--brand-green);">Terms of Service</a> and <a href="#" style="color: var(--brand-green);">Privacy Policy</a></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('paymentModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1; padding: 14px; font-size: 16px; font-weight: 700;">
+                        🚀 Complete Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Real-time synchronization system -->
     <script src="realtime-sync.js"></script>
     <script src="data-persistence.js"></script>
@@ -4193,7 +4428,7 @@ Phone: (210) 835-7834
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
                 
-                showNotification(`📄 Invoice ${orderId} downloaded`, 'success');
+                showNotification(`���� Invoice ${orderId} downloaded`, 'success');
             } catch (error) {
                 console.error('Error downloading invoice:', error);
                 showNotification('Download error. Please try again.', 'error');
