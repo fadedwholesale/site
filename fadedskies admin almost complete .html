@@ -5026,23 +5026,60 @@ Faded Skies Wholesale Team
         function updateTopProductsAnalytics() {
             // Calculate product revenue from orders
             const productRevenue = {};
-            
+
+            // Ensure orders is an array and handle each order safely
+            if (!Array.isArray(orders)) {
+                console.warn('Orders is not an array in updateTopProductsAnalytics:', orders);
+                return;
+            }
+
             orders.forEach(order => {
-                // Parse order items to extract product names and quantities
-                const items = order.items.split(', ');
+                // Skip invalid orders
+                if (!order || !order.items) {
+                    return;
+                }
+
+                let items = [];
+
+                // Handle different data types for order.items
+                if (typeof order.items === 'string') {
+                    // Parse string format like "OG Kush (x5), Blue Runtz (x3)"
+                    items = order.items.split(', ');
+                } else if (Array.isArray(order.items)) {
+                    // Handle array format
+                    items = order.items.map(item => {
+                        if (typeof item === 'string') {
+                            return item;
+                        } else if (item && typeof item === 'object') {
+                            // Handle object format like {name: "OG Kush", quantity: 5}
+                            const name = item.name || item.product || item.strain || 'Unknown Product';
+                            const qty = item.quantity || item.qty || 1;
+                            return `${name} (x${qty})`;
+                        }
+                        return String(item);
+                    });
+                } else {
+                    // Convert other types to string and try to parse
+                    items = [String(order.items)];
+                }
+
+                // Process each item
                 items.forEach(item => {
+                    if (!item || typeof item !== 'string') return;
+
                     const match = item.match(/^(.+?)\s*\(x(\d+)\)$/);
                     if (match) {
                         const productName = match[1].trim();
                         const quantity = parseInt(match[2]);
-                        
+
                         // Find matching product to get price
-                        const product = products.find(p => 
-                            p.strain.toLowerCase().includes(productName.toLowerCase()) ||
-                            productName.toLowerCase().includes(p.strain.toLowerCase())
+                        const product = products.find(p =>
+                            p && p.strain &&
+                            (p.strain.toLowerCase().includes(productName.toLowerCase()) ||
+                            productName.toLowerCase().includes(p.strain.toLowerCase()))
                         );
-                        
-                        if (product) {
+
+                        if (product && product.price) {
                             const revenue = product.price * quantity;
                             productRevenue[productName] = (productRevenue[productName] || 0) + revenue;
                         }
