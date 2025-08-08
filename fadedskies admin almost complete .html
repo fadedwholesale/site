@@ -2329,7 +2329,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     <textarea id="emailMessage" required rows="8" placeholder="Enter your message here..."></textarea>
                 </div>
                 <div style="display: flex; gap: 12px;">
-                    <button type="button" class="btn btn-secondary" onclick="previewEmail()" style="flex: 1;">👁�� Preview</button>
+                    <button type="button" class="btn btn-secondary" onclick="previewEmail()" style="flex: 1;">👁️ Preview</button>
                     <button type="submit" class="btn btn-primary" style="flex: 2;">📧 Send Email</button>
                 </div>
             </form>
@@ -2879,7 +2879,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
             if (sharedOrders.length > 0) {
                 orders = [...sharedOrders]; // Create a copy
-                console.log('📦 Loaded', orders.length, 'orders from shared data manager');
+                console.log('��� Loaded', orders.length, 'orders from shared data manager');
             }
 
             console.log('✅ Data loaded and synchronized with shared manager');
@@ -4332,7 +4332,7 @@ Faded Skies Wholesale Team
             
             console.log(`📧 ${status} notification sent to:`, order.partner);
             console.log(statusMessages[status]);
-            showNotification(`📧 ${status} notification sent to ${order.partnerName}`, 'success');
+            showNotification(`�� ${status} notification sent to ${order.partnerName}`, 'success');
         }
 
         function lookupCustomerOrder() {
@@ -5971,7 +5971,7 @@ Faded Skies Wholesale Team`
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 800px;">
                     <div class="modal-header">
-                        <h3 class="modal-title">Security Audit Log ����</h3>
+                        <h3 class="modal-title">Security Audit Log 🔒</h3>
                         <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
                     </div>
                     <div>
@@ -6908,6 +6908,21 @@ Faded Skies Partnership Team`
         window.submitApplicationAction = submitApplicationAction;
         window.quickApproveApplication = quickApproveApplication;
         window.quickRejectApplication = quickRejectApplication;
+
+        // Export admin portal logger functions for global access
+        window.adminPortalLogger = {
+            updateLoggerStatus: updateLoggerStatus,
+            testSystemCommunication: testSystemCommunication,
+            verifyCrossPortalCommunication: verifyCrossPortalCommunication,
+            getLoggerStats: () => window.simpleLogger?.getStats?.() || {},
+            getSystemStatus: () => ({
+                logger: !!window.simpleLogger,
+                sharedData: !!window.sharedDataManager,
+                realTimeSync: !!window.realTimeSync,
+                currentUser: !!currentUser,
+                timestamp: new Date().toISOString()
+            })
+        };
 
         // Initialize logger status monitoring
         function updateLoggerStatus() {
