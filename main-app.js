@@ -583,12 +583,72 @@ function downloadOrderHistory() {
 // Profile Functions
 function updateProfileDisplay() {
     if (!currentUser) return;
-    
+
+    console.log('🔄 Updating profile display with user data:', currentUser);
+
+    // Update profile info fields dynamically
+    const profileInfoFields = document.getElementById('profileInfoFields');
+    if (profileInfoFields) {
+        const businessName = currentUser.businessName || currentUser.name || 'Your Business';
+        const contactName = currentUser.contactName || currentUser.name || 'Your Name';
+        const email = currentUser.email || 'your@email.com';
+        const tier = currentUser.tier || 'Gold Partner';
+        const licenseNumber = currentUser.licenseNumber || currentUser.license || 'Not provided';
+        const memberSince = currentUser.registeredAt ?
+            new Date(currentUser.registeredAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) :
+            'January 2024';
+        const phone = currentUser.phone || 'Not provided';
+        const businessAddress = currentUser.businessAddress || 'Not provided';
+        const website = currentUser.website || 'Not provided';
+
+        profileInfoFields.innerHTML = `
+            <div class="profile-field" style="margin-bottom: 16px; padding: 12px; background: var(--surface-elevated); border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                <strong style="color: var(--brand-green);">Business Name:</strong>
+                <span style="color: var(--text-primary);">${businessName}</span>
+            </div>
+            <div class="profile-field" style="margin-bottom: 16px; padding: 12px; background: var(--surface-elevated); border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                <strong style="color: var(--brand-green);">Contact Person:</strong>
+                <span style="color: var(--text-primary);">${contactName}</span>
+            </div>
+            <div class="profile-field" style="margin-bottom: 16px; padding: 12px; background: var(--surface-elevated); border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                <strong style="color: var(--brand-green);">Email Address:</strong>
+                <span style="color: var(--text-primary);" id="profileEmail">${email}</span>
+            </div>
+            <div class="profile-field" style="margin-bottom: 16px; padding: 12px; background: var(--surface-elevated); border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                <strong style="color: var(--brand-green);">Phone Number:</strong>
+                <span style="color: var(--text-primary);">${phone}</span>
+            </div>
+            <div class="profile-field" style="margin-bottom: 16px; padding: 12px; background: var(--surface-elevated); border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                <strong style="color: var(--brand-green);">Business Address:</strong>
+                <span style="color: var(--text-primary);">${businessAddress}</span>
+            </div>
+            <div class="profile-field" style="margin-bottom: 16px; padding: 12px; background: var(--surface-elevated); border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                <strong style="color: var(--brand-green);">Website:</strong>
+                <span style="color: var(--text-primary);">${website}</span>
+            </div>
+            <div class="profile-field" style="margin-bottom: 16px; padding: 12px; background: var(--surface-elevated); border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                <strong style="color: var(--brand-green);">Partner Tier:</strong>
+                <span style="color: var(--brand-green); font-weight: 700;">${tier}</span>
+            </div>
+            <div class="profile-field" style="margin-bottom: 16px; padding: 12px; background: var(--surface-elevated); border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                <strong style="color: var(--brand-green);">License Number:</strong>
+                <span style="color: var(--text-primary);" id="profileLicense">${licenseNumber}</span>
+            </div>
+            <div class="profile-field" style="margin-bottom: 16px; padding: 12px; background: var(--surface-elevated); border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                <strong style="color: var(--brand-green);">Member Since:</strong>
+                <span style="color: var(--text-primary);">${memberSince}</span>
+            </div>
+        `;
+    }
+
+    // Update individual elements if they exist (fallback)
     const emailEl = document.getElementById('profileEmail');
     const licenseEl = document.getElementById('profileLicense');
-    
+
     if (emailEl) emailEl.textContent = currentUser.email;
-    if (licenseEl) licenseEl.textContent = currentUser.license || 'Not provided';
+    if (licenseEl) licenseEl.textContent = currentUser.licenseNumber || currentUser.license || 'Not provided';
+
+    console.log('✅ Profile display updated successfully');
 }
 
 function openProfileEditModal() {
