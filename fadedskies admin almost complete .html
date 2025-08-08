@@ -5193,6 +5193,17 @@ Faded Skies Wholesale Team
                 return;
             }
 
+            // Immediately ensure all orders have valid statusHistory to prevent runtime errors
+            orders.forEach(order => {
+                if (order && (!order.statusHistory || !Array.isArray(order.statusHistory))) {
+                    order.statusHistory = [{
+                        status: order.status || 'PENDING',
+                        timestamp: order.createdAt || new Date().toISOString(),
+                        note: 'Status history created on-demand'
+                    }];
+                }
+            });
+
             const totalOrders = orders.length;
             const ordersWithTracking = orders.filter(o => o && o.trackingNumber).length;
             const trackingPercentage = totalOrders > 0 ? Math.round((ordersWithTracking / totalOrders) * 100) : 0;
