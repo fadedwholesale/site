@@ -2163,6 +2163,7 @@ window.processPayment = processPayment;
 window.updateProfile = updateProfile;
 window.populateProfileEditForm = populateProfileEditForm;
 window.refreshProfileData = refreshProfileData;
+window.openProfileEditModal = openProfileEditModal;
 
 // Test function to verify profile edit modal
 window.testProfileEditModal = function() {
