@@ -2264,7 +2264,7 @@
                         </div>
                         
                         <div style="margin: 40px 0;">
-                            <button class="btn btn-primary" onclick="openModal('registerModal')">Start Partnership ✨</button>
+                            <button class="btn btn-primary" onclick="openModal('registerModal')">Start Partnership ���</button>
                             <button class="btn btn-secondary" style="margin-left: 16px;" onclick="toggleLiveInventory()">View Live Inventory 📦</button>
                         </div>
                         
@@ -2777,7 +2777,7 @@
                     <h4>Cannabis Wholesale Services</h4>
                     <p>• THCA Flower Wholesale (A & B Grade)<br>
                     • THC Hemp Concentrates & Premium Rosin<br>
-                    • Wholesale Cannabis Vape Cartridges<br>
+                    �� Wholesale Cannabis Vape Cartridges<br>
                     • Bulk Hemp Orders (20lb+ available)<br>
                     • Cannabis Wholesale Packaging Solutions<br>
                     • Hemp White Label Opportunities<br>
@@ -5232,10 +5232,20 @@
                     restoreSessionData();
                 }
 
-                // Load system logos
+                // Load system logos immediately and on data updates
+                loadSystemLogos();
                 setTimeout(() => {
                     loadSystemLogos();
                 }, 200);
+
+                // Add listener for logo updates
+                window.addEventListener('sharedDataChange', (e) => {
+                    if (e.detail.type === 'logos_updated') {
+                        setTimeout(() => {
+                            loadSystemLogos();
+                        }, 100);
+                    }
+                });
 
                 updateAllViews();
                 showPublicWebsite();
