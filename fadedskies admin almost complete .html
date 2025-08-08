@@ -2438,7 +2438,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
     <div id="applicationReviewModal" class="modal">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
-                <h3 class="modal-title">���� Review Business Application</h3>
+                <h3 class="modal-title">📋 Review Business Application</h3>
                 <button class="modal-close" onclick="closeModal('applicationReviewModal')">×</button>
             </div>
 
@@ -3699,6 +3699,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
                 // Update shared data manager (this will notify partner portals)
                 window.sharedDataManager.updateProduct(productId, updates);
+
+                // Ensure local data stays in sync
+                loadDataFromSharedManager();
 
                 updateInventoryTable();
                 updateDashboardStats();
@@ -5542,7 +5545,7 @@ This is a friendly reminder regarding your account and payment terms.
 📋 ACCOUNT REMINDERS:
 • Orders require immediate payment upon placement
 ��� Credit terms available for approved partners only
-• Please ensure payment methods are up to date
+�� Please ensure payment methods are up to date
 • Contact us for any payment or billing questions
 
 💳 PAYMENT OPTIONS:
