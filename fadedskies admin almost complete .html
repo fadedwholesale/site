@@ -2929,6 +2929,43 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             console.log('🔄 Portal sync monitoring active');
         }
 
+        // Automatic sync after admin changes (with debouncing)
+        let autoSyncTimeout = null;
+        function triggerAutoSync(changeType = 'admin_change') {
+            console.log('🔄 Admin: Triggering auto-sync for', changeType);
+
+            // Clear existing timeout to debounce rapid changes
+            if (autoSyncTimeout) {
+                clearTimeout(autoSyncTimeout);
+            }
+
+            // Debounce auto-sync for 2 seconds
+            autoSyncTimeout = setTimeout(() => {
+                console.log('🔄 Admin: Executing auto-sync to partner portal');
+
+                // Update sync status
+                updateSyncStatus('syncing');
+
+                // Force sync to shared data manager
+                try {
+                    window.sharedDataManager.forceSyncProducts(products);
+
+                    // Broadcast via real-time system
+                    if (window.realTimeSync) {
+                        window.realTimeSync.forceSyncAll();
+                    }
+
+                    setTimeout(() => {
+                        updateSyncStatus('connected');
+                        console.log('✅ Admin: Auto-sync completed');
+                    }, 1000);
+                } catch (error) {
+                    console.error('❌ Admin: Auto-sync failed', error);
+                    updateSyncStatus('error');
+                }
+            }, 2000);
+        }
+
         // Load data from shared data manager
         function loadDataFromSharedManager() {
             console.log('📡 Loading data from shared data manager...');
@@ -6566,7 +6603,7 @@ Faded Skies Partnership Team`
             });
             localStorage.setItem('adminNotifications', JSON.stringify(notifications));
             loadApplicationNotifications();
-            showNotification('✅ All application notifications marked as read', 'success');
+            showNotification('��� All application notifications marked as read', 'success');
         }
 
         function clearOldNotifications() {
