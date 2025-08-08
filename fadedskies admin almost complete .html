@@ -3337,6 +3337,18 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             updateSyncStatus('syncing');
             console.log('🔄 Admin: Force syncing to partner portal...');
 
+            // Log sync initiation
+            if (window.simpleLogger) {
+                window.simpleLogger.system('Manual sync to portal initiated', {
+                    admin: currentUser?.email,
+                    productsCount: products?.length || 0,
+                    ordersCount: orders?.length || 0,
+                    timestamp: new Date().toISOString(),
+                    action: 'manual_sync',
+                    system: 'admin-portal'
+                });
+            }
+
             try {
                 // Force sync products to shared data manager with real-time broadcasting
                 window.sharedDataManager.forceSyncProducts(products);
@@ -3362,6 +3374,17 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     updateSyncStatus('connected');
                     showNotification('📊 Inventory synced to partner portal successfully! All changes are now live.', 'success');
 
+                    // Log successful sync
+                    if (window.simpleLogger) {
+                        window.simpleLogger.system('Sync to portal completed successfully', {
+                            admin: currentUser?.email,
+                            productsCount: products?.length || 0,
+                            ordersCount: orders?.length || 0,
+                            timestamp: new Date().toISOString(),
+                            system: 'admin-portal'
+                        });
+                    }
+
                     // Update last sync timestamp
                     const lastSyncElement = document.getElementById('lastSync');
                     if (lastSyncElement) {
@@ -3372,6 +3395,16 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 console.error('❌ Error syncing to portal:', error);
                 updateSyncStatus('error');
                 showNotification('❌ Failed to sync inventory. Please try again.', 'error');
+
+                // Log sync error
+                if (window.simpleLogger) {
+                    window.simpleLogger.error('Sync to portal failed', {
+                        admin: currentUser?.email,
+                        error: error.message,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
             }
         }
 
@@ -6460,6 +6493,19 @@ Faded Skies Wholesale Team`
                 return;
             }
 
+            // Log application review action
+            if (window.simpleLogger) {
+                window.simpleLogger.system('Application review action initiated', {
+                    applicationId: currentReviewingApplication.applicationId,
+                    businessName: currentReviewingApplication.businessName,
+                    action: action,
+                    partnerTier: partnerTier,
+                    admin: currentUser?.email,
+                    timestamp: new Date().toISOString(),
+                    system: 'admin-portal'
+                });
+            }
+
             // Update application
             const appIndex = currentApplications.findIndex(app =>
                 app.applicationId === currentReviewingApplication.applicationId
@@ -6496,6 +6542,20 @@ Faded Skies Wholesale Team`
             };
 
             showNotification(`✅ Application ${actionText[action]} successfully!`, 'success');
+
+            // Log successful application action
+            if (window.simpleLogger) {
+                window.simpleLogger.system('Application review completed', {
+                    applicationId: currentApplications[appIndex].applicationId,
+                    businessName: currentApplications[appIndex].businessName,
+                    action: action,
+                    finalStatus: currentApplications[appIndex].status,
+                    partnerTier: currentApplications[appIndex].partnerTier,
+                    admin: currentUser?.email,
+                    timestamp: new Date().toISOString(),
+                    system: 'admin-portal'
+                });
+            }
 
             // Close modal and refresh data
             closeModal('applicationNotesModal');
