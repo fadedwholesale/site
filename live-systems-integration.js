@@ -460,14 +460,22 @@ class LiveSystemsIntegrator {
             // Test 3: Data persistence backup
             if (this.systems.dataPersistence) {
                 try {
-                    const status = this.systems.dataPersistence.getRecoveryStatus();
-                    if (!status || status.backupCount < 0) {
-                        communicationWorking = false;
-                        errors.push('Data persistence backup system not working');
+                    if (typeof this.systems.dataPersistence.getRecoveryStatus === 'function') {
+                        const status = this.systems.dataPersistence.getRecoveryStatus();
+                        if (!status || (typeof status.backupCount === 'number' && status.backupCount < 0)) {
+                            communicationWorking = false;
+                            errors.push('Data persistence backup system not working');
+                        }
+                    } else {
+                        // Fallback: just check if data persistence is loaded
+                        if (!this.systems.dataPersistence.backup || !this.systems.dataPersistence.recover) {
+                            communicationWorking = false;
+                            errors.push('Data persistence missing core methods');
+                        }
                     }
                 } catch (error) {
                     communicationWorking = false;
-                    errors.push('Data persistence status check failed');
+                    errors.push(`Data persistence status check failed: ${error.message}`);
                 }
             }
 
