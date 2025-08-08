@@ -310,19 +310,44 @@ class CartManager {
                 console.log('✅ Updated cartCount2 to:', totals.totalItems);
             }
 
-            if (!cartItems || !cartTotal) {
-                console.warn('Cart elements not found');
+            if (!cartItems) {
+                console.warn('Cart items container not found');
                 return;
             }
 
             // Update cart total
-            cartTotal.textContent = totals.total.toFixed(2);
+            if (cartTotal) {
+                cartTotal.textContent = totals.total.toFixed(2);
+                console.log('✅ Updated cart total to:', totals.total.toFixed(2));
+            }
 
-            // Generate cart items HTML
+            // Generate cart items HTML - ensure all items are displayed
             if (this.cart.length === 0) {
                 cartItems.innerHTML = this.getEmptyCartHTML();
+                console.log('🛒 Cart is empty - showing empty state');
             } else {
-                cartItems.innerHTML = this.cart.map(item => this.getCartItemHTML(item)).join('');
+                console.log('🛒 Generating HTML for', this.cart.length, 'cart items');
+                const cartItemsHTML = this.cart.map((item, index) => {
+                    console.log(`🛒 Item ${index + 1}:`, {
+                        strain: item.strain,
+                        quantity: item.quantity,
+                        price: item.price,
+                        total: (item.price * item.quantity).toFixed(2)
+                    });
+                    return this.getCartItemHTML(item);
+                }).join('');
+
+                cartItems.innerHTML = cartItemsHTML;
+                console.log('✅ Cart items HTML updated with', this.cart.length, 'items');
+
+                // Verify DOM update
+                setTimeout(() => {
+                    const cartItemElements = document.querySelectorAll('.cart-item');
+                    console.log('🔍 Cart items in DOM:', cartItemElements.length);
+                    if (cartItemElements.length !== this.cart.length) {
+                        console.warn('⚠️ Mismatch between cart items and DOM elements!');
+                    }
+                }, 100);
             }
 
             // Update cart total section
