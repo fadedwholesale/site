@@ -1365,7 +1365,7 @@
                             <button class="btn btn-secondary" onclick="bulkStatusUpdate()">🔄 Bulk Status Update</button>
                             <button class="btn btn-secondary" onclick="exportOrders()">📄 Export Orders</button>
                             <button class="btn btn-secondary" onclick="openModal('customerTrackingModal')">🔍 Customer Tracking</button>
-                            <button class="btn btn-admin" onclick="generateBulkShippingLabels()">📦 Bulk Labels</button>
+                            <button class="btn btn-admin" onclick="generateBulkShippingLabels()">��� Bulk Labels</button>
                         </div>
                     </div>
 
@@ -2922,7 +2922,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     console.log('📡 Admin: New order received via real-time sync', data);
                     loadDataFromSharedManager(); // Refresh all data
                     updateAllDashboardViews();
-                    showNotification(`���� NEW ORDER: ${data.id} from ${data.partnerName || 'Partner'} - $${data.total}`, 'success');
+                    showNotification(`🚨 NEW ORDER: ${data.id} from ${data.partnerName || 'Partner'} - $${data.total}`, 'success');
                 });
 
                 console.log('✅ Real-time sync listeners configured for admin portal');
@@ -4948,6 +4948,18 @@ Faded Skies Wholesale Team
             // Ensure orders is defined and is an array
             if (!Array.isArray(orders)) {
                 console.warn('Orders array is not defined or not an array:', orders);
+
+                // Log this issue
+                if (window.simpleLogger) {
+                    window.simpleLogger.warning('Orders array issue in updateFulfillmentMetrics', {
+                        ordersType: typeof orders,
+                        ordersValue: orders,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
                 return;
             }
 
@@ -5839,7 +5851,7 @@ We're excited to announce new premium products now available in our wholesale ca
 🚀 HIGHLIGHTS:
 • Competitive wholesale pricing
 • Same-day processing for orders
-• Quality guaranteed products
+�� Quality guaranteed products
 
 Log into your partner portal to view the complete catalog and place orders:
 🌐 https://portal.fadedskies.com
