@@ -415,6 +415,12 @@ class LiveDataManager {
     processOrderInventory(order) {
         if (!order.items) return;
 
+        // Ensure items is an array
+        if (!Array.isArray(order.items)) {
+            console.warn('⚠️ Order items is not an array:', typeof order.items, order.items);
+            return;
+        }
+
         order.items.forEach(item => {
             const product = this.data.products.find(p => p.id === item.productId);
             if (product) {
