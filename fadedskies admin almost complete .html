@@ -1821,7 +1821,7 @@
 
                     <div class="grid">
                         <div class="card">
-                            <h3>🏢 Company Information</h3>
+                            <h3>��� Company Information</h3>
                             <div class="form-group">
                                 <label>Company Name</label>
                                 <input type="text" class="editable" value="Faded Skies Wholesale" style="width: 100%;">
@@ -5921,13 +5921,27 @@ Faded Skies Wholesale Team`
 
         // Utility Functions
         function formatDateTime(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            if (!dateString) return 'No date';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return 'Invalid date';
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            } catch (error) {
+                console.warn('Error formatting date:', dateString, error);
+                return 'Invalid date';
+            }
         }
 
         function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString();
+            if (!dateString) return 'No date';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return 'Invalid date';
+                return date.toLocaleDateString();
+            } catch (error) {
+                console.warn('Error formatting date:', dateString, error);
+                return 'Invalid date';
+            }
         }
 
         function showNotification(message, type = 'success') {
