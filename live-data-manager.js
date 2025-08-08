@@ -230,7 +230,13 @@ class LiveDataManager {
             });
 
             window.realTimeSync.on('order_added', (order) => {
-                this.addOrder(order, { fromRemote: true });
+                // Validate and clean order data before processing
+                const cleanOrder = this.validateAndCleanOrder(order);
+                if (cleanOrder) {
+                    this.addOrder(cleanOrder, { fromRemote: true });
+                } else {
+                    console.warn('⚠️ Received invalid order data:', order);
+                }
             });
 
             window.realTimeSync.on('order_updated', (order) => {
@@ -347,15 +353,51 @@ class LiveDataManager {
         return true;
     }
 
-    // Order management methods
-    addOrder(order, options = {}) {
-        if (!order.id) {
-            order.id = this.generateOrderId();
+    // Validate and clean order data
+    validateAndCleanOrder(order) {
+        if (!order || typeof order !== 'object') {
+            return null;
         }
 
-        order.created = order.created || new Date().toISOString();
+        // Create a clean copy to avoid modifying the original
+        const cleanOrder = { ...order };
+
+        // Ensure items is an array
+        if (cleanOrder.items && !Array.isArray(cleanOrder.items)) {
+            if (typeof cleanOrder.items === 'string') {
+                // Convert string to basic array format
+                cleanOrder.items = [{
+                    productId: 'unknown',
+                    name: cleanOrder.items,
+                    quantity: 1,
+                    price: cleanOrder.total || 0
+                }];
+            } else {
+                console.warn('⚠️ Invalid items format, setting to empty array:', cleanOrder.items);
+                cleanOrder.items = [];
+            }
+        }
+
+        // Ensure required fields exist
+        cleanOrder.id = cleanOrder.id || this.generateOrderId();
+        cleanOrder.items = cleanOrder.items || [];
+        cleanOrder.total = cleanOrder.total || 0;
+        cleanOrder.status = cleanOrder.status || 'pending';
+        cleanOrder.created = cleanOrder.created || new Date().toISOString();
+
+        return cleanOrder;
+    }
+
+    // Order management methods
+    addOrder(order, options = {}) {
+        // Validate and clean order before processing
+        order = this.validateAndCleanOrder(order);
+        if (!order) {
+            console.error('❌ Invalid order data provided');
+            return null;
+        }
+
         order.lastModified = new Date().toISOString();
-        order.status = order.status || 'pending';
 
         this.data.orders.push(order);
         this.pendingChanges.add('orders');
