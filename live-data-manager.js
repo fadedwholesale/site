@@ -118,31 +118,44 @@ class LiveDataManager {
     async resetToDefaults() {
         console.log('🔄 Resetting to default data...');
         
-        // Initialize with sample data if needed
-        const sampleProducts = [
+        // Initialize with real cannabis products if needed
+        const realProducts = [
             {
                 id: 'FSP001',
-                strain: 'Purple Haze A-Grade',
+                strain: 'Zkittlez A-Grade',
                 grade: 'A-Grade',
-                price: 850,
-                thca: 28.5,
+                price: 950,
+                thca: 29.8,
                 status: 'available',
-                stock: 25,
-                image: 'https://images.unsplash.com/photo-1566265784/36330-4f3e3b4b0b0b',
-                description: 'Premium THCA flower with exceptional quality',
+                stock: 15,
+                image: 'https://images.unsplash.com/photo-1610234815282-a78e82bbde8e?w=300&h=300&fit=crop&crop=center',
+                description: 'Premium indoor grown Zkittlez with tropical fruit flavors',
                 created: new Date().toISOString(),
                 lastModified: new Date().toISOString()
             },
             {
-                id: 'FSP002', 
-                strain: 'OG Kush B-Grade',
+                id: 'FSP002',
+                strain: 'Gelato 41 B-Grade',
                 grade: 'B-Grade',
-                price: 550,
-                thca: 24.2,
+                price: 650,
+                thca: 25.1,
                 status: 'available',
-                stock: 40,
-                image: 'https://images.unsplash.com/photo-1566265784/36330-4f3e3b4b0b0b',
-                description: 'Quality THCA flower at great value',
+                stock: 35,
+                image: 'https://images.unsplash.com/photo-1644845499871-2b9c93cf69f5?w=300&h=300&fit=crop&crop=center',
+                description: 'High-quality B-grade Gelato 41 with sweet dessert flavors',
+                created: new Date().toISOString(),
+                lastModified: new Date().toISOString()
+            },
+            {
+                id: 'FSP003',
+                strain: 'Live Rosin - Papaya',
+                grade: 'Rosin',
+                price: 45,
+                thca: 82.6,
+                status: 'available',
+                stock: 8,
+                image: 'https://images.unsplash.com/photo-1644845499871-2b9c93cf69f5?w=300&h=300&fit=crop&crop=center',
+                description: 'Solventless live rosin from fresh frozen Papaya buds',
                 created: new Date().toISOString(),
                 lastModified: new Date().toISOString()
             }
@@ -150,13 +163,13 @@ class LiveDataManager {
 
         this.data = {
             ...this.defaultData,
-            products: sampleProducts,
+            products: realProducts,
             lastModified: new Date().toISOString(),
             version: 1
         };
 
         await this.saveData();
-        this.log('system', 'Data reset to defaults', { productCount: sampleProducts.length });
+        this.log('system', 'Data reset to defaults', { productCount: realProducts.length });
     }
 
     // Start auto-save functionality
