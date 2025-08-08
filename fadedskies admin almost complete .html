@@ -1552,7 +1552,7 @@
                         <h3 style="color: var(--brand-green); margin: 0;">Business Application Review Center</h3>
                         <div class="action-group">
                             <button class="btn btn-primary" onclick="refreshApplications()">🔄 Refresh Applications</button>
-                            <button class="btn btn-secondary" onclick="exportApplications()">📄 Export Applications</button>
+                            <button class="btn btn-secondary" onclick="exportApplications()">�� Export Applications</button>
                             <button class="btn btn-admin" onclick="bulkApplicationAction()">📦 Bulk Actions</button>
                             <button class="btn btn-secondary" onclick="openModal('applicationNotificationsModal')">���� Notifications</button>
                         </div>
@@ -3007,6 +3007,121 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     modifiedBy: 'system'
                 }
             ];
+        }
+
+        // Enhanced live systems integration - to be loaded after scripts
+        function initializeLiveSystems() {
+            console.log('🚀 Initializing Admin Live Systems...');
+
+            // Set up real-time sync monitoring
+            if (window.realTimeSync) {
+                window.realTimeSync.on('order_placed', (orderData) => {
+                    console.log('📦 LIVE ORDER RECEIVED!', orderData);
+                    handleAdminRealTimeUpdate({ type: 'new_order', data: orderData });
+                });
+
+                window.realTimeSync.on('product_updated', (productData) => {
+                    console.log('📦 LIVE PRODUCT UPDATE!', productData);
+                    handleAdminRealTimeUpdate({ type: 'product_updated', data: productData });
+                });
+            }
+
+            // Set up live data manager monitoring
+            if (window.liveDataManager) {
+                console.log('✅ Live Data Manager connected to admin');
+                loadDataFromSharedManager();
+            }
+
+            // Set up order sync manager monitoring
+            if (window.orderSyncManager) {
+                console.log('✅ Order Sync Manager connected to admin');
+            }
+
+            // Set up activity logger monitoring
+            if (window.activityLogger) {
+                console.log('✅ Activity Logger connected to admin');
+
+                // Log admin login
+                window.activityLogger.log('admin', 'Admin dashboard accessed', {
+                    userEmail: currentUser?.email,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            console.log('✅ Admin Live Systems initialized successfully');
+        }
+
+        // Enhanced data loading from shared systems
+        function loadDataFromSharedManager() {
+            try {
+                if (window.liveDataManager) {
+                    // Load products from live data manager
+                    const liveProducts = window.liveDataManager.getProducts();
+                    if (liveProducts && liveProducts.length > 0) {
+                        products = liveProducts;
+                        console.log('📦 Loaded', products.length, 'products from live data manager');
+                    }
+
+                    // Load orders from live data manager
+                    const liveOrders = window.liveDataManager.getOrders();
+                    if (liveOrders && liveOrders.length > 0) {
+                        orders = liveOrders;
+                        console.log('📋 Loaded', orders.length, 'orders from live data manager');
+                    }
+
+                    // Force UI update
+                    updateAllDashboardViews();
+                    updateSyncStatus('connected');
+                }
+            } catch (error) {
+                console.error('❌ Error loading from shared manager:', error);
+                updateSyncStatus('error');
+            }
+        }
+
+        // Trigger auto-sync after admin changes
+        function triggerAutoSync(changeType) {
+            try {
+                console.log('🔄 Triggering auto-sync for:', changeType);
+
+                // Update live data manager
+                if (window.liveDataManager) {
+                    // Force save all admin changes
+                    products.forEach(product => {
+                        window.liveDataManager.updateProduct(product.id, {
+                            ...product,
+                            lastModified: new Date().toISOString(),
+                            modifiedBy: currentUser?.email || 'admin'
+                        });
+                    });
+                }
+
+                // Broadcast via real-time sync
+                if (window.realTimeSync) {
+                    window.realTimeSync.broadcast('admin_change', {
+                        changeType: changeType,
+                        timestamp: new Date().toISOString(),
+                        adminUser: currentUser?.email
+                    });
+                }
+
+                // Log the change
+                if (window.activityLogger) {
+                    window.activityLogger.logAdminAction(changeType, 'products', {
+                        productCount: products.length,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                updateSyncStatus('syncing');
+                setTimeout(() => {
+                    updateSyncStatus('connected');
+                }, 1000);
+
+            } catch (error) {
+                console.error('❌ Error triggering auto-sync:', error);
+                updateSyncStatus('error');
+            }
         }
 
         // Handle real-time updates
