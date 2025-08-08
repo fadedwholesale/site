@@ -88,8 +88,9 @@ class ActivityLogger {
             events: []
         };
 
-        // Store session in session storage for quick access
-        sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(this.currentSession));
+        // Store session in session storage for quick access (safe version)
+        const safeSession = this.getSafeSessionData();
+        sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(safeSession));
         
         this.log(this.logLevels.SYSTEM, 'Session started', this.currentSession);
     }
@@ -228,10 +229,18 @@ class ActivityLogger {
                 const beforeValue = beforeData[key];
                 const afterValue = afterData[key];
                 
-                if (JSON.stringify(beforeValue) !== JSON.stringify(afterValue)) {
+                try {
+                    if (JSON.stringify(beforeValue) !== JSON.stringify(afterValue)) {
+                        diff[key] = {
+                            before: beforeValue,
+                            after: afterValue
+                        };
+                    }
+                } catch (error) {
+                    // Handle circular references in diff calculation
                     diff[key] = {
-                        before: beforeValue,
-                        after: afterValue
+                        before: '[Complex Object]',
+                        after: '[Complex Object]'
                     };
                 }
             });
@@ -853,8 +862,8 @@ class ActivityLogger {
             const recentLogs = logs.slice(-Math.floor(this.maxLogs * 0.5));
             const recentChanges = changes.slice(-Math.floor(this.maxLogs * 0.5));
             
-            localStorage.setItem(this.logStorageKey, JSON.stringify(recentLogs));
-            localStorage.setItem(this.changeStorageKey, JSON.stringify(recentChanges));
+            localStorage.setItem(this.logStorageKey, this.safeJSONStringify(recentLogs));
+            localStorage.setItem(this.changeStorageKey, this.safeJSONStringify(recentChanges));
             
             console.log('🧹 Cleaned up old logs and changes');
         } catch (error) {
