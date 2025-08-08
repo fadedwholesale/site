@@ -89,9 +89,19 @@ class ActivityLogger {
             events: []
         };
 
-        // Store session in session storage for quick access (safe version)
+        // Store session in session storage for quick access (completely safe)
         const safeSession = this.getSafeSessionData();
-        sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(safeSession));
+        try {
+            sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(safeSession));
+        } catch (error) {
+            // If even the safe session data fails, store minimal info
+            const minimalSession = {
+                id: this.currentSession?.id || 'unknown',
+                startTime: this.currentSession?.startTime || new Date().toISOString(),
+                userEmail: this.currentSession?.userEmail || 'unknown'
+            };
+            sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(minimalSession));
+        }
         
         this.log(this.logLevels.SYSTEM, 'Session started', this.currentSession);
     }
@@ -693,10 +703,15 @@ class ActivityLogger {
                 this.changeBuffer = [];
             }
 
-            // Update session in session storage (safe version)
+            // Update session in session storage (completely safe)
             if (this.currentSession) {
                 const safeSession = this.getSafeSessionData();
-                sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(safeSession));
+                try {
+                    sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(safeSession));
+                } catch (error) {
+                    // Use our safe stringify method as fallback
+                    sessionStorage.setItem(this.sessionStorageKey, this.safeJSONStringify(safeSession));
+                }
             }
 
             // Update last flush time
