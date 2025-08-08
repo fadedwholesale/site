@@ -503,7 +503,7 @@ class SharedDataManager {
 
     // Real-time event handlers
     handleRealTimeProductsUpdate(products) {
-        console.log('📡 Handling real-time products update');
+        console.log('���� Handling real-time products update');
         // Update local data without triggering another broadcast
         const data = this.getData();
         data.products = products;
@@ -577,6 +577,53 @@ class SharedDataManager {
         if (this.realTimeSync) {
             const currentData = this.getData();
             this.realTimeSync.broadcast('full_sync', currentData, { force: true });
+        }
+    }
+
+    // Handle real-time image updates
+    handleRealTimeImageUpdate(imageData) {
+        console.log('📡 Handling real-time image update:', imageData);
+        const { productId, newImage } = imageData;
+
+        if (productId && newImage !== undefined) {
+            // Update the specific product's image
+            const data = this.getData();
+            const productIndex = data.products.findIndex(p => p.id === productId);
+
+            if (productIndex !== -1) {
+                data.products[productIndex].image = newImage;
+                data.products[productIndex].lastModified = new Date().toISOString();
+                data.lastSync = new Date().toISOString();
+                localStorage.setItem(this.storageKey, JSON.stringify(data));
+
+                // Notify local components of image update
+                this.notifyChange('product_updated', data.products[productIndex]);
+                this.notifyChange('product_image_updated', imageData);
+
+                // Show notification if appropriate
+                if (window.showNotification) {
+                    window.showNotification(`📸 ${imageData.productName} image updated`, 'info');
+                }
+            }
+        }
+    }
+
+    // Handle real-time admin changes
+    handleRealTimeAdminChange(adminData) {
+        console.log('📡 Handling real-time admin change:', adminData);
+
+        if (window.showNotification && adminData.productName) {
+            const changeSummary = adminData.changes.join(', ');
+            const message = `🔧 Admin updated ${adminData.productName}: ${changeSummary}`;
+            window.showNotification(message, 'info');
+        }
+
+        // If this was a new product, ensure it's properly displayed
+        if (adminData.action === 'product_added' && adminData.newProduct) {
+            // Force refresh of product displays
+            if (window.updateAllViews) {
+                setTimeout(() => window.updateAllViews(), 500);
+            }
         }
     }
 
