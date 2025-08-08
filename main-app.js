@@ -64,7 +64,7 @@ function initializeApplication() {
             const userData = JSON.parse(savedUser);
             setCurrentUser(userData);
             showUserSession();
-            console.log('✅ User session restored:', currentUser.email);
+            console.log('��� User session restored:', currentUser.email);
         } catch (error) {
             console.error('Error restoring user session:', error);
             localStorage.removeItem('currentUser');
@@ -1232,7 +1232,7 @@ function requestCustomQuote() {
 }
 
 function openSupportModal() {
-    showNotification('�� Support contact feature coming soon!', 'info');
+    showNotification('📞 Support contact feature coming soon!', 'info');
 }
 
 // Notification System
@@ -1634,6 +1634,50 @@ function testCompleteRealTimeSystem() {
     });
 
     return true;
+}
+
+// Highlight updated products in the UI
+function highlightUpdatedProduct(productId) {
+    console.log('✨ Highlighting updated product:', productId);
+
+    // Find all table rows that contain this product
+    const tableRows = document.querySelectorAll('tr');
+    tableRows.forEach(row => {
+        const addToCartButton = row.querySelector(`[onclick*="addToCart(${productId})"]`);
+        if (addToCartButton) {
+            // Add highlight class
+            row.classList.add('updated');
+
+            // Remove highlight after animation
+            setTimeout(() => {
+                row.classList.remove('updated');
+            }, 1200);
+        }
+    });
+
+    // Also highlight the product image if it exists
+    const productImages = document.querySelectorAll('.product-image');
+    productImages.forEach(img => {
+        const row = img.closest('tr');
+        if (row && row.querySelector(`[onclick*="addToCart(${productId})"]`)) {
+            img.style.boxShadow = '0 0 15px rgba(0, 200, 81, 0.6)';
+            setTimeout(() => {
+                img.style.boxShadow = '';
+            }, 2000);
+        }
+    });
+}
+
+// Enhanced image error handling for better fallbacks
+function handleProductImageError(img, productData) {
+    console.log('🖼️ Image load error, using fallback for:', productData);
+
+    // Generate a better fallback image URL
+    const fallbackUrl = `https://via.placeholder.com/80x80/1a1a1a/00C851?text=${encodeURIComponent(productData.grade || 'PRODUCT')}`;
+
+    if (img.src !== fallbackUrl) {
+        img.src = fallbackUrl;
+    }
 }
 
 // Debug real-time system status
