@@ -50,10 +50,13 @@ function initializeApplication() {
         window.cartManager = new CartManager();
         console.log('✅ Cart manager initialized');
     }
-    
+
     // Setup shared data manager event listeners
     window.addEventListener('sharedDataChange', handleSharedDataChange);
-    
+
+    // Initialize real-time status indicator
+    initializeRealTimeStatusIndicator();
+
     // Check if user is already logged in
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
@@ -67,12 +70,61 @@ function initializeApplication() {
             localStorage.removeItem('currentUser');
         }
     }
-    
+
     // Initialize view state
     const urlParams = new URLSearchParams(window.location.search);
     const initialView = urlParams.get('view');
     if (initialView === 'portal' && currentUser) {
         showPartnerPortal();
+    }
+}
+
+// Initialize real-time status indicator
+function initializeRealTimeStatusIndicator() {
+    const syncIcon = document.getElementById('syncIcon');
+    const syncText = document.getElementById('syncText');
+
+    if (!syncIcon || !syncText) return;
+
+    // Check real-time system status periodically
+    const checkStatus = () => {
+        const isOnline = navigator.onLine;
+        const hasRealTimeSync = !!window.realTimeSync;
+        const hasDataManager = !!window.sharedDataManager;
+
+        if (!isOnline) {
+            syncIcon.textContent = '📡';
+            syncText.textContent = 'Offline';
+            syncIcon.parentElement.style.background = 'linear-gradient(135deg, var(--accent-red), #FF6666)';
+        } else if (hasRealTimeSync && hasDataManager) {
+            syncIcon.textContent = '✅';
+            syncText.textContent = 'Live Sync';
+            syncIcon.parentElement.style.background = 'linear-gradient(135deg, var(--brand-green), var(--brand-green-light))';
+        } else {
+            syncIcon.textContent = '🔄';
+            syncText.textContent = 'Initializing...';
+            syncIcon.parentElement.style.background = 'linear-gradient(135deg, var(--accent-orange), #FFB366)';
+        }
+    };
+
+    // Initial check
+    checkStatus();
+
+    // Check every 3 seconds
+    setInterval(checkStatus, 3000);
+
+    // Listen for online/offline events
+    window.addEventListener('online', checkStatus);
+    window.addEventListener('offline', checkStatus);
+
+    // Listen for real-time sync events to show activity
+    if (window.realTimeSync) {
+        window.realTimeSync.on('*', () => {
+            syncIcon.style.animation = 'pulse 0.5s ease-in-out';
+            setTimeout(() => {
+                syncIcon.style.animation = '';
+            }, 500);
+        });
     }
 }
 
@@ -792,7 +844,7 @@ function submitRegistration() {
         document.getElementById('registrationStep1').classList.add('active');
         
         if (submitBtn) {
-            submitBtn.textContent = 'Submit Application 🚀';
+            submitBtn.textContent = 'Submit Application ���';
             submitBtn.disabled = false;
         }
     }, 2000);
