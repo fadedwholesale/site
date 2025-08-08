@@ -1299,7 +1299,7 @@
                     <button class="tab" onclick="switchTab('partners')">👥 Partner Management</button>
                     <button class="tab" onclick="switchTab('applications')">📋 Business Applications</button>
                     <button class="tab" onclick="switchTab('analytics')">📊 Analytics & Reports</button>
-                    <button class="tab" onclick="switchTab('settings')">⚙️ System Settings</button>
+                    <button class="tab" onclick="switchTab('settings')">⚙��� System Settings</button>
                 </div>
 
                 <!-- Inventory Management Tab -->
@@ -1554,7 +1554,7 @@
                             <button class="btn btn-primary" onclick="refreshApplications()">🔄 Refresh Applications</button>
                             <button class="btn btn-secondary" onclick="exportApplications()">📄 Export Applications</button>
                             <button class="btn btn-admin" onclick="bulkApplicationAction()">📦 Bulk Actions</button>
-                            <button class="btn btn-secondary" onclick="openModal('applicationNotificationsModal')">🔔 Notifications</button>
+                            <button class="btn btn-secondary" onclick="openModal('applicationNotificationsModal')">���� Notifications</button>
                         </div>
                     </div>
 
@@ -1738,7 +1738,7 @@
                         </div>
 
                         <div class="chart-container">
-                            <h3 class="chart-title">📊 Order Status Distribution</h3>
+                            <h3 class="chart-title">��� Order Status Distribution</h3>
                             <div style="height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
                                 <div id="orderStatusChart" style="width: 100%; height: 100%; display: flex; flex-direction: column; padding: 20px;">
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
@@ -2403,7 +2403,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
     <div id="orderDetailsModal" class="modal">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
-                <h3 class="modal-title">Order Details 📋</h3>
+                <h3 class="modal-title">Order Details ����</h3>
                 <button class="modal-close" onclick="closeModal('orderDetailsModal')">×</button>
             </div>
             <div id="orderDetailsContent">
@@ -2537,148 +2537,8 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         let currentOrderFilter = 'all';
 
         // Shared Data - Syncs with public website/partner portal
-        let products = [
-            {
-                id: 1,
-                grade: 'A-GRADE',
-                strain: 'Purple Cream (EXTC)',
-                thca: 31.2,
-                price: 983,
-                costBasis: 688,
-                status: 'COMING SOON',
-                stock: 0,
-                type: 'Indica',
-                lastModified: '2025-06-27T10:30:00Z',
-                modifiedBy: 'admin@fadedskies.com',
-                photo: '' // Add photo property
-            },
-            {
-                id: 2,
-                grade: 'A-GRADE',
-                strain: 'Blue Gelatti (EXTC)',
-                thca: 29.5,
-                price: 964,
-                costBasis: 675,
-                status: 'AVAILABLE',
-                stock: 15,
-                type: 'Sativa',
-                lastModified: '2025-06-27T09:15:00Z',
-                modifiedBy: 'admin@fadedskies.com',
-                photo: ''
-            },
-            {
-                id: 3,
-                grade: 'A-GRADE',
-                strain: 'Candy Gas (EXTC)',
-                thca: 31.9,
-                price: 804,
-                costBasis: 563,
-                status: 'AVAILABLE',
-                stock: 23,
-                type: 'Hybrid',
-                lastModified: '2025-06-26T16:45:00Z',
-                modifiedBy: 'admin@fadedskies.com',
-                photo: ''
-            },
-            {
-                id: 4,
-                grade: 'A-GRADE',
-                strain: 'OG Kush (IN)',
-                thca: 24.1,
-                price: 764,
-                costBasis: 535,
-                status: 'AVAILABLE',
-                stock: 47,
-                type: 'Hybrid',
-                lastModified: '2025-06-26T14:20:00Z',
-                modifiedBy: 'admin@fadedskies.com',
-                photo: ''
-            },
-            {
-                id: 5,
-                grade: 'A-GRADE',
-                strain: 'Blue Runtz (IN)',
-                thca: 31.6,
-                price: 723,
-                costBasis: 506,
-                status: 'AVAILABLE',
-                stock: 32,
-                type: 'Indica',
-                lastModified: '2025-06-26T11:10:00Z',
-                modifiedBy: 'admin@fadedskies.com',
-                photo: ''
-            },
-            {
-                id: 6,
-                grade: 'B-GRADE',
-                strain: 'LCG B (IN)',
-                thca: 31.0,
-                price: 550,
-                costBasis: 385,
-                status: 'AVAILABLE',
-                stock: 18,
-                type: 'Hybrid',
-                lastModified: '2025-06-25T08:30:00Z',
-                modifiedBy: 'admin@fadedskies.com',
-                photo: ''
-            },
-            {
-                id: 7,
-                grade: 'B-GRADE',
-                strain: 'Illemonati B (IN)',
-                thca: 33.1,
-                price: 550,
-                costBasis: 385,
-                status: 'AVAILABLE',
-                stock: 12,
-                type: 'Sativa',
-                lastModified: '2025-06-25T07:45:00Z',
-                modifiedBy: 'admin@fadedskies.com',
-                photo: ''
-            },
-            {
-                id: 8,
-                grade: 'ROSIN',
-                strain: 'Cherry Grease Rosin (T1)',
-                thca: 0,
-                price: 16,
-                costBasis: 11,
-                status: 'AVAILABLE',
-                stock: 250,
-                type: 'Concentrate',
-                lastModified: '2025-06-24T13:20:00Z',
-                modifiedBy: 'admin@fadedskies.com',
-                photo: ''
-            },
-            {
-                id: 9,
-                grade: 'VAPE',
-                strain: 'Sour Diesel Vape (2g)',
-                thca: 0,
-                price: 29,
-                costBasis: 20,
-                status: 'AVAILABLE',
-                stock: 85,
-                type: 'Concentrate',
-                lastModified: '2025-06-24T10:15:00Z',
-                modifiedBy: 'admin@fadedskies.com',
-                photo: ''
-            },
-            {
-                id: 10,
-                grade: 'BULK',
-                strain: 'Zaza Runtz Big (EXTC)',
-                thca: 28.5,
-                price: 1205,
-                costBasis: 844,
-                status: 'AVAILABLE',
-                stock: 8,
-                type: 'Hybrid',
-                lastModified: '2025-06-23T15:30:00Z',
-                modifiedBy: 'admin@fadedskies.com',
-                photo: ''
-            }
-        ];
+        // Initialize empty array - data will be loaded from shared data manager
+        let products = [];
 
         let orders = [
             {
@@ -2906,29 +2766,17 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             // Load system logos
             loadSystemLogos();
 
-            // Load products from shared data manager
-            const sharedProducts = window.sharedDataManager.getProducts();
-            if (sharedProducts.length > 0) {
-                products = sharedProducts;
-                console.log('📦 Loaded', products.length, 'products from shared data manager');
-            } else {
-                // Force sync default products to shared data manager
-                console.log('📦 No shared products found, syncing defaults...');
-                window.sharedDataManager.updateProducts(products);
-            }
-
-            // Load orders from shared data manager
-            const sharedOrders = window.sharedDataManager.getOrders();
-            if (sharedOrders.length > 0) {
-                orders = sharedOrders;
-                console.log('📦 Loaded', orders.length, 'orders from shared data manager');
-            }
+            // Always use shared data manager as source of truth
+            loadDataFromSharedManager();
 
             // Listen for shared data changes
             window.addEventListener('sharedDataChange', handleAdminSharedDataChange);
 
             // Listen for real-time updates
             window.addEventListener('realTimeUpdate', handleAdminRealTimeUpdate);
+
+            // Set up real-time sync listeners
+            setupRealTimeSyncListeners();
 
             // Start portal sync monitoring
             startPortalSync();
@@ -2939,6 +2787,226 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             console.log('✅ Admin dashboard initialized');
             console.log('🔐 Secure admin portal ready');
             console.log('🔄 Portal sync monitoring active');
+        }
+
+        // Automatic sync after admin changes (with debouncing)
+        let autoSyncTimeout = null;
+        function triggerAutoSync(changeType = 'admin_change') {
+            console.log('🔄 Admin: Triggering auto-sync for', changeType);
+
+            // Clear existing timeout to debounce rapid changes
+            if (autoSyncTimeout) {
+                clearTimeout(autoSyncTimeout);
+            }
+
+            // Debounce auto-sync for 2 seconds
+            autoSyncTimeout = setTimeout(() => {
+                console.log('🔄 Admin: Executing auto-sync to partner portal');
+
+                // Update sync status
+                updateSyncStatus('syncing');
+
+                // Force sync to shared data manager
+                try {
+                    window.sharedDataManager.forceSyncProducts(products);
+
+                    // Broadcast via real-time system
+                    if (window.realTimeSync) {
+                        window.realTimeSync.forceSyncAll();
+                    }
+
+                    setTimeout(() => {
+                        updateSyncStatus('connected');
+                        console.log('✅ Admin: Auto-sync completed');
+                    }, 1000);
+                } catch (error) {
+                    console.error('❌ Admin: Auto-sync failed', error);
+                    updateSyncStatus('error');
+                }
+            }, 2000);
+        }
+
+        // Normalize product data to ensure all required fields are present
+        function normalizeProductData(product) {
+            return {
+                ...product,
+                modifiedBy: product.modifiedBy || 'system',
+                lastModified: product.lastModified || new Date().toISOString(),
+                image: product.image || product.photo || '',
+                photo: product.photo || product.image || '',
+                description: product.description || '',
+                type: product.type || 'Unknown'
+            };
+        }
+
+        // Load data from shared data manager
+        function loadDataFromSharedManager() {
+            console.log('📡 Loading data from shared data manager...');
+
+            // Always get fresh data from shared manager
+            const sharedProducts = window.sharedDataManager.getProducts();
+            const sharedOrders = window.sharedDataManager.getOrders();
+
+            if (sharedProducts.length > 0) {
+                // Normalize all products to prevent undefined errors
+                products = sharedProducts.map(normalizeProductData);
+
+                // Check if any products were normalized (missing fields) and update shared data
+                const hasNormalizationChanges = sharedProducts.some((original, index) => {
+                    const normalized = products[index];
+                    return original.modifiedBy !== normalized.modifiedBy ||
+                           original.lastModified !== normalized.lastModified ||
+                           !original.image || !original.photo;
+                });
+
+                if (hasNormalizationChanges) {
+                    console.log('📦 Some products were normalized, updating shared data manager');
+                    window.sharedDataManager.updateProducts(products);
+                }
+
+                console.log('📦 Loaded', products.length, 'products from shared data manager');
+            } else {
+                // If no shared products, initialize with defaults and sync
+                console.log('📦 No shared products found, initializing defaults...');
+                const defaultProducts = getDefaultProducts();
+                window.sharedDataManager.updateProducts(defaultProducts);
+                products = [...defaultProducts];
+            }
+
+            if (sharedOrders.length > 0) {
+                orders = [...sharedOrders]; // Create a copy
+                console.log('📦 Loaded', orders.length, 'orders from shared data manager');
+            }
+
+            console.log('✅ Data loaded and synchronized with shared manager');
+        }
+
+        // Set up real-time sync listeners
+        function setupRealTimeSyncListeners() {
+            if (window.realTimeSync) {
+                console.log('📡 Setting up real-time sync listeners for admin portal...');
+
+                // Listen for product updates
+                window.realTimeSync.on('products_updated', (data) => {
+                    console.log('📡 Admin: Products updated via real-time sync');
+                    products = [...data]; // Always use fresh data
+                    updateAllDashboardViews();
+                    showNotification('📦 Products synchronized from partner portal', 'info');
+                });
+
+                // Listen for individual product changes
+                window.realTimeSync.on('product_updated', (data) => {
+                    console.log('📡 Admin: Individual product updated', data);
+                    loadDataFromSharedManager(); // Refresh all data
+                    updateAllDashboardViews();
+                });
+
+                window.realTimeSync.on('product_added', (data) => {
+                    console.log('📡 Admin: Product added', data);
+                    loadDataFromSharedManager(); // Refresh all data
+                    updateAllDashboardViews();
+                });
+
+                window.realTimeSync.on('product_deleted', (data) => {
+                    console.log('📡 Admin: Product deleted', data);
+                    loadDataFromSharedManager(); // Refresh all data
+                    updateAllDashboardViews();
+                });
+
+                // Listen for order updates
+                window.realTimeSync.on('order_added', (data) => {
+                    console.log('📡 Admin: New order received via real-time sync', data);
+                    loadDataFromSharedManager(); // Refresh all data
+                    updateAllDashboardViews();
+                    showNotification(`🚨 NEW ORDER: ${data.id} from ${data.partnerName || 'Partner'} - $${data.total}`, 'success');
+                });
+
+                console.log('✅ Real-time sync listeners configured for admin portal');
+            } else {
+                console.warn('⚠️ Real-time sync not available, retrying in 1 second...');
+                setTimeout(setupRealTimeSyncListeners, 1000);
+            }
+        }
+
+        // Get default products for initialization
+        function getDefaultProducts() {
+            return [
+                {
+                    id: 1,
+                    grade: "A-GRADE",
+                    strain: "Blue Runtz",
+                    thca: 31.6,
+                    price: 847,
+                    status: "AVAILABLE",
+                    stock: 25,
+                    type: "Hybrid",
+                    image: "https://images.unsplash.com/photo-1610234815282-a78e82bbde8e?w=300&h=300&fit=crop&crop=center",
+                    photo: "https://images.unsplash.com/photo-1610234815282-a78e82bbde8e?w=300&h=300&fit=crop&crop=center",
+                    description: "Premium A-grade indoor flower with exceptional terpene profile",
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: 'system'
+                },
+                {
+                    id: 2,
+                    grade: "A-GRADE",
+                    strain: "Wedding Cake",
+                    thca: 28.9,
+                    price: 723,
+                    status: "AVAILABLE",
+                    stock: 18,
+                    type: "Hybrid",
+                    image: "https://images.unsplash.com/photo-1605069876632-6e30ff47b8bd?w=300&h=300&fit=crop&crop=center",
+                    photo: "https://images.unsplash.com/photo-1605069876632-6e30ff47b8bd?w=300&h=300&fit=crop&crop=center",
+                    description: "Sweet and tangy hybrid with relaxing effects",
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: 'system'
+                },
+                {
+                    id: 3,
+                    grade: "B-GRADE",
+                    strain: "OG Kush",
+                    thca: 24.3,
+                    price: 550,
+                    status: "AVAILABLE",
+                    stock: 30,
+                    type: "Indica",
+                    image: "https://images.unsplash.com/photo-1607249146552-4e34b69cd4b3?w=300&h=300&fit=crop&crop=center",
+                    photo: "https://images.unsplash.com/photo-1607249146552-4e34b69cd4b3?w=300&h=300&fit=crop&crop=center",
+                    description: "Classic strain with earthy pine flavors",
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: 'system'
+                },
+                {
+                    id: 4,
+                    grade: "ROSIN",
+                    strain: "Live Rosin - Purple Punch",
+                    thca: 78.2,
+                    price: 35,
+                    status: "AVAILABLE",
+                    stock: 12,
+                    type: "Concentrate",
+                    image: "https://images.unsplash.com/photo-1644845499871-2b9c93cf69f5?w=300&h=300&fit=crop&crop=center",
+                    photo: "https://images.unsplash.com/photo-1644845499871-2b9c93cf69f5?w=300&h=300&fit=crop&crop=center",
+                    description: "Premium live rosin concentrate",
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: 'system'
+                },
+                {
+                    id: 5,
+                    grade: "VAPE",
+                    strain: "Gelato Cart",
+                    thca: 85.4,
+                    price: 45,
+                    status: "COMING SOON",
+                    stock: 0,
+                    type: "Vape",
+                    image: "https://images.unsplash.com/photo-1628958230481-0011f5bd3db9?w=300&h=300&fit=crop&crop=center",
+                    photo: "https://images.unsplash.com/photo-1628958230481-0011f5bd3db9?w=300&h=300&fit=crop&crop=center",
+                    description: "Premium live resin vape cartridge",
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: 'system'
+                }
+            ];
         }
 
         // Handle real-time updates
@@ -3006,14 +3074,36 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
             switch (type) {
                 case 'external_update':
-                    // Reload products if they were updated externally
-                    products = window.sharedDataManager.getProducts();
+                case 'products_updated':
+                case 'product_updated':
+                case 'product_added':
+                case 'product_deleted':
+                    // Always reload data from shared manager to stay in sync
+                    console.log('�� Admin: Reloading data due to external changes');
+                    loadDataFromSharedManager();
+                    updateAllDashboardViews();
+                    updateSyncStatus('connected');
+                    showNotification('📦 Inventory updated from partner portal', 'info');
+                    break;
+                case 'order_added':
+                case 'order_updated':
+                    // Reload order data
+                    console.log('📡 Admin: Reloading orders due to external changes');
+                    loadDataFromSharedManager();
                     updateAllDashboardViews();
                     updateSyncStatus('connected');
                     break;
                 case 'cart_updated':
                     // Update UI to show active cart users
                     updateSyncStatus('connected');
+                    break;
+                case 'full_sync':
+                    // Full data synchronization
+                    console.log('📡 Admin: Full sync received');
+                    loadDataFromSharedManager();
+                    updateAllDashboardViews();
+                    updateSyncStatus('connected');
+                    showNotification('🔄 Full inventory sync completed', 'success');
                     break;
             }
         }
@@ -3130,18 +3220,44 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
         function syncToPortal() {
             updateSyncStatus('syncing');
+            console.log('🔄 Admin: Force syncing to partner portal...');
 
-            // Actually sync products to shared data manager
-            window.sharedDataManager.updateProducts(products);
-            console.log('🔄 Synced', products.length, 'products to shared data manager');
+            try {
+                // Force sync products to shared data manager with real-time broadcasting
+                window.sharedDataManager.forceSyncProducts(products);
+                console.log('🔄 Force synced', products.length, 'products to shared data manager');
 
-            setTimeout(() => {
-                updateSyncStatus('connected');
-                showNotification('📊 Inventory synced to partner portal successfully!', 'success');
+                // Force sync orders as well
+                orders.forEach(order => {
+                    const existingOrder = window.sharedDataManager.getOrders().find(o => o.id === order.id);
+                    if (!existingOrder) {
+                        window.sharedDataManager.addOrder(order);
+                    } else {
+                        window.sharedDataManager.updateOrder(order.id, order);
+                    }
+                });
 
-                // Update last sync timestamp
-                document.getElementById('lastSync').textContent = 'Just now';
-            }, 1500);
+                // Broadcast sync completion via real-time system
+                if (window.realTimeSync) {
+                    window.realTimeSync.forceSyncAll();
+                    console.log('📡 Real-time sync broadcast completed');
+                }
+
+                setTimeout(() => {
+                    updateSyncStatus('connected');
+                    showNotification('📊 Inventory synced to partner portal successfully! All changes are now live.', 'success');
+
+                    // Update last sync timestamp
+                    const lastSyncElement = document.getElementById('lastSync');
+                    if (lastSyncElement) {
+                        lastSyncElement.textContent = 'Just now';
+                    }
+                }, 1500);
+            } catch (error) {
+                console.error('❌ Error syncing to portal:', error);
+                updateSyncStatus('error');
+                showNotification('❌ Failed to sync inventory. Please try again.', 'error');
+            }
         }
 
         // Authentication Functions
@@ -3239,13 +3355,21 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         function updateInventoryTable() {
             const tbody = document.getElementById('inventoryBody');
             if (!tbody) return;
-            
+
             tbody.innerHTML = '';
-            
+
+            // Ensure products array is valid
+            if (!Array.isArray(products)) {
+                console.warn('Products is not an array:', products);
+                products = [];
+                return;
+            }
+
             // Filter products based on current filter
             let filteredProducts = products;
             if (currentFilter !== 'all') {
                 filteredProducts = products.filter(p => {
+                    if (!p || !p.status) return false;
                     switch(currentFilter) {
                         case 'available': return p.status === 'AVAILABLE';
                         case 'coming': return p.status === 'COMING SOON';
@@ -3254,12 +3378,17 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     }
                 });
             }
-            
+
             filteredProducts.forEach(product => {
+                // Ensure product has all required fields
+                if (!product || !product.id) {
+                    console.warn('Invalid product:', product);
+                    return;
+                }
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>
-                        ${product.photo ? `<img src="${product.photo}" alt="Photo" style="width:48px;height:48px;object-fit:cover;border-radius:8px;">` : '<span style="color:var(--text-muted);font-size:12px;">No Image</span>'}
+                        ${(product.image || product.photo) ? `<img src="${product.image || product.photo}" alt="Photo" style="width:48px;height:48px;object-fit:cover;border-radius:8px;">` : '<span style="color:var(--text-muted);font-size:12px;">No Image</span>'}
                     </td>
                     <td>FS-${String(product.id).padStart(3, '0')}</td>
                     <td><strong>${product.grade}</strong></td>
@@ -3287,7 +3416,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     </td>
                     <td>
                         <small style="color: var(--text-muted);">${formatDateTime(product.lastModified)}</small><br>
-                        <small style="color: var(--text-muted);">by ${product.modifiedBy.split('@')[0]}</small>
+                        <small style="color: var(--text-muted);">by ${product.modifiedBy ? product.modifiedBy.split('@')[0] : 'system'}</small>
                     </td>
                     <td>
                         <button class="btn btn-secondary btn-sm" onclick="editProduct(${product.id})">Edit</button>
@@ -3476,9 +3605,15 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Update shared data manager (this will notify partner portals)
                 window.sharedDataManager.updateProduct(productId, updates);
 
+                // Ensure local data stays in sync
+                loadDataFromSharedManager();
+
                 updatePricingTable();
                 updateDashboardStats();
                 showNotification(`💰 Price updated for ${product.strain}`, 'success');
+
+                // Trigger auto-sync to partner portal
+                triggerAutoSync('price_update');
             }
         }
 
@@ -3497,9 +3632,15 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Update shared data manager (this will notify partner portals)
                 window.sharedDataManager.updateProduct(productId, updates);
 
+                // Ensure local data stays in sync
+                loadDataFromSharedManager();
+
                 updateInventoryTable();
                 updateDashboardStats();
                 showNotification(`📊 Status updated for ${product.strain}`, 'success');
+
+                // Trigger auto-sync to partner portal
+                triggerAutoSync('status_update');
             }
         }
 
@@ -3525,9 +3666,15 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Update shared data manager (this will notify partner portals)
                 window.sharedDataManager.updateProduct(productId, updates);
 
+                // Ensure local data stays in sync
+                loadDataFromSharedManager();
+
                 updateInventoryTable();
                 updateDashboardStats();
                 showNotification(`📦 Stock updated for ${product.strain}`, 'success');
+
+                // Trigger auto-sync to partner portal
+                triggerAutoSync('stock_update');
             }
         }
 
@@ -3540,8 +3687,14 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Remove from shared data manager (this will notify partner portals)
                 window.sharedDataManager.deleteProduct(productId);
 
+                // Ensure local data stays in sync
+                loadDataFromSharedManager();
+
                 updateAllDashboardViews();
-                showNotification(`���️ Product ${product.strain} deleted`, 'success');
+                showNotification(`🗑️ Product ${product.strain} deleted`, 'success');
+
+                // Trigger auto-sync to partner portal
+                triggerAutoSync('product_delete');
             }
         }
 
@@ -3561,8 +3714,8 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             document.getElementById('newDescription').value = product.description || '';
             // Photo preview
             const photoPreview = document.getElementById('photoPreview');
-            if (product.photo) {
-                photoPreview.innerHTML = `<img src="${product.photo}" alt="Photo" style="width:80px;height:80px;object-fit:cover;border-radius:8px;">`;
+            if (product.image || product.photo) {
+                photoPreview.innerHTML = `<img src="${product.image || product.photo}" alt="Photo" style="width:80px;height:80px;object-fit:cover;border-radius:8px;">`;
             } else {
                 photoPreview.innerHTML = '';
             }
@@ -3592,7 +3745,8 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 description: document.getElementById('newDescription').value || '',
                 lastModified: new Date().toISOString(),
                 modifiedBy: currentUser.email,
-                photo: window._productPhotoData || ''
+                photo: window._productPhotoData || '',
+                image: window._productPhotoData || '' // Sync both fields for compatibility
             };
             
             if (window.editingProductId) {
@@ -3602,6 +3756,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
                 // Update shared data manager (this will notify partner portals)
                 window.sharedDataManager.updateProduct(window.editingProductId, productData);
+
+                // Ensure local data stays in sync
+                loadDataFromSharedManager();
 
                 showNotification(`✅ Product ${product.strain} updated successfully!`, 'success');
                 delete window.editingProductId;
@@ -3613,12 +3770,18 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Add to shared data manager (this will notify partner portals)
                 window.sharedDataManager.addProduct(productData);
 
+                // Ensure local data stays in sync
+                loadDataFromSharedManager();
+
                 showNotification(`✅ Product ${productData.strain} added successfully!`, 'success');
             }
 
             updateAllDashboardViews();
             closeModal('addProductModal');
-            
+
+            // Trigger auto-sync to partner portal
+            triggerAutoSync(window.editingProductId ? 'product_edit' : 'product_add');
+
             // Reset form
             event.target.reset();
             document.querySelector('#addProductModal .modal-title').textContent = 'Add New Product 🌿';
@@ -4011,7 +4174,7 @@ Faded Skies Wholesale Team
                         </div>
                     </div>
                     <div style="margin-top: 20px; text-align: center;">
-                        <button onclick="window.print()" style="padding: 10px 20px; background: #00C851; color: white; border: none; border-radius: 4px; cursor: pointer;">🖨️ Print Label</button>
+                        <button onclick="window.print()" style="padding: 10px 20px; background: #00C851; color: white; border: none; border-radius: 4px; cursor: pointer;">��️ Print Label</button>
                     </div>
                 </body>
                 </html>
@@ -4641,7 +4804,7 @@ Faded Skies Wholesale Team
                     </div>
                     
                     <div class="header">
-                        <h1>🌿 Faded Skies Wholesale</h1>
+                        <h1>�� Faded Skies Wholesale</h1>
                         <h2>Executive Performance Report</h2>
                         <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
                     </div>
@@ -4957,7 +5120,7 @@ Faded Skies Wholesale Team
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 800px;">
                     <div class="modal-header">
-                        <h3 class="modal-title">✏️ Edit Partner - ${partner.businessName}</h3>
+                        <h3 class="modal-title">��️ Edit Partner - ${partner.businessName}</h3>
                         <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
                     </div>
                     <form id="editPartnerForm">
@@ -5194,7 +5357,7 @@ Faded Skies Wholesale Team
                 console.log(`📧 Password reset email sent to: ${partner.email}`);
             });
             
-            showNotification(`📧 Password reset emails sent to ${eligiblePartners.length} partners`, 'success');
+            showNotification(`��� Password reset emails sent to ${eligiblePartners.length} partners`, 'success');
         }
 
         function updatePasswordResetTable() {
@@ -5326,7 +5489,7 @@ Faded Skies Wholesale Team`
 
 This message is to inform you of recent pricing updates in our wholesale catalog.
 
-📊 PRICING CHANGES:
+�� PRICING CHANGES:
 • Effective immediately
 • Updated pricing reflects current market conditions
 • Your tier discounts remain unchanged
@@ -5340,7 +5503,7 @@ Best regards,
 Faded Skies Wholesale Team`
                 },
                 inventory_alert: {
-                    subject: '⚠️ Low Inventory Alert - Faded Skies Wholesale',
+                    subject: '���️ Low Inventory Alert - Faded Skies Wholesale',
                     message: `Dear Partners,
 
 This is a notification that several popular items are running low in stock.
@@ -5392,7 +5555,7 @@ Welcome to this month's Faded Skies Wholesale newsletter!
 
 🎯 THIS MONTH'S HIGHLIGHTS:
 • Industry market trends and insights
-• New product announcements and arrivals
+�� New product announcements and arrivals
 • Partnership program updates and tier benefits
 • Educational resources and compliance updates
 
@@ -5567,7 +5730,7 @@ Faded Skies Wholesale Team`
         }
 
         function bulkStatusUpdate() {
-            showNotification('🔄 Bulk status update functionality coming soon!', 'warning');
+            showNotification('�� Bulk status update functionality coming soon!', 'warning');
         }
 
         function generateShippingLabels() {
@@ -5645,13 +5808,27 @@ Faded Skies Wholesale Team`
 
         // Utility Functions
         function formatDateTime(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            if (!dateString) return 'No date';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return 'Invalid date';
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            } catch (error) {
+                console.warn('Error formatting date:', dateString, error);
+                return 'Invalid date';
+            }
         }
 
         function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString();
+            if (!dateString) return 'No date';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return 'Invalid date';
+                return date.toLocaleDateString();
+            } catch (error) {
+                console.warn('Error formatting date:', dateString, error);
+                return 'Invalid date';
+            }
         }
 
         function showNotification(message, type = 'success') {
