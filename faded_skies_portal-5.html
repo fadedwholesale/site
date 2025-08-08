@@ -2125,7 +2125,7 @@
                     </div>
                     <div class="grid">
                         <div class="card">
-                            <h3>��� THCA Flower</h3>
+                            <h3>🌿 THCA Flower</h3>
                             <p>Premium indoor and outdoor strains with exceptional terpene profiles. Consistent quality that drives customer loyalty.</p>
                             <div class="price" id="flowerStartingPrice">Starting at $550/lb</div>
                             <button class="btn btn-primary" onclick="toggleLiveInventory()">Browse Strains</button>
@@ -3082,7 +3082,7 @@
                 <!-- Additional Information Section -->
                 <div class="form-section" style="margin-bottom: 24px;">
                     <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                        📝 Additional Information
+                        �� Additional Information
                     </h4>
                     <div class="form-row">
                         <div class="form-group">
@@ -4118,7 +4118,7 @@
                 console.log('Switched to public website view');
             } catch (error) {
                 console.error('Error showing public website:', error);
-                showNotification('�� Navigation error. Please refresh the page.', 'error');
+                showNotification('❌ Navigation error. Please refresh the page.', 'error');
             }
         }
 
@@ -4375,7 +4375,7 @@
                     
                     // Send confirmation notification
                     setTimeout(() => {
-                        showNotification('📧 Confirmation email sent to ' + businessEmail, 'success');
+                        showNotification('�� Confirmation email sent to ' + businessEmail, 'success');
                     }, 2000);
                 }, 2000);
                 
@@ -5011,7 +5011,9 @@
                 }
 
                 // Load system logos
-                loadSystemLogos();
+                setTimeout(() => {
+                    loadSystemLogos();
+                }, 200);
 
                 updateAllViews();
                 showPublicWebsite();
