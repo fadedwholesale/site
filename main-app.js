@@ -685,9 +685,11 @@ function refreshProfileData() {
 }
 
 function openProfileEditModal() {
-    console.log('🔄 Opening profile edit modal...');
+    console.log('🔄 Opening profile edit modal from main-app.js...');
+    console.log('🔍 Current user:', currentUser);
 
     if (!currentUser) {
+        console.log('❌ No current user found');
         showNotification('❌ Please log in to edit your profile', 'error');
         return;
     }
@@ -695,12 +697,25 @@ function openProfileEditModal() {
     try {
         // Show loading notification
         showNotification('📝 Opening profile editor...', 'info');
+        console.log('📝 About to populate form...');
 
         // Populate form with current user data
         populateProfileEditForm();
+        console.log('✅ Form populated');
+
+        // Check if modal exists
+        const modalElement = document.getElementById('profileEditModal');
+        console.log('🔍 Profile edit modal element:', modalElement);
+
+        if (!modalElement) {
+            console.error('❌ Profile edit modal not found in DOM');
+            showNotification('❌ Profile edit modal not found', 'error');
+            return;
+        }
 
         // Open the modal with slight delay for better UX
         setTimeout(() => {
+            console.log('🚀 Opening modal...');
             openModal('profileEditModal');
             showNotification('✏️ Edit your business profile information', 'success');
         }, 300);
@@ -1142,7 +1157,7 @@ function handleFileUpload(input, documentType) {
                             <div class="file-name">${file.name}</div>
                             <div class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
                         </div>
-                        <span class="file-status">��</span>
+                        <span class="file-status">✅</span>
                     </div>
                 </div>
             `;
