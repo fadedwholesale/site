@@ -40,6 +40,18 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApplication();
     loadInitialData();
     setupEventListeners();
+
+    // Verify authentication state
+    setTimeout(() => {
+        const authState = debugAuthState();
+        console.log('🔐 Final Authentication State:', authState);
+        if (!authState.isAuthenticated) {
+            console.log('✅ Authentication working correctly - user is NOT automatically logged in');
+        } else {
+            console.warn('⚠️ User is automatically logged in - this may be unintended');
+        }
+    }, 100);
+
     console.log('✅ Application initialized successfully');
 });
 
