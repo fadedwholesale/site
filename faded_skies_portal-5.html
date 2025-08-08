@@ -170,13 +170,16 @@
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border-subtle);
             z-index: 1000;
-            padding: 16px 0;
+            padding: 12px 0;
+            min-height: 80px;
         }
 
         nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: nowrap;
+            gap: 16px;
         }
 
         .logo {
@@ -189,12 +192,16 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-shrink: 0;
+            min-width: 120px;
         }
 
         .logo img {
             height: 48px;
             width: auto;
             display: block;
+            object-fit: contain;
+            max-width: 100px;
         }
 
         .nav-links {
@@ -220,7 +227,11 @@
         .nav-auth {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            flex-shrink: 1;
+            min-width: 0;
         }
 
         .sync-indicator {
@@ -1399,6 +1410,41 @@
                 padding: 0 12px;
             }
 
+            header {
+                padding: 6px 0;
+                min-height: 56px;
+            }
+
+            nav {
+                gap: 6px;
+            }
+
+            .logo {
+                font-size: 1rem;
+                min-width: 80px;
+            }
+
+            .logo img {
+                height: 32px;
+                max-width: 60px;
+            }
+
+            .nav-auth {
+                gap: 6px;
+            }
+
+            .nav-auth .btn {
+                font-size: 11px;
+                padding: 4px 8px;
+                min-height: 32px;
+            }
+
+            .sync-indicator {
+                font-size: 11px;
+                padding: 4px 8px;
+                min-height: 32px;
+            }
+
             .hero h1 {
                 font-size: clamp(2rem, 6vw, 3rem);
                 margin-bottom: 16px;
@@ -1474,6 +1520,42 @@
                 padding: 0 16px;
             }
 
+            header {
+                padding: 8px 0;
+                min-height: 64px;
+            }
+
+            nav {
+                gap: 8px;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+                min-width: 100px;
+            }
+
+            .logo img {
+                height: 40px;
+                max-width: 80px;
+            }
+
+            .nav-auth {
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .nav-auth .btn {
+                font-size: 12px;
+                padding: 6px 12px;
+                min-height: 36px;
+            }
+
+            .sync-indicator {
+                font-size: 12px;
+                padding: 6px 12px;
+                min-height: 36px;
+            }
+
             /* Enhanced Mobile Navigation */
             .mobile-menu-toggle {
                 display: block;
@@ -1486,6 +1568,7 @@
                 order: -1;
                 min-width: 44px;
                 min-height: 44px;
+                flex-shrink: 0;
             }
 
             .nav-links {
@@ -3353,7 +3436,7 @@
                 <div style="display: flex; gap: 12px; margin-top: 24px;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('checkoutModal')">← Back to Cart</button>
                     <button type="submit" class="btn btn-primary" style="flex: 1; padding: 14px; font-size: 16px; font-weight: 700;">
-                        💳 Proceed to Payment
+                        ���� Proceed to Payment
                     </button>
                 </div>
             </form>
@@ -7307,7 +7390,7 @@ Phone: (210) 835-7834
                         console.log(`❌ Image failed: ${product.strain} - ${product.image}`);
                         
                         if (successCount + errorCount === products.length) {
-                            showNotification(`🖼️ Image test complete: ${successCount}/${products.length} loaded successfully`, successCount > errorCount ? 'success' : 'warning');
+                            showNotification(`🖼�� Image test complete: ${successCount}/${products.length} loaded successfully`, successCount > errorCount ? 'success' : 'warning');
                         }
                     };
                     img.src = product.image;
