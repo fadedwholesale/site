@@ -693,6 +693,9 @@ class ActivityLogger {
                 sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(safeSession));
             }
 
+            // Update last flush time
+            this.lastFlushTime = new Date().toISOString();
+
         } catch (error) {
             console.error('❌ Error flushing logs:', error);
 
