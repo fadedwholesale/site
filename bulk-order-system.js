@@ -895,7 +895,7 @@ class BulkOrderManager {
 
     // Reorder from bulk history (create preset from history entry)
     reorderBulk(orderId) {
-        showNotification('🔄 Bulk reorder feature coming soon!', 'info');
+        showNotification('���� Bulk reorder feature coming soon!', 'info');
     }
 
     // Storage functions
@@ -1104,16 +1104,82 @@ class BulkOrderManager {
 if (typeof window !== 'undefined') {
     window.BulkOrderManager = BulkOrderManager;
 
-    // Initialize when DOM is ready
-    document.addEventListener('DOMContentLoaded', () => {
+    // Initialize immediately if DOM is already loaded, otherwise wait
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeBulkManager);
+    } else {
+        initializeBulkManager();
+    }
+
+    function initializeBulkManager() {
         if (!window.bulkOrderManager) {
             window.bulkOrderManager = new BulkOrderManager();
             console.log('📦 Bulk Order Manager initialized');
         }
-    });
+    }
 
-    // Make functions globally available
+    // Make ALL bulk order functions globally available
     window.openBulkOrderModal = () => window.bulkOrderManager?.openBulkOrderModal();
     window.openPresetManager = () => window.bulkOrderManager?.openPresetManager();
     window.viewBulkHistory = () => window.bulkOrderManager?.viewBulkHistory();
+    window.closeBulkOrderModal = () => window.bulkOrderManager?.closeBulkOrderModal();
+    window.nextBulkStep = () => window.bulkOrderManager?.nextBulkStep();
+    window.previousBulkStep = () => window.bulkOrderManager?.previousBulkStep();
+    window.selectAllBulkProducts = () => window.bulkOrderManager?.selectAllBulkProducts();
+    window.clearBulkSelection = () => window.bulkOrderManager?.clearBulkSelection();
+    window.loadPresetSelection = () => window.bulkOrderManager?.loadPresetSelection();
+    window.applyMinimumQuantities = () => window.bulkOrderManager?.applyMinimumQuantities();
+    window.optimizeForDiscount = () => window.bulkOrderManager?.optimizeForDiscount();
+    window.saveBulkPreset = () => window.bulkOrderManager?.saveBulkPreset();
+    window.submitBulkOrder = () => window.bulkOrderManager?.submitBulkOrder();
+    window.createNewPreset = () => window.bulkOrderManager?.openBulkOrderModal();
+    window.importPreset = () => window.bulkOrderManager?.importPreset();
+    window.exportAllPresets = () => window.bulkOrderManager?.exportAllPresets();
+    window.filterBulkHistory = (value) => {
+        // Simple filter implementation
+        const rows = document.querySelectorAll('#bulkHistoryBody tr');
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const matches = text.includes(value.toLowerCase());
+            row.style.display = matches ? '' : 'none';
+        });
+    };
+    window.filterBulkHistoryByStatus = (status) => {
+        const rows = document.querySelectorAll('#bulkHistoryBody tr');
+        rows.forEach(row => {
+            if (!status) {
+                row.style.display = '';
+            } else {
+                const statusCell = row.cells[6]; // Status column
+                const matches = statusCell && statusCell.textContent.includes(status);
+                row.style.display = matches ? '' : 'none';
+            }
+        });
+    };
+    window.downloadBulkHistory = () => {
+        if (window.bulkOrderManager && window.bulkOrderManager.bulkOrderHistory.length > 0) {
+            const csvContent = 'Order ID,Date,Items,Weight,Total,Discount,Status\n' +
+                window.bulkOrderManager.bulkOrderHistory.map(o =>
+                    `${o.id},${o.date},"${o.items}",${o.totalWeight},${o.totalValue},${o.discount}%,${o.status}`
+                ).join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bulk-order-history-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            showNotification('📄 Bulk order history downloaded!', 'success');
+        } else {
+            showNotification('📦 No bulk order history to download', 'warning');
+        }
+    };
+    window.refreshBulkHistory = () => {
+        if (window.bulkOrderManager) {
+            window.bulkOrderManager.loadBulkHistoryDisplay();
+            showNotification('🔄 Bulk history refreshed!', 'success');
+        }
+    };
 }
