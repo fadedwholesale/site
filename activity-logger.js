@@ -91,17 +91,8 @@ class ActivityLogger {
 
         // Store session in session storage for quick access (completely safe)
         const safeSession = this.getSafeSessionData();
-        try {
-            sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(safeSession));
-        } catch (error) {
-            // If even the safe session data fails, store minimal info
-            const minimalSession = {
-                id: this.currentSession?.id || 'unknown',
-                startTime: this.currentSession?.startTime || new Date().toISOString(),
-                userEmail: this.currentSession?.userEmail || 'unknown'
-            };
-            sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(minimalSession));
-        }
+        // Always use safe stringify for session storage
+        sessionStorage.setItem(this.sessionStorageKey, this.safeJSONStringify(safeSession));
         
         this.log(this.logLevels.SYSTEM, 'Session started', this.currentSession);
     }
@@ -242,14 +233,28 @@ class ActivityLogger {
                 const afterValue = afterData[key];
                 
                 try {
-                    if (JSON.stringify(beforeValue) !== JSON.stringify(afterValue)) {
+                    // Safe comparison without JSON.stringify
+                    let valuesEqual = false;
+                    if (beforeValue === afterValue) {
+                        valuesEqual = true;
+                    } else if (typeof beforeValue !== typeof afterValue) {
+                        valuesEqual = false;
+                    } else if (typeof beforeValue === 'object' && beforeValue !== null && afterValue !== null) {
+                        // For objects, do shallow comparison to avoid circular references
+                        valuesEqual = Object.keys(beforeValue).length === Object.keys(afterValue).length &&
+                                    Object.keys(beforeValue).every(k => beforeValue[k] === afterValue[k]);
+                    } else {
+                        valuesEqual = beforeValue === afterValue;
+                    }
+
+                    if (!valuesEqual) {
                         diff[key] = {
-                            before: beforeValue,
-                            after: afterValue
+                            before: typeof beforeValue === 'object' ? '[Object]' : beforeValue,
+                            after: typeof afterValue === 'object' ? '[Object]' : afterValue
                         };
                     }
                 } catch (error) {
-                    // Handle circular references in diff calculation
+                    // Handle any comparison errors
                     diff[key] = {
                         before: '[Complex Object]',
                         after: '[Complex Object]'
@@ -706,12 +711,8 @@ class ActivityLogger {
             // Update session in session storage (completely safe)
             if (this.currentSession) {
                 const safeSession = this.getSafeSessionData();
-                try {
-                    sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(safeSession));
-                } catch (error) {
-                    // Use our safe stringify method as fallback
-                    sessionStorage.setItem(this.sessionStorageKey, this.safeJSONStringify(safeSession));
-                }
+                // Always use safe stringify for session storage
+                sessionStorage.setItem(this.sessionStorageKey, this.safeJSONStringify(safeSession));
             }
 
             // Update last flush time
