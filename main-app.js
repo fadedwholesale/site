@@ -1248,7 +1248,23 @@ function submitRegistration() {
         submitBtn.textContent = 'Submitting Application...';
         submitBtn.disabled = true;
     }
-    
+
+    // Create complete application data
+    const applicationData = {
+        ...registrationData,
+        documents: uploadedDocuments,
+        submissionDate: new Date().toISOString(),
+        applicationId: 'APP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+        status: 'pending',
+        submissionIP: 'demo-ip',
+        userAgent: navigator.userAgent
+    };
+
+    // Store application in localStorage for admin review
+    const existingApplications = JSON.parse(localStorage.getItem('businessApplications') || '[]');
+    existingApplications.push(applicationData);
+    localStorage.setItem('businessApplications', JSON.stringify(existingApplications));
+
     setTimeout(() => {
         closeModal('registerModal');
         showNotification('🎉 Registration submitted successfully! You will receive an email confirmation shortly.', 'success');
