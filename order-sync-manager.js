@@ -283,32 +283,44 @@ class OrderSyncManager {
         });
     }
 
-    // Send low stock alert
+    // Send low stock alert with rate limiting
     sendLowStockAlert(product, currentStock) {
-        const alertData = {
-            type: 'low_stock',
-            productId: product.id,
-            productName: product.strain,
-            currentStock: currentStock,
-            timestamp: new Date().toISOString()
-        };
+        const alertKey = `lowStockAlert_${product.id}`;
+        const lastAlert = localStorage.getItem(alertKey);
+        const now = Date.now();
 
-        // Broadcast alert
-        if (window.realTimeSync) {
-            window.realTimeSync.broadcast('inventory_alert', alertData);
-        }
+        // Only send alert once per hour to prevent spam
+        if (!lastAlert || (now - parseInt(lastAlert)) > 3600000) {
+            const alertData = {
+                type: 'low_stock',
+                productId: product.id,
+                productName: product.strain,
+                currentStock: currentStock,
+                timestamp: new Date().toISOString()
+            };
 
-        // Show notification
-        if (window.showNotification) {
-            window.showNotification(
-                `⚠️ Low Stock Alert: ${product.strain} (${currentStock} remaining)`,
-                'warning'
-            );
-        }
+            // Broadcast alert
+            if (window.realTimeSync) {
+                window.realTimeSync.broadcast('inventory_alert', alertData);
+            }
 
-        // Log the alert
-        if (window.liveDataManager) {
-            window.liveDataManager.log('warning', 'Low stock alert triggered', alertData);
+            // Show notification
+            if (window.showNotification) {
+                window.showNotification(
+                    `⚠️ Low Stock: ${product.strain} (${currentStock} remaining)`,
+                    'warning'
+                );
+            }
+
+            // Store timestamp to prevent spam
+            localStorage.setItem(alertKey, now.toString());
+
+            // Log the alert
+            if (window.liveDataManager) {
+                window.liveDataManager.log('warning', 'Low stock alert triggered', alertData);
+            }
+        } else {
+            console.log(`🔇 Low stock alert suppressed for ${product.strain} (recently alerted)`);
         }
     }
 
