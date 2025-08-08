@@ -270,15 +270,7 @@ if (typeof window !== 'undefined') {
         DataCleanup.resetAllData();
     };
 
-    // Run emergency cleanup immediately if there are circular reference patterns
-    try {
-        const logs = localStorage.getItem('fadedSkiesActivityLogs');
-        if (logs && logs.includes('events') && logs.includes('currentSession')) {
-            console.log('🚨 Detected potential circular references, running emergency cleanup');
-            DataCleanup.emergencyLogCleanup();
-        }
-    } catch (error) {
-        console.log('🚨 Error checking for circular references, running emergency cleanup');
-        DataCleanup.emergencyLogCleanup();
-    }
+    // ALWAYS run emergency cleanup to prevent circular reference issues
+    console.log('🚨 Running emergency cleanup to prevent circular references');
+    DataCleanup.emergencyLogCleanup();
 }
