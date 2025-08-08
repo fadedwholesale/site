@@ -1365,7 +1365,7 @@
                             <button class="btn btn-secondary" onclick="bulkStatusUpdate()">🔄 Bulk Status Update</button>
                             <button class="btn btn-secondary" onclick="exportOrders()">📄 Export Orders</button>
                             <button class="btn btn-secondary" onclick="openModal('customerTrackingModal')">🔍 Customer Tracking</button>
-                            <button class="btn btn-admin" onclick="generateBulkShippingLabels()">��� Bulk Labels</button>
+                            <button class="btn btn-admin" onclick="generateBulkShippingLabels()">📦 Bulk Labels</button>
                         </div>
                     </div>
 
@@ -3510,12 +3510,18 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         function ensureOrdersHaveStatusHistory() {
             if (!Array.isArray(orders)) return;
 
+            let fixedOrders = 0;
+            let totalOrders = orders.length;
+
             orders.forEach(order => {
                 if (!order) return;
+
+                let orderWasFixed = false;
 
                 // Ensure statusHistory exists and is an array
                 if (!order.statusHistory || !Array.isArray(order.statusHistory)) {
                     order.statusHistory = [];
+                    orderWasFixed = true;
 
                     // Add a basic status entry based on current status
                     if (order.status) {
@@ -3530,10 +3536,26 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Ensure createdAt exists
                 if (!order.createdAt) {
                     order.createdAt = order.date ? new Date(order.date).toISOString() : new Date().toISOString();
+                    orderWasFixed = true;
+                }
+
+                if (orderWasFixed) {
+                    fixedOrders++;
                 }
             });
 
             console.log('✅ Ensured all orders have proper statusHistory structure');
+
+            // Log the data integrity fix
+            if (window.simpleLogger && fixedOrders > 0) {
+                window.simpleLogger.system('Order data integrity fix applied', {
+                    totalOrders: totalOrders,
+                    fixedOrders: fixedOrders,
+                    admin: currentUser?.email || 'system',
+                    timestamp: new Date().toISOString(),
+                    system: 'admin-portal'
+                });
+            }
         }
 
         // Data Update Functions
@@ -5664,7 +5686,7 @@ Your account provides access to:
 ✅ Live inventory and pricing
 ✅ Order management and tracking  
 ✅ Account statements and invoices
-✅ Product catalogs and updates
+�� Product catalogs and updates
 
 Welcome to the Faded Skies family!
 
@@ -5851,7 +5873,7 @@ We're excited to announce new premium products now available in our wholesale ca
 🚀 HIGHLIGHTS:
 • Competitive wholesale pricing
 • Same-day processing for orders
-�� Quality guaranteed products
+• Quality guaranteed products
 
 Log into your partner portal to view the complete catalog and place orders:
 🌐 https://portal.fadedskies.com
