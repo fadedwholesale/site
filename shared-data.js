@@ -110,6 +110,33 @@ class SharedDataManager {
                         timestamp: new Date().toISOString()
                     });
                 }
+
+                // If image changed, broadcast image update
+                if (updates.image !== undefined && updates.image !== oldProduct.image) {
+                    this.realTimeSync.broadcast('product_image_updated', {
+                        productId,
+                        productName: data.products[productIndex].strain,
+                        oldImage: oldProduct.image,
+                        newImage: updates.image,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                // If product metadata changed (price, status, etc.), broadcast admin change
+                const significantChanges = ['price', 'status', 'thca', 'grade'];
+                const hasSignificantChange = significantChanges.some(field =>
+                    updates[field] !== undefined && updates[field] !== oldProduct[field]
+                );
+
+                if (hasSignificantChange) {
+                    this.realTimeSync.broadcast('admin_product_change', {
+                        productId,
+                        productName: data.products[productIndex].strain,
+                        changes: Object.keys(updates).filter(key => updates[key] !== oldProduct[key]),
+                        updatedProduct: data.products[productIndex],
+                        timestamp: new Date().toISOString()
+                    });
+                }
             }
 
             return data.products[productIndex];
