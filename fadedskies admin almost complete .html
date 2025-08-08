@@ -2340,6 +2340,94 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         </div>
     </div>
 
+    <!-- Application Review Modal -->
+    <div id="applicationReviewModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="modal-title">📋 Review Business Application</h3>
+                <button class="modal-close" onclick="closeModal('applicationReviewModal')">×</button>
+            </div>
+
+            <div id="applicationReviewContent">
+                <!-- Application content will be populated here -->
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('applicationReviewModal')">Close</button>
+                <button type="button" class="btn btn-danger" onclick="rejectApplication()">❌ Reject</button>
+                <button type="button" class="btn btn-primary" onclick="approveApplication()">✅ Approve</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Notes Modal -->
+    <div id="applicationNotesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">📝 Add Review Notes</h3>
+                <button class="modal-close" onclick="closeModal('applicationNotesModal')">×</button>
+            </div>
+
+            <form onsubmit="submitApplicationAction(event)">
+                <div class="form-group">
+                    <label for="reviewAction">Action *</label>
+                    <select id="reviewAction" required>
+                        <option value="">Select action</option>
+                        <option value="approve">✅ Approve Application</option>
+                        <option value="reject">❌ Reject Application</option>
+                        <option value="request_info">📋 Request Additional Information</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="reviewNotes">Review Notes *</label>
+                    <textarea id="reviewNotes" rows="4" required placeholder="Enter your review notes, reasons for decision, or additional information requests..."></textarea>
+                </div>
+
+                <div id="approvalOptionsSection" class="form-group" style="display: none;">
+                    <label for="partnerTier">Partner Tier (if approving)</label>
+                    <select id="partnerTier">
+                        <option value="starter">Starter Partner</option>
+                        <option value="professional">Professional Partner</option>
+                        <option value="enterprise">Enterprise Partner</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="adminEmail">Send Email Notification</label>
+                    <input type="checkbox" id="sendEmailNotification" checked>
+                    <label for="sendEmailNotification" style="display: inline; margin-left: 8px;">Send email to applicant</label>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('applicationNotesModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Submit Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Notifications Modal -->
+    <div id="applicationNotificationsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">🔔 Application Notifications</h3>
+                <button class="modal-close" onclick="closeModal('applicationNotificationsModal')">×</button>
+            </div>
+
+            <div class="controls" style="margin-bottom: 24px;">
+                <div class="action-group">
+                    <button class="btn btn-secondary" onclick="markAllNotificationsRead()">✅ Mark All Read</button>
+                    <button class="btn btn-secondary" onclick="clearOldNotifications()">🗑️ Clear Old</button>
+                </div>
+            </div>
+
+            <div id="notificationsList" style="max-height: 400px; overflow-y: auto;">
+                <!-- Notifications will be loaded here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Include Shared Data Manager -->
     <script src="shared-data.js"></script>
     <!-- Include Test Functionality -->
