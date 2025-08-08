@@ -2537,7 +2537,8 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         let currentOrderFilter = 'all';
 
         // Shared Data - Syncs with public website/partner portal
-        let products = [
+        // Initialize empty array - data will be loaded from shared data manager
+        let products = [];
             {
                 id: 1,
                 grade: 'A-GRADE',
@@ -4314,7 +4315,7 @@ Faded Skies Wholesale Team
                         </div>
                     </div>
                     <div style="margin-top: 20px; text-align: center;">
-                        <button onclick="window.print()" style="padding: 10px 20px; background: #00C851; color: white; border: none; border-radius: 4px; cursor: pointer;">🖨️ Print Label</button>
+                        <button onclick="window.print()" style="padding: 10px 20px; background: #00C851; color: white; border: none; border-radius: 4px; cursor: pointer;">��️ Print Label</button>
                     </div>
                 </body>
                 </html>
@@ -5260,7 +5261,7 @@ Faded Skies Wholesale Team
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 800px;">
                     <div class="modal-header">
-                        <h3 class="modal-title">✏️ Edit Partner - ${partner.businessName}</h3>
+                        <h3 class="modal-title">��️ Edit Partner - ${partner.businessName}</h3>
                         <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
                     </div>
                     <form id="editPartnerForm">
@@ -5643,7 +5644,7 @@ Best regards,
 Faded Skies Wholesale Team`
                 },
                 inventory_alert: {
-                    subject: '⚠️ Low Inventory Alert - Faded Skies Wholesale',
+                    subject: '���️ Low Inventory Alert - Faded Skies Wholesale',
                     message: `Dear Partners,
 
 This is a notification that several popular items are running low in stock.
