@@ -2015,22 +2015,22 @@
                     </h4>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="checkoutCustomerName">Contact Name *</label>
-                            <input type="text" id="checkoutCustomerName" required placeholder="Your full name">
+                            <label for="checkoutCustomerName">Contact Name * <span class="live-validation-indicator" data-field="checkoutCustomerName"></span></label>
+                            <input type="text" id="checkoutCustomerName" required placeholder="Your full name" oninput="validateFieldLive(this)" onblur="validateFieldLive(this)">
                         </div>
                         <div class="form-group">
-                            <label for="checkoutCustomerEmail">Email Address *</label>
-                            <input type="email" id="checkoutCustomerEmail" required placeholder="your@email.com">
+                            <label for="checkoutCustomerEmail">Email Address * <span class="live-validation-indicator" data-field="checkoutCustomerEmail"></span></label>
+                            <input type="email" id="checkoutCustomerEmail" required placeholder="your@email.com" oninput="validateFieldLive(this)" onblur="validateFieldLive(this)">
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="checkoutCustomerPhone">Phone Number *</label>
-                            <input type="tel" id="checkoutCustomerPhone" required placeholder="(555) 123-4567">
+                            <label for="checkoutCustomerPhone">Phone Number * <span class="live-validation-indicator" data-field="checkoutCustomerPhone"></span></label>
+                            <input type="tel" id="checkoutCustomerPhone" required placeholder="(555) 123-4567" oninput="validateFieldLive(this)" onblur="validateFieldLive(this)">
                         </div>
                         <div class="form-group">
-                            <label for="checkoutBusinessName">Business Name *</label>
-                            <input type="text" id="checkoutBusinessName" required placeholder="Your business name">
+                            <label for="checkoutBusinessName">Business Name * <span class="live-validation-indicator" data-field="checkoutBusinessName"></span></label>
+                            <input type="text" id="checkoutBusinessName" required placeholder="Your business name" oninput="validateFieldLive(this)" onblur="validateFieldLive(this)">
                         </div>
                     </div>
                 </div>
@@ -4655,7 +4655,7 @@
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 600px;">
                     <div class="modal-header">
-                        <h3 class="modal-title">📋 Order Details - ${order.id}</h3>
+                        <h3 class="modal-title">���� Order Details - ${order.id}</h3>
                         <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
                     </div>
                     <div style="background: var(--surface-elevated); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
@@ -5078,7 +5078,7 @@ Phone: (210) 835-7834
 
         function contactShippingSupport() {
             try {
-                showNotification('���� Connecting you with shipping support...', 'success');
+                showNotification('🚚 Connecting you with shipping support...', 'success');
                 closeOrderModal();
             } catch (error) {
                 console.error('Error contacting shipping support:', error);
