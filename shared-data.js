@@ -4,8 +4,10 @@
 class SharedDataManager {
     constructor() {
         this.storageKey = 'fadedSkiesSharedData';
+        this.realTimeSync = null;
         this.initializeData();
         this.setupStorageListener();
+        this.setupRealTimeSync();
     }
 
     initializeData() {
