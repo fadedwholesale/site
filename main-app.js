@@ -665,37 +665,45 @@ function openProfileEditModal() {
 }
 
 function populateProfileEditForm() {
-    // Get current user data or set defaults
+    // Get current user data with intelligent defaults
     const userData = {
-        businessName: currentUser.businessName || 'Green Valley Dispensary',
-        contactName: currentUser.contactName || currentUser.name || 'John Smith',
+        businessName: currentUser.businessName || currentUser.name + "'s Store" || 'Your Business Name',
+        contactName: currentUser.contactName || currentUser.name || '',
         businessEmail: currentUser.email || '',
-        phone: currentUser.phone || '(555) 123-4567',
+        phone: currentUser.phone || '',
         businessType: currentUser.businessType || 'dispensary',
-        licenseNumber: currentUser.licenseNumber || 'CA-LICENSE-12345',
-        businessAddress: currentUser.businessAddress || '123 Main St\nAnytown, CA 90210',
-        taxId: currentUser.taxId || '12-3456789',
-        website: currentUser.website || 'https://greenvalleydispensary.com',
-        notes: currentUser.notes || 'Premium cannabis retailer since 2020'
+        licenseNumber: currentUser.licenseNumber || currentUser.license || '',
+        businessAddress: currentUser.businessAddress || '',
+        taxId: currentUser.taxId || '',
+        website: currentUser.website || '',
+        notes: currentUser.notes || ''
     };
 
-    // Populate form fields
-    const fields = [
-        'editBusinessName', 'editContactName', 'editBusinessEmail', 'editPhone',
-        'editBusinessType', 'editLicenseNumber', 'editBusinessAddress',
-        'editTaxId', 'editWebsite', 'editNotes'
-    ];
+    // Populate form fields with better field mapping
+    const fieldMapping = {
+        'editBusinessName': userData.businessName,
+        'editContactName': userData.contactName,
+        'editBusinessEmail': userData.businessEmail,
+        'editPhone': userData.phone,
+        'editBusinessType': userData.businessType,
+        'editLicenseNumber': userData.licenseNumber,
+        'editBusinessAddress': userData.businessAddress,
+        'editTaxId': userData.taxId,
+        'editWebsite': userData.website,
+        'editNotes': userData.notes
+    };
 
-    fields.forEach(fieldId => {
+    Object.entries(fieldMapping).forEach(([fieldId, value]) => {
         const element = document.getElementById(fieldId);
         if (element) {
-            const fieldName = fieldId.replace('edit', '').toLowerCase();
-            const value = userData[fieldName] || '';
-            element.value = value;
+            element.value = value || '';
+            console.log(`📝 Populated ${fieldId} with:`, value);
+        } else {
+            console.warn(`⚠️ Field ${fieldId} not found in DOM`);
         }
     });
 
-    console.log('✅ Profile edit form populated with user data');
+    console.log('✅ Profile edit form populated with user data:', userData);
 }
 
 function updateProfile(event) {
