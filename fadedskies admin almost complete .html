@@ -1251,10 +1251,10 @@
                     </form>
                     
                     <div style="margin-top: 32px; padding: 20px; background: var(--surface-elevated); border-radius: 12px; text-align: left;">
-                        <h4 style="color: var(--brand-green); margin-bottom: 12px;">🔐 Demo Credentials:</h4>
+                        <h4 style="color: var(--brand-green); margin-bottom: 12px;">🔐 Admin Access</h4>
                         <p style="color: var(--text-muted); font-size: 14px; line-height: 1.8;">
-                            <strong>Admin:</strong> admin@fadedskies.com / admin123<br>
-                            <small>This is a separate secure admin portal independent from the public website</small>
+                            <strong>Authorized Personnel Only</strong><br>
+                            <small>This is a secure admin portal for inventory and operations management</small>
                         </p>
                     </div>
                 </div>
@@ -1475,7 +1475,7 @@
                                 AI-powered pricing recommendations based on market data, competition, and demand patterns.
                             </p>
                             <button class="btn btn-primary btn-sm" style="width: 100%;" onclick="runPriceOptimization()">
-                                🤖 Run AI Optimization
+                                �� Run AI Optimization
                             </button>
                         </div>
                     </div>
@@ -2452,7 +2452,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
             <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('applicationReviewModal')">Close</button>
-                <button type="button" class="btn btn-danger" onclick="rejectApplication()">❌ Reject</button>
+                <button type="button" class="btn btn-danger" onclick="rejectApplication()">�� Reject</button>
                 <button type="button" class="btn btn-primary" onclick="approveApplication()">✅ Approve</button>
             </div>
         </div>
@@ -6088,7 +6088,7 @@ Faded Skies Wholesale Team
             if (partner && partner.passwordResetToken) {
                 const resetLink = `https://portal.fadedskies.com/reset-password?token=${partner.passwordResetToken}`;
                 navigator.clipboard.writeText(resetLink).then(() => {
-                    showNotification('🔗 Reset link copied to clipboard', 'success');
+                    showNotification('��� Reset link copied to clipboard', 'success');
                 }).catch(() => {
                     showNotification('Failed to copy link', 'error');
                 });
@@ -6403,7 +6403,7 @@ Faded Skies Wholesale Team`
 
         function resetSystem() {
             if (confirm('Are you sure you want to reset the system? This action cannot be undone.')) {
-                showNotification('🔄 System reset functionality disabled for safety!', 'warning');
+                showNotification('���� System reset functionality disabled for safety!', 'warning');
             }
         }
 
