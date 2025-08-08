@@ -264,7 +264,29 @@ class SharedDataManager {
         // Enhanced notification with real-time broadcasting
         this.notifyChange('order_added', order);
 
-        // Immediate broadcast for admin portal
+        // New real-time sync broadcasting
+        if (this.realTimeSync) {
+            this.realTimeSync.broadcast('order_added', {
+                ...order,
+                isUrgent: order.total > 1000,
+                customerInfo: {
+                    email: order.partner,
+                    name: order.partnerName
+                }
+            });
+
+            // Also broadcast user action for notifications
+            this.realTimeSync.broadcast('user_action', {
+                action: 'order_placed',
+                orderId: order.id,
+                userEmail: order.partner,
+                userName: order.partnerName,
+                amount: order.total,
+                type: 'success'
+            });
+        }
+
+        // Legacy broadcast for admin portal
         this.broadcastRealTimeUpdate('new_order', {
             ...order,
             isUrgent: order.total > 1000,
