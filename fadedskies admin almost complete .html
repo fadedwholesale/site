@@ -2824,8 +2824,34 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             initializeAdminDashboard();
         });
 
+        // Load system logos
+        function loadSystemLogos() {
+            try {
+                const logos = window.sharedDataManager.getLogos();
+                console.log('📷 Loading system logos:', logos);
+
+                // Update admin header logo
+                const adminLogo = document.getElementById('adminHeaderLogo');
+                if (adminLogo && logos.adminHeader) {
+                    adminLogo.src = logos.adminHeader;
+                    adminLogo.style.display = 'inline-block';
+                    console.log('✅ Admin header logo loaded');
+                } else if (adminLogo && logos.main) {
+                    // Fallback to main logo
+                    adminLogo.src = logos.main;
+                    adminLogo.style.display = 'inline-block';
+                    console.log('✅ Admin header logo loaded (fallback)');
+                }
+            } catch (error) {
+                console.error('❌ Error loading system logos:', error);
+            }
+        }
+
         function initializeAdminDashboard() {
             console.log('🔧 Initializing Faded Skies Admin Dashboard...');
+
+            // Load system logos first
+            loadSystemLogos();
 
             // Load products from shared data manager
             const sharedProducts = window.sharedDataManager.getProducts();
