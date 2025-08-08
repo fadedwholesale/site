@@ -135,19 +135,19 @@ class ActivityLogger {
             }
         };
 
-        // Add to session events (simplified to prevent circular references)
+        // Add to session events (completely safe to prevent circular references)
         if (this.currentSession) {
+            // Only store basic, safe data in session events
             this.currentSession.events.push({
                 timestamp: logEntry.timestamp,
                 level: level,
-                message: message,
-                dataType: typeof data,
+                message: message.length > 100 ? message.substring(0, 100) + '...' : message,
                 hasData: data !== null && data !== undefined
             });
 
-            // Limit session events
-            if (this.currentSession.events.length > this.maxSessionLogs) {
-                this.currentSession.events = this.currentSession.events.slice(-this.maxSessionLogs);
+            // Limit session events more aggressively
+            if (this.currentSession.events.length > 50) {
+                this.currentSession.events = this.currentSession.events.slice(-50);
             }
         }
 
@@ -550,88 +550,94 @@ class ActivityLogger {
         }, this.flushInterval);
     }
 
-    // Safe JSON serialization that handles circular references
-    safeJSONStringify(obj, maxDepth = 5) {
+    // Completely safe JSON serialization without using JSON.stringify
+    safeJSONStringify(obj, maxDepth = 3) {
         const seen = new WeakSet();
-        const stack = [];
+        let depth = 0;
 
-        const replacer = (key, value) => {
-            // Skip problematic keys that often cause circular references
-            if (key === 'events' && Array.isArray(value) && value.length > 10) {
-                return `[${value.length} events - truncated for safety]`;
+        const serialize = (value, currentDepth = 0) => {
+            // Handle primitives
+            if (value === null) return 'null';
+            if (value === undefined) return '"[Undefined]"';
+            if (typeof value === 'boolean') return value.toString();
+            if (typeof value === 'number') {
+                return isFinite(value) ? value.toString() : 'null';
+            }
+            if (typeof value === 'string') {
+                return '"' + value.replace(/"/g, '\\"').replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t') + '"';
+            }
+            if (typeof value === 'function') {
+                return '"[Function]"';
             }
 
-            if (key === 'data' && typeof value === 'object' && value !== null) {
-                // Check if this data object contains session references
-                if (value.sessionId || value.currentSession) {
-                    return '[Data object - truncated to prevent circular reference]';
-                }
-            }
-
-            // Handle null and primitives
-            if (value === null || typeof value !== 'object') {
-                if (typeof value === 'function') return '[Function]';
-                if (value === undefined) return '[Undefined]';
-                return value;
+            // Handle depth limit
+            if (currentDepth >= maxDepth) {
+                return '"[Max depth reached]"';
             }
 
             // Handle circular references
-            if (seen.has(value)) {
-                return '[Circular Reference]';
+            if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) {
+                    return '"[Circular Reference]"';
+                }
+                seen.add(value);
             }
-
-            // Check stack depth
-            if (stack.length >= maxDepth) {
-                return '[Maximum depth reached]';
-            }
-
-            seen.add(value);
-            stack.push(value);
 
             try {
                 // Handle arrays
                 if (Array.isArray(value)) {
-                    if (value.length > 50) {
-                        const result = `[Array with ${value.length} items - truncated]`;
-                        stack.pop();
-                        return result;
+                    if (value.length === 0) return '[]';
+                    if (value.length > 20) {
+                        return `"[Array with ${value.length} items - truncated]"`;
                     }
+
+                    const items = [];
+                    for (let i = 0; i < Math.min(value.length, 20); i++) {
+                        items.push(serialize(value[i], currentDepth + 1));
+                    }
+                    return '[' + items.join(',') + ']';
                 }
 
-                // For objects, create a simplified version
+                // Handle objects
                 if (typeof value === 'object') {
                     const keys = Object.keys(value);
-                    if (keys.length > 20) {
-                        const result = `[Object with ${keys.length} properties - truncated]`;
-                        stack.pop();
-                        return result;
+                    if (keys.length === 0) return '{}';
+
+                    // Skip problematic keys
+                    const safeKeys = keys.filter(key => {
+                        if (key === 'events' && Array.isArray(value[key]) && value[key].length > 5) return false;
+                        if (key === 'currentSession' && typeof value[key] === 'object') return false;
+                        if (key === 'data' && typeof value[key] === 'object' && value[key] && (value[key].sessionId || value[key].currentSession)) return false;
+                        return true;
+                    });
+
+                    if (safeKeys.length > 15) {
+                        return `"{Object with ${keys.length} properties - truncated}"`;
                     }
+
+                    const pairs = [];
+                    for (const key of safeKeys.slice(0, 15)) {
+                        const keyStr = '"' + key.replace(/"/g, '\\"') + '"';
+                        const valueStr = serialize(value[key], currentDepth + 1);
+                        pairs.push(keyStr + ':' + valueStr);
+                    }
+                    return '{' + pairs.join(',') + '}';
                 }
 
-                stack.pop();
-                return value;
+                return '"[Unknown type]"';
             } catch (error) {
-                stack.pop();
-                return '[Error serializing object]';
+                return '"[Serialization error]"';
+            } finally {
+                if (typeof value === 'object' && value !== null) {
+                    seen.delete(value);
+                }
             }
         };
 
         try {
-            return JSON.stringify(obj, replacer, 2);
+            return serialize(obj);
         } catch (error) {
-            // Complete fallback - return basic info only
-            try {
-                const basic = {
-                    error: 'Serialization failed',
-                    message: error.message,
-                    type: typeof obj,
-                    isArray: Array.isArray(obj),
-                    timestamp: new Date().toISOString()
-                };
-                return JSON.stringify(basic);
-            } catch (fallbackError) {
-                return '{"error":"Complete serialization failure"}';
-            }
+            return '{"error":"Complete serialization failure","message":"' + (error.message || 'Unknown error').replace(/"/g, '\\"') + '"}';
         }
     }
 
@@ -717,7 +723,7 @@ class ActivityLogger {
                 this.logBuffer = [];
                 this.changeBuffer = [];
             } catch (retryError) {
-                console.error('❌ Failed to flush logs even after cleanup:', retryError);
+                console.error('��� Failed to flush logs even after cleanup:', retryError);
                 // Clear buffers to prevent infinite retry
                 this.logBuffer = [];
                 this.changeBuffer = [];
