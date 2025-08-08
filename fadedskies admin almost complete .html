@@ -2906,29 +2906,17 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             // Load system logos
             loadSystemLogos();
 
-            // Load products from shared data manager
-            const sharedProducts = window.sharedDataManager.getProducts();
-            if (sharedProducts.length > 0) {
-                products = sharedProducts;
-                console.log('📦 Loaded', products.length, 'products from shared data manager');
-            } else {
-                // Force sync default products to shared data manager
-                console.log('📦 No shared products found, syncing defaults...');
-                window.sharedDataManager.updateProducts(products);
-            }
-
-            // Load orders from shared data manager
-            const sharedOrders = window.sharedDataManager.getOrders();
-            if (sharedOrders.length > 0) {
-                orders = sharedOrders;
-                console.log('📦 Loaded', orders.length, 'orders from shared data manager');
-            }
+            // Always use shared data manager as source of truth
+            loadDataFromSharedManager();
 
             // Listen for shared data changes
             window.addEventListener('sharedDataChange', handleAdminSharedDataChange);
 
             // Listen for real-time updates
             window.addEventListener('realTimeUpdate', handleAdminRealTimeUpdate);
+
+            // Set up real-time sync listeners
+            setupRealTimeSyncListeners();
 
             // Start portal sync monitoring
             startPortalSync();
@@ -2939,6 +2927,161 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             console.log('✅ Admin dashboard initialized');
             console.log('🔐 Secure admin portal ready');
             console.log('🔄 Portal sync monitoring active');
+        }
+
+        // Load data from shared data manager
+        function loadDataFromSharedManager() {
+            console.log('📡 Loading data from shared data manager...');
+
+            // Always get fresh data from shared manager
+            const sharedProducts = window.sharedDataManager.getProducts();
+            const sharedOrders = window.sharedDataManager.getOrders();
+
+            if (sharedProducts.length > 0) {
+                products = [...sharedProducts]; // Create a copy to avoid reference issues
+                console.log('📦 Loaded', products.length, 'products from shared data manager');
+            } else {
+                // If no shared products, initialize with defaults and sync
+                console.log('📦 No shared products found, initializing defaults...');
+                const defaultProducts = getDefaultProducts();
+                window.sharedDataManager.updateProducts(defaultProducts);
+                products = [...defaultProducts];
+            }
+
+            if (sharedOrders.length > 0) {
+                orders = [...sharedOrders]; // Create a copy
+                console.log('📦 Loaded', orders.length, 'orders from shared data manager');
+            }
+
+            console.log('✅ Data loaded and synchronized with shared manager');
+        }
+
+        // Set up real-time sync listeners
+        function setupRealTimeSyncListeners() {
+            if (window.realTimeSync) {
+                console.log('📡 Setting up real-time sync listeners for admin portal...');
+
+                // Listen for product updates
+                window.realTimeSync.on('products_updated', (data) => {
+                    console.log('📡 Admin: Products updated via real-time sync');
+                    products = [...data]; // Always use fresh data
+                    updateAllDashboardViews();
+                    showNotification('📦 Products synchronized from partner portal', 'info');
+                });
+
+                // Listen for individual product changes
+                window.realTimeSync.on('product_updated', (data) => {
+                    console.log('📡 Admin: Individual product updated', data);
+                    loadDataFromSharedManager(); // Refresh all data
+                    updateAllDashboardViews();
+                });
+
+                window.realTimeSync.on('product_added', (data) => {
+                    console.log('📡 Admin: Product added', data);
+                    loadDataFromSharedManager(); // Refresh all data
+                    updateAllDashboardViews();
+                });
+
+                window.realTimeSync.on('product_deleted', (data) => {
+                    console.log('📡 Admin: Product deleted', data);
+                    loadDataFromSharedManager(); // Refresh all data
+                    updateAllDashboardViews();
+                });
+
+                // Listen for order updates
+                window.realTimeSync.on('order_added', (data) => {
+                    console.log('📡 Admin: New order received via real-time sync', data);
+                    loadDataFromSharedManager(); // Refresh all data
+                    updateAllDashboardViews();
+                    showNotification(`🚨 NEW ORDER: ${data.id} from ${data.partnerName || 'Partner'} - $${data.total}`, 'success');
+                });
+
+                console.log('✅ Real-time sync listeners configured for admin portal');
+            } else {
+                console.warn('⚠️ Real-time sync not available, retrying in 1 second...');
+                setTimeout(setupRealTimeSyncListeners, 1000);
+            }
+        }
+
+        // Get default products for initialization
+        function getDefaultProducts() {
+            return [
+                {
+                    id: 1,
+                    grade: "A-GRADE",
+                    strain: "Blue Runtz",
+                    thca: 31.6,
+                    price: 847,
+                    status: "AVAILABLE",
+                    stock: 25,
+                    type: "Hybrid",
+                    image: "https://images.unsplash.com/photo-1610234815282-a78e82bbde8e?w=300&h=300&fit=crop&crop=center",
+                    photo: "https://images.unsplash.com/photo-1610234815282-a78e82bbde8e?w=300&h=300&fit=crop&crop=center",
+                    description: "Premium A-grade indoor flower with exceptional terpene profile",
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: 'system'
+                },
+                {
+                    id: 2,
+                    grade: "A-GRADE",
+                    strain: "Wedding Cake",
+                    thca: 28.9,
+                    price: 723,
+                    status: "AVAILABLE",
+                    stock: 18,
+                    type: "Hybrid",
+                    image: "https://images.unsplash.com/photo-1605069876632-6e30ff47b8bd?w=300&h=300&fit=crop&crop=center",
+                    photo: "https://images.unsplash.com/photo-1605069876632-6e30ff47b8bd?w=300&h=300&fit=crop&crop=center",
+                    description: "Sweet and tangy hybrid with relaxing effects",
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: 'system'
+                },
+                {
+                    id: 3,
+                    grade: "B-GRADE",
+                    strain: "OG Kush",
+                    thca: 24.3,
+                    price: 550,
+                    status: "AVAILABLE",
+                    stock: 30,
+                    type: "Indica",
+                    image: "https://images.unsplash.com/photo-1607249146552-4e34b69cd4b3?w=300&h=300&fit=crop&crop=center",
+                    photo: "https://images.unsplash.com/photo-1607249146552-4e34b69cd4b3?w=300&h=300&fit=crop&crop=center",
+                    description: "Classic strain with earthy pine flavors",
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: 'system'
+                },
+                {
+                    id: 4,
+                    grade: "ROSIN",
+                    strain: "Live Rosin - Purple Punch",
+                    thca: 78.2,
+                    price: 35,
+                    status: "AVAILABLE",
+                    stock: 12,
+                    type: "Concentrate",
+                    image: "https://images.unsplash.com/photo-1644845499871-2b9c93cf69f5?w=300&h=300&fit=crop&crop=center",
+                    photo: "https://images.unsplash.com/photo-1644845499871-2b9c93cf69f5?w=300&h=300&fit=crop&crop=center",
+                    description: "Premium live rosin concentrate",
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: 'system'
+                },
+                {
+                    id: 5,
+                    grade: "VAPE",
+                    strain: "Gelato Cart",
+                    thca: 85.4,
+                    price: 45,
+                    status: "COMING SOON",
+                    stock: 0,
+                    type: "Vape",
+                    image: "https://images.unsplash.com/photo-1628958230481-0011f5bd3db9?w=300&h=300&fit=crop&crop=center",
+                    photo: "https://images.unsplash.com/photo-1628958230481-0011f5bd3db9?w=300&h=300&fit=crop&crop=center",
+                    description: "Premium live resin vape cartridge",
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: 'system'
+                }
+            ];
         }
 
         // Handle real-time updates
@@ -5385,7 +5528,7 @@ Best regards,
 Faded Skies Wholesale Team`
                 },
                 newsletter: {
-                    subject: '📰 Monthly Newsletter - Faded Skies Wholesale',
+                    subject: '���� Monthly Newsletter - Faded Skies Wholesale',
                     message: `Dear Partners,
 
 Welcome to this month's Faded Skies Wholesale newsletter!
