@@ -4522,8 +4522,7 @@
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
                     
-                    // Start order status simulation for demo
-                    startOrderStatusSimulation();
+                    // Order status updates handled by real-time sync
                 }, 1500);
                 
             } catch (error) {
@@ -7288,34 +7287,7 @@ Phone: (210) 835-7834
         }
 
         // Simulate real-time order status updates for demo
-        function startOrderStatusSimulation() {
-            try {
-                setInterval(() => {
-                    if (!currentUser) return;
-                    
-                    const myOrders = orders.filter(o => o.partner === currentUser.email);
-                    const pendingOrders = myOrders.filter(o => o.status === 'PENDING');
-                    const processingOrders = myOrders.filter(o => o.status === 'PROCESSING');
-                    
-                    // Randomly advance order statuses for demo
-                    if (pendingOrders.length > 0 && Math.random() < 0.3) {
-                        const order = pendingOrders[0];
-                        order.status = 'PROCESSING';
-                        showNotification(`📋 Order ${order.id} is now being processed!`, 'success');
-                        updateOrderHistory();
-                    }
-                    
-                    if (processingOrders.length > 0 && Math.random() < 0.2) {
-                        const order = processingOrders[0];
-                        order.status = 'SHIPPED';
-                        showNotification(`📦 Order ${order.id} has been shipped! Track: FS${order.id.slice(-3)}2025`, 'success');
-                        updateOrderHistory();
-                    }
-                }, 30000); // Check every 30 seconds for demo
-            } catch (error) {
-                console.error('Error in order status simulation:', error);
-            }
-        }
+        // Real-time order status updates handled by the system integration
 
         // openProfileEditModal function removed - now using the comprehensive one from main-app.js
 
