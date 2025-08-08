@@ -1821,7 +1821,7 @@
 
                     <div class="grid">
                         <div class="card">
-                            <h3>��� Company Information</h3>
+                            <h3>🏢 Company Information</h3>
                             <div class="form-group">
                                 <label>Company Name</label>
                                 <input type="text" class="editable" value="Faded Skies Wholesale" style="width: 100%;">
@@ -2404,7 +2404,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
                 <h3 class="modal-title">Order Details ����</h3>
-                <button class="modal-close" onclick="closeModal('orderDetailsModal')">×</button>
+                <button class="modal-close" onclick="closeModal('orderDetailsModal')">��</button>
             </div>
             <div id="orderDetailsContent">
                 <!-- Order details will be populated here -->
@@ -3481,13 +3481,21 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         function updateInventoryTable() {
             const tbody = document.getElementById('inventoryBody');
             if (!tbody) return;
-            
+
             tbody.innerHTML = '';
-            
+
+            // Ensure products array is valid
+            if (!Array.isArray(products)) {
+                console.warn('Products is not an array:', products);
+                products = [];
+                return;
+            }
+
             // Filter products based on current filter
             let filteredProducts = products;
             if (currentFilter !== 'all') {
                 filteredProducts = products.filter(p => {
+                    if (!p || !p.status) return false;
                     switch(currentFilter) {
                         case 'available': return p.status === 'AVAILABLE';
                         case 'coming': return p.status === 'COMING SOON';
@@ -3496,8 +3504,13 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     }
                 });
             }
-            
+
             filteredProducts.forEach(product => {
+                // Ensure product has all required fields
+                if (!product || !product.id) {
+                    console.warn('Invalid product:', product);
+                    return;
+                }
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>
@@ -4149,7 +4162,7 @@ Faded Skies Wholesale Team
                 'DELIVERED': `Your order ${order.id} has been delivered successfully! Thank you for your business.`
             };
             
-            console.log(`📧 ${status} notification sent to:`, order.partner);
+            console.log(`���� ${status} notification sent to:`, order.partner);
             console.log(statusMessages[status]);
             showNotification(`📧 ${status} notification sent to ${order.partnerName}`, 'success');
         }
@@ -6657,7 +6670,7 @@ Faded Skies Partnership Team`
             );
             localStorage.setItem('adminNotifications', JSON.stringify(filteredNotifications));
             loadApplicationNotifications();
-            showNotification('🗑️ Old notifications cleared', 'success');
+            showNotification('🗑�� Old notifications cleared', 'success');
         }
 
         // Global functions
