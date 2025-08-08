@@ -946,6 +946,293 @@
             gap: 16px;
         }
 
+        /* Payment Form Styles */
+        .payment-form {
+            transition: all 0.3s ease;
+        }
+
+        .payment-form.active {
+            display: block;
+        }
+
+        .payment-tab {
+            transition: all 0.3s ease;
+        }
+
+        .payment-tab:hover {
+            background: var(--surface-elevated) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .payment-tab.active {
+            background: var(--brand-green) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(0, 200, 81, 0.3);
+        }
+
+        .order-summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+        }
+
+        .order-summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item-details {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .order-item-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .order-item-info h5 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .order-item-info p {
+            margin: 2px 0 0 0;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .order-item-price {
+            text-align: right;
+        }
+
+        .order-item-quantity {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .order-item-total {
+            font-weight: 600;
+            color: var(--brand-green);
+        }
+
+        /* Enhanced form input styles */
+        .form-group input[type="text"]:focus,
+        .form-group input[type="email"]:focus,
+        .form-group input[type="tel"]:focus,
+        .form-group input[type="url"]:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 3px rgba(0, 200, 81, 0.1);
+            outline: none;
+        }
+
+        /* Input formatting for payment fields */
+        input[type="text"]::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Security badge styling */
+        .security-section {
+            background: linear-gradient(135deg, var(--surface-elevated), rgba(0, 200, 81, 0.05));
+        }
+
+        /* Profile form enhancements */
+        #profileEditModal .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #paymentModal .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Payment method transition effects */
+        .payment-form {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Checkout Modal Styles */
+        .checkout-section {
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 20px;
+        }
+
+        .checkout-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .checkout-order-item {
+            transition: all 0.3s ease;
+        }
+
+        .checkout-order-item:hover {
+            background: rgba(0, 200, 81, 0.05);
+            border-radius: 8px;
+            margin: 0 -8px;
+            padding: 12px 8px !important;
+        }
+
+        /* Live Validation Indicators */
+        .live-validation-indicator {
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .live-validation-indicator.valid {
+            color: var(--brand-green);
+        }
+
+        .live-validation-indicator.invalid {
+            color: var(--accent-red);
+        }
+
+        .live-validation-indicator.checking {
+            color: var(--accent-orange);
+            animation: pulse 1s infinite;
+        }
+
+        /* Live input validation styling */
+        .form-group input.valid,
+        .form-group textarea.valid {
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 2px rgba(0, 200, 81, 0.1);
+        }
+
+        .form-group input.invalid,
+        .form-group textarea.invalid {
+            border-color: var(--accent-red);
+            box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.1);
+        }
+
+        .form-group input.checking,
+        .form-group textarea.checking {
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.1);
+        }
+
+        /* Live pricing summary animation */
+        .live-pricing-summary {
+            animation: livePulse 2s infinite;
+        }
+
+        @keyframes livePulse {
+            0%, 100% {
+                border-color: var(--brand-green);
+                box-shadow: 0 0 0 0 rgba(0, 200, 81, 0.3);
+            }
+            50% {
+                border-color: var(--brand-green-light);
+                box-shadow: 0 0 0 4px rgba(0, 200, 81, 0.1);
+            }
+        }
+
+        /* Live shipping cost updates */
+        .live-shipping-cost {
+            transition: all 0.3s ease;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .live-shipping-cost.updating {
+            background: rgba(0, 200, 81, 0.2);
+            color: var(--brand-green);
+        }
+
+        /* Live amounts with animation */
+        .live-subtotal,
+        .live-shipping-amount,
+        .live-total-amount {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .live-subtotal.updating,
+        .live-shipping-amount.updating,
+        .live-total-amount.updating {
+            color: var(--brand-green) !important;
+            transform: scale(1.05);
+        }
+
+        /* Delivery method styling */
+        input[type="radio"]:checked + div {
+            color: var(--brand-green) !important;
+        }
+
+        label:has(input[type="radio"]:checked) {
+            border-color: var(--brand-green) !important;
+            background: rgba(0, 200, 81, 0.1) !important;
+            box-shadow: 0 0 0 2px rgba(0, 200, 81, 0.2) !important;
+        }
+
+        label:has(input[type="radio"]):hover {
+            border-color: var(--brand-green-light) !important;
+            background: rgba(0, 200, 81, 0.05) !important;
+        }
+
+        /* Checkout modal responsive */
+        #checkoutModal .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Responsive payment forms */
+        @media (max-width: 768px) {
+            .payment-method-tabs {
+                flex-direction: column;
+            }
+
+            .payment-tab {
+                padding: 16px !important;
+            }
+
+            .order-item-details {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .order-item-image {
+                width: 60px;
+                height: 60px;
+            }
+
+            /* Checkout modal responsive */
+            label:has(input[type="radio"]) {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            input[type="radio"] {
+                margin-bottom: 8px;
+            }
+        }
+
         /* Notification System */
         .notification {
             position: fixed;
@@ -1530,8 +1817,9 @@
                                 <p style="margin-bottom: 16px;"><strong>License Number:</strong> <span id="profileLicense"></span></p>
                                 <p style="margin-bottom: 16px;"><strong>Member Since:</strong> January 2024</p>
                             </div>
-                            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                            <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
                                 <button class="btn btn-primary" onclick="openProfileEditModal()">✏️ Edit Profile</button>
+                                <button class="btn btn-secondary" onclick="refreshProfileData()">🔄 Refresh Data</button>
                                 <button class="btn btn-secondary" onclick="showNotification('⬆️ Tier upgrade request submitted!', 'success')">⬆️ Request Upgrade</button>
                             </div>
                         </div>
@@ -1703,6 +1991,402 @@
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Profile Edit Modal -->
+    <div id="profileEditModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 class="modal-title">✏️ Edit Business Profile</h3>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Update your business information and contact details</div>
+                <button class="modal-close" onclick="closeModal('profileEditModal')">×</button>
+            </div>
+            <form onsubmit="updateProfile(event)">
+                <!-- Business Information Section -->
+                <div class="form-section" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);">
+                    <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        🏢 Business Information
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editBusinessName">Business Name *</label>
+                            <input type="text" id="editBusinessName" required placeholder="Your licensed business name">
+                        </div>
+                        <div class="form-group">
+                            <label for="editContactName">Contact Name *</label>
+                            <input type="text" id="editContactName" required placeholder="Your full name">
+                        </div>
+                    </div>
+                </div>
+                <!-- Contact Information Section -->
+                <div class="form-section" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);">
+                    <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        📞 Contact Information
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editBusinessEmail">Business Email *</label>
+                            <input type="email" id="editBusinessEmail" required placeholder="business@yourstore.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="editPhone">Phone Number *</label>
+                            <input type="tel" id="editPhone" required placeholder="(555) 123-4567">
+                        </div>
+                    </div>
+                </div>
+                <!-- Business Details Section -->
+                <div class="form-section" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);">
+                    <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        📋 Business Details
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editBusinessType">Business Type *</label>
+                            <select id="editBusinessType" required>
+                                <option value="">Select your business type</option>
+                                <option value="dispensary">Licensed Dispensary</option>
+                                <option value="smoke-shop">Smoke Shop</option>
+                                <option value="cbd-store">CBD/Hemp Store</option>
+                                <option value="distributor">Wholesale Distributor</option>
+                                <option value="delivery">Delivery Service</option>
+                                <option value="other">Other Licensed Retailer</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editLicenseNumber">License Number</label>
+                            <input type="text" id="editLicenseNumber" placeholder="Your business license number">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editBusinessAddress">Business Address *</label>
+                        <textarea id="editBusinessAddress" rows="3" required placeholder="Full business address including city, state, zip"></textarea>
+                    </div>
+                </div>
+                <!-- Additional Information Section -->
+                <div class="form-section" style="margin-bottom: 24px;">
+                    <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        📝 Additional Information
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editTaxId">Tax ID/EIN</label>
+                            <input type="text" id="editTaxId" placeholder="XX-XXXXXXX">
+                        </div>
+                        <div class="form-group">
+                            <label for="editWebsite">Website</label>
+                            <input type="url" id="editWebsite" placeholder="https://yourwebsite.com">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editNotes">Additional Notes</label>
+                        <textarea id="editNotes" rows="3" placeholder="Any additional information about your business..."></textarea>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('profileEditModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 class="modal-title">🛒 Checkout Details</h3>
+                <div class="live-update-indicator" style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--brand-green);">
+                    <span class="live-dot" style="width: 8px; height: 8px; background: var(--brand-green); border-radius: 50%; animation: livePulse 2s infinite;"></span>
+                    <span>Live Updates Active</span>
+                </div>
+                <button class="modal-close" onclick="closeModal('checkoutModal')">×</button>
+            </div>
+
+            <!-- Order Summary Section -->
+            <div class="checkout-summary-section" style="background: var(--surface-elevated); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border-subtle);">
+                <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                    📦 Order Summary
+                </h4>
+                <div id="checkoutOrderItems" style="margin-bottom: 16px;">
+                    <!-- Order items will be populated here -->
+                </div>
+                <div style="border-top: 2px solid var(--border-subtle); padding-top: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; color: var(--brand-green);">
+                        <span>Total Amount:</span>
+                        <span id="checkoutOrderTotal">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <form onsubmit="proceedToPayment(event)">
+                <!-- Customer Information -->
+                <div class="checkout-section" style="margin-bottom: 24px;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        👤 Customer Information
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="checkoutCustomerName">Contact Name * <span class="live-validation-indicator" data-field="checkoutCustomerName"></span></label>
+                            <input type="text" id="checkoutCustomerName" required placeholder="Your full name" oninput="validateFieldLive(this)" onblur="validateFieldLive(this)">
+                        </div>
+                        <div class="form-group">
+                            <label for="checkoutCustomerEmail">Email Address * <span class="live-validation-indicator" data-field="checkoutCustomerEmail"></span></label>
+                            <input type="email" id="checkoutCustomerEmail" required placeholder="your@email.com" oninput="validateFieldLive(this)" onblur="validateFieldLive(this)">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="checkoutCustomerPhone">Phone Number * <span class="live-validation-indicator" data-field="checkoutCustomerPhone"></span></label>
+                            <input type="tel" id="checkoutCustomerPhone" required placeholder="(555) 123-4567" oninput="validateFieldLive(this)" onblur="validateFieldLive(this)">
+                        </div>
+                        <div class="form-group">
+                            <label for="checkoutBusinessName">Business Name * <span class="live-validation-indicator" data-field="checkoutBusinessName"></span></label>
+                            <input type="text" id="checkoutBusinessName" required placeholder="Your business name" oninput="validateFieldLive(this)" onblur="validateFieldLive(this)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Information -->
+                <div class="checkout-section" style="margin-bottom: 24px;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        🚚 Shipping Information
+                    </h4>
+                    <div class="form-group">
+                        <label for="checkoutShippingAddress">Shipping Address * <span class="live-validation-indicator" data-field="checkoutShippingAddress"></span></label>
+                        <textarea id="checkoutShippingAddress" rows="3" required placeholder="Full shipping address including city, state, zip code" oninput="validateFieldLive(this)" onblur="validateFieldLive(this)"></textarea>
+                    </div>
+
+                    <!-- Delivery Method -->
+                    <div class="form-group">
+                        <label style="margin-bottom: 12px; display: block;">Delivery Method</label>
+                        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 16px; border: 2px solid var(--border-subtle); border-radius: 8px; background: var(--surface-card); transition: all 0.3s ease;" onchange="updateDeliveryMethodLive(this)">
+                                <input type="radio" name="deliveryMethod" value="standard" checked style="margin: 0;">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">📦 Standard Shipping</div>
+                                    <div style="font-size: 12px; color: var(--text-secondary);">3-5 business days • <span class="live-shipping-cost" data-method="standard">Free on orders $1000+</span></div>
+                                </div>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 16px; border: 2px solid var(--border-subtle); border-radius: 8px; background: var(--surface-card); transition: all 0.3s ease;" onchange="updateDeliveryMethodLive(this)">
+                                <input type="radio" name="deliveryMethod" value="priority" style="margin: 0;">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">⚡ Priority Shipping</div>
+                                    <div style="font-size: 12px; color: var(--text-secondary);">1-2 business days • <span class="live-shipping-cost" data-method="priority">$25</span></div>
+                                </div>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 16px; border: 2px solid var(--border-subtle); border-radius: 8px; background: var(--surface-card); transition: all 0.3s ease;" onchange="updateDeliveryMethodLive(this)">
+                                <input type="radio" name="deliveryMethod" value="overnight" style="margin: 0;">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">🚀 Overnight</div>
+                                    <div style="font-size: 12px; color: var(--text-secondary);">Next business day • <span class="live-shipping-cost" data-method="overnight">$50</span></div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Live Pricing Summary -->
+                    <div class="live-pricing-summary" style="background: var(--surface-elevated); padding: 16px; border-radius: 8px; margin-top: 16px; border: 1px solid var(--brand-green);">
+                        <h5 style="color: var(--brand-green); margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
+                            ⚡ Live Pricing Update
+                        </h5>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span>Subtotal:</span>
+                            <span class="live-subtotal" style="font-weight: 600;">$0.00</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span>Shipping:</span>
+                            <span class="live-shipping-amount" style="font-weight: 600; color: var(--brand-green);">$0.00</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-subtle); padding-top: 8px; font-weight: 700; font-size: 16px;">
+                            <span>Total:</span>
+                            <span class="live-total-amount" style="color: var(--brand-green);">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Notes -->
+                <div class="checkout-section" style="margin-bottom: 24px;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        📝 Order Notes
+                    </h4>
+                    <div class="form-group">
+                        <label for="checkoutOrderNotes">Special Instructions (Optional)</label>
+                        <textarea id="checkoutOrderNotes" rows="3" placeholder="Any special delivery instructions, preferred delivery times, or other notes..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('checkoutModal')">← Back to Cart</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1; padding: 14px; font-size: 16px; font-weight: 700;">
+                        💳 Proceed to Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Checkout Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">💳 Complete Your Order</h3>
+                <button class="modal-close" onclick="closeModal('paymentModal')">×</button>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="order-summary-section" style="background: var(--surface-elevated); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border-subtle);">
+                <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                    📦 Order Summary
+                </h4>
+                <div id="orderSummaryItems" style="margin-bottom: 16px;">
+                    <!-- Order items will be populated here -->
+                </div>
+                <div style="border-top: 2px solid var(--border-subtle); padding-top: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; color: var(--brand-green);">
+                        <span>Total Amount:</span>
+                        <span id="orderTotalAmount">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Method Selection -->
+            <div class="payment-method-section" style="margin-bottom: 24px;">
+                <h4 style="color: var(--text-primary); margin-bottom: 16px;">💳 Payment Method</h4>
+                <div class="payment-method-tabs" style="display: flex; gap: 8px; margin-bottom: 20px; background: var(--surface-card); padding: 8px; border-radius: 12px;">
+                    <button type="button" class="payment-tab active" data-method="card" onclick="selectPaymentMethod('card')" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: var(--brand-green); color: white; cursor: pointer; font-weight: 600;">
+                        💳 Card
+                    </button>
+                    <button type="button" class="payment-tab" data-method="crypto" onclick="selectPaymentMethod('crypto')" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: transparent; color: var(--text-secondary); cursor: pointer; font-weight: 600;">
+                        ₿ Crypto
+                    </button>
+                    <button type="button" class="payment-tab" data-method="bank" onclick="selectPaymentMethod('bank')" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: transparent; color: var(--text-secondary); cursor: pointer; font-weight: 600;">
+                        🏦 Bank Transfer
+                    </button>
+                </div>
+            </div>
+
+            <form onsubmit="processPayment(event)">
+                <!-- Card Payment Form -->
+                <div id="cardPaymentForm" class="payment-form active">
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 2;">
+                            <label for="cardNumber">Card Number *</label>
+                            <input type="text" id="cardNumber" required placeholder="1234 5678 9012 3456" maxlength="19" onkeyup="formatCardNumber(this)">
+                        </div>
+                        <div class="form-group">
+                            <label for="cardCvv">CVV *</label>
+                            <input type="text" id="cardCvv" required placeholder="123" maxlength="4" onkeyup="formatCvv(this)">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cardExpiry">Expiry Date *</label>
+                            <input type="text" id="cardExpiry" required placeholder="MM/YY" maxlength="5" onkeyup="formatExpiry(this)">
+                        </div>
+                        <div class="form-group">
+                            <label for="cardName">Cardholder Name *</label>
+                            <input type="text" id="cardName" required placeholder="John Smith">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="billingAddress">Billing Address *</label>
+                        <textarea id="billingAddress" rows="3" required placeholder="Full billing address including city, state, zip"></textarea>
+                    </div>
+                </div>
+
+                <!-- Crypto Payment Form -->
+                <div id="cryptoPaymentForm" class="payment-form" style="display: none;">
+                    <div class="form-group">
+                        <label for="cryptoType">Cryptocurrency *</label>
+                        <select id="cryptoType" required>
+                            <option value="">Select cryptocurrency</option>
+                            <option value="bitcoin">Bitcoin (BTC)</option>
+                            <option value="ethereum">Ethereum (ETH)</option>
+                            <option value="litecoin">Litecoin (LTC)</option>
+                            <option value="usdc">USD Coin (USDC)</option>
+                            <option value="usdt">Tether (USDT)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cryptoWallet">Wallet Address *</label>
+                        <input type="text" id="cryptoWallet" required placeholder="Your cryptocurrency wallet address">
+                    </div>
+                    <div class="form-group">
+                        <label for="cryptoEmail">Email for Transaction Updates *</label>
+                        <input type="email" id="cryptoEmail" required placeholder="crypto@yourstore.com">
+                    </div>
+                    <div style="background: var(--surface-elevated); padding: 16px; border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                        <p style="color: var(--text-secondary); margin: 0; font-size: 14px;">
+                            📝 Note: You will receive payment instructions via email. Payment must be completed within 30 minutes to reserve your order.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Bank Transfer Form -->
+                <div id="bankPaymentForm" class="payment-form" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bankAccountName">Account Holder Name *</label>
+                            <input type="text" id="bankAccountName" required placeholder="Account holder full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="bankRoutingNumber">Routing Number *</label>
+                            <input type="text" id="bankRoutingNumber" required placeholder="123456789" maxlength="9" onkeyup="formatRoutingNumber(this)">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bankAccountNumber">Account Number *</label>
+                            <input type="text" id="bankAccountNumber" required placeholder="Account number">
+                        </div>
+                        <div class="form-group">
+                            <label for="bankAccountType">Account Type *</label>
+                            <select id="bankAccountType" required>
+                                <option value="">Select account type</option>
+                                <option value="checking">Checking</option>
+                                <option value="savings">Savings</option>
+                                <option value="business">Business Checking</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="bankName">Bank Name *</label>
+                        <input type="text" id="bankName" required placeholder="Bank name">
+                    </div>
+                    <div style="background: var(--surface-elevated); padding: 16px; border-radius: 8px; border-left: 4px solid var(--brand-green);">
+                        <p style="color: var(--text-secondary); margin: 0; font-size: 14px;">
+                            🏦 Note: Bank transfers typically take 1-3 business days to process. Your order will be prepared once payment is confirmed.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Security & Terms -->
+                <div class="security-section" style="background: var(--surface-elevated); padding: 16px; border-radius: 8px; margin: 24px 0; border: 1px solid var(--border-subtle);">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <span style="color: var(--brand-green); font-size: 20px;">🔒</span>
+                        <h4 style="margin: 0; color: var(--text-primary);">Secure Payment</h4>
+                    </div>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">
+                        Your payment information is encrypted and processed securely through our certified payment processor. We never store your payment details.
+                    </p>
+                    <div style="margin-top: 12px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-primary);">
+                            <input type="checkbox" id="agreeTerms" required style="margin: 0;">
+                            <span style="font-size: 14px;">I agree to the <a href="#" style="color: var(--brand-green);">Terms of Service</a> and <a href="#" style="color: var(--brand-green);">Privacy Policy</a></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('paymentModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1; padding: 14px; font-size: 16px; font-weight: 700;">
+                        🚀 Complete Payment
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -4982,60 +5666,7 @@ Phone: (210) 835-7834
             }
         }
 
-        function openProfileEditModal() {
-            try {
-                const user = currentUser || {};
-                const modal = document.createElement('div');
-                modal.className = 'modal';
-                modal.style.display = 'block';
-                modal.innerHTML = `
-                    <div class="modal-content" style="max-width: 500px;">
-                        <div class="modal-header">
-                            <h3 class="modal-title">✏️ Edit Business Profile</h3>
-                            <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
-                        </div>
-                        <form id="editProfileForm">
-                            <div class="form-group">
-                                <label for="editBusinessName">Business Name</label>
-                                <input type="text" id="editBusinessName" value="${user.businessName || 'Green Valley Dispensary'}" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="editContactName">Contact Name</label>
-                                <input type="text" id="editContactName" value="${user.contactName || 'John Smith'}" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="editProfileEmail">Email</label>
-                                <input type="email" id="editProfileEmail" value="${user.email || ''}" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="editLicense">License Number</label>
-                                <input type="text" id="editLicense" value="${user.license || ''}" placeholder="Enter license #" />
-                            </div>
-                            <button type="submit" class="btn btn-primary" style="width:100%;">Save Changes</button>
-                        </form>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-                document.body.style.overflow = 'hidden';
-                modal.querySelector('#editProfileForm').onsubmit = function(e) {
-                    e.preventDefault();
-                    currentUser.businessName = modal.querySelector('#editBusinessName').value.trim();
-                    currentUser.contactName = modal.querySelector('#editContactName').value.trim();
-                    currentUser.email = modal.querySelector('#editProfileEmail').value.trim();
-                    currentUser.license = modal.querySelector('#editLicense').value.trim();
-                    try {
-                        sessionStorage.setItem('fadedSkiesSession', JSON.stringify(currentUser));
-                    } catch (e) {}
-                    updateProfileDisplay();
-                    showNotification('✅ Profile updated successfully!', 'success');
-                    modal.remove();
-                    document.body.style.overflow = 'auto';
-                };
-            } catch (error) {
-                console.error('Error editing profile:', error);
-                showNotification('Edit error. Please contact support.', 'error');
-            }
-        }
+        // openProfileEditModal function removed - now using the comprehensive one from main-app.js
 
         function updateProfileDisplay() {
             try {
@@ -5169,7 +5800,7 @@ Phone: (210) 835-7834
                     });
                 });
                 
-                console.log(`✅ Modal triggers setup complete (${uniqueTriggers.length} triggers found)`);
+                console.log(`��� Modal triggers setup complete (${uniqueTriggers.length} triggers found)`);
                 
             } catch (error) {
                 console.error('Error setting up modal triggers:', error);

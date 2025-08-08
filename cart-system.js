@@ -137,6 +137,7 @@ class CartManager {
 
             this.saveCart();
             this.updateDisplay();
+            this.syncCartRealTime(); // Real-time sync
             this.notifyListeners('item_added', { productId, quantity });
 
             // Auto-open cart for first item
@@ -169,8 +170,9 @@ class CartManager {
             const removedItem = this.cart.splice(itemIndex, 1)[0];
             this.saveCart();
             this.updateDisplay();
+            this.syncCartRealTime(); // Real-time sync
             this.notifyListeners('item_removed', { productId });
-            
+
             this.showNotification(`🗑️ Removed ${removedItem.strain} from cart`, 'success');
             return true;
 
@@ -213,6 +215,7 @@ class CartManager {
 
             this.saveCart();
             this.updateDisplay();
+            this.syncCartRealTime(); // Real-time sync
             this.notifyListeners('quantity_updated', { productId, oldQuantity, newQuantity });
 
             if (newQuantity > oldQuantity) {
@@ -242,6 +245,7 @@ class CartManager {
             this.cart = [];
             this.saveCart();
             this.updateDisplay();
+            this.syncCartRealTime(); // Real-time sync
             this.notifyListeners('cart_cleared', { itemCount });
             
             this.showNotification(`🗑️ Cart cleared successfully (${itemCount} items removed)`, 'success');
@@ -491,8 +495,8 @@ class CartManager {
                         <span style="color: var(--brand-green);">$${totals.total.toFixed(2)}</span>
                     </div>
                 </div>
-                <button class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 700; border-radius: 8px;" onclick="window.cartManager.checkout()">
-                    🚀 Place Order - $${totals.total.toFixed(2)}
+                <button class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 700; border-radius: 8px;" onclick="window.cartManager.openCheckoutModal()">
+                    🛒 Checkout - $${totals.total.toFixed(2)}
                 </button>
                 <button class="btn btn-secondary" style="width: 100%; margin-top: 8px; padding: 10px; border-radius: 8px;" onclick="window.cartManager.clear()">
                     🗑️ Clear Cart
@@ -545,10 +549,9 @@ class CartManager {
         }
     }
 
-    // Checkout process
-    async checkout() {
+    // Open checkout modal (new method)
+    openCheckoutModal() {
         try {
-
             if (this.cart.length === 0) {
                 this.showNotification('⚠️ Your cart is empty! Add some products first.', 'error');
                 return false;
@@ -561,30 +564,364 @@ class CartManager {
                 return false;
             }
 
-            // Show loading state
-            const checkoutBtn = document.querySelector('.cart-total .btn-primary');
-            const originalText = checkoutBtn ? checkoutBtn.textContent : '';
-            if (checkoutBtn) {
-                checkoutBtn.textContent = 'Processing Order...';
-                checkoutBtn.disabled = true;
+            // Check authentication
+            if (!window.currentUser) {
+                this.showNotification('🔒 Please log in to complete your order', 'error');
+                openModal('loginModal');
+                return false;
             }
 
-            // Process order
-            const success = await this.processOrder();
+            // Populate checkout modal with cart data
+            this.populateCheckoutModal();
 
-            // Restore button state
-            if (checkoutBtn) {
-                checkoutBtn.textContent = originalText;
-                checkoutBtn.disabled = false;
-            }
+            // Open checkout modal
+            openModal('checkoutModal');
 
-            return success;
+            console.log('🛒 Checkout modal opened');
+            return true;
 
         } catch (error) {
-            console.error('Checkout error:', error);
-            this.showNotification('❌ Checkout failed. Please try again or contact support.', 'error');
+            console.error('Checkout modal error:', error);
+            this.showNotification('❌ Unable to open checkout. Please try again.', 'error');
             return false;
         }
+    }
+
+    // Populate checkout modal with cart and user data
+    populateCheckoutModal() {
+        const totals = this.getTotals();
+
+        // Update checkout order summary
+        const checkoutOrderItems = document.getElementById('checkoutOrderItems');
+        const checkoutOrderTotal = document.getElementById('checkoutOrderTotal');
+
+        if (checkoutOrderItems) {
+            const itemsHTML = this.cart.map((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                return `
+                    <div class="checkout-order-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);" data-item-id="${item.id}">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <img src="${item.image || 'https://via.placeholder.com/40x40/1a1a1a/00C851?text=' + encodeURIComponent(item.grade)}"
+                                 alt="${item.strain}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover;" />
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-primary);">${item.strain}</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">${item.grade} • Qty: ${item.quantity}</div>
+                            </div>
+                        </div>
+                        <div style="font-weight: 600; color: var(--brand-green);" class="item-total-${item.id}">$${itemTotal.toFixed(2)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            checkoutOrderItems.innerHTML = itemsHTML;
+        }
+
+        if (checkoutOrderTotal) {
+            checkoutOrderTotal.textContent = `$${totals.total.toFixed(2)}`;
+        }
+
+        // Initialize live pricing
+        this.updateLivePricing();
+
+        // Pre-populate user information
+        const currentUser = window.currentUser;
+        if (currentUser) {
+            const fields = {
+                'checkoutCustomerName': currentUser.contactName || currentUser.name || '',
+                'checkoutCustomerEmail': currentUser.email || '',
+                'checkoutCustomerPhone': currentUser.phone || '',
+                'checkoutBusinessName': currentUser.businessName || '',
+                'checkoutShippingAddress': currentUser.businessAddress || ''
+            };
+
+            Object.entries(fields).forEach(([fieldId, value]) => {
+                const element = document.getElementById(fieldId);
+                if (element) {
+                    element.value = value;
+                    // Trigger live validation for pre-populated fields
+                    setTimeout(() => {
+                        if (window.validateFieldLive) {
+                            window.validateFieldLive(element);
+                        }
+                    }, 100);
+                }
+            });
+        }
+
+        console.log('✅ Checkout modal populated with', this.cart.length, 'items');
+    }
+
+    // Live pricing updates
+    updateLivePricing(deliveryMethod = 'standard') {
+        const totals = this.getTotals();
+        let shippingCost = 0;
+
+        // Calculate shipping based on method and subtotal
+        switch (deliveryMethod) {
+            case 'standard':
+                shippingCost = totals.subtotal >= 1000 ? 0 : 25;
+                break;
+            case 'priority':
+                shippingCost = 25;
+                break;
+            case 'overnight':
+                shippingCost = 50;
+                break;
+        }
+
+        const finalTotal = totals.subtotal + shippingCost;
+
+        // Update live pricing elements with animation
+        this.animateValueUpdate('.live-subtotal', `$${totals.subtotal.toFixed(2)}`);
+        this.animateValueUpdate('.live-shipping-amount', shippingCost === 0 ? 'FREE' : `$${shippingCost.toFixed(2)}`);
+        this.animateValueUpdate('.live-total-amount', `$${finalTotal.toFixed(2)}`);
+        this.animateValueUpdate('#checkoutOrderTotal', `$${finalTotal.toFixed(2)}`);
+
+        // Update shipping cost descriptions
+        document.querySelectorAll('.live-shipping-cost').forEach(element => {
+            const method = element.dataset.method;
+            let costText = '';
+
+            switch (method) {
+                case 'standard':
+                    costText = totals.subtotal >= 1000 ? 'FREE' : '$25';
+                    if (totals.subtotal >= 1000) {
+                        costText = 'FREE (qualified!)';
+                        element.style.color = 'var(--brand-green)';
+                        element.style.fontWeight = '700';
+                    }
+                    break;
+                case 'priority':
+                    costText = '$25';
+                    break;
+                case 'overnight':
+                    costText = '$50';
+                    break;
+            }
+
+            element.textContent = costText;
+            element.classList.add('updating');
+            setTimeout(() => element.classList.remove('updating'), 300);
+        });
+
+        console.log('💰 Live pricing updated:', { subtotal: totals.subtotal, shipping: shippingCost, total: finalTotal });
+    }
+
+    // Animate value updates
+    animateValueUpdate(selector, newValue) {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.classList.add('updating');
+            element.textContent = newValue;
+            setTimeout(() => element.classList.remove('updating'), 300);
+        }
+    }
+
+    // Real-time cart sync during checkout
+    syncCartRealTime() {
+        if (!this.isOpen && !document.getElementById('checkoutModal').style.display !== 'none') {
+            return; // Only sync if cart or checkout is open
+        }
+
+        // Update checkout modal if open
+        const checkoutModal = document.getElementById('checkoutModal');
+        if (checkoutModal && checkoutModal.style.display !== 'none') {
+            this.updateCheckoutModalRealTime();
+        }
+
+        // Update regular cart display
+        this.updateDisplay();
+    }
+
+    // Update checkout modal in real-time
+    updateCheckoutModalRealTime() {
+        console.log('🔄 Real-time checkout update triggered');
+
+        // Get current delivery method
+        const selectedDelivery = document.querySelector('input[name="deliveryMethod"]:checked');
+        const deliveryMethod = selectedDelivery ? selectedDelivery.value : 'standard';
+
+        // Update live pricing
+        this.updateLivePricing(deliveryMethod);
+
+        // Update order items if any changes
+        const checkoutOrderItems = document.getElementById('checkoutOrderItems');
+        if (checkoutOrderItems) {
+            const currentItems = checkoutOrderItems.querySelectorAll('.checkout-order-item');
+
+            // Check if items changed
+            if (currentItems.length !== this.cart.length) {
+                this.populateCheckoutModal();
+                return;
+            }
+
+            // Update individual item totals
+            this.cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                const itemTotalElement = document.querySelector(`.item-total-${item.id}`);
+                if (itemTotalElement) {
+                    this.animateValueUpdate(`.item-total-${item.id}`, `$${itemTotal.toFixed(2)}`);
+                }
+            });
+        }
+    }
+
+    // Process checkout and move to payment
+    async processCheckout() {
+        try {
+            // Validate checkout form
+            const validation = this.validateCheckoutForm();
+            if (!validation.valid) {
+                this.showNotification(`❌ ${validation.message}`, 'error');
+                return false;
+            }
+
+            // Store checkout data
+            this.checkoutData = validation.data;
+
+            // Close checkout modal
+            closeModal('checkoutModal');
+
+            // Open payment modal with order details
+            this.openPaymentModal();
+
+            return true;
+
+        } catch (error) {
+            console.error('Checkout processing error:', error);
+            this.showNotification('❌ Checkout processing failed. Please try again.', 'error');
+            return false;
+        }
+    }
+
+    // Validate checkout form
+    validateCheckoutForm() {
+        const customerName = document.getElementById('checkoutCustomerName').value.trim();
+        const customerEmail = document.getElementById('checkoutCustomerEmail').value.trim();
+        const customerPhone = document.getElementById('checkoutCustomerPhone').value.trim();
+        const businessName = document.getElementById('checkoutBusinessName').value.trim();
+        const shippingAddress = document.getElementById('checkoutShippingAddress').value.trim();
+        const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked')?.value || 'standard';
+        const orderNotes = document.getElementById('checkoutOrderNotes').value.trim();
+
+        // Required field validation
+        if (!customerName) {
+            return { valid: false, message: 'Customer name is required' };
+        }
+
+        if (!customerEmail || !customerEmail.includes('@')) {
+            return { valid: false, message: 'Valid email address is required' };
+        }
+
+        if (!customerPhone) {
+            return { valid: false, message: 'Phone number is required' };
+        }
+
+        if (!businessName) {
+            return { valid: false, message: 'Business name is required' };
+        }
+
+        if (!shippingAddress) {
+            return { valid: false, message: 'Shipping address is required' };
+        }
+
+        return {
+            valid: true,
+            data: {
+                customerName,
+                customerEmail,
+                customerPhone,
+                businessName,
+                shippingAddress,
+                deliveryMethod,
+                orderNotes
+            }
+        };
+    }
+
+    // Open payment modal with order summary
+    openPaymentModal() {
+        const totals = this.getTotals();
+
+        // Populate order summary
+        this.populateOrderSummary(totals);
+
+        // Set payment method to card by default
+        this.selectPaymentMethod('card');
+
+        // Open payment modal
+        openModal('paymentModal');
+
+        console.log('💳 Payment modal opened with order total:', totals.total);
+    }
+
+    // Populate order summary in payment modal
+    populateOrderSummary(totals) {
+        const orderSummaryItems = document.getElementById('orderSummaryItems');
+        const orderTotalAmount = document.getElementById('orderTotalAmount');
+
+        if (!orderSummaryItems || !orderTotalAmount) {
+            console.error('Order summary elements not found');
+            return;
+        }
+
+        // Generate order items HTML
+        const itemsHTML = this.cart.map(item => {
+            const itemTotal = item.price * item.quantity;
+            return `
+                <div class="order-summary-item">
+                    <div class="order-item-details">
+                        <img src="${item.image || 'https://via.placeholder.com/40x40/1a1a1a/00C851?text=' + encodeURIComponent(item.grade)}"
+                             alt="${item.strain}" class="order-item-image" />
+                        <div class="order-item-info">
+                            <h5>${item.strain}</h5>
+                            <p>${item.grade} • $${item.price.toFixed(2)}${this.getUnitLabel(item.grade)}</p>
+                        </div>
+                    </div>
+                    <div class="order-item-price">
+                        <div class="order-item-quantity">Qty: ${item.quantity}</div>
+                        <div class="order-item-total">$${itemTotal.toFixed(2)}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        orderSummaryItems.innerHTML = itemsHTML;
+        orderTotalAmount.textContent = `$${totals.total.toFixed(2)}`;
+
+        console.log('✅ Order summary populated with', this.cart.length, 'items');
+    }
+
+    // Select payment method
+    selectPaymentMethod(method) {
+        // Update tab styles
+        document.querySelectorAll('.payment-tab').forEach(tab => {
+            tab.classList.remove('active');
+            tab.style.background = 'transparent';
+            tab.style.color = 'var(--text-secondary)';
+        });
+
+        const activeTab = document.querySelector(`[data-method="${method}"]`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+            activeTab.style.background = 'var(--brand-green)';
+            activeTab.style.color = 'white';
+        }
+
+        // Hide all payment forms
+        document.querySelectorAll('.payment-form').forEach(form => {
+            form.style.display = 'none';
+            form.classList.remove('active');
+        });
+
+        // Show selected payment form
+        const activeForm = document.getElementById(`${method}PaymentForm`);
+        if (activeForm) {
+            activeForm.style.display = 'block';
+            activeForm.classList.add('active');
+        }
+
+        console.log('💳 Payment method selected:', method);
     }
 
     // Validate cart before checkout
@@ -753,10 +1090,14 @@ class CartManager {
 // Initialize cart manager when DOM is ready
 if (typeof window !== 'undefined') {
     window.CartManager = CartManager;
-    
+
     // Initialize cart manager if not already done
     if (!window.cartManager) {
         window.cartManager = new CartManager();
         console.log('🛒 Cart manager initialized');
     }
+
+    // Make methods globally available for easier access
+    window.openCheckoutModal = () => window.cartManager?.openCheckoutModal();
+    window.processCheckout = () => window.cartManager?.processCheckout();
 }
