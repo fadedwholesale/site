@@ -183,7 +183,7 @@ class LiveSystemsIntegrator {
 
     async testRealTimeSync() {
         const testName = 'Real-Time Sync Test';
-        
+
         if (!this.systems.realTimeSync) {
             return {
                 name: testName,
@@ -194,23 +194,45 @@ class LiveSystemsIntegrator {
         }
 
         try {
-            // Test broadcasting
-            const testData = { test: true, timestamp: Date.now() };
-            this.systems.realTimeSync.broadcast('integration_test', testData);
-            
-            // Test listener
-            let receivedData = false;
-            this.systems.realTimeSync.on('integration_test', (data) => {
-                receivedData = true;
-            });
+            // Test basic functionality first
+            const syncStatus = this.systems.realTimeSync.getSyncStatus();
+            if (!syncStatus || !syncStatus.isOnline) {
+                return {
+                    name: testName,
+                    passed: false,
+                    message: 'Real-time sync is offline or not properly initialized',
+                    timestamp: new Date().toISOString()
+                };
+            }
 
-            // Give it a moment to process
-            await new Promise(resolve => setTimeout(resolve, 100));
+            // Test broadcasting and listening
+            let receivedData = false;
+            const testData = { test: true, timestamp: Date.now() };
+
+            // Set up listener first
+            const testHandler = (data) => {
+                if (data.test && data.timestamp === testData.timestamp) {
+                    receivedData = true;
+                }
+            };
+            this.systems.realTimeSync.on('integration_test', testHandler);
+
+            // Give listener time to register
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            // Now broadcast
+            this.systems.realTimeSync.broadcast('integration_test', testData);
+
+            // Wait for processing
+            await new Promise(resolve => setTimeout(resolve, 200));
+
+            // Clean up listener
+            this.systems.realTimeSync.off('integration_test', testHandler);
 
             return {
                 name: testName,
-                passed: true,
-                message: 'Real-time broadcasting and listening working correctly',
+                passed: receivedData,
+                message: receivedData ? 'Real-time broadcasting and listening working correctly' : 'Real-time sync not receiving broadcasts',
                 timestamp: new Date().toISOString()
             };
         } catch (error) {
