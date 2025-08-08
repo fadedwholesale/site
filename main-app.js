@@ -74,27 +74,10 @@ function initializeApplication() {
     // Initialize live checkout system
     initializeLiveCheckout();
 
-    // Ensure there's a user for profile editing (auto-login if no user)
+    // Ensure users start in logged out state
     if (!currentUser) {
-        console.log('🔄 No user found, creating default user for profile editing...');
-        const defaultUser = {
-            email: 'partner@greenvalley.com',
-            name: 'John Smith',
-            businessName: 'Green Valley Dispensary',
-            contactName: 'John Smith',
-            phone: '(555) 123-4567',
-            businessType: 'dispensary',
-            tier: 'Gold Partner',
-            loginTime: new Date().toISOString(),
-            businessAddress: '123 Main Street\nGreen Valley, CA 90210',
-            licenseNumber: 'CA-LICENSE-12345',
-            website: 'https://greenvalleydispensary.com',
-            taxId: '12-3456789',
-            notes: 'Premium cannabis retailer serving the community since 2020'
-        };
-        setCurrentUser(defaultUser);
-        showUserSession();
-        console.log('✅ Default user created for profile editing');
+        console.log('👤 No user session found, showing guest session');
+        showGuestSession();
     }
 
     // Initialize view state
@@ -206,18 +189,66 @@ function handleSharedDataChange(event) {
 // Authentication Functions
 function login(event) {
     event.preventDefault();
-    
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    // Simple authentication (in real app, this would be server-side)
-    if (email && password) {
-        const userData = {
-            email: email,
-            name: email.split('@')[0],
-            tier: 'Gold Partner',
-            loginTime: new Date().toISOString()
-        };
+    // Enhanced authentication with credential validation
+    if (!email || !password) {
+        showNotification('❌ Please enter both email and password', 'error');
+        return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showNotification('❌ Please enter a valid email address', 'error');
+        return;
+    }
+
+    // Demo credentials for testing (in real app, this would be server-side)
+    const validCredentials = {
+        'partner@greenvalley.com': 'demo123',
+        'admin@fadedskies.com': 'admin123',
+        'test@partner.com': 'test123'
+    };
+
+    if (validCredentials[email] && validCredentials[email] === password) {
+        // Create user data based on email
+        let userData;
+        if (email === 'partner@greenvalley.com') {
+            userData = {
+                email: email,
+                name: 'John Smith',
+                businessName: 'Green Valley Dispensary',
+                contactName: 'John Smith',
+                phone: '(555) 123-4567',
+                businessType: 'dispensary',
+                tier: 'Gold Partner',
+                loginTime: new Date().toISOString(),
+                businessAddress: '123 Main Street\nGreen Valley, CA 90210',
+                licenseNumber: 'CA-LICENSE-12345',
+                website: 'https://greenvalleydispensary.com',
+                taxId: '12-3456789',
+                notes: 'Premium cannabis retailer serving the community since 2020'
+            };
+        } else if (email === 'admin@fadedskies.com') {
+            userData = {
+                email: email,
+                name: 'Admin User',
+                businessName: 'Faded Skies Admin',
+                tier: 'Administrator',
+                loginTime: new Date().toISOString(),
+                isAdmin: true
+            };
+        } else {
+            userData = {
+                email: email,
+                name: email.split('@')[0],
+                tier: 'Partner',
+                loginTime: new Date().toISOString()
+            };
+        }
 
         // Set user with proper synchronization
         setCurrentUser(userData);
@@ -233,7 +264,7 @@ function login(event) {
         showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
         console.log('✅ User logged in:', currentUser.email);
     } else {
-        showNotification('❌ Please enter valid credentials', 'error');
+        showNotification('❌ Invalid email or password. Try: partner@greenvalley.com / demo123', 'error');
     }
 }
 
