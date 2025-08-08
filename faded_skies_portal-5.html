@@ -2030,7 +2030,7 @@
     <header>
         <nav class="container">
             <div class="logo" onclick="showPublicWebsite()">
-                <img src="logo2.png" alt="Faded Skies Logo" />
+                <img id="partnerHeaderLogo" src="" alt="Faded Skies Logo" />
             </div>
             <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" style="display: none;">☰</button>
             <ul class="nav-links" id="mobileNavLinks">
@@ -3082,7 +3082,7 @@
                 <!-- Additional Information Section -->
                 <div class="form-section" style="margin-bottom: 24px;">
                     <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                        📝 Additional Information
+                        �� Additional Information
                     </h4>
                     <div class="form-row">
                         <div class="form-group">
@@ -4375,7 +4375,7 @@
                     
                     // Send confirmation notification
                     setTimeout(() => {
-                        showNotification('📧 Confirmation email sent to ' + businessEmail, 'success');
+                        showNotification('�� Confirmation email sent to ' + businessEmail, 'success');
                     }, 2000);
                 }, 2000);
                 
@@ -4959,19 +4959,62 @@
             }
         }
 
+        // Load system logos
+        function loadSystemLogos() {
+            try {
+                const logos = window.sharedDataManager.getLogos();
+                console.log('📷 Loading system logos:', logos);
+
+                // Update partner header logo
+                const partnerLogo = document.getElementById('partnerHeaderLogo');
+                if (partnerLogo && logos.partnerHeader) {
+                    partnerLogo.src = logos.partnerHeader;
+                    partnerLogo.style.display = 'block';
+                    console.log('✅ Partner header logo loaded');
+                } else if (partnerLogo && logos.main) {
+                    // Fallback to main logo
+                    partnerLogo.src = logos.main;
+                    partnerLogo.style.display = 'block';
+                    console.log('✅ Partner header logo loaded (fallback)');
+                }
+            } catch (error) {
+                console.error('❌ Error loading system logos:', error);
+            }
+        }
+
+        // Handle logo updates
+        function handleLogoUpdate(logos) {
+            console.log('📷 Handling logo update:', logos);
+            loadSystemLogos();
+            showNotification('📷 Logo updated successfully', 'success');
+        }
+
+        // Listen for shared data changes including logo updates
+        window.addEventListener('sharedDataChange', function(event) {
+            const { type, data } = event.detail;
+            if (type === 'logos_updated' || type === 'system_config_updated') {
+                handleLogoUpdate(data);
+            }
+        });
+
         // Enhanced initialization with mobile-first approach and image support
         function initializeApp() {
             console.log('🌿 Initializing Faded Skies Wholesale Portal...');
-            
+
             try {
                 // Check for existing session first
                 const hasSession = checkExistingSession();
-                
+
                 // Restore cart data if available
                 if (hasSession) {
                     restoreSessionData();
                 }
-                
+
+                // Load system logos
+                setTimeout(() => {
+                    loadSystemLogos();
+                }, 200);
+
                 updateAllViews();
                 showPublicWebsite();
                 

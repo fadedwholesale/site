@@ -95,6 +95,16 @@
             color: white;
             text-shadow: 0 0 20px var(--brand-green);
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            height: 48px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 200, 81, 0.3);
         }
 
         .admin-indicator {
@@ -1191,7 +1201,10 @@
 
     <header>
         <nav class="container">
-            <div class="logo">🔧 Faded Skies Admin</div>
+            <div class="logo">
+                <img id="adminHeaderLogo" src="" alt="Faded Skies Admin Logo" />
+                🔧 Faded Skies Admin
+            </div>
             <div class="nav-info">
                 <div class="admin-indicator">
                     <span>👑</span>
@@ -2821,8 +2834,77 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             initializeAdminDashboard();
         });
 
+        // Load system logos
+        function loadSystemLogos() {
+            try {
+                const logos = window.sharedDataManager.getLogos();
+                console.log('📷 Loading system logos:', logos);
+
+                // Update admin header logo
+                const adminLogo = document.getElementById('adminHeaderLogo');
+                if (adminLogo && logos.adminHeader) {
+                    adminLogo.src = logos.adminHeader;
+                    adminLogo.style.display = 'inline-block';
+                    console.log('✅ Admin header logo loaded');
+                } else if (adminLogo && logos.main) {
+                    // Fallback to main logo
+                    adminLogo.src = logos.main;
+                    adminLogo.style.display = 'inline-block';
+                    console.log('✅ Admin header logo loaded (fallback)');
+                }
+            } catch (error) {
+                console.error('❌ Error loading system logos:', error);
+            }
+        }
+
+        // Handle logo updates
+        function handleLogoUpdate(logos) {
+            console.log('📷 Handling logo update:', logos);
+            loadSystemLogos();
+            showNotification('📷 Logo updated successfully', 'success');
+        }
+
+        // Listen for shared data changes including logo updates
+        window.addEventListener('sharedDataChange', function(event) {
+            const { type, data } = event.detail;
+            if (type === 'logos_updated' || type === 'system_config_updated') {
+                handleLogoUpdate(data);
+            }
+        });
+
+        // Update system logo function
+        function updateSystemLogo(logoUrl) {
+            try {
+                console.log('📷 Updating system logo to:', logoUrl);
+
+                const updatedLogos = window.sharedDataManager.updateLogos({
+                    main: logoUrl,
+                    adminHeader: logoUrl,
+                    partnerHeader: logoUrl
+                });
+
+                console.log('✅ System logo updated:', updatedLogos);
+                showNotification('📷 Logo updated and synced to all portals!', 'success');
+
+                // Immediately refresh logos
+                loadSystemLogos();
+
+                return updatedLogos;
+            } catch (error) {
+                console.error('❌ Error updating system logo:', error);
+                showNotification('❌ Failed to update logo', 'error');
+                throw error;
+            }
+        }
+
         function initializeAdminDashboard() {
             console.log('🔧 Initializing Faded Skies Admin Dashboard...');
+
+            // Initialize system logo with the provided URL
+            updateSystemLogo('https://cdn.builder.io/api/v1/image/assets%2F9ee94cd3e5524451b5a43eae8f0b9627%2F2a1db2e6b6bc4987bc3bab24606d5f80?format=webp&width=800');
+
+            // Load system logos
+            loadSystemLogos();
 
             // Load products from shared data manager
             const sharedProducts = window.sharedDataManager.getProducts();
@@ -3459,7 +3541,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 window.sharedDataManager.deleteProduct(productId);
 
                 updateAllDashboardViews();
-                showNotification(`🗑️ Product ${product.strain} deleted`, 'success');
+                showNotification(`���️ Product ${product.strain} deleted`, 'success');
             }
         }
 

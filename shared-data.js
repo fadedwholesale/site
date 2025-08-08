@@ -17,6 +17,18 @@ class SharedDataManager {
                 products: [],
                 carts: {}, // keyed by user email
                 orders: [],
+                system: {
+                    logos: {
+                        main: 'https://cdn.builder.io/api/v1/image/assets%2F9ee94cd3e5524451b5a43eae8f0b9627%2F2a1db2e6b6bc4987bc3bab24606d5f80?format=webp&width=800',
+                        favicon: '',
+                        adminHeader: 'https://cdn.builder.io/api/v1/image/assets%2F9ee94cd3e5524451b5a43eae8f0b9627%2F2a1db2e6b6bc4987bc3bab24606d5f80?format=webp&width=800',
+                        partnerHeader: 'https://cdn.builder.io/api/v1/image/assets%2F9ee94cd3e5524451b5a43eae8f0b9627%2F2a1db2e6b6bc4987bc3bab24606d5f80?format=webp&width=800'
+                    },
+                    branding: {
+                        companyName: 'Faded Skies',
+                        tagline: 'Premium THCA Wholesale'
+                    }
+                },
                 lastSync: new Date().toISOString(),
                 version: 1
             };
@@ -630,6 +642,46 @@ class SharedDataManager {
     // Get real-time sync status
     getRealTimeSyncStatus() {
         return this.realTimeSync ? this.realTimeSync.getSyncStatus() : null;
+    }
+
+    // System Configuration Management
+    getSystemConfig() {
+        const data = this.getData();
+        return data.system || {};
+    }
+
+    updateSystemConfig(config) {
+        const data = this.getData();
+        if (!data.system) data.system = {};
+        data.system = { ...data.system, ...config };
+        this.saveData(data);
+        this.notifyChange('system_config_updated', data.system);
+
+        // Broadcast real-time update
+        if (this.realTimeSync) {
+            this.realTimeSync.broadcast('system_config_updated', data.system);
+        }
+        return data.system;
+    }
+
+    updateLogos(logos) {
+        const data = this.getData();
+        if (!data.system) data.system = {};
+        if (!data.system.logos) data.system.logos = {};
+        data.system.logos = { ...data.system.logos, ...logos };
+        this.saveData(data);
+        this.notifyChange('logos_updated', data.system.logos);
+
+        // Broadcast real-time update
+        if (this.realTimeSync) {
+            this.realTimeSync.broadcast('logos_updated', data.system.logos);
+        }
+        return data.system.logos;
+    }
+
+    getLogos() {
+        const data = this.getData();
+        return data.system?.logos || {};
     }
 }
 
