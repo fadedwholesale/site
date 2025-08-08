@@ -1627,12 +1627,13 @@
             <div class="logo" onclick="showPublicWebsite()">
                 <img src="logo2.png" alt="Faded Skies Logo" />
             </div>
-            <ul class="nav-links">
-                <li><a onclick="showPublicWebsite()">Home</a></li>
-                <li><a onclick="scrollToSection('products')">Products</a></li>
-                <li><a onclick="scrollToSection('pricing')">Pricing</a></li>
-                <li><a onclick="toggleLiveInventory()">Live Inventory</a></li>
-                <li><a onclick="scrollToSection('compliance')">Compliance</a></li>
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" style="display: none;">☰</button>
+            <ul class="nav-links" id="mobileNavLinks">
+                <li><a onclick="showPublicWebsite(); closeMobileMenu();">Home</a></li>
+                <li><a onclick="scrollToSection('products'); closeMobileMenu();">Products</a></li>
+                <li><a onclick="scrollToSection('pricing'); closeMobileMenu();">Pricing</a></li>
+                <li><a onclick="toggleLiveInventory(); closeMobileMenu();">Live Inventory</a></li>
+                <li><a onclick="scrollToSection('compliance'); closeMobileMenu();">Compliance</a></li>
             </ul>
             <div class="nav-auth">
                 <!-- Guest Section -->
