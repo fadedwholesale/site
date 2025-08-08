@@ -5261,6 +5261,9 @@
                     forceUpdateWithImages();
                 }, 200);
                 
+                // Set up real-time sync for inventory and orders
+                setupPartnerRealTimeSync();
+
                 // Add all production features with mobile support
                 setTimeout(() => {
                     try {
@@ -5270,7 +5273,7 @@
                         enhanceAccessibility();
                         initializeToggleButtons();
                         addUniversalTouchHandlers(); // New comprehensive mobile handler
-                        
+
                         // Mobile-specific initialization
                         initializeMobileFeatures();
                         
