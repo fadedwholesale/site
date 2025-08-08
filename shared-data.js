@@ -251,17 +251,60 @@ class SharedDataManager {
     }
 
     // Event System
+    setupRealTimeSync() {
+        // Wait for RealTimeSync to be available
+        if (window.RealTimeSync) {
+            this.initializeRealTimeSync();
+        } else {
+            // Wait for it to load
+            setTimeout(() => this.setupRealTimeSync(), 100);
+        }
+    }
+
+    initializeRealTimeSync() {
+        if (window.realTimeSync) {
+            this.realTimeSync = window.realTimeSync;
+            console.log('📡 Connected to Real-Time Sync system');
+
+            // Set up listeners for real-time events
+            this.realTimeSync.on('products_updated', (data) => {
+                console.log('📡 Real-time products update received:', data);
+                this.handleRealTimeProductsUpdate(data);
+            });
+
+            this.realTimeSync.on('order_added', (data) => {
+                console.log('📡 Real-time order added:', data);
+                this.handleRealTimeOrderUpdate(data);
+            });
+
+            this.realTimeSync.on('inventory_updated', (data) => {
+                console.log('📡 Real-time inventory update:', data);
+                this.handleRealTimeInventoryUpdate(data);
+            });
+
+            this.realTimeSync.on('sync_request', () => {
+                console.log('📡 Sync request received, broadcasting current data');
+                this.broadcastCurrentData();
+            });
+
+            this.realTimeSync.on('full_sync', (data) => {
+                console.log('📡 Full sync received:', data);
+                this.handleFullSync(data);
+            });
+        }
+    }
+
     setupStorageListener() {
         window.addEventListener('storage', (e) => {
             if (e.key === this.storageKey) {
                 this.notifyChange('external_update', JSON.parse(e.newValue || '{}'));
             }
 
-            // Listen for real-time updates
+            // Listen for real-time updates (legacy support)
             if (e.key === 'fadedSkiesRealTimeUpdate') {
                 try {
                     const updateData = JSON.parse(e.newValue || '{}');
-                    console.log('📡 Received real-time update:', updateData);
+                    console.log('📡 Received legacy real-time update:', updateData);
 
                     // Dispatch the real-time update
                     window.dispatchEvent(new CustomEvent('realTimeUpdate', {
