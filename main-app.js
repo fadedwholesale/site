@@ -384,7 +384,7 @@ function addToCart(productId, quantity = 1) {
     if (window.cartManager) {
         return window.cartManager.addProduct(productId, quantity);
     } else {
-        console.error('❌ Cart manager not found');
+        console.error('�� Cart manager not found');
         showNotification('❌ Cart system not available', 'error');
         return false;
     }
@@ -1267,16 +1267,16 @@ function submitRegistration() {
 
     setTimeout(() => {
         closeModal('registerModal');
-        showNotification('🎉 Registration submitted successfully! You will receive an email confirmation shortly.', 'success');
-        
+        showNotification(`🎉 Application submitted successfully! Application ID: ${applicationData.applicationId}. Our team will review your application within 24-48 hours.`, 'success');
+
+        // Trigger admin notification
+        triggerAdminNotification(applicationData);
+
         // Reset form
-        currentRegistrationStep = 1;
-        registrationData = {};
-        document.getElementById('registrationStep3').classList.remove('active');
-        document.getElementById('registrationStep1').classList.add('active');
+        resetRegistrationForm();
         
         if (submitBtn) {
-            submitBtn.textContent = 'Submit Application ���';
+            submitBtn.textContent = 'Submit Application �����';
             submitBtn.disabled = false;
         }
     }, 2000);
