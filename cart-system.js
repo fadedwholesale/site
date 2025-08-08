@@ -545,8 +545,8 @@ class CartManager {
         }
     }
 
-    // Checkout process
-    async checkout() {
+    // Open checkout modal (new method)
+    openCheckoutModal() {
         try {
             if (this.cart.length === 0) {
                 this.showNotification('⚠️ Your cart is empty! Add some products first.', 'error');
@@ -567,15 +567,148 @@ class CartManager {
                 return false;
             }
 
-            // Open payment modal with order details
-            this.openPaymentModal();
+            // Populate checkout modal with cart data
+            this.populateCheckoutModal();
+
+            // Open checkout modal
+            openModal('checkoutModal');
+
+            console.log('🛒 Checkout modal opened');
             return true;
 
         } catch (error) {
-            console.error('Checkout error:', error);
-            this.showNotification('❌ Checkout failed. Please try again or contact support.', 'error');
+            console.error('Checkout modal error:', error);
+            this.showNotification('❌ Unable to open checkout. Please try again.', 'error');
             return false;
         }
+    }
+
+    // Populate checkout modal with cart and user data
+    populateCheckoutModal() {
+        const totals = this.getTotals();
+
+        // Update checkout order summary
+        const checkoutOrderItems = document.getElementById('checkoutOrderItems');
+        const checkoutOrderTotal = document.getElementById('checkoutOrderTotal');
+
+        if (checkoutOrderItems) {
+            const itemsHTML = this.cart.map(item => {
+                const itemTotal = item.price * item.quantity;
+                return `
+                    <div class="checkout-order-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <img src="${item.image || 'https://via.placeholder.com/40x40/1a1a1a/00C851?text=' + encodeURIComponent(item.grade)}"
+                                 alt="${item.strain}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover;" />
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-primary);">${item.strain}</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">${item.grade} • Qty: ${item.quantity}</div>
+                            </div>
+                        </div>
+                        <div style="font-weight: 600; color: var(--brand-green);">$${itemTotal.toFixed(2)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            checkoutOrderItems.innerHTML = itemsHTML;
+        }
+
+        if (checkoutOrderTotal) {
+            checkoutOrderTotal.textContent = `$${totals.total.toFixed(2)}`;
+        }
+
+        // Pre-populate user information
+        const currentUser = window.currentUser;
+        if (currentUser) {
+            const fields = {
+                'checkoutCustomerName': currentUser.contactName || currentUser.name || '',
+                'checkoutCustomerEmail': currentUser.email || '',
+                'checkoutCustomerPhone': currentUser.phone || '',
+                'checkoutBusinessName': currentUser.businessName || '',
+                'checkoutShippingAddress': currentUser.businessAddress || ''
+            };
+
+            Object.entries(fields).forEach(([fieldId, value]) => {
+                const element = document.getElementById(fieldId);
+                if (element) {
+                    element.value = value;
+                }
+            });
+        }
+
+        console.log('✅ Checkout modal populated with', this.cart.length, 'items');
+    }
+
+    // Process checkout and move to payment
+    async processCheckout() {
+        try {
+            // Validate checkout form
+            const validation = this.validateCheckoutForm();
+            if (!validation.valid) {
+                this.showNotification(`❌ ${validation.message}`, 'error');
+                return false;
+            }
+
+            // Store checkout data
+            this.checkoutData = validation.data;
+
+            // Close checkout modal
+            closeModal('checkoutModal');
+
+            // Open payment modal with order details
+            this.openPaymentModal();
+
+            return true;
+
+        } catch (error) {
+            console.error('Checkout processing error:', error);
+            this.showNotification('❌ Checkout processing failed. Please try again.', 'error');
+            return false;
+        }
+    }
+
+    // Validate checkout form
+    validateCheckoutForm() {
+        const customerName = document.getElementById('checkoutCustomerName').value.trim();
+        const customerEmail = document.getElementById('checkoutCustomerEmail').value.trim();
+        const customerPhone = document.getElementById('checkoutCustomerPhone').value.trim();
+        const businessName = document.getElementById('checkoutBusinessName').value.trim();
+        const shippingAddress = document.getElementById('checkoutShippingAddress').value.trim();
+        const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked')?.value || 'standard';
+        const orderNotes = document.getElementById('checkoutOrderNotes').value.trim();
+
+        // Required field validation
+        if (!customerName) {
+            return { valid: false, message: 'Customer name is required' };
+        }
+
+        if (!customerEmail || !customerEmail.includes('@')) {
+            return { valid: false, message: 'Valid email address is required' };
+        }
+
+        if (!customerPhone) {
+            return { valid: false, message: 'Phone number is required' };
+        }
+
+        if (!businessName) {
+            return { valid: false, message: 'Business name is required' };
+        }
+
+        if (!shippingAddress) {
+            return { valid: false, message: 'Shipping address is required' };
+        }
+
+        return {
+            valid: true,
+            data: {
+                customerName,
+                customerEmail,
+                customerPhone,
+                businessName,
+                shippingAddress,
+                deliveryMethod,
+                orderNotes
+            }
+        };
     }
 
     // Open payment modal with order summary
