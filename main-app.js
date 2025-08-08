@@ -751,29 +751,67 @@ function updateProfile(event) {
         submitBtn.textContent = 'Saving...';
         submitBtn.disabled = true;
 
-        // Simulate save process
+        // Simulate save process with proper data persistence
         setTimeout(() => {
-            // Update current user object
-            Object.assign(currentUser, formData);
-            currentUser.lastUpdated = new Date().toISOString();
+            try {
+                // Update current user object with all form data
+                Object.assign(currentUser, formData);
+                currentUser.lastUpdated = new Date().toISOString();
 
-            // Update localStorage
-            setCurrentUser(currentUser);
+                // Ensure core fields are set
+                if (!currentUser.name && formData.contactName) {
+                    currentUser.name = formData.contactName;
+                }
 
-            // Update UI displays
-            updateProfileDisplay();
+                // Update localStorage and global state
+                setCurrentUser(currentUser);
 
-            // Close modal
-            closeModal('profileEditModal');
+                // Update all UI displays that might show user data
+                updateProfileDisplay();
 
-            // Show success notification
-            showNotification('✅ Profile updated successfully!', 'success');
+                // Update welcome message in header if name changed
+                const userWelcome = document.getElementById('userWelcome');
+                if (userWelcome && currentUser.name) {
+                    userWelcome.textContent = `Welcome, ${currentUser.name}`;
+                }
 
-            // Restore button state
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
+                // Update profile email in navigation if email changed
+                if (currentUser.email !== formData.businessEmail) {
+                    currentUser.email = formData.businessEmail;
+                    setCurrentUser(currentUser);
+                }
 
-            console.log('✅ Profile updated:', currentUser);
+                // Close modal
+                closeModal('profileEditModal');
+
+                // Show detailed success notification
+                showNotification('✅ Profile updated successfully!', 'success');
+
+                setTimeout(() => {
+                    showNotification(`📝 Business: ${formData.businessName}`, 'info');
+                }, 1000);
+
+                setTimeout(() => {
+                    showNotification(`📧 Contact: ${formData.contactName} (${formData.businessEmail})`, 'info');
+                }, 2000);
+
+                // Restore button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+
+                console.log('✅ Profile updated with complete data:', currentUser);
+
+                // Trigger any other systems that might need to know about profile updates
+                window.dispatchEvent(new CustomEvent('profileUpdated', { detail: currentUser }));
+
+            } catch (error) {
+                console.error('Error during profile update:', error);
+                showNotification('❌ Error saving profile data', 'error');
+
+                // Restore button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
 
         }, 1500);
 
@@ -1187,7 +1225,7 @@ function testCartFunctionality() {
                     // Final validation
                     setTimeout(() => {
                         const cartElements = document.querySelectorAll('.cart-item');
-                        console.log('🧪 Final test results:', {
+                        console.log('���� Final test results:', {
                             expectedItems: testProductIds.length,
                             cartArrayLength: window.cartManager.cart.length,
                             domElements: cartElements.length,
