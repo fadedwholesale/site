@@ -539,6 +539,59 @@ class ActivityLogger {
         }, this.flushInterval);
     }
 
+    // Safe JSON serialization that handles circular references
+    safeJSONStringify(obj, maxDepth = 10) {
+        const seen = new WeakSet();
+
+        const replacer = (key, value, depth = 0) => {
+            // Limit recursion depth
+            if (depth > maxDepth) {
+                return '[Maximum depth reached]';
+            }
+
+            // Handle circular references
+            if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) {
+                    return '[Circular Reference]';
+                }
+                seen.add(value);
+            }
+
+            // Handle functions
+            if (typeof value === 'function') {
+                return '[Function]';
+            }
+
+            // Handle undefined
+            if (value === undefined) {
+                return '[Undefined]';
+            }
+
+            return value;
+        };
+
+        return JSON.stringify(obj, replacer);
+    }
+
+    // Create safe session data without circular references
+    getSafeSessionData() {
+        if (!this.currentSession) return null;
+
+        return {
+            id: this.currentSession.id,
+            startTime: this.currentSession.startTime,
+            endTime: this.currentSession.endTime,
+            userEmail: this.currentSession.userEmail,
+            userType: this.currentSession.userType,
+            page: this.currentSession.page,
+            userAgent: this.currentSession.userAgent,
+            screen: this.currentSession.screen,
+            viewport: this.currentSession.viewport,
+            eventCount: this.currentSession.events ? this.currentSession.events.length : 0,
+            duration: this.currentSession.duration
+        };
+    }
+
     // Flush logs to storage
     flushLogs() {
         if (this.logBuffer.length === 0 && this.changeBuffer.length === 0) {
@@ -550,11 +603,11 @@ class ActivityLogger {
             if (this.logBuffer.length > 0) {
                 const existingLogs = this.getStoredLogs();
                 const newLogs = [...existingLogs, ...this.logBuffer];
-                
+
                 // Keep only recent logs
                 const trimmedLogs = newLogs.slice(-this.maxLogs);
-                
-                localStorage.setItem(this.logStorageKey, JSON.stringify(trimmedLogs));
+
+                localStorage.setItem(this.logStorageKey, this.safeJSONStringify(trimmedLogs));
                 console.log(`💾 Flushed ${this.logBuffer.length} logs to storage`);
                 this.logBuffer = [];
             }
@@ -563,32 +616,46 @@ class ActivityLogger {
             if (this.changeBuffer.length > 0) {
                 const existingChanges = this.getStoredChanges();
                 const newChanges = [...existingChanges, ...this.changeBuffer];
-                
+
                 // Keep only recent changes
                 const trimmedChanges = newChanges.slice(-this.maxLogs);
-                
-                localStorage.setItem(this.changeStorageKey, JSON.stringify(trimmedChanges));
+
+                localStorage.setItem(this.changeStorageKey, this.safeJSONStringify(trimmedChanges));
                 console.log(`📝 Flushed ${this.changeBuffer.length} changes to storage`);
                 this.changeBuffer = [];
             }
 
-            // Update session in session storage
+            // Update session in session storage (safe version)
             if (this.currentSession) {
-                sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(this.currentSession));
+                const safeSession = this.getSafeSessionData();
+                sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(safeSession));
             }
 
         } catch (error) {
             console.error('❌ Error flushing logs:', error);
-            
+
             // Clear some space and try again
             this.cleanupOldLogs();
             try {
-                localStorage.setItem(this.logStorageKey, JSON.stringify(this.logBuffer.slice(-100)));
-                localStorage.setItem(this.changeStorageKey, JSON.stringify(this.changeBuffer.slice(-100)));
+                const safeLogBuffer = this.logBuffer.slice(-100).map(log => ({
+                    ...log,
+                    data: log.data ? '[Simplified]' : null
+                }));
+                const safeChangeBuffer = this.changeBuffer.slice(-100).map(change => ({
+                    ...change,
+                    beforeData: '[Simplified]',
+                    afterData: '[Simplified]'
+                }));
+
+                localStorage.setItem(this.logStorageKey, JSON.stringify(safeLogBuffer));
+                localStorage.setItem(this.changeStorageKey, JSON.stringify(safeChangeBuffer));
                 this.logBuffer = [];
                 this.changeBuffer = [];
             } catch (retryError) {
                 console.error('❌ Failed to flush logs even after cleanup:', retryError);
+                // Clear buffers to prevent infinite retry
+                this.logBuffer = [];
+                this.changeBuffer = [];
             }
         }
     }
