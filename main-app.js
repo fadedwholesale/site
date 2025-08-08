@@ -1232,7 +1232,7 @@ function requestCustomQuote() {
 }
 
 function openSupportModal() {
-    showNotification('📞 Support contact feature coming soon!', 'info');
+    showNotification('�� Support contact feature coming soon!', 'info');
 }
 
 // Notification System
@@ -1696,6 +1696,9 @@ window.viewOrderDetails = viewOrderDetails;
 window.quickOrder = quickOrder;
 window.downloadOrderHistory = downloadOrderHistory;
 window.openProfileEditModal = openProfileEditModal;
+window.updateProfile = updateProfile;
+window.refreshProfileData = refreshProfileData;
+window.showAuthRequiredNotification = showAuthRequiredNotification;
 window.createBulkOrder = createBulkOrder;
 window.requestCustomQuote = requestCustomQuote;
 window.openSupportModal = openSupportModal;
