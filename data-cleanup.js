@@ -261,7 +261,24 @@ if (typeof window !== 'undefined') {
         DataCleanup.cleanupCorruptedData();
     };
 
+    window.emergencyCleanup = () => {
+        console.log('🚨 Emergency cleanup triggered');
+        DataCleanup.emergencyLogCleanup();
+    };
+
     window.resetAllData = () => {
         DataCleanup.resetAllData();
     };
+
+    // Run emergency cleanup immediately if there are circular reference patterns
+    try {
+        const logs = localStorage.getItem('fadedSkiesActivityLogs');
+        if (logs && logs.includes('events') && logs.includes('currentSession')) {
+            console.log('🚨 Detected potential circular references, running emergency cleanup');
+            DataCleanup.emergencyLogCleanup();
+        }
+    } catch (error) {
+        console.log('🚨 Error checking for circular references, running emergency cleanup');
+        DataCleanup.emergencyLogCleanup();
+    }
 }
