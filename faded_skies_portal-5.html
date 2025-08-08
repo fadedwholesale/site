@@ -2466,7 +2466,7 @@
                                 <button class="btn btn-primary" onclick="switchPortalTab('products')">🛒 Browse Products</button>
                                 <button class="btn btn-secondary" onclick="switchPortalTab('orders')">📋 View Orders</button>
                                 <button class="btn btn-secondary" onclick="switchPortalTab('bulk')">📦 Bulk Order</button>
-                                <button class="btn btn-secondary" onclick="showNotification('�� Latest invoice downloaded', 'success')">📄 Download Invoice</button>
+                                <button class="btn btn-secondary" onclick="showNotification('📄 Latest invoice downloaded', 'success')">📄 Download Invoice</button>
                             </div>
                         </div>
                     </div>
@@ -5341,6 +5341,12 @@
                     });
 
                     console.log('✅ Real-time sync listeners configured for partner portal');
+
+                    // Set up periodic sync verification
+                    setInterval(() => {
+                        verifyPartnerPortalSync();
+                    }, 30000); // Check every 30 seconds
+
                 } else {
                     console.log('⏳ Real-time sync not ready, retrying in 1 second...');
                     setTimeout(checkRealTimeSync, 1000);
@@ -5348,6 +5354,46 @@
             };
 
             checkRealTimeSync();
+        }
+
+        // Verify partner portal is in sync with shared data
+        function verifyPartnerPortalSync() {
+            try {
+                if (!window.sharedDataManager) return;
+
+                const sharedData = window.sharedDataManager.getData();
+
+                // Check if product counts match
+                if (sharedData.products && sharedData.products.length !== products.length) {
+                    console.log('🔄 Partner: Product count mismatch detected, syncing...');
+                    refreshAllProducts();
+                    return;
+                }
+
+                // Check for stock or price differences
+                let dataMismatch = false;
+                if (sharedData.products) {
+                    sharedData.products.forEach(sharedProduct => {
+                        const localProduct = products.find(p => p.id === sharedProduct.id);
+                        if (localProduct) {
+                            if (localProduct.stock !== sharedProduct.stock ||
+                                localProduct.price !== sharedProduct.price ||
+                                localProduct.status !== sharedProduct.status) {
+                                console.log(`🔄 Partner: Data mismatch for ${sharedProduct.strain}`);
+                                dataMismatch = true;
+                            }
+                        }
+                    });
+                }
+
+                if (dataMismatch) {
+                    refreshAllProducts();
+                    showNotification('📊 Inventory updated', 'info');
+                }
+
+            } catch (error) {
+                console.warn('Error in partner sync verification:', error);
+            }
         }
 
         // Update specific product in partner view
