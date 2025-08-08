@@ -1049,9 +1049,10 @@ function closeModal(modalId) {
     }
 }
 
-// Registration Functions
+// Business Application Functions
 let currentRegistrationStep = 1;
 let registrationData = {};
+let uploadedDocuments = {};
 
 function nextRegistrationStep() {
     if (currentRegistrationStep === 1) {
