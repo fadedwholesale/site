@@ -242,6 +242,14 @@ class RealTimeSync {
             case 'user_action':
                 this.showUserActionNotification(data);
                 break;
+
+            case 'product_image_updated':
+                this.handleProductImageUpdate(data);
+                break;
+
+            case 'admin_product_change':
+                this.handleAdminProductChange(data);
+                break;
         }
     }
 
