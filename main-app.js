@@ -1245,7 +1245,7 @@ function submitRegistration() {
     // Simulate registration submission
     const submitBtn = document.querySelector('[onclick="submitRegistration()"]');
     if (submitBtn) {
-        submitBtn.textContent = 'Submitting...';
+        submitBtn.textContent = 'Submitting Application...';
         submitBtn.disabled = true;
     }
     
@@ -2593,7 +2593,7 @@ async function processPayment(event) {
 
     } catch (error) {
         console.error('Payment processing error:', error);
-        showNotification('�� Payment processing error. Please try again.', 'error');
+        showNotification('❌ Payment processing error. Please try again.', 'error');
     }
 }
 
