@@ -688,78 +688,169 @@ class SharedDataManager {
 // Create global instance
 window.sharedDataManager = new SharedDataManager();
 
-// Initialize default products if none exist
+// Initialize real cannabis products if none exist
 if (window.sharedDataManager.getProducts().length === 0) {
-    const defaultProducts = [
+    const realProducts = [
         {
             id: 1,
             grade: "A-GRADE",
-            strain: "Blue Runtz",
-            thca: 31.6,
-            price: 847,
+            strain: "Zkittlez",
+            thca: 29.8,
+            price: 950,
             status: "AVAILABLE",
-            stock: 25,
-            type: "Hybrid",
+            stock: 15,
+            type: "Indica-Hybrid",
             image: "https://images.unsplash.com/photo-1610234815282-a78e82bbde8e?w=300&h=300&fit=crop&crop=center",
-            description: "Premium A-grade indoor flower with exceptional terpene profile",
+            description: "Premium indoor grown Zkittlez with tropical fruit flavors and potent THCA levels",
             lastModified: new Date().toISOString()
         },
         {
             id: 2,
             grade: "A-GRADE",
-            strain: "Wedding Cake",
-            thca: 28.9,
-            price: 723,
+            strain: "Banana Runtz",
+            thca: 31.2,
+            price: 1050,
             status: "AVAILABLE",
-            stock: 18,
+            stock: 22,
             type: "Hybrid",
             image: "https://images.unsplash.com/photo-1605069876632-6e30ff47b8bd?w=300&h=300&fit=crop&crop=center",
-            description: "Sweet and tangy hybrid with relaxing effects",
+            description: "Exotic Banana Runtz phenotype with sweet banana terps and exceptional bag appeal",
             lastModified: new Date().toISOString()
         },
         {
             id: 3,
-            grade: "B-GRADE",
-            strain: "OG Kush",
-            thca: 24.3,
-            price: 550,
+            grade: "A-GRADE",
+            strain: "White Truffle",
+            thca: 28.7,
+            price: 875,
             status: "AVAILABLE",
-            stock: 30,
+            stock: 18,
             type: "Indica",
             image: "https://images.unsplash.com/photo-1607249146552-4e34b69cd4b3?w=300&h=300&fit=crop&crop=center",
-            description: "Classic strain with earthy pine flavors",
+            description: "Gourmet White Truffle strain with rich earthy flavors and deep relaxation",
             lastModified: new Date().toISOString()
         },
         {
             id: 4,
-            grade: "ROSIN",
-            strain: "Live Rosin - Purple Punch",
-            thca: 78.2,
-            price: 35,
+            grade: "B-GRADE",
+            strain: "Gelato 41",
+            thca: 25.1,
+            price: 650,
             status: "AVAILABLE",
-            stock: 12,
-            type: "Concentrate",
+            stock: 35,
+            type: "Hybrid",
             image: "https://images.unsplash.com/photo-1644845499871-2b9c93cf69f5?w=300&h=300&fit=crop&crop=center",
-            description: "Premium live rosin concentrate",
+            description: "High-quality B-grade Gelato 41 with sweet dessert flavors and balanced effects",
             lastModified: new Date().toISOString()
         },
         {
             id: 5,
-            grade: "VAPE",
-            strain: "Gelato Cart",
-            thca: 85.4,
+            grade: "B-GRADE",
+            strain: "MAC 1",
+            thca: 23.8,
+            price: 575,
+            status: "AVAILABLE",
+            stock: 28,
+            type: "Hybrid",
+            image: "https://images.unsplash.com/photo-1628958230481-0011f5bd3db9?w=300&h=300&fit=crop&crop=center",
+            description: "MAC 1 (Miracle Alien Cookies) with citrus and spice notes",
+            lastModified: new Date().toISOString()
+        },
+        {
+            id: 6,
+            grade: "ROSIN",
+            strain: "Live Rosin - Papaya",
+            thca: 82.6,
             price: 45,
+            status: "AVAILABLE",
+            stock: 8,
+            type: "Concentrate",
+            image: "https://images.unsplash.com/photo-1644845499871-2b9c93cf69f5?w=300&h=300&fit=crop&crop=center",
+            description: "Solventless live rosin from fresh frozen Papaya buds with tropical terps",
+            lastModified: new Date().toISOString()
+        },
+        {
+            id: 7,
+            grade: "ROSIN",
+            strain: "Live Rosin - Sunset Sherbet",
+            thca: 79.3,
+            price: 42,
+            status: "AVAILABLE",
+            stock: 12,
+            type: "Concentrate",
+            image: "https://images.unsplash.com/photo-1644845499871-2b9c93cf69f5?w=300&h=300&fit=crop&crop=center",
+            description: "Premium live rosin with creamy orange and berry flavor profile",
+            lastModified: new Date().toISOString()
+        },
+        {
+            id: 8,
+            grade: "HASH",
+            strain: "Bubble Hash - Wedding Cake",
+            thca: 58.7,
+            price: 32,
+            status: "AVAILABLE",
+            stock: 6,
+            type: "Concentrate",
+            image: "https://images.unsplash.com/photo-1644845499871-2b9c93cf69f5?w=300&h=300&fit=crop&crop=center",
+            description: "Full melt bubble hash made from Wedding Cake trim and small buds",
+            lastModified: new Date().toISOString()
+        },
+        {
+            id: 9,
+            grade: "VAPE",
+            strain: "Live Resin Cart - Blue Dream",
+            thca: 89.2,
+            price: 35,
             status: "COMING SOON",
             stock: 0,
             type: "Vape",
             image: "https://images.unsplash.com/photo-1628958230481-0011f5bd3db9?w=300&h=300&fit=crop&crop=center",
-            description: "Premium live resin vape cartridge",
+            description: "Premium 1g live resin cartridge with authentic Blue Dream profile",
+            lastModified: new Date().toISOString()
+        },
+        {
+            id: 10,
+            grade: "VAPE",
+            strain: "Live Resin Cart - Sour Diesel",
+            thca: 87.8,
+            price: 35,
+            status: "AVAILABLE",
+            stock: 24,
+            type: "Vape",
+            image: "https://images.unsplash.com/photo-1628958230481-0011f5bd3db9?w=300&h=300&fit=crop&crop=center",
+            description: "Classic Sour Diesel in premium live resin cartridge format",
+            lastModified: new Date().toISOString()
+        },
+        {
+            id: 11,
+            grade: "EDIBLES",
+            strain: "Mixed Berry Gummies",
+            thca: 0,
+            price: 25,
+            status: "AVAILABLE",
+            stock: 45,
+            type: "Edible",
+            image: "https://images.unsplash.com/photo-1628958230481-0011f5bd3db9?w=300&h=300&fit=crop&crop=center",
+            description: "10mg THC gummies made with live resin extract - 10 count package",
+            lastModified: new Date().toISOString()
+        },
+        {
+            id: 12,
+            grade: "EDIBLES",
+            strain: "Chocolate Bars",
+            thca: 0,
+            price: 18,
+            status: "AVAILABLE",
+            stock: 30,
+            type: "Edible",
+            image: "https://images.unsplash.com/photo-1628958230481-0011f5bd3db9?w=300&h=300&fit=crop&crop=center",
+            description: "Premium dark chocolate infused with 100mg THC - 10 piece bar",
             lastModified: new Date().toISOString()
         }
     ];
-    
-    window.sharedDataManager.updateProducts(defaultProducts);
-    console.log('✅ Initialized default products in shared data manager');
+
+    window.sharedDataManager.updateProducts(realProducts);
+    console.log('✅ Initialized real cannabis products in shared data manager');
 }
 
 console.log('📡 Shared Data Manager initialized successfully');
