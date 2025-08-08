@@ -1475,7 +1475,7 @@
                                 AI-powered pricing recommendations based on market data, competition, and demand patterns.
                             </p>
                             <button class="btn btn-primary btn-sm" style="width: 100%;" onclick="runPriceOptimization()">
-                                �� Run AI Optimization
+                                🤖 Run AI Optimization
                             </button>
                         </div>
                     </div>
@@ -2452,7 +2452,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
             <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('applicationReviewModal')">Close</button>
-                <button type="button" class="btn btn-danger" onclick="rejectApplication()">�� Reject</button>
+                <button type="button" class="btn btn-danger" onclick="rejectApplication()">❌ Reject</button>
                 <button type="button" class="btn btn-primary" onclick="approveApplication()">✅ Approve</button>
             </div>
         </div>
@@ -2756,7 +2756,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 return updatedLogos;
             } catch (error) {
                 console.error('��� Error updating system logo:', error);
-                showNotification('❌ Failed to update logo', 'error');
+                showNotification('�� Failed to update logo', 'error');
                 throw error;
             }
         }
@@ -6088,7 +6088,7 @@ Faded Skies Wholesale Team
             if (partner && partner.passwordResetToken) {
                 const resetLink = `https://portal.fadedskies.com/reset-password?token=${partner.passwordResetToken}`;
                 navigator.clipboard.writeText(resetLink).then(() => {
-                    showNotification('��� Reset link copied to clipboard', 'success');
+                    showNotification('🔗 Reset link copied to clipboard', 'success');
                 }).catch(() => {
                     showNotification('Failed to copy link', 'error');
                 });
@@ -6403,7 +6403,7 @@ Faded Skies Wholesale Team`
 
         function resetSystem() {
             if (confirm('Are you sure you want to reset the system? This action cannot be undone.')) {
-                showNotification('���� System reset functionality disabled for safety!', 'warning');
+                showNotification('🔄 System reset functionality disabled for safety!', 'warning');
             }
         }
 
@@ -7443,5 +7443,6 @@ Faded Skies Partnership Team`
     <script src="simple-logger.js"></script>
     <script src="system-integration.js"></script>
     <script src="live-demo.js"></script>
+    <script src="cleanup-invalid-products.js"></script>
 </body>
 </html>
