@@ -351,7 +351,7 @@ class LiveSystemsIntegrator {
 
     async testActivityLogging() {
         const testName = 'Activity Logging Test';
-        
+
         if (!this.systems.activityLogger) {
             return {
                 name: testName,
@@ -362,20 +362,47 @@ class LiveSystemsIntegrator {
         }
 
         try {
+            // Check basic status first
+            const status = this.systems.activityLogger.getStatus();
+            if (!status || !status.initialized) {
+                return {
+                    name: testName,
+                    passed: false,
+                    message: 'Activity Logger not properly initialized',
+                    timestamp: new Date().toISOString()
+                };
+            }
+
             // Test logging
-            const testLogId = this.systems.activityLogger.log('system', 'Integration test log entry', {
+            const uniqueMessage = `Integration test log entry ${Date.now()}`;
+            const testLogId = this.systems.activityLogger.log('system', uniqueMessage, {
                 test: true,
                 timestamp: new Date().toISOString()
             });
 
+            if (!testLogId || !testLogId.id) {
+                return {
+                    name: testName,
+                    passed: false,
+                    message: 'Activity Logger failed to return log entry ID',
+                    timestamp: new Date().toISOString()
+                };
+            }
+
+            // Force flush logs to make sure they're stored
+            this.systems.activityLogger.flushLogs();
+
+            // Wait a moment for flush
+            await new Promise(resolve => setTimeout(resolve, 100));
+
             // Try to retrieve logs
-            const logs = this.systems.activityLogger.getLogs({ limit: 10 });
-            const testLogExists = logs.some(log => log.message === 'Integration test log entry');
+            const logs = this.systems.activityLogger.getLogs({ limit: 20 });
+            const testLogExists = logs.some(log => log.message === uniqueMessage);
 
             return {
                 name: testName,
                 passed: testLogExists,
-                message: testLogExists ? 'Activity logging working correctly' : 'Activity logging failed',
+                message: testLogExists ? 'Activity logging working correctly' : `Activity logging failed - logged but not retrievable (${logs.length} logs found)`,
                 timestamp: new Date().toISOString()
             };
         } catch (error) {
