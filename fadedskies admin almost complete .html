@@ -5205,11 +5205,17 @@ Faded Skies Wholesale Team
                 const createdDate = new Date(order.createdAt);
 
                 // Check if statusHistory exists and is an array
-                if (!order.statusHistory || !Array.isArray(order.statusHistory)) {
+                if (!order.statusHistory || !Array.isArray(order.statusHistory) || order.statusHistory.length === 0) {
                     return false;
                 }
 
-                const processingStatus = order.statusHistory.find(s => s && s.status === 'PROCESSING');
+                // Double-check statusHistory is still valid before calling find
+                const statusHistory = order.statusHistory;
+                if (!statusHistory || !Array.isArray(statusHistory)) {
+                    return false;
+                }
+
+                const processingStatus = statusHistory.find(s => s && s.status === 'PROCESSING');
                 if (processingStatus && processingStatus.timestamp) {
                     const processedDate = new Date(processingStatus.timestamp);
                     const daysDiff = Math.ceil((processedDate - createdDate) / (1000 * 60 * 60 * 24));
