@@ -105,14 +105,16 @@ class CartManager {
 
             // Check if product already exists in cart
             const existingItem = this.cart.find(item => item.id == productId);
-            
+
             if (existingItem) {
+                const oldQuantity = existingItem.quantity;
                 const newQuantity = Math.min(existingItem.quantity + quantity, product.stock);
                 if (newQuantity === existingItem.quantity) {
                     this.showNotification(`⚠️ Maximum quantity (${product.stock}) reached for ${product.strain}`, 'warning');
                     return false;
                 }
                 existingItem.quantity = newQuantity;
+                console.log(`🔄 Updated existing cart item: ${product.strain} from ${oldQuantity} to ${newQuantity}`);
                 this.showNotification(`⬆️ Updated ${product.strain} quantity to ${newQuantity}`, 'success');
             } else {
                 const cartItem = {
@@ -122,13 +124,16 @@ class CartManager {
                     price: product.price,
                     quantity: Math.min(quantity, product.stock),
                     maxStock: product.stock,
-                    image: product.image || 'https://via.placeholder.com/60x60/1a1a1a/00C851?text=' + product.grade,
+                    image: product.image || 'https://via.placeholder.com/60x60/1a1a1a/00C851?text=' + encodeURIComponent(product.grade),
                     addedAt: new Date().toISOString()
                 };
-                
+
                 this.cart.push(cartItem);
+                console.log(`➕ Added new cart item:`, cartItem);
                 this.showNotification(`✅ Added ${product.strain} to cart!`, 'success');
             }
+
+            console.log(`🛒 Cart now contains ${this.cart.length} unique items:`, this.cart.map(item => `${item.strain} (x${item.quantity})`));
 
             this.saveCart();
             this.updateDisplay();
