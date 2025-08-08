@@ -2922,7 +2922,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     console.log('📡 Admin: New order received via real-time sync', data);
                     loadDataFromSharedManager(); // Refresh all data
                     updateAllDashboardViews();
-                    showNotification(`🚨 NEW ORDER: ${data.id} from ${data.partnerName || 'Partner'} - $${data.total}`, 'success');
+                    showNotification(`���� NEW ORDER: ${data.id} from ${data.partnerName || 'Partner'} - $${data.total}`, 'success');
                 });
 
                 console.log('✅ Real-time sync listeners configured for admin portal');
@@ -3016,6 +3016,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         // Enhanced live systems integration - to be loaded after scripts
         function initializeLiveSystems() {
             console.log('🚀 Initializing Admin Live Systems...');
+
+            // Ensure all existing orders have proper statusHistory
+            ensureOrdersHaveStatusHistory();
 
             // Set up real-time sync monitoring
             if (window.realTimeSync) {
