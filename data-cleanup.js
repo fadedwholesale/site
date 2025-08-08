@@ -176,9 +176,24 @@ class DataCleanup {
 // Auto-run cleanup when script loads
 if (typeof window !== 'undefined') {
     window.DataCleanup = DataCleanup;
-    
-    // Run cleanup on page load
-    document.addEventListener('DOMContentLoaded', () => {
+
+    // Run cleanup immediately
+    DataCleanup.cleanupCorruptedData();
+
+    // Also run on DOM load as backup
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            DataCleanup.cleanupCorruptedData();
+        });
+    }
+
+    // Add manual cleanup function to window for debugging
+    window.forceDataCleanup = () => {
+        console.log('🔧 Manual data cleanup triggered');
         DataCleanup.cleanupCorruptedData();
-    });
+    };
+
+    window.resetAllData = () => {
+        DataCleanup.resetAllData();
+    };
 }
