@@ -4959,19 +4959,45 @@
             }
         }
 
+        // Load system logos
+        function loadSystemLogos() {
+            try {
+                const logos = window.sharedDataManager.getLogos();
+                console.log('📷 Loading system logos:', logos);
+
+                // Update partner header logo
+                const partnerLogo = document.getElementById('partnerHeaderLogo');
+                if (partnerLogo && logos.partnerHeader) {
+                    partnerLogo.src = logos.partnerHeader;
+                    partnerLogo.style.display = 'block';
+                    console.log('✅ Partner header logo loaded');
+                } else if (partnerLogo && logos.main) {
+                    // Fallback to main logo
+                    partnerLogo.src = logos.main;
+                    partnerLogo.style.display = 'block';
+                    console.log('✅ Partner header logo loaded (fallback)');
+                }
+            } catch (error) {
+                console.error('❌ Error loading system logos:', error);
+            }
+        }
+
         // Enhanced initialization with mobile-first approach and image support
         function initializeApp() {
             console.log('🌿 Initializing Faded Skies Wholesale Portal...');
-            
+
             try {
                 // Check for existing session first
                 const hasSession = checkExistingSession();
-                
+
                 // Restore cart data if available
                 if (hasSession) {
                     restoreSessionData();
                 }
-                
+
+                // Load system logos
+                loadSystemLogos();
+
                 updateAllViews();
                 showPublicWebsite();
                 
