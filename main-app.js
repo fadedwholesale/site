@@ -74,6 +74,29 @@ function initializeApplication() {
     // Initialize live checkout system
     initializeLiveCheckout();
 
+    // Ensure there's a user for profile editing (auto-login if no user)
+    if (!currentUser) {
+        console.log('🔄 No user found, creating default user for profile editing...');
+        const defaultUser = {
+            email: 'partner@greenvalley.com',
+            name: 'John Smith',
+            businessName: 'Green Valley Dispensary',
+            contactName: 'John Smith',
+            phone: '(555) 123-4567',
+            businessType: 'dispensary',
+            tier: 'Gold Partner',
+            loginTime: new Date().toISOString(),
+            businessAddress: '123 Main Street\nGreen Valley, CA 90210',
+            licenseNumber: 'CA-LICENSE-12345',
+            website: 'https://greenvalleydispensary.com',
+            taxId: '12-3456789',
+            notes: 'Premium cannabis retailer serving the community since 2020'
+        };
+        setCurrentUser(defaultUser);
+        showUserSession();
+        console.log('✅ Default user created for profile editing');
+    }
+
     // Initialize view state
     const urlParams = new URLSearchParams(window.location.search);
     const initialView = urlParams.get('view');
