@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Sync Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #111;
+            color: #fff;
+        }
+        .portal-test {
+            background: #222;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 2px solid #00C851;
+        }
+        .product-list {
+            background: #333;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .product-item {
+            background: #444;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .success { color: #00C851; }
+        .error { color: #ff4444; }
+        .warning { color: #ffaa00; }
+        button {
+            background: #00C851;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #00a544;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 Portal Synchronization Test</h1>
+    
+    <div class="portal-test">
+        <h2>SharedDataManager Status</h2>
+        <div id="sharedManagerStatus">Checking...</div>
+        <button onclick="checkSync()">🔄 Check Sync Status</button>
+        <button onclick="addTestProduct()">➕ Add Test Product</button>
+        <button onclick="clearTestData()">🗑️ Clear Test Data</button>
+    </div>
+
+    <div class="portal-test">
+        <h2>📦 Products from SharedDataManager</h2>
+        <div>Product Count: <span id="productCount">-</span></div>
+        <div class="product-list" id="productList">Loading...</div>
+    </div>
+
+    <div class="portal-test">
+        <h2>🔗 Portal Links</h2>
+        <a href="faded_skies_portal-5.html" target="_blank" style="color: #00C851; margin-right: 20px;">🌐 Main Portal</a>
+        <a href="fadedskies admin almost complete .html" target="_blank" style="color: #00C851;">👑 Admin Portal</a>
+    </div>
+
+    <div class="portal-test">
+        <h2>📊 Test Results</h2>
+        <div id="testResults">No tests run yet</div>
+    </div>
+
+    <!-- Include shared data manager -->
+    <script src="shared-data.js"></script>
+    <script src="realtime-sync.js"></script>
+
+    <script>
+        let testResults = [];
+
+        function log(message, type = 'info') {
+            console.log(message);
+            const timestamp = new Date().toLocaleTimeString();
+            testResults.push(`[${timestamp}] ${message}`);
+            updateTestResults();
+        }
+
+        function updateTestResults() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = testResults.slice(-10).map(result => 
+                `<div>${result}</div>`
+            ).join('');
+        }
+
+        function checkSync() {
+            log('🔄 Starting sync check...');
+            
+            // Check if SharedDataManager is available
+            if (window.sharedDataManager) {
+                log('✅ SharedDataManager is available', 'success');
+                
+                const products = window.sharedDataManager.getProducts();
+                log(`📦 Found ${products.length} products in SharedDataManager`);
+                
+                const lastSync = window.sharedDataManager.getLastSync();
+                log(`🕐 Last sync: ${lastSync}`);
+                
+                displayProducts();
+                
+                document.getElementById('sharedManagerStatus').innerHTML = 
+                    '<span class="success">✅ SharedDataManager Connected</span>';
+            } else {
+                log('❌ SharedDataManager not available', 'error');
+                document.getElementById('sharedManagerStatus').innerHTML = 
+                    '<span class="error">❌ SharedDataManager Not Found</span>';
+            }
+        }
+
+        function displayProducts() {
+            if (!window.sharedDataManager) return;
+            
+            const products = window.sharedDataManager.getProducts();
+            document.getElementById('productCount').textContent = products.length;
+            
+            const productList = document.getElementById('productList');
+            if (products.length === 0) {
+                productList.innerHTML = '<div class="warning">No products found</div>';
+                return;
+            }
+            
+            productList.innerHTML = products.map(product => `
+                <div class="product-item">
+                    <div>
+                        <strong>${product.strain || 'Unknown'}</strong><br>
+                        <small>${product.grade || 'No grade'} - $${product.price || 0}</small>
+                    </div>
+                    <div>
+                        <span class="success">Stock: ${product.stock || 0}</span><br>
+                        <small>ID: ${product.id}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addTestProduct() {
+            if (!window.sharedDataManager) {
+                log('❌ Cannot add product - SharedDataManager not available', 'error');
+                return;
+            }
+            
+            const testProduct = {
+                id: Date.now(),
+                strain: `Test Product ${Date.now()}`,
+                grade: 'TEST',
+                price: 999,
+                stock: 10,
+                status: 'AVAILABLE',
+                thca: 25.0,
+                image: 'https://images.unsplash.com/photo-1610234815282-a78e82bbde8e?w=300&h=300&fit=crop&crop=center',
+                description: 'Test product for sync verification',
+                lastModified: new Date().toISOString()
+            };
+            
+            window.sharedDataManager.addProduct(testProduct);
+            log(`✅ Added test product: ${testProduct.strain}`, 'success');
+            
+            displayProducts();
+        }
+
+        function clearTestData() {
+            if (!window.sharedDataManager) {
+                log('❌ Cannot clear data - SharedDataManager not available', 'error');
+                return;
+            }
+            
+            const products = window.sharedDataManager.getProducts();
+            const testProducts = products.filter(p => p.grade === 'TEST');
+            
+            testProducts.forEach(product => {
+                window.sharedDataManager.deleteProduct(product.id);
+            });
+            
+            log(`🗑️ Cleared ${testProducts.length} test products`, 'success');
+            displayProducts();
+        }
+
+        // Auto-check sync on load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                checkSync();
+                
+                // Set up auto-refresh
+                setInterval(displayProducts, 5000);
+            }, 1000);
+        });
+
+        // Listen for shared data changes
+        window.addEventListener('sharedDataChange', (e) => {
+            log(`📡 Shared data change detected: ${e.detail.type}`);
+            displayProducts();
+        });
+    </script>
+</body>
+</html>
