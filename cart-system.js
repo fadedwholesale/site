@@ -215,6 +215,7 @@ class CartManager {
 
             this.saveCart();
             this.updateDisplay();
+            this.syncCartRealTime(); // Real-time sync
             this.notifyListeners('quantity_updated', { productId, oldQuantity, newQuantity });
 
             if (newQuantity > oldQuantity) {
@@ -473,7 +474,7 @@ class CartManager {
     updateCartTotalSection(totals) {
         const cartTotalSection = document.querySelector('.cart-total');
         if (cartTotalSection) {
-            console.log('�� Updating cart total section with:', totals);
+            console.log('💰 Updating cart total section with:', totals);
             cartTotalSection.innerHTML = `
                 <div style="margin-bottom: 20px; padding: 16px; background: var(--surface-elevated); border-radius: 12px; border: 1px solid var(--border-subtle);">
                     <h4 style="margin: 0 0 12px 0; color: var(--brand-green); font-size: 16px;">Order Summary</h4>
