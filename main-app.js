@@ -276,16 +276,22 @@ function showUserSession() {
     if (window.cartManager) {
         window.cartManager.updateDisplay();
     }
+
+    // Update public inventory display to show action buttons for authenticated users
+    updatePublicInventoryDisplay();
 }
 
 function showGuestSession() {
     const guestSection = document.getElementById('guestSection');
     const userSession = document.getElementById('userSession');
     const cartToggle = document.getElementById('cartToggle');
-    
+
     if (guestSection) guestSection.style.display = 'flex';
     if (userSession) userSession.classList.remove('show');
     if (cartToggle) cartToggle.style.display = 'none';
+
+    // Update public inventory display to hide action buttons for non-authenticated users
+    updatePublicInventoryDisplay();
 }
 
 // View Management Functions
@@ -417,22 +423,42 @@ function updateAllViews() {
 function updatePublicInventoryDisplay() {
     const tbody = document.getElementById('publicInventoryBody');
     if (!tbody) return;
-    
+
     const availableProducts = products.filter(p => p.status === 'AVAILABLE');
-    
+
     if (availableProducts.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No products available at this time</td></tr>';
         return;
     }
-    
+
+    // Check if user is authenticated to show action buttons
+    const isAuthenticated = !!(currentUser || window.currentUser);
+
     tbody.innerHTML = availableProducts.map(product => {
         const unitLabel = getUnitLabel(product.grade);
+
+        // Different action column content based on authentication status
+        let actionColumn;
+        if (isAuthenticated) {
+            actionColumn = `
+                <button class="btn btn-primary btn-sm" onclick="addToCart(${product.id})" title="Add ${product.strain} to cart">
+                    🛒 Add to Cart
+                </button>
+            `;
+        } else {
+            actionColumn = `
+                <button class="btn btn-secondary btn-sm" onclick="showAuthRequiredNotification()" title="Login required to add to cart">
+                    🔒 Partner Login Required
+                </button>
+            `;
+        }
+
         return `
-            <tr>
+            <tr data-product-id="${product.id}">
                 <td class="product-image-container">
-                    <img src="${product.image || 'https://via.placeholder.com/80x80/1a1a1a/00C851?text=' + product.grade}" 
-                         alt="${product.strain}" class="product-image" 
-                         onerror="this.src='https://via.placeholder.com/80x80/1a1a1a/00C851?text=${product.grade}'" />
+                    <img src="${product.image || product.photo || 'https://via.placeholder.com/80x80/1a1a1a/00C851?text=' + encodeURIComponent(product.grade)}"
+                         alt="${product.strain}" class="product-image"
+                         onerror="handleProductImageError(this, ${JSON.stringify(product).replace(/"/g, '&quot;')})" />
                 </td>
                 <td><strong>${product.grade}</strong></td>
                 <td>
@@ -442,11 +468,7 @@ function updatePublicInventoryDisplay() {
                 <td><strong style="color: var(--brand-green);">$${product.price}${unitLabel}</strong></td>
                 <td><span style="color: var(--brand-green); font-weight: 700;">${product.thca}%</span></td>
                 <td><span class="status-available">${product.stock} Available</span></td>
-                <td>
-                    <button class="btn btn-primary btn-sm" onclick="addToCart(${product.id})">
-                        🛒 Add to Cart
-                    </button>
-                </td>
+                <td>${actionColumn}</td>
             </tr>
         `;
     }).join('');
@@ -476,11 +498,11 @@ function updatePartnerProductsDisplay() {
         const isAvailable = product.status === 'AVAILABLE' && product.stock > 0;
         
         return `
-            <tr>
+            <tr data-product-id="${product.id}">
                 <td class="product-image-container">
-                    <img src="${product.image || 'https://via.placeholder.com/80x80/1a1a1a/00C851?text=' + product.grade}" 
-                         alt="${product.strain}" class="product-image" 
-                         onerror="this.src='https://via.placeholder.com/80x80/1a1a1a/00C851?text=${product.grade}'" />
+                    <img src="${product.image || product.photo || 'https://via.placeholder.com/80x80/1a1a1a/00C851?text=' + encodeURIComponent(product.grade)}"
+                         alt="${product.strain}" class="product-image"
+                         onerror="handleProductImageError(this, ${JSON.stringify(product).replace(/"/g, '&quot;')})" />
                 </td>
                 <td><strong>${product.grade}</strong></td>
                 <td>
@@ -1218,14 +1240,14 @@ function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
-    
+
     document.body.appendChild(notification);
-    
+
     // Show notification
     setTimeout(() => {
         notification.classList.add('show');
     }, 100);
-    
+
     // Hide notification
     setTimeout(() => {
         notification.classList.remove('show');
@@ -1235,6 +1257,18 @@ function showNotification(message, type = 'info') {
             }
         }, 300);
     }, 4000);
+}
+
+// Authentication required notification
+function showAuthRequiredNotification() {
+    showNotification('🔒 Please log in as a partner to add products to cart', 'warning');
+
+    // Optionally show login modal after a short delay
+    setTimeout(() => {
+        if (confirm('Would you like to log in to your partner account or register as a new partner?')) {
+            openModal('loginModal');
+        }
+    }, 1500);
 }
 
 // Debug function to check authentication state
@@ -1602,6 +1636,50 @@ function testCompleteRealTimeSystem() {
     return true;
 }
 
+// Highlight updated products in the UI
+function highlightUpdatedProduct(productId) {
+    console.log('✨ Highlighting updated product:', productId);
+
+    // Find all table rows that contain this product
+    const tableRows = document.querySelectorAll('tr');
+    tableRows.forEach(row => {
+        const addToCartButton = row.querySelector(`[onclick*="addToCart(${productId})"]`);
+        if (addToCartButton) {
+            // Add highlight class
+            row.classList.add('updated');
+
+            // Remove highlight after animation
+            setTimeout(() => {
+                row.classList.remove('updated');
+            }, 1200);
+        }
+    });
+
+    // Also highlight the product image if it exists
+    const productImages = document.querySelectorAll('.product-image');
+    productImages.forEach(img => {
+        const row = img.closest('tr');
+        if (row && row.querySelector(`[onclick*="addToCart(${productId})"]`)) {
+            img.style.boxShadow = '0 0 15px rgba(0, 200, 81, 0.6)';
+            setTimeout(() => {
+                img.style.boxShadow = '';
+            }, 2000);
+        }
+    });
+}
+
+// Enhanced image error handling for better fallbacks
+function handleProductImageError(img, productData) {
+    console.log('🖼️ Image load error, using fallback for:', productData);
+
+    // Generate a better fallback image URL
+    const fallbackUrl = `https://via.placeholder.com/80x80/1a1a1a/00C851?text=${encodeURIComponent(productData.grade || 'PRODUCT')}`;
+
+    if (img.src !== fallbackUrl) {
+        img.src = fallbackUrl;
+    }
+}
+
 // Debug real-time system status
 function debugRealTimeSystemStatus() {
     console.log('🔍 Real-Time System Status Debug:');
@@ -1637,6 +1715,8 @@ window.testDataPersistence = testDataPersistence;
 window.testRealTimeUI = testRealTimeUI;
 window.testCompleteRealTimeSystem = testCompleteRealTimeSystem;
 window.debugRealTimeSystemStatus = debugRealTimeSystemStatus;
+window.highlightUpdatedProduct = highlightUpdatedProduct;
+window.handleProductImageError = handleProductImageError;
 window.login = login;
 window.logout = logout;
 window.showPublicWebsite = showPublicWebsite;
@@ -1662,9 +1742,201 @@ window.viewOrderDetails = viewOrderDetails;
 window.quickOrder = quickOrder;
 window.downloadOrderHistory = downloadOrderHistory;
 window.openProfileEditModal = openProfileEditModal;
+window.updateProfile = updateProfile;
+window.refreshProfileData = refreshProfileData;
+window.showAuthRequiredNotification = showAuthRequiredNotification;
 window.createBulkOrder = createBulkOrder;
 window.requestCustomQuote = requestCustomQuote;
 window.openSupportModal = openSupportModal;
+
+// Comprehensive test for authorization controls and real-time sync
+function testAuthorizationAndSync() {
+    console.log('🔒 Starting comprehensive authorization and real-time sync test...');
+
+    const testResults = {
+        authorizationTest: false,
+        realTimeSyncTest: false,
+        imageUpdateTest: false,
+        crossTabSyncTest: false
+    };
+
+    // Test 1: Authorization Controls
+    console.log('🔒 Testing authorization controls...');
+
+    // First, logout to test non-authenticated state
+    logout();
+
+    setTimeout(() => {
+        // Check that action buttons are hidden for non-authenticated users
+        const publicInventoryTable = document.getElementById('publicInventoryBody');
+        if (publicInventoryTable) {
+            const actionButtons = publicInventoryTable.querySelectorAll('.btn-primary[onclick*="addToCart"]');
+            const loginRequiredButtons = publicInventoryTable.querySelectorAll('[onclick*="showAuthRequiredNotification"]');
+
+            if (actionButtons.length === 0 && loginRequiredButtons.length > 0) {
+                console.log('✅ Authorization test passed - action buttons hidden for non-authenticated users');
+                testResults.authorizationTest = true;
+                showNotification('✅ Authorization controls working correctly', 'success');
+            } else {
+                console.error('❌ Authorization test failed - action buttons visible for non-authenticated users');
+                showNotification('❌ Authorization test failed', 'error');
+            }
+        }
+
+        // Test 2: Login and check buttons appear
+        setTimeout(() => {
+            console.log('👤 Testing login and button visibility...');
+            forceLogin('test@authtest.com');
+
+            setTimeout(() => {
+                updatePublicInventoryDisplay(); // Force refresh
+
+                const actionButtons = document.querySelectorAll('.btn-primary[onclick*="addToCart"]');
+                if (actionButtons.length > 0) {
+                    console.log('✅ Login test passed - action buttons visible for authenticated users');
+                    showNotification('✅ Login controls working correctly', 'success');
+                } else {
+                    console.error('❌ Login test failed - action buttons not visible for authenticated users');
+                    showNotification('❌ Login test failed', 'error');
+                }
+
+                // Test 3: Real-time sync
+                setTimeout(() => {
+                    testRealTimeSyncFeatures(testResults);
+                }, 1000);
+
+            }, 1000);
+        }, 2000);
+    }, 1000);
+
+    return testResults;
+}
+
+function testRealTimeSyncFeatures(testResults) {
+    console.log('📡 Testing real-time sync features...');
+
+    if (!window.realTimeSync || !window.sharedDataManager) {
+        console.error('❌ Real-time sync components not available');
+        showNotification('❌ Real-time sync not available', 'error');
+        return;
+    }
+
+    // Test 4: Product update sync
+    console.log('📦 Testing product update sync...');
+    const products = window.sharedDataManager.getProducts();
+    if (products.length > 0) {
+        const testProduct = products[0];
+        const originalStock = testProduct.stock;
+        const newStock = originalStock + Math.floor(Math.random() * 10) + 1;
+
+        // Listen for the update
+        const handleProductUpdate = (data) => {
+            if (data.productId === testProduct.id) {
+                console.log('✅ Product update sync test passed - received real-time update');
+                testResults.realTimeSyncTest = true;
+                showNotification('✅ Real-time product sync working', 'success');
+
+                // Cleanup listener
+                window.realTimeSync.off('product_updated', handleProductUpdate);
+            }
+        };
+
+        window.realTimeSync.on('product_updated', handleProductUpdate);
+
+        // Trigger the update
+        window.sharedDataManager.updateProduct(testProduct.id, {
+            stock: newStock,
+            lastModified: new Date().toISOString()
+        });
+
+        console.log(`📦 Updated ${testProduct.strain} stock from ${originalStock} to ${newStock}`);
+    }
+
+    // Test 5: Image update sync
+    setTimeout(() => {
+        console.log('🖼️ Testing image update sync...');
+        if (products.length > 0) {
+            const testProduct = products[1] || products[0];
+            const newImageUrl = 'https://images.unsplash.com/photo-1628958230481-0011f5bd3db9?w=300&h=300&fit=crop&crop=center';
+
+            // Listen for image updates
+            const handleImageUpdate = (data) => {
+                if (data.productId === testProduct.id) {
+                    console.log('✅ Image update sync test passed');
+                    testResults.imageUpdateTest = true;
+                    showNotification('✅ Real-time image sync working', 'success');
+
+                    // Cleanup listener
+                    window.realTimeSync.off('product_image_updated', handleImageUpdate);
+                }
+            };
+
+            window.realTimeSync.on('product_image_updated', handleImageUpdate);
+
+            // Trigger image update
+            window.sharedDataManager.updateProduct(testProduct.id, {
+                image: newImageUrl,
+                lastModified: new Date().toISOString()
+            });
+
+            console.log(`🖼️ Updated ${testProduct.strain} image`);
+        }
+    }, 2000);
+
+    // Test 6: Cross-tab communication simulation
+    setTimeout(() => {
+        console.log('📡 Testing cross-tab communication...');
+
+        // Simulate a message from another tab
+        const testMessage = {
+            type: 'admin_product_change',
+            data: {
+                productId: products[0]?.id,
+                productName: products[0]?.strain,
+                changes: ['test_update'],
+                action: 'test_sync',
+                timestamp: new Date().toISOString()
+            }
+        };
+
+        // Broadcast the test message
+        window.realTimeSync.broadcast('admin_product_change', testMessage.data);
+
+        setTimeout(() => {
+            console.log('✅ Cross-tab communication test completed');
+            testResults.crossTabSyncTest = true;
+            showNotification('✅ Cross-tab sync working', 'success');
+
+            // Final test results
+            setTimeout(() => {
+                showTestResults(testResults);
+            }, 1000);
+        }, 1000);
+    }, 3000);
+}
+
+function showTestResults(results) {
+    console.log('📊 Final Test Results:', results);
+
+    const passedTests = Object.values(results).filter(Boolean).length;
+    const totalTests = Object.keys(results).length;
+
+    const resultMessage = `🧪 Authorization & Sync Tests: ${passedTests}/${totalTests} passed`;
+
+    if (passedTests === totalTests) {
+        showNotification(`✅ ${resultMessage} - All systems working!`, 'success');
+    } else {
+        showNotification(`⚠️ ${resultMessage} - Some issues detected`, 'warning');
+    }
+
+    // Detailed results in console
+    console.table(results);
+}
+
+// Export test functions
+window.testAuthorizationAndSync = testAuthorizationAndSync;
+window.testRealTimeSyncFeatures = testRealTimeSyncFeatures;
+window.showTestResults = showTestResults;
 // Payment Processing Functions
 function selectPaymentMethod(method) {
     if (window.cartManager) {

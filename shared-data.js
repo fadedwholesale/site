@@ -69,15 +69,40 @@ class SharedDataManager {
             product.id = Date.now() + Math.random();
         }
 
+        // Ensure image field exists
+        if (!product.image) {
+            product.image = product.photo || ''; // Support both 'image' and 'photo' fields
+        }
+
+        // Add creation timestamp
+        product.createdAt = new Date().toISOString();
+        if (!product.lastModified) {
+            product.lastModified = product.createdAt;
+        }
+
         data.products.push(product);
         this.saveData(data);
         this.notifyChange('product_added', product);
 
         // Broadcast real-time update
         if (this.realTimeSync) {
-            this.realTimeSync.broadcast('product_added', product);
+            this.realTimeSync.broadcast('product_added', {
+                ...product,
+                isNewProduct: true
+            });
+
+            // Also broadcast admin action for notifications
+            this.realTimeSync.broadcast('admin_product_change', {
+                productId: product.id,
+                productName: product.strain,
+                changes: ['new_product'],
+                action: 'product_added',
+                newProduct: product,
+                timestamp: new Date().toISOString()
+            });
         }
 
+        console.log('📦 Product added with real-time sync:', product.strain);
         return product;
     }
 
@@ -107,6 +132,33 @@ class SharedDataManager {
                         productName: data.products[productIndex].strain,
                         oldStock: oldProduct.stock,
                         newStock: updates.stock,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                // If image changed, broadcast image update
+                if (updates.image !== undefined && updates.image !== oldProduct.image) {
+                    this.realTimeSync.broadcast('product_image_updated', {
+                        productId,
+                        productName: data.products[productIndex].strain,
+                        oldImage: oldProduct.image,
+                        newImage: updates.image,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                // If product metadata changed (price, status, etc.), broadcast admin change
+                const significantChanges = ['price', 'status', 'thca', 'grade'];
+                const hasSignificantChange = significantChanges.some(field =>
+                    updates[field] !== undefined && updates[field] !== oldProduct[field]
+                );
+
+                if (hasSignificantChange) {
+                    this.realTimeSync.broadcast('admin_product_change', {
+                        productId,
+                        productName: data.products[productIndex].strain,
+                        changes: Object.keys(updates).filter(key => updates[key] !== oldProduct[key]),
+                        updatedProduct: data.products[productIndex],
                         timestamp: new Date().toISOString()
                     });
                 }
@@ -358,6 +410,16 @@ class SharedDataManager {
                 console.log('📡 Full sync received:', data);
                 this.handleFullSync(data);
             });
+
+            this.realTimeSync.on('product_image_updated', (data) => {
+                console.log('📡 Real-time product image update:', data);
+                this.handleRealTimeImageUpdate(data);
+            });
+
+            this.realTimeSync.on('admin_product_change', (data) => {
+                console.log('📡 Real-time admin product change:', data);
+                this.handleRealTimeAdminChange(data);
+            });
         }
     }
 
@@ -441,7 +503,7 @@ class SharedDataManager {
 
     // Real-time event handlers
     handleRealTimeProductsUpdate(products) {
-        console.log('📡 Handling real-time products update');
+        console.log('���� Handling real-time products update');
         // Update local data without triggering another broadcast
         const data = this.getData();
         data.products = products;
@@ -515,6 +577,53 @@ class SharedDataManager {
         if (this.realTimeSync) {
             const currentData = this.getData();
             this.realTimeSync.broadcast('full_sync', currentData, { force: true });
+        }
+    }
+
+    // Handle real-time image updates
+    handleRealTimeImageUpdate(imageData) {
+        console.log('📡 Handling real-time image update:', imageData);
+        const { productId, newImage } = imageData;
+
+        if (productId && newImage !== undefined) {
+            // Update the specific product's image
+            const data = this.getData();
+            const productIndex = data.products.findIndex(p => p.id === productId);
+
+            if (productIndex !== -1) {
+                data.products[productIndex].image = newImage;
+                data.products[productIndex].lastModified = new Date().toISOString();
+                data.lastSync = new Date().toISOString();
+                localStorage.setItem(this.storageKey, JSON.stringify(data));
+
+                // Notify local components of image update
+                this.notifyChange('product_updated', data.products[productIndex]);
+                this.notifyChange('product_image_updated', imageData);
+
+                // Show notification if appropriate
+                if (window.showNotification) {
+                    window.showNotification(`📸 ${imageData.productName} image updated`, 'info');
+                }
+            }
+        }
+    }
+
+    // Handle real-time admin changes
+    handleRealTimeAdminChange(adminData) {
+        console.log('📡 Handling real-time admin change:', adminData);
+
+        if (window.showNotification && adminData.productName) {
+            const changeSummary = adminData.changes.join(', ');
+            const message = `🔧 Admin updated ${adminData.productName}: ${changeSummary}`;
+            window.showNotification(message, 'info');
+        }
+
+        // If this was a new product, ensure it's properly displayed
+        if (adminData.action === 'product_added' && adminData.newProduct) {
+            // Force refresh of product displays
+            if (window.updateAllViews) {
+                setTimeout(() => window.updateAllViews(), 500);
+            }
         }
     }
 
