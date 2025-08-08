@@ -3645,6 +3645,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Update shared data manager (this will notify partner portals)
                 window.sharedDataManager.updateProduct(productId, updates);
 
+                // Ensure local data stays in sync
+                loadDataFromSharedManager();
+
                 updatePricingTable();
                 updateDashboardStats();
                 showNotification(`💰 Price updated for ${product.strain}`, 'success');
@@ -5349,7 +5352,7 @@ Faded Skies Wholesale Team
                     generated++;
                 }
             });
-            showNotification(`🔗 Generated ${generated} password reset links`, 'success');
+            showNotification(`���� Generated ${generated} password reset links`, 'success');
         }
 
         function sendBulkPasswordResets() {
