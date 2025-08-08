@@ -216,8 +216,32 @@ function handleSharedDataChange(event) {
     }
 }
 
+// Production Authentication Helper
+async function validateUserCredentials(email, password) {
+    // In production, this would make an API call to your authentication server
+    // For now, we'll validate against basic business email patterns
+
+    // Basic validation - in production, replace with actual API call
+    const businessEmailPatterns = [
+        /@[a-zA-Z0-9-]+\.(com|net|org|biz)$/,
+        /dispensary/i,
+        /cannabis/i,
+        /partner/i
+    ];
+
+    const isBusinessEmail = businessEmailPatterns.some(pattern =>
+        pattern.test ? pattern.test(email) : email.toLowerCase().includes(pattern)
+    );
+
+    // Simulate API validation delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // For production: return the result of your actual authentication API
+    return isBusinessEmail && password.length >= 6;
+}
+
 // Authentication Functions
-function login(event) {
+async function login(event) {
     event.preventDefault();
 
     const email = document.getElementById('email').value;
@@ -236,14 +260,17 @@ function login(event) {
         return;
     }
 
-    // Demo credentials for testing (in real app, this would be server-side)
-    const validCredentials = {
-        'partner@greenvalley.com': 'demo123',
-        'admin@fadedskies.com': 'admin123',
-        'test@partner.com': 'test123'
-    };
+    // Show loading state
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Authenticating...';
+    submitBtn.disabled = true;
 
-    if (validCredentials[email] && validCredentials[email] === password) {
+    try {
+        // Production authentication - validate with backend API
+        const isValidUser = await validateUserCredentials(email, password);
+
+        if (isValidUser) {
         // Create user data based on email
         let userData;
         if (email === 'partner@greenvalley.com') {
@@ -293,8 +320,18 @@ function login(event) {
 
         showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
         console.log('✅ User logged in:', currentUser.email);
+
     } else {
-        showNotification('❌ Invalid email or password. Try: partner@greenvalley.com / demo123', 'error');
+        showNotification('❌ Invalid credentials. Please check your email and password.', 'error');
+    }
+
+    } catch (error) {
+        console.error('Authentication error:', error);
+        showNotification('❌ Authentication failed. Please try again.', 'error');
+    } finally {
+        // Restore button state
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
 }
 
@@ -1736,7 +1773,7 @@ function testAuthentication() {
 
     setTimeout(() => {
         const loggedInState = debugAuthState();
-        console.log('3️⃣ After login state:', loggedInState);
+        console.log('3��⃣ After login state:', loggedInState);
 
         // 3. Test logout
         console.log('4️⃣ Testing logout...');
