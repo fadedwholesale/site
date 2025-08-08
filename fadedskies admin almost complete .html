@@ -3718,6 +3718,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Remove from shared data manager (this will notify partner portals)
                 window.sharedDataManager.deleteProduct(productId);
 
+                // Ensure local data stays in sync
+                loadDataFromSharedManager();
+
                 updateAllDashboardViews();
                 showNotification(`���️ Product ${product.strain} deleted`, 'success');
             }
