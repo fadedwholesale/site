@@ -1469,6 +1469,383 @@ window.openProfileEditModal = openProfileEditModal;
 window.createBulkOrder = createBulkOrder;
 window.requestCustomQuote = requestCustomQuote;
 window.openSupportModal = openSupportModal;
+// Payment Processing Functions
+function selectPaymentMethod(method) {
+    if (window.cartManager) {
+        window.cartManager.selectPaymentMethod(method);
+    }
+}
+
+function formatCardNumber(input) {
+    let value = input.value.replace(/\D/g, '');
+    value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+    input.value = value;
+}
+
+function formatExpiry(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value.length >= 2) {
+        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    }
+    input.value = value;
+}
+
+function formatCvv(input) {
+    input.value = input.value.replace(/\D/g, '');
+}
+
+function formatRoutingNumber(input) {
+    input.value = input.value.replace(/\D/g, '');
+}
+
+async function processPayment(event) {
+    event.preventDefault();
+
+    if (!window.currentUser) {
+        showNotification('❌ Please log in to complete payment', 'error');
+        return;
+    }
+
+    try {
+        // Get active payment method
+        const activePaymentTab = document.querySelector('.payment-tab.active');
+        const paymentMethod = activePaymentTab ? activePaymentTab.dataset.method : 'card';
+
+        // Validate payment form
+        const validation = validatePaymentForm(paymentMethod);
+        if (!validation.valid) {
+            showNotification(`❌ ${validation.message}`, 'error');
+            return;
+        }
+
+        // Check terms agreement
+        const agreeTerms = document.getElementById('agreeTerms');
+        if (!agreeTerms || !agreeTerms.checked) {
+            showNotification('❌ Please agree to the Terms of Service', 'error');
+            return;
+        }
+
+        // Show processing state
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = '🔄 Processing Payment...';
+        submitBtn.disabled = true;
+
+        // Process payment based on method
+        const paymentResult = await processPaymentMethod(paymentMethod, validation.data);
+
+        if (paymentResult.success) {
+            // Complete the order
+            await completeOrderWithPayment(paymentResult);
+
+            // Close payment modal
+            closeModal('paymentModal');
+
+            // Show success notification
+            showNotification('🎉 Payment processed successfully!', 'success');
+
+            setTimeout(() => {
+                showNotification('📧 Order confirmation sent to your email', 'success');
+            }, 2000);
+
+        } else {
+            showNotification(`❌ Payment failed: ${paymentResult.message}`, 'error');
+        }
+
+        // Restore button state
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+
+    } catch (error) {
+        console.error('Payment processing error:', error);
+        showNotification('❌ Payment processing error. Please try again.', 'error');
+    }
+}
+
+function validatePaymentForm(method) {
+    try {
+        switch (method) {
+            case 'card':
+                return validateCardPayment();
+            case 'crypto':
+                return validateCryptoPayment();
+            case 'bank':
+                return validateBankPayment();
+            default:
+                return { valid: false, message: 'Invalid payment method' };
+        }
+    } catch (error) {
+        console.error('Payment validation error:', error);
+        return { valid: false, message: 'Validation error occurred' };
+    }
+}
+
+function validateCardPayment() {
+    const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+    const cardCvv = document.getElementById('cardCvv').value;
+    const cardExpiry = document.getElementById('cardExpiry').value;
+    const cardName = document.getElementById('cardName').value;
+    const billingAddress = document.getElementById('billingAddress').value;
+
+    // Basic validation
+    if (!cardNumber || cardNumber.length < 13 || cardNumber.length > 19) {
+        return { valid: false, message: 'Please enter a valid card number' };
+    }
+
+    if (!cardCvv || cardCvv.length < 3 || cardCvv.length > 4) {
+        return { valid: false, message: 'Please enter a valid CVV' };
+    }
+
+    if (!cardExpiry || !cardExpiry.match(/^\d{2}\/\d{2}$/)) {
+        return { valid: false, message: 'Please enter a valid expiry date (MM/YY)' };
+    }
+
+    if (!cardName.trim()) {
+        return { valid: false, message: 'Please enter the cardholder name' };
+    }
+
+    if (!billingAddress.trim()) {
+        return { valid: false, message: 'Please enter the billing address' };
+    }
+
+    // Check expiry date
+    const [month, year] = cardExpiry.split('/');
+    const expiryDate = new Date(2000 + parseInt(year), parseInt(month) - 1);
+    const currentDate = new Date();
+
+    if (expiryDate < currentDate) {
+        return { valid: false, message: 'Card has expired' };
+    }
+
+    return {
+        valid: true,
+        data: {
+            cardNumber: cardNumber,
+            cvv: cardCvv,
+            expiry: cardExpiry,
+            name: cardName,
+            billingAddress: billingAddress,
+            last4: cardNumber.slice(-4)
+        }
+    };
+}
+
+function validateCryptoPayment() {
+    const cryptoType = document.getElementById('cryptoType').value;
+    const cryptoWallet = document.getElementById('cryptoWallet').value;
+    const cryptoEmail = document.getElementById('cryptoEmail').value;
+
+    if (!cryptoType) {
+        return { valid: false, message: 'Please select a cryptocurrency' };
+    }
+
+    if (!cryptoWallet.trim()) {
+        return { valid: false, message: 'Please enter your wallet address' };
+    }
+
+    if (!cryptoEmail.trim() || !cryptoEmail.includes('@')) {
+        return { valid: false, message: 'Please enter a valid email address' };
+    }
+
+    return {
+        valid: true,
+        data: {
+            type: cryptoType,
+            wallet: cryptoWallet,
+            email: cryptoEmail
+        }
+    };
+}
+
+function validateBankPayment() {
+    const accountName = document.getElementById('bankAccountName').value;
+    const routingNumber = document.getElementById('bankRoutingNumber').value;
+    const accountNumber = document.getElementById('bankAccountNumber').value;
+    const accountType = document.getElementById('bankAccountType').value;
+    const bankName = document.getElementById('bankName').value;
+
+    if (!accountName.trim()) {
+        return { valid: false, message: 'Please enter the account holder name' };
+    }
+
+    if (!routingNumber || routingNumber.length !== 9) {
+        return { valid: false, message: 'Please enter a valid 9-digit routing number' };
+    }
+
+    if (!accountNumber.trim()) {
+        return { valid: false, message: 'Please enter the account number' };
+    }
+
+    if (!accountType) {
+        return { valid: false, message: 'Please select the account type' };
+    }
+
+    if (!bankName.trim()) {
+        return { valid: false, message: 'Please enter the bank name' };
+    }
+
+    return {
+        valid: true,
+        data: {
+            accountName: accountName,
+            routingNumber: routingNumber,
+            accountNumber: accountNumber,
+            accountType: accountType,
+            bankName: bankName,
+            maskedAccount: '*'.repeat(accountNumber.length - 4) + accountNumber.slice(-4)
+        }
+    };
+}
+
+async function processPaymentMethod(method, paymentData) {
+    // Simulate API call to payment processor
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            // Simulate different success rates and responses
+            const random = Math.random();
+
+            if (random > 0.95) { // 5% failure rate
+                resolve({
+                    success: false,
+                    message: 'Payment declined. Please check your payment information and try again.'
+                });
+            } else {
+                resolve({
+                    success: true,
+                    transactionId: `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+                    method: method,
+                    data: paymentData,
+                    processedAt: new Date().toISOString()
+                });
+            }
+        }, 2000 + Math.random() * 1000); // 2-3 second processing time
+    });
+}
+
+async function completeOrderWithPayment(paymentResult) {
+    if (!window.cartManager) return;
+
+    try {
+        const totals = window.cartManager.getTotals();
+        const orderItems = window.cartManager.cart.map(item => `${item.strain} (x${item.quantity})`).join(', ');
+
+        const userEmail = window.currentUser?.email || 'guest@example.com';
+        const userName = window.currentUser?.name || 'Guest User';
+
+        const newOrder = {
+            id: `ORD-${String((window.sharedDataManager?.getOrders()?.length || 0) + 1).padStart(3, '0')}`,
+            partner: userEmail,
+            partnerName: userName + ' Store',
+            items: orderItems,
+            itemDetails: window.cartManager.cart.map(item => ({
+                id: item.id,
+                strain: item.strain,
+                grade: item.grade,
+                quantity: item.quantity,
+                price: item.price,
+                subtotal: item.price * item.quantity
+            })),
+            total: totals.total,
+            status: 'PENDING',
+            date: new Date().toISOString().split('T')[0],
+            notes: '',
+            delivery: totals.total > 1000 ? 'priority' : 'standard',
+            created: new Date().toISOString(),
+            payment: {
+                method: paymentResult.method,
+                transactionId: paymentResult.transactionId,
+                processedAt: paymentResult.processedAt,
+                status: 'COMPLETED'
+            }
+        };
+
+        // Add order to shared data manager
+        if (window.sharedDataManager) {
+            window.sharedDataManager.addOrder(newOrder);
+        }
+
+        // Update inventory
+        window.cartManager.updateInventoryAfterOrder();
+
+        // Clear cart
+        window.cartManager.cart = [];
+        window.cartManager.saveCart();
+        window.cartManager.updateDisplay();
+        window.cartManager.close();
+
+        // Update all views
+        if (window.updateAllViews) {
+            window.updateAllViews();
+        }
+
+        console.log('✅ Order completed with payment:', newOrder);
+
+    } catch (error) {
+        console.error('Error completing order with payment:', error);
+        throw error;
+    }
+}
+
+// Register Modal Functions (simplified version)
+function register(event) {
+    event.preventDefault();
+
+    const businessName = document.getElementById('businessName').value;
+    const contactName = document.getElementById('contactName').value;
+    const businessEmail = document.getElementById('businessEmail').value;
+    const phone = document.getElementById('phone').value;
+    const businessType = document.getElementById('businessType').value;
+
+    if (!businessName || !contactName || !businessEmail || !phone || !businessType) {
+        showNotification('❌ Please fill in all required fields', 'error');
+        return;
+    }
+
+    // Show loading state
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Creating Account...';
+    submitBtn.disabled = true;
+
+    setTimeout(() => {
+        // Create user account
+        const userData = {
+            email: businessEmail,
+            name: contactName,
+            businessName: businessName,
+            phone: phone,
+            businessType: businessType,
+            tier: 'Starter Partner',
+            registeredAt: new Date().toISOString()
+        };
+
+        // Auto-login after registration
+        setCurrentUser(userData);
+        showUserSession();
+        closeModal('registerModal');
+        showPartnerPortal();
+
+        showNotification(`🎉 Welcome to Faded Skies, ${contactName}!`, 'success');
+
+        // Restore button state
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+
+        // Clear form
+        event.target.reset();
+
+    }, 2000);
+}
+
+window.selectPaymentMethod = selectPaymentMethod;
+window.formatCardNumber = formatCardNumber;
+window.formatExpiry = formatExpiry;
+window.formatCvv = formatCvv;
+window.formatRoutingNumber = formatRoutingNumber;
+window.processPayment = processPayment;
+window.updateProfile = updateProfile;
+window.populateProfileEditForm = populateProfileEditForm;
+window.register = register;
 window.showNotification = showNotification;
 window.updateAllViews = updateAllViews;
 
