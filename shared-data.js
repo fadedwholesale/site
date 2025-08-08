@@ -438,6 +438,90 @@ class SharedDataManager {
         this.initializeData();
         this.notifyChange('data_cleared', {});
     }
+
+    // Real-time event handlers
+    handleRealTimeProductsUpdate(products) {
+        console.log('📡 Handling real-time products update');
+        // Update local data without triggering another broadcast
+        const data = this.getData();
+        data.products = products;
+        data.lastSync = new Date().toISOString();
+        localStorage.setItem(this.storageKey, JSON.stringify(data));
+
+        // Notify local components
+        this.notifyChange('products_updated', products);
+    }
+
+    handleRealTimeOrderUpdate(order) {
+        console.log('📡 Handling real-time order update:', order);
+        // Update local data
+        const data = this.getData();
+        if (!data.orders) data.orders = [];
+
+        // Check if order already exists
+        const existingIndex = data.orders.findIndex(o => o.id === order.id);
+        if (existingIndex === -1) {
+            data.orders.push(order);
+        } else {
+            data.orders[existingIndex] = order;
+        }
+
+        data.lastSync = new Date().toISOString();
+        localStorage.setItem(this.storageKey, JSON.stringify(data));
+
+        // Notify local components
+        this.notifyChange('order_added', order);
+    }
+
+    handleRealTimeInventoryUpdate(inventoryData) {
+        console.log('📡 Handling real-time inventory update:', inventoryData);
+        const { productId, newStock } = inventoryData;
+
+        if (productId && newStock !== undefined) {
+            // Update the specific product's stock
+            const data = this.getData();
+            const productIndex = data.products.findIndex(p => p.id === productId);
+
+            if (productIndex !== -1) {
+                data.products[productIndex].stock = newStock;
+                data.lastSync = new Date().toISOString();
+                localStorage.setItem(this.storageKey, JSON.stringify(data));
+
+                // Notify local components
+                this.notifyChange('product_updated', data.products[productIndex]);
+            }
+        }
+    }
+
+    handleFullSync(syncData) {
+        console.log('📡 Handling full data sync');
+        if (syncData && typeof syncData === 'object') {
+            // Replace all data with synced data
+            syncData.lastSync = new Date().toISOString();
+            localStorage.setItem(this.storageKey, JSON.stringify(syncData));
+
+            // Notify all components of the update
+            this.notifyChange('full_sync', syncData);
+            if (syncData.products) {
+                this.notifyChange('products_updated', syncData.products);
+            }
+            if (syncData.orders) {
+                this.notifyChange('orders_updated', syncData.orders);
+            }
+        }
+    }
+
+    broadcastCurrentData() {
+        if (this.realTimeSync) {
+            const currentData = this.getData();
+            this.realTimeSync.broadcast('full_sync', currentData, { force: true });
+        }
+    }
+
+    // Get real-time sync status
+    getRealTimeSyncStatus() {
+        return this.realTimeSync ? this.realTimeSync.getSyncStatus() : null;
+    }
 }
 
 // Create global instance
