@@ -161,6 +161,12 @@ class ActivityLogger {
 
     // Main logging method
     log(level, message, data = null, options = {}) {
+        // EMERGENCY DISABLE - just console log and return
+        if (this.emergencyDisabled) {
+            console.log(`[${level.toUpperCase()}] ${message}`, data || '');
+            return { id: 'disabled', timestamp: new Date().toISOString() };
+        }
+
         // Create completely safe log entry without circular reference risks
         const logEntry = {
             id: this.generateLogId(),
