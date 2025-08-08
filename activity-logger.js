@@ -934,7 +934,7 @@ class ActivityLogger {
     getStats() {
         const logs = this.getStoredLogs();
         const changes = this.getStoredChanges();
-        
+
         const logsByLevel = {};
         Object.values(this.logLevels).forEach(level => {
             logsByLevel[level] = logs.filter(log => log.level === level).length;
@@ -952,6 +952,21 @@ class ActivityLogger {
             changesByEntity: changesByEntity,
             currentSession: this.currentSession?.id,
             bufferSize: this.logBuffer.length + this.changeBuffer.length
+        };
+    }
+
+    // Get system status for integration testing
+    getStatus() {
+        return {
+            initialized: true,
+            sessionActive: this.currentSession !== null,
+            sessionId: this.currentSession?.id,
+            bufferSize: this.logBuffer.length + this.changeBuffer.length,
+            totalLogs: this.getStoredLogs().length,
+            totalChanges: this.getStoredChanges().length,
+            autoFlushEnabled: true,
+            lastFlush: this.lastFlushTime || 'Never',
+            status: 'healthy'
         };
     }
 
