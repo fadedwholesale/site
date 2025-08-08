@@ -245,6 +245,7 @@ class CartManager {
             this.cart = [];
             this.saveCart();
             this.updateDisplay();
+            this.syncCartRealTime(); // Real-time sync
             this.notifyListeners('cart_cleared', { itemCount });
             
             this.showNotification(`🗑️ Cart cleared successfully (${itemCount} items removed)`, 'success');
