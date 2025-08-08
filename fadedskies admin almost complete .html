@@ -1811,7 +1811,7 @@
                         </div>
 
                         <div class="card">
-                            <h3>🛡️ Partner Portal Security</h3>
+                            <h3>���️ Partner Portal Security</h3>
                             <div style="margin-bottom: 16px;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                     <span>Failed Login Attempts (24h):</span>
@@ -4918,7 +4918,7 @@ Faded Skies Wholesale Team
             if (partner && confirm(`Are you sure you want to delete ${partner.businessName}? This will also disable their portal access.`)) {
                 partners = partners.filter(p => p.id !== partnerId);
                 updateAllDashboardViews();
-                showNotification(`🗑️ Partner ${partner.businessName} deleted and portal access revoked`, 'success');
+                showNotification(`🗑�� Partner ${partner.businessName} deleted and portal access revoked`, 'success');
             }
         }
 
@@ -5202,7 +5202,7 @@ Faded Skies Wholesale Team`
 This is a friendly reminder regarding your account and payment terms.
 
 📋 ACCOUNT REMINDERS:
-��� Orders require immediate payment upon placement
+• Orders require immediate payment upon placement
 ��� Credit terms available for approved partners only
 • Please ensure payment methods are up to date
 • Contact us for any payment or billing questions
@@ -5473,6 +5473,8 @@ Faded Skies Wholesale Team`
             } else if (tabName === 'partners') {
                 updatePartnersTable();
                 updatePartnerStats();
+            } else if (tabName === 'applications') {
+                loadApplicationsData();
             } else if (tabName === 'orders') {
                 updateOrdersTable();
             }
