@@ -3283,7 +3283,7 @@
                 <!-- Additional Information Section -->
                 <div class="form-section" style="margin-bottom: 24px;">
                     <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                        �� Additional Information
+                        ��� Additional Information
                     </h4>
                     <div class="form-row">
                         <div class="form-group">
@@ -7576,10 +7576,33 @@ Phone: (210) 835-7834
             }, {});
             // Average order value
             const avgOrderValue = myOrders.length > 0 ? (myOrders.reduce((sum, o) => sum + o.total, 0) / myOrders.length) : 0;
-            // Top products ordered
+            // Top products ordered with safe handling
             const productCounts = {};
             myOrders.forEach(order => {
-                order.items.split(',').forEach(itemStr => {
+                if (!order || !order.items) return;
+
+                let itemStrings = [];
+
+                if (typeof order.items === 'string') {
+                    itemStrings = order.items.split(',');
+                } else if (Array.isArray(order.items)) {
+                    itemStrings = order.items.map(item => {
+                        if (typeof item === 'string') {
+                            return item;
+                        } else if (item && typeof item === 'object') {
+                            const name = item.name || item.product || item.strain || 'Unknown Product';
+                            const qty = item.quantity || item.qty || 1;
+                            return `${name} (x${qty})`;
+                        }
+                        return String(item);
+                    });
+                } else {
+                    itemStrings = [String(order.items)];
+                }
+
+                itemStrings.forEach(itemStr => {
+                    if (!itemStr || typeof itemStr !== 'string') return;
+
                     const match = itemStr.match(/^(.+?) \(x(\d+)\)$/);
                     if (match) {
                         const name = match[1].trim();
