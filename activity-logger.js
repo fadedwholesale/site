@@ -701,7 +701,7 @@ class ActivityLogger {
             userAgent: this.currentSession.userAgent,
             screen: this.currentSession.screen,
             viewport: this.currentSession.viewport,
-            eventCount: this.currentSession.events ? this.currentSession.events.length : 0,
+            eventCount: 0, // No events tracked to prevent circular references
             duration: this.currentSession.duration
         };
     }
