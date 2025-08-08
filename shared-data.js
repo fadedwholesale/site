@@ -17,6 +17,18 @@ class SharedDataManager {
                 products: [],
                 carts: {}, // keyed by user email
                 orders: [],
+                system: {
+                    logos: {
+                        main: 'https://cdn.builder.io/api/v1/image/assets%2F9ee94cd3e5524451b5a43eae8f0b9627%2F2a1db2e6b6bc4987bc3bab24606d5f80?format=webp&width=800',
+                        favicon: '',
+                        adminHeader: 'https://cdn.builder.io/api/v1/image/assets%2F9ee94cd3e5524451b5a43eae8f0b9627%2F2a1db2e6b6bc4987bc3bab24606d5f80?format=webp&width=800',
+                        partnerHeader: 'https://cdn.builder.io/api/v1/image/assets%2F9ee94cd3e5524451b5a43eae8f0b9627%2F2a1db2e6b6bc4987bc3bab24606d5f80?format=webp&width=800'
+                    },
+                    branding: {
+                        companyName: 'Faded Skies',
+                        tagline: 'Premium THCA Wholesale'
+                    }
+                },
                 lastSync: new Date().toISOString(),
                 version: 1
             };
