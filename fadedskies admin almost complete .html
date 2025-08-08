@@ -6024,7 +6024,17 @@ Faded Skies Wholesale Team`
         }
 
         function bulkStatusUpdate() {
-            showNotification('�� Bulk status update functionality coming soon!', 'warning');
+            // Log bulk status update attempt
+            if (window.simpleLogger) {
+                window.simpleLogger.info('Bulk status update feature accessed', {
+                    admin: currentUser?.email,
+                    timestamp: new Date().toISOString(),
+                    action: 'bulk_status_update_attempt',
+                    system: 'admin-portal'
+                });
+            }
+
+            showNotification('📦 Bulk status update functionality coming soon!', 'warning');
         }
 
         function generateShippingLabels() {
