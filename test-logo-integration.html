@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logo Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: white;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #111;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .logo-display {
+            margin: 10px 0;
+        }
+        .logo-display img {
+            height: 48px;
+            width: auto;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .btn {
+            background: #00C851;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .success { background: rgba(0, 200, 81, 0.2); border: 1px solid #00C851; }
+        .error { background: rgba(255, 68, 68, 0.2); border: 1px solid #FF4444; }
+        .info { background: rgba(0, 191, 255, 0.2); border: 1px solid #00BFFF; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Logo Integration Test</h1>
+        <p>This page tests the logo integration functionality for the Faded Skies wholesale portal system.</p>
+
+        <div class="test-section">
+            <h2>📷 Current Logo Configuration</h2>
+            <div id="logoStatus" class="status info">Loading logo configuration...</div>
+            
+            <div class="logo-display">
+                <strong>Main Logo:</strong><br>
+                <img id="mainLogo" src="" alt="Main Logo" onerror="this.style.display='none'">
+                <div id="mainLogoUrl"></div>
+            </div>
+            
+            <div class="logo-display">
+                <strong>Partner Header Logo:</strong><br>
+                <img id="partnerLogo" src="" alt="Partner Logo" onerror="this.style.display='none'">
+                <div id="partnerLogoUrl"></div>
+            </div>
+            
+            <div class="logo-display">
+                <strong>Admin Header Logo:</strong><br>
+                <img id="adminLogo" src="" alt="Admin Logo" onerror="this.style.display='none'">
+                <div id="adminLogoUrl"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 Test Controls</h2>
+            <button class="btn" onclick="testLoadLogos()">🔄 Reload Logo Configuration</button>
+            <button class="btn" onclick="testUpdateLogo()">📷 Test Logo Update</button>
+            <button class="btn" onclick="testSystemConfig()">⚙️ Test System Config</button>
+            <button class="btn" onclick="clearDatabase()">🗑️ Clear Database</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Test Results</h2>
+            <div id="testResults"></div>
+        </div>
+    </div>
+
+    <!-- Include the shared data manager -->
+    <script src="shared-data.js"></script>
+    
+    <script>
+        let testResults = [];
+
+        // Add test result
+        function addTestResult(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testResults.push(`[${timestamp}] ${message}`);
+            
+            const resultsDiv = document.getElementById('testResults');
+            const resultElement = document.createElement('div');
+            resultElement.className = `status ${type}`;
+            resultElement.textContent = `[${timestamp}] ${message}`;
+            resultsDiv.appendChild(resultElement);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        // Test loading logos
+        function testLoadLogos() {
+            try {
+                addTestResult('🔄 Testing logo loading...', 'info');
+                
+                const logos = window.sharedDataManager.getLogos();
+                console.log('Loaded logos:', logos);
+                
+                if (Object.keys(logos).length === 0) {
+                    addTestResult('⚠️ No logos found in database', 'error');
+                    return;
+                }
+                
+                // Update display
+                document.getElementById('mainLogo').src = logos.main || '';
+                document.getElementById('partnerLogo').src = logos.partnerHeader || '';
+                document.getElementById('adminLogo').src = logos.adminHeader || '';
+                
+                document.getElementById('mainLogoUrl').textContent = logos.main || 'Not set';
+                document.getElementById('partnerLogoUrl').textContent = logos.partnerHeader || 'Not set';
+                document.getElementById('adminLogoUrl').textContent = logos.adminHeader || 'Not set';
+                
+                addTestResult('✅ Logos loaded successfully', 'success');
+                document.getElementById('logoStatus').textContent = 'Logo configuration loaded successfully';
+                document.getElementById('logoStatus').className = 'status success';
+                
+            } catch (error) {
+                addTestResult(`❌ Error loading logos: ${error.message}`, 'error');
+                document.getElementById('logoStatus').textContent = `Error: ${error.message}`;
+                document.getElementById('logoStatus').className = 'status error';
+            }
+        }
+
+        // Test updating logo
+        function testUpdateLogo() {
+            try {
+                addTestResult('📷 Testing logo update...', 'info');
+                
+                const testLogoUrl = 'https://cdn.builder.io/api/v1/image/assets%2F9ee94cd3e5524451b5a43eae8f0b9627%2F2a1db2e6b6bc4987bc3bab24606d5f80?format=webp&width=800';
+                
+                const updatedLogos = window.sharedDataManager.updateLogos({
+                    main: testLogoUrl,
+                    adminHeader: testLogoUrl,
+                    partnerHeader: testLogoUrl
+                });
+                
+                addTestResult('✅ Logo update successful', 'success');
+                
+                // Reload logos to verify
+                setTimeout(() => {
+                    testLoadLogos();
+                }, 100);
+                
+            } catch (error) {
+                addTestResult(`❌ Error updating logo: ${error.message}`, 'error');
+            }
+        }
+
+        // Test system configuration
+        function testSystemConfig() {
+            try {
+                addTestResult('⚙️ Testing system configuration...', 'info');
+                
+                const config = window.sharedDataManager.getSystemConfig();
+                console.log('System config:', config);
+                
+                addTestResult(`✅ System config loaded: ${JSON.stringify(config)}`, 'success');
+                
+            } catch (error) {
+                addTestResult(`❌ Error loading system config: ${error.message}`, 'error');
+            }
+        }
+
+        // Clear database for testing
+        function clearDatabase() {
+            if (confirm('This will clear all data. Are you sure?')) {
+                try {
+                    window.sharedDataManager.clearAllData();
+                    addTestResult('🗑️ Database cleared', 'info');
+                    
+                    // Reload page to reset
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                    
+                } catch (error) {
+                    addTestResult(`❌ Error clearing database: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Initialize test page
+        function initializeTest() {
+            addTestResult('🧪 Logo Integration Test Started', 'info');
+            
+            // Wait for shared data manager to be ready
+            setTimeout(() => {
+                testLoadLogos();
+            }, 500);
+        }
+
+        // Start the test when page loads
+        window.addEventListener('load', initializeTest);
+    </script>
+</body>
+</html>
