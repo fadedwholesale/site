@@ -1650,14 +1650,12 @@ function showNotification(message, type = 'info') {
 
 // Authentication required notification
 function showAuthRequiredNotification() {
-    showNotification('🔒 Please log in as a partner to add products to cart', 'warning');
+    showNotification('🔒 Please log in to access partner features', 'warning');
 
-    // Optionally show login modal after a short delay
+    // Automatically open login modal after a short delay
     setTimeout(() => {
-        if (confirm('Would you like to log in to your partner account or register as a new partner?')) {
-            openModal('loginModal');
-        }
-    }, 1500);
+        openModal('loginModal');
+    }, 1000);
 }
 
 // Debug function to check authentication state
