@@ -5666,60 +5666,7 @@ Phone: (210) 835-7834
             }
         }
 
-        function openProfileEditModal() {
-            try {
-                const user = currentUser || {};
-                const modal = document.createElement('div');
-                modal.className = 'modal';
-                modal.style.display = 'block';
-                modal.innerHTML = `
-                    <div class="modal-content" style="max-width: 500px;">
-                        <div class="modal-header">
-                            <h3 class="modal-title">✏️ Edit Business Profile</h3>
-                            <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
-                        </div>
-                        <form id="editProfileForm">
-                            <div class="form-group">
-                                <label for="editBusinessName">Business Name</label>
-                                <input type="text" id="editBusinessName" value="${user.businessName || 'Green Valley Dispensary'}" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="editContactName">Contact Name</label>
-                                <input type="text" id="editContactName" value="${user.contactName || 'John Smith'}" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="editProfileEmail">Email</label>
-                                <input type="email" id="editProfileEmail" value="${user.email || ''}" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="editLicense">License Number</label>
-                                <input type="text" id="editLicense" value="${user.license || ''}" placeholder="Enter license #" />
-                            </div>
-                            <button type="submit" class="btn btn-primary" style="width:100%;">Save Changes</button>
-                        </form>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-                document.body.style.overflow = 'hidden';
-                modal.querySelector('#editProfileForm').onsubmit = function(e) {
-                    e.preventDefault();
-                    currentUser.businessName = modal.querySelector('#editBusinessName').value.trim();
-                    currentUser.contactName = modal.querySelector('#editContactName').value.trim();
-                    currentUser.email = modal.querySelector('#editProfileEmail').value.trim();
-                    currentUser.license = modal.querySelector('#editLicense').value.trim();
-                    try {
-                        sessionStorage.setItem('fadedSkiesSession', JSON.stringify(currentUser));
-                    } catch (e) {}
-                    updateProfileDisplay();
-                    showNotification('✅ Profile updated successfully!', 'success');
-                    modal.remove();
-                    document.body.style.overflow = 'auto';
-                };
-            } catch (error) {
-                console.error('Error editing profile:', error);
-                showNotification('Edit error. Please contact support.', 'error');
-            }
-        }
+        // openProfileEditModal function removed - now using the comprehensive one from main-app.js
 
         function updateProfileDisplay() {
             try {
@@ -5853,7 +5800,7 @@ Phone: (210) 835-7834
                     });
                 });
                 
-                console.log(`✅ Modal triggers setup complete (${uniqueTriggers.length} triggers found)`);
+                console.log(`��� Modal triggers setup complete (${uniqueTriggers.length} triggers found)`);
                 
             } catch (error) {
                 console.error('Error setting up modal triggers:', error);
