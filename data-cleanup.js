@@ -3,7 +3,10 @@
 
 class DataCleanup {
     static cleanupCorruptedData() {
-        console.log('🧹 Starting aggressive data cleanup...');
+        console.log('🧹 Starting emergency data cleanup for circular references...');
+
+        // Emergency: Clear all activity logs that might have circular references
+        this.emergencyLogCleanup();
 
         // Clean up orders with invalid items structure
         this.cleanupOrders();
@@ -17,7 +20,7 @@ class DataCleanup {
         // Force clear any corrupted real-time data
         this.clearCorruptedRealTimeData();
 
-        console.log('✅ Aggressive data cleanup completed');
+        console.log('✅ Emergency data cleanup completed');
     }
     
     static cleanupOrders() {
