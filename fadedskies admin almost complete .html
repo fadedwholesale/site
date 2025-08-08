@@ -3196,12 +3196,20 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             if (window.realTimeSync) {
                 window.realTimeSync.on('order_placed', (orderData) => {
                     console.log('📦 LIVE ORDER RECEIVED!', orderData);
-                    handleAdminRealTimeUpdate({ type: 'new_order', data: orderData });
+                    handleAdminRealTimeUpdate({
+                        type: 'new_order',
+                        data: orderData,
+                        timestamp: new Date().toISOString()
+                    });
                 });
 
                 window.realTimeSync.on('product_updated', (productData) => {
                     console.log('📦 LIVE PRODUCT UPDATE!', productData);
-                    handleAdminRealTimeUpdate({ type: 'product_updated', data: productData });
+                    handleAdminRealTimeUpdate({
+                        type: 'product_updated',
+                        data: productData,
+                        timestamp: new Date().toISOString()
+                    });
                 });
             }
 
@@ -3243,11 +3251,23 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 if (window.liveDataManager) {
                     // Force save all admin changes
                     products.forEach(product => {
-                        window.liveDataManager.updateProduct(product.id, {
-                            ...product,
-                            lastModified: new Date().toISOString(),
-                            modifiedBy: currentUser?.email || 'admin'
-                        });
+                        // Check if product exists before updating
+                        const existingProduct = window.liveDataManager.getProduct(product.id);
+                        if (existingProduct) {
+                            window.liveDataManager.updateProduct(product.id, {
+                                ...product,
+                                lastModified: new Date().toISOString(),
+                                modifiedBy: currentUser?.email || 'admin'
+                            });
+                        } else {
+                            // If product doesn't exist, add it instead
+                            console.log('🌱 Adding new product to live data manager:', product.id);
+                            window.liveDataManager.addProduct({
+                                ...product,
+                                lastModified: new Date().toISOString(),
+                                modifiedBy: currentUser?.email || 'admin'
+                            });
+                        }
                     });
                 }
 
@@ -3281,7 +3301,20 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
         // Handle real-time updates
         function handleAdminRealTimeUpdate(event) {
-            const { type, data, timestamp } = event.detail;
+            // Handle both event objects and direct function calls
+            let type, data, timestamp;
+
+            if (event && event.detail) {
+                // Event object format
+                ({ type, data, timestamp } = event.detail);
+            } else if (event && event.type) {
+                // Direct object format
+                ({ type, data, timestamp } = event);
+            } else {
+                console.error('❌ Invalid event format received:', event);
+                return;
+            }
+
             console.log('📡 Admin received real-time update:', type, data);
 
             switch (type) {
@@ -4454,7 +4487,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 </div>
             ` : `
                 <div class="card" style="margin-bottom: 20px; border: 1px solid var(--accent-orange);">
-                    <h3 style="color: var(--accent-orange);">⚠️ No Tracking Information</h3>
+                    <h3 style="color: var(--accent-orange);">��️ No Tracking Information</h3>
                     <p style="color: var(--text-muted);">This order has not been assigned tracking information yet.</p>
                     <button class="btn btn-primary btn-sm" onclick="closeModal('orderDetailsModal'); addTracking('${order.id}')">📦 Add Tracking</button>
                 </div>

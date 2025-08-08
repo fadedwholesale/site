@@ -200,6 +200,7 @@ if (typeof window !== 'undefined') {
             // Also create aliases for backward compatibility
             window.activityLogger = {
                 log: (level, message, data) => window.simpleLogger.log(level, message, data),
+                logAdminAction: (action, section, data) => window.simpleLogger.log('system', `Admin ${action} on ${section}`, data),
                 getStatus: () => window.simpleLogger.getStatus(),
                 getStats: () => window.simpleLogger.getStats(),
                 getLogs: () => window.simpleLogger.getLogs()

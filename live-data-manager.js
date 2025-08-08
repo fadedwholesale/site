@@ -628,6 +628,10 @@ class LiveDataManager {
         return this.data.products || [];
     }
 
+    getProduct(productId) {
+        return this.data.products.find(p => p.id === productId);
+    }
+
     getOrders() {
         return this.data.orders || [];
     }
