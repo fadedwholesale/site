@@ -896,7 +896,7 @@ class ActivityLogger {
                 headers.map(header => {
                     const value = row[header];
                     if (typeof value === 'object') {
-                        return `"${JSON.stringify(value).replace(/"/g, '""')}"`;
+                        return `"${this.safeJSONStringify(value).replace(/"/g, '""')}"`;
                     }
                     return `"${String(value).replace(/"/g, '""')}"`;
                 }).join(',')
