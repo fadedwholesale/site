@@ -3196,7 +3196,11 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             if (window.realTimeSync) {
                 window.realTimeSync.on('order_placed', (orderData) => {
                     console.log('📦 LIVE ORDER RECEIVED!', orderData);
-                    handleAdminRealTimeUpdate({ type: 'new_order', data: orderData });
+                    handleAdminRealTimeUpdate({
+                        type: 'new_order',
+                        data: orderData,
+                        timestamp: new Date().toISOString()
+                    });
                 });
 
                 window.realTimeSync.on('product_updated', (productData) => {
@@ -4483,7 +4487,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 </div>
             ` : `
                 <div class="card" style="margin-bottom: 20px; border: 1px solid var(--accent-orange);">
-                    <h3 style="color: var(--accent-orange);">⚠️ No Tracking Information</h3>
+                    <h3 style="color: var(--accent-orange);">��️ No Tracking Information</h3>
                     <p style="color: var(--text-muted);">This order has not been assigned tracking information yet.</p>
                     <button class="btn btn-primary btn-sm" onclick="closeModal('orderDetailsModal'); addTracking('${order.id}')">📦 Add Tracking</button>
                 </div>
