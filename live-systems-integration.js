@@ -290,7 +290,7 @@ class LiveSystemsIntegrator {
                 id: 'TEST_ORDER_001',
                 partner: 'test@integration.com',
                 partnerName: 'Integration Test Partner',
-                items: 'Test Item (x1)',
+                items: [{ productId: 'FSP001', name: 'Test Item', quantity: 1, price: 100 }],
                 total: 100,
                 status: 'pending',
                 created: new Date().toISOString()
@@ -620,7 +620,7 @@ class LiveSystemsIntegrator {
                 id: 'SYNC_TEST_' + Date.now(),
                 partner: 'test@partner.com',
                 partnerName: 'Sync Test Partner',
-                items: 'Test Product (x1)',
+                items: [{ productId: 'FSP002', name: 'Test Product', quantity: 1, price: 50 }],
                 total: 50,
                 status: 'pending',
                 created: new Date().toISOString()
