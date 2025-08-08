@@ -3503,6 +3503,36 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             updateAllDashboardViews();
         }
 
+        // Data Integrity Functions
+        function ensureOrdersHaveStatusHistory() {
+            if (!Array.isArray(orders)) return;
+
+            orders.forEach(order => {
+                if (!order) return;
+
+                // Ensure statusHistory exists and is an array
+                if (!order.statusHistory || !Array.isArray(order.statusHistory)) {
+                    order.statusHistory = [];
+
+                    // Add a basic status entry based on current status
+                    if (order.status) {
+                        order.statusHistory.push({
+                            status: order.status,
+                            timestamp: order.createdAt || new Date().toISOString(),
+                            note: 'Status reconstructed from order data'
+                        });
+                    }
+                }
+
+                // Ensure createdAt exists
+                if (!order.createdAt) {
+                    order.createdAt = order.date ? new Date(order.date).toISOString() : new Date().toISOString();
+                }
+            });
+
+            console.log('✅ Ensured all orders have proper statusHistory structure');
+        }
+
         // Data Update Functions
         function updateAllDashboardViews() {
             updateDashboardStats();
@@ -4521,7 +4551,7 @@ Faded Skies Wholesale Team
             orders.unshift(orderData);
             updateAllDashboardViews();
             closeModal('createOrderModal');
-            showNotification(`�� Order ${orderData.id} created successfully!`, 'success');
+            showNotification(`✅ Order ${orderData.id} created successfully!`, 'success');
             
             // Reset form
             event.target.reset();
