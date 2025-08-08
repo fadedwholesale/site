@@ -901,6 +901,93 @@ function forceLogin(email = 'test@example.com') {
     return userData;
 }
 
+// Test cart functionality with multiple items
+function testCartFunctionality() {
+    console.log('🧪 Testing cart functionality...');
+
+    if (!window.cartManager) {
+        console.error('❌ Cart manager not available');
+        return false;
+    }
+
+    if (!currentUser) {
+        console.log('👤 Logging in test user...');
+        forceLogin('test@carttest.com');
+    }
+
+    // Clear cart first
+    window.cartManager.cart = [];
+    window.cartManager.updateDisplay();
+
+    // Add multiple different items
+    const testProductIds = [2, 3, 4]; // Blue Gelatti, Candy Gas, OG Kush
+    const testResults = [];
+
+    testProductIds.forEach((productId, index) => {
+        setTimeout(() => {
+            console.log(`🧪 Adding product ${productId} to cart...`);
+            const result = addToCart(productId, index + 1);
+            testResults.push({ productId, success: result });
+
+            console.log(`🧪 Cart state after adding product ${productId}:`, {
+                itemCount: window.cartManager.cart.length,
+                totalItems: window.cartManager.getTotals().totalItems,
+                cartItems: window.cartManager.cart.map(item => ({ strain: item.strain, quantity: item.quantity }))
+            });
+
+            // Open cart after adding all items
+            if (index === testProductIds.length - 1) {
+                setTimeout(() => {
+                    console.log('🧪 Opening cart to show results...');
+                    window.cartManager.open();
+
+                    // Final validation
+                    setTimeout(() => {
+                        const cartElements = document.querySelectorAll('.cart-item');
+                        console.log('🧪 Final test results:', {
+                            expectedItems: testProductIds.length,
+                            cartArrayLength: window.cartManager.cart.length,
+                            domElements: cartElements.length,
+                            totals: window.cartManager.getTotals()
+                        });
+
+                        if (cartElements.length === window.cartManager.cart.length) {
+                            console.log('✅ Cart test passed - items display correctly');
+                            showNotification('✅ Cart test passed!', 'success');
+                        } else {
+                            console.error('❌ Cart test failed - display mismatch');
+                            showNotification('❌ Cart test failed - check console', 'error');
+                        }
+                    }, 500);
+                }, 1000);
+            }
+        }, index * 300);
+    });
+
+    return true;
+}
+
+// Debug cart state
+function debugCartState() {
+    if (!window.cartManager) {
+        console.log('❌ Cart manager not available');
+        return;
+    }
+
+    const state = {
+        isAuthenticated: !!currentUser,
+        userEmail: currentUser?.email,
+        cartItems: window.cartManager.cart.length,
+        cartArray: window.cartManager.cart,
+        domElements: document.querySelectorAll('.cart-item').length,
+        totals: window.cartManager.getTotals(),
+        cartOpen: window.cartManager.isOpen
+    };
+
+    console.log('🔍 Cart Debug State:', state);
+    return state;
+}
+
 // Make functions globally available
 window.debugAuthState = debugAuthState;
 window.forceLogin = forceLogin;
