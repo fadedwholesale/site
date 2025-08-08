@@ -195,7 +195,7 @@ class CartManager {
 
             const item = this.cart.find(item => item.id == productId);
             if (!item) {
-                this.showNotification('❌ Item not found in cart', 'error');
+                this.showNotification('�� Item not found in cart', 'error');
                 return false;
             }
 
@@ -592,10 +592,10 @@ class CartManager {
         const checkoutOrderTotal = document.getElementById('checkoutOrderTotal');
 
         if (checkoutOrderItems) {
-            const itemsHTML = this.cart.map(item => {
+            const itemsHTML = this.cart.map((item, index) => {
                 const itemTotal = item.price * item.quantity;
                 return `
-                    <div class="checkout-order-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+                    <div class="checkout-order-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);" data-item-id="${item.id}">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <img src="${item.image || 'https://via.placeholder.com/40x40/1a1a1a/00C851?text=' + encodeURIComponent(item.grade)}"
                                  alt="${item.strain}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover;" />
@@ -604,7 +604,7 @@ class CartManager {
                                 <div style="font-size: 12px; color: var(--text-secondary);">${item.grade} • Qty: ${item.quantity}</div>
                             </div>
                         </div>
-                        <div style="font-weight: 600; color: var(--brand-green);">$${itemTotal.toFixed(2)}</div>
+                        <div style="font-weight: 600; color: var(--brand-green);" class="item-total-${item.id}">$${itemTotal.toFixed(2)}</div>
                     </div>
                 `;
             }).join('');
@@ -615,6 +615,9 @@ class CartManager {
         if (checkoutOrderTotal) {
             checkoutOrderTotal.textContent = `$${totals.total.toFixed(2)}`;
         }
+
+        // Initialize live pricing
+        this.updateLivePricing();
 
         // Pre-populate user information
         const currentUser = window.currentUser;
@@ -631,11 +634,132 @@ class CartManager {
                 const element = document.getElementById(fieldId);
                 if (element) {
                     element.value = value;
+                    // Trigger live validation for pre-populated fields
+                    setTimeout(() => {
+                        if (window.validateFieldLive) {
+                            window.validateFieldLive(element);
+                        }
+                    }, 100);
                 }
             });
         }
 
         console.log('✅ Checkout modal populated with', this.cart.length, 'items');
+    }
+
+    // Live pricing updates
+    updateLivePricing(deliveryMethod = 'standard') {
+        const totals = this.getTotals();
+        let shippingCost = 0;
+
+        // Calculate shipping based on method and subtotal
+        switch (deliveryMethod) {
+            case 'standard':
+                shippingCost = totals.subtotal >= 1000 ? 0 : 25;
+                break;
+            case 'priority':
+                shippingCost = 25;
+                break;
+            case 'overnight':
+                shippingCost = 50;
+                break;
+        }
+
+        const finalTotal = totals.subtotal + shippingCost;
+
+        // Update live pricing elements with animation
+        this.animateValueUpdate('.live-subtotal', `$${totals.subtotal.toFixed(2)}`);
+        this.animateValueUpdate('.live-shipping-amount', shippingCost === 0 ? 'FREE' : `$${shippingCost.toFixed(2)}`);
+        this.animateValueUpdate('.live-total-amount', `$${finalTotal.toFixed(2)}`);
+        this.animateValueUpdate('#checkoutOrderTotal', `$${finalTotal.toFixed(2)}`);
+
+        // Update shipping cost descriptions
+        document.querySelectorAll('.live-shipping-cost').forEach(element => {
+            const method = element.dataset.method;
+            let costText = '';
+
+            switch (method) {
+                case 'standard':
+                    costText = totals.subtotal >= 1000 ? 'FREE' : '$25';
+                    if (totals.subtotal >= 1000) {
+                        costText = 'FREE (qualified!)';
+                        element.style.color = 'var(--brand-green)';
+                        element.style.fontWeight = '700';
+                    }
+                    break;
+                case 'priority':
+                    costText = '$25';
+                    break;
+                case 'overnight':
+                    costText = '$50';
+                    break;
+            }
+
+            element.textContent = costText;
+            element.classList.add('updating');
+            setTimeout(() => element.classList.remove('updating'), 300);
+        });
+
+        console.log('💰 Live pricing updated:', { subtotal: totals.subtotal, shipping: shippingCost, total: finalTotal });
+    }
+
+    // Animate value updates
+    animateValueUpdate(selector, newValue) {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.classList.add('updating');
+            element.textContent = newValue;
+            setTimeout(() => element.classList.remove('updating'), 300);
+        }
+    }
+
+    // Real-time cart sync during checkout
+    syncCartRealTime() {
+        if (!this.isOpen && !document.getElementById('checkoutModal').style.display !== 'none') {
+            return; // Only sync if cart or checkout is open
+        }
+
+        // Update checkout modal if open
+        const checkoutModal = document.getElementById('checkoutModal');
+        if (checkoutModal && checkoutModal.style.display !== 'none') {
+            this.updateCheckoutModalRealTime();
+        }
+
+        // Update regular cart display
+        this.updateDisplay();
+    }
+
+    // Update checkout modal in real-time
+    updateCheckoutModalRealTime() {
+        console.log('🔄 Real-time checkout update triggered');
+
+        // Get current delivery method
+        const selectedDelivery = document.querySelector('input[name="deliveryMethod"]:checked');
+        const deliveryMethod = selectedDelivery ? selectedDelivery.value : 'standard';
+
+        // Update live pricing
+        this.updateLivePricing(deliveryMethod);
+
+        // Update order items if any changes
+        const checkoutOrderItems = document.getElementById('checkoutOrderItems');
+        if (checkoutOrderItems) {
+            const currentItems = checkoutOrderItems.querySelectorAll('.checkout-order-item');
+
+            // Check if items changed
+            if (currentItems.length !== this.cart.length) {
+                this.populateCheckoutModal();
+                return;
+            }
+
+            // Update individual item totals
+            this.cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                const itemTotalElement = document.querySelector(`.item-total-${item.id}`);
+                if (itemTotalElement) {
+                    this.animateValueUpdate(`.item-total-${item.id}`, `$${itemTotal.toFixed(2)}`);
+                }
+            });
+        }
     }
 
     // Process checkout and move to payment
