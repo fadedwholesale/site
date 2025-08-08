@@ -548,7 +548,6 @@ class CartManager {
     // Checkout process
     async checkout() {
         try {
-
             if (this.cart.length === 0) {
                 this.showNotification('⚠️ Your cart is empty! Add some products first.', 'error');
                 return false;
@@ -561,30 +560,107 @@ class CartManager {
                 return false;
             }
 
-            // Show loading state
-            const checkoutBtn = document.querySelector('.cart-total .btn-primary');
-            const originalText = checkoutBtn ? checkoutBtn.textContent : '';
-            if (checkoutBtn) {
-                checkoutBtn.textContent = 'Processing Order...';
-                checkoutBtn.disabled = true;
+            // Check authentication
+            if (!window.currentUser) {
+                this.showNotification('🔒 Please log in to complete your order', 'error');
+                openModal('loginModal');
+                return false;
             }
 
-            // Process order
-            const success = await this.processOrder();
-
-            // Restore button state
-            if (checkoutBtn) {
-                checkoutBtn.textContent = originalText;
-                checkoutBtn.disabled = false;
-            }
-
-            return success;
+            // Open payment modal with order details
+            this.openPaymentModal();
+            return true;
 
         } catch (error) {
             console.error('Checkout error:', error);
             this.showNotification('❌ Checkout failed. Please try again or contact support.', 'error');
             return false;
         }
+    }
+
+    // Open payment modal with order summary
+    openPaymentModal() {
+        const totals = this.getTotals();
+
+        // Populate order summary
+        this.populateOrderSummary(totals);
+
+        // Set payment method to card by default
+        this.selectPaymentMethod('card');
+
+        // Open payment modal
+        openModal('paymentModal');
+
+        console.log('💳 Payment modal opened with order total:', totals.total);
+    }
+
+    // Populate order summary in payment modal
+    populateOrderSummary(totals) {
+        const orderSummaryItems = document.getElementById('orderSummaryItems');
+        const orderTotalAmount = document.getElementById('orderTotalAmount');
+
+        if (!orderSummaryItems || !orderTotalAmount) {
+            console.error('Order summary elements not found');
+            return;
+        }
+
+        // Generate order items HTML
+        const itemsHTML = this.cart.map(item => {
+            const itemTotal = item.price * item.quantity;
+            return `
+                <div class="order-summary-item">
+                    <div class="order-item-details">
+                        <img src="${item.image || 'https://via.placeholder.com/40x40/1a1a1a/00C851?text=' + encodeURIComponent(item.grade)}"
+                             alt="${item.strain}" class="order-item-image" />
+                        <div class="order-item-info">
+                            <h5>${item.strain}</h5>
+                            <p>${item.grade} • $${item.price.toFixed(2)}${this.getUnitLabel(item.grade)}</p>
+                        </div>
+                    </div>
+                    <div class="order-item-price">
+                        <div class="order-item-quantity">Qty: ${item.quantity}</div>
+                        <div class="order-item-total">$${itemTotal.toFixed(2)}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        orderSummaryItems.innerHTML = itemsHTML;
+        orderTotalAmount.textContent = `$${totals.total.toFixed(2)}`;
+
+        console.log('✅ Order summary populated with', this.cart.length, 'items');
+    }
+
+    // Select payment method
+    selectPaymentMethod(method) {
+        // Update tab styles
+        document.querySelectorAll('.payment-tab').forEach(tab => {
+            tab.classList.remove('active');
+            tab.style.background = 'transparent';
+            tab.style.color = 'var(--text-secondary)';
+        });
+
+        const activeTab = document.querySelector(`[data-method="${method}"]`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+            activeTab.style.background = 'var(--brand-green)';
+            activeTab.style.color = 'white';
+        }
+
+        // Hide all payment forms
+        document.querySelectorAll('.payment-form').forEach(form => {
+            form.style.display = 'none';
+            form.classList.remove('active');
+        });
+
+        // Show selected payment form
+        const activeForm = document.getElementById(`${method}PaymentForm`);
+        if (activeForm) {
+            activeForm.style.display = 'block';
+            activeForm.classList.add('active');
+        }
+
+        console.log('💳 Payment method selected:', method);
     }
 
     // Validate cart before checkout
