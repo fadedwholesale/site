@@ -189,9 +189,10 @@ class ActivityLogger {
         // Console logging with appropriate level
         this.logToConsole(logEntry);
 
-        // Immediate logging for critical events
+        // Immediate logging for critical events (DISABLED to prevent circular reference errors)
         if (level === this.logLevels.ERROR || level === this.logLevels.SECURITY) {
-            this.flushLogs();
+            console.log('🚫 Immediate flush disabled to prevent circular reference errors');
+            // this.flushLogs();
         }
 
         // Real-time broadcast for important events
