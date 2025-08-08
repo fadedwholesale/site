@@ -1085,7 +1085,7 @@
         }
 
         .checkout-order-item {
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .checkout-order-item:hover {
@@ -1093,6 +1093,89 @@
             border-radius: 8px;
             margin: 0 -8px;
             padding: 12px 8px !important;
+        }
+
+        /* Live Validation Indicators */
+        .live-validation-indicator {
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .live-validation-indicator.valid {
+            color: var(--brand-green);
+        }
+
+        .live-validation-indicator.invalid {
+            color: var(--accent-red);
+        }
+
+        .live-validation-indicator.checking {
+            color: var(--accent-orange);
+            animation: pulse 1s infinite;
+        }
+
+        /* Live input validation styling */
+        .form-group input.valid,
+        .form-group textarea.valid {
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 2px rgba(0, 200, 81, 0.1);
+        }
+
+        .form-group input.invalid,
+        .form-group textarea.invalid {
+            border-color: var(--accent-red);
+            box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.1);
+        }
+
+        .form-group input.checking,
+        .form-group textarea.checking {
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.1);
+        }
+
+        /* Live pricing summary animation */
+        .live-pricing-summary {
+            animation: livePulse 2s infinite;
+        }
+
+        @keyframes livePulse {
+            0%, 100% {
+                border-color: var(--brand-green);
+                box-shadow: 0 0 0 0 rgba(0, 200, 81, 0.3);
+            }
+            50% {
+                border-color: var(--brand-green-light);
+                box-shadow: 0 0 0 4px rgba(0, 200, 81, 0.1);
+            }
+        }
+
+        /* Live shipping cost updates */
+        .live-shipping-cost {
+            transition: all 0.3s ease;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .live-shipping-cost.updating {
+            background: rgba(0, 200, 81, 0.2);
+            color: var(--brand-green);
+        }
+
+        /* Live amounts with animation */
+        .live-subtotal,
+        .live-shipping-amount,
+        .live-total-amount {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .live-subtotal.updating,
+        .live-shipping-amount.updating,
+        .live-total-amount.updating {
+            color: var(--brand-green) !important;
+            transform: scale(1.05);
         }
 
         /* Delivery method styling */
@@ -2119,7 +2202,7 @@
     <div id="paymentModal" class="modal">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <h3 class="modal-title">�� Complete Your Order</h3>
+                <h3 class="modal-title">💳 Complete Your Order</h3>
                 <button class="modal-close" onclick="closeModal('paymentModal')">×</button>
             </div>
 
@@ -4201,7 +4284,7 @@
                 // Update cart counters immediately at start of function
                 if (cartCount) {
                     cartCount.textContent = totalItems;
-                    console.log('✅ Updated cartCount to:', totalItems);
+                    console.log('��� Updated cartCount to:', totalItems);
                 }
                 if (cartCount2) {
                     cartCount2.textContent = totalItems;
@@ -4835,7 +4918,7 @@ Phone: (210) 835-7834
                         break;
                     default:
                         statusMessage = 'Status information not available.';
-                        statusIcon = '��';
+                        statusIcon = '❓';
                         statusColor = 'var(--text-secondary)';
                 }
 
@@ -5907,7 +5990,7 @@ Phone: (210) 835-7834
                         console.log(`❌ Image failed: ${product.strain} - ${product.image}`);
                         
                         if (successCount + errorCount === products.length) {
-                            showNotification(`🖼️ Image test complete: ${successCount}/${products.length} loaded successfully`, successCount > errorCount ? 'success' : 'warning');
+                            showNotification(`���️ Image test complete: ${successCount}/${products.length} loaded successfully`, successCount > errorCount ? 'success' : 'warning');
                         }
                     };
                     img.src = product.image;
