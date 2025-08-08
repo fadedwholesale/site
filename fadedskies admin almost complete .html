@@ -1299,7 +1299,7 @@
                     <button class="tab" onclick="switchTab('partners')">👥 Partner Management</button>
                     <button class="tab" onclick="switchTab('applications')">📋 Business Applications</button>
                     <button class="tab" onclick="switchTab('analytics')">📊 Analytics & Reports</button>
-                    <button class="tab" onclick="switchTab('settings')">⚙️ System Settings</button>
+                    <button class="tab" onclick="switchTab('settings')">⚙��� System Settings</button>
                 </div>
 
                 <!-- Inventory Management Tab -->
@@ -2404,7 +2404,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
                 <h3 class="modal-title">Order Details ����</h3>
-                <button class="modal-close" onclick="closeModal('orderDetailsModal')">��</button>
+                <button class="modal-close" onclick="closeModal('orderDetailsModal')">×</button>
             </div>
             <div id="orderDetailsContent">
                 <!-- Order details will be populated here -->
@@ -2990,6 +2990,20 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             if (sharedProducts.length > 0) {
                 // Normalize all products to prevent undefined errors
                 products = sharedProducts.map(normalizeProductData);
+
+                // Check if any products were normalized (missing fields) and update shared data
+                const hasNormalizationChanges = sharedProducts.some((original, index) => {
+                    const normalized = products[index];
+                    return original.modifiedBy !== normalized.modifiedBy ||
+                           original.lastModified !== normalized.lastModified ||
+                           !original.image || !original.photo;
+                });
+
+                if (hasNormalizationChanges) {
+                    console.log('📦 Some products were normalized, updating shared data manager');
+                    window.sharedDataManager.updateProducts(products);
+                }
+
                 console.log('📦 Loaded', products.length, 'products from shared data manager');
             } else {
                 // If no shared products, initialize with defaults and sync
@@ -4162,7 +4176,7 @@ Faded Skies Wholesale Team
                 'DELIVERED': `Your order ${order.id} has been delivered successfully! Thank you for your business.`
             };
             
-            console.log(`���� ${status} notification sent to:`, order.partner);
+            console.log(`📧 ${status} notification sent to:`, order.partner);
             console.log(statusMessages[status]);
             showNotification(`📧 ${status} notification sent to ${order.partnerName}`, 'success');
         }
@@ -6670,7 +6684,7 @@ Faded Skies Partnership Team`
             );
             localStorage.setItem('adminNotifications', JSON.stringify(filteredNotifications));
             loadApplicationNotifications();
-            showNotification('🗑�� Old notifications cleared', 'success');
+            showNotification('🗑️ Old notifications cleared', 'success');
         }
 
         // Global functions
