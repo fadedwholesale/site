@@ -3428,7 +3428,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>
-                        ${product.photo ? `<img src="${product.photo}" alt="Photo" style="width:48px;height:48px;object-fit:cover;border-radius:8px;">` : '<span style="color:var(--text-muted);font-size:12px;">No Image</span>'}
+                        ${(product.image || product.photo) ? `<img src="${product.image || product.photo}" alt="Photo" style="width:48px;height:48px;object-fit:cover;border-radius:8px;">` : '<span style="color:var(--text-muted);font-size:12px;">No Image</span>'}
                     </td>
                     <td>FS-${String(product.id).padStart(3, '0')}</td>
                     <td><strong>${product.grade}</strong></td>
