@@ -3607,9 +3607,14 @@
         </div>
     </div>
 
-    <!-- Real-time synchronization system -->
+    <!-- Enhanced real-time synchronization and live data systems -->
     <script src="realtime-sync.js"></script>
     <script src="data-persistence.js"></script>
+    <script src="live-data-manager.js"></script>
+    <script src="order-sync-manager.js"></script>
+    <script src="simple-logger.js"></script>
+    <script src="system-integration.js"></script>
+    <script src="live-demo.js"></script>
     <script src="realtime-ui.js"></script>
     <script src="notification-system.js"></script>
     <script src="shared-data.js"></script>
@@ -4327,7 +4332,7 @@
             try {
                 if (!currentUser) {
                     openModal('loginModal');
-                    showNotification('🔒 Please log in to access the partner portal', 'warning');
+                    showNotification('���� Please log in to access the partner portal', 'warning');
                     return;
                 }
                 
@@ -6120,7 +6125,7 @@
                     showNotification(`❌ ${cartItem.strain} is no longer available`, 'error');
                     hasIssues = true;
                 } else if (cartItem.quantity > product.stock) {
-                    showNotification(`��️ Only ${product.stock} units of ${cartItem.strain} available`, 'warning');
+                    showNotification(`���� Only ${product.stock} units of ${cartItem.strain} available`, 'warning');
                     cartItem.quantity = product.stock;
                     updateCartDisplay();
                     hasIssues = true;
@@ -6399,7 +6404,7 @@ Phone: (210) 835-7834
                         break;
                     case 'DELIVERED':
                         statusMessage = 'Order has been successfully delivered!';
-                        statusIcon = '✅';
+                        statusIcon = '��';
                         statusColor = 'var(--brand-green)';
                         break;
                     default:
@@ -7415,7 +7420,7 @@ Phone: (210) 835-7834
                         console.log(`�� Image loaded: ${product.strain}`);
                         
                         if (successCount + errorCount === products.length) {
-                            showNotification(`🖼️ Image test complete: ${successCount}/${products.length} loaded successfully`, 'success');
+                            showNotification(`���️ Image test complete: ${successCount}/${products.length} loaded successfully`, 'success');
                         }
                     };
                     img.onerror = () => {
