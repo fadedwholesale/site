@@ -1214,6 +1214,10 @@
                     <span>🔄</span>
                     <span>Syncing with Portal</span>
                 </div>
+                <div id="loggerStatus" class="sync-status" style="display: none;">
+                    <span>📊</span>
+                    <span id="loggerStatusText">Logger Active</span>
+                </div>
                 <div id="adminSession" style="display: none;">
                     <span id="adminWelcome">Welcome, Admin</span>
                     <button class="btn btn-danger btn-sm" onclick="logout()">
@@ -1937,7 +1941,7 @@
     <div id="addProductModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Add New Product 🌿</h3>
+                <h3 class="modal-title">Add New Product ����</h3>
                 <button class="modal-close" onclick="closeModal('addProductModal')">×</button>
             </div>
             <form onsubmit="addProduct(event)">
@@ -2438,7 +2442,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
     <div id="applicationReviewModal" class="modal">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
-                <h3 class="modal-title">📋 Review Business Application</h3>
+                <h3 class="modal-title">�� Review Business Application</h3>
                 <button class="modal-close" onclick="closeModal('applicationReviewModal')">×</button>
             </div>
 
@@ -2744,7 +2748,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 });
 
                 console.log('✅ System logo updated:', updatedLogos);
-                showNotification('📷 Logo updated and synced to all portals!', 'success');
+                showNotification('���� Logo updated and synced to all portals!', 'success');
 
                 // Immediately refresh logos
                 loadSystemLogos();
@@ -2875,7 +2879,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
             if (sharedOrders.length > 0) {
                 orders = [...sharedOrders]; // Create a copy
-                console.log('📦 Loaded', orders.length, 'orders from shared data manager');
+                console.log('��� Loaded', orders.length, 'orders from shared data manager');
             }
 
             console.log('✅ Data loaded and synchronized with shared manager');
@@ -2916,15 +2920,66 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Listen for order updates
                 window.realTimeSync.on('order_added', (data) => {
                     console.log('📡 Admin: New order received via real-time sync', data);
-                    loadDataFromSharedManager(); // Refresh all data
-                    updateAllDashboardViews();
-                    showNotification(`🚨 NEW ORDER: ${data.id} from ${data.partnerName || 'Partner'} - $${data.total}`, 'success');
+                    handleNewOrderInAdmin(data);
+                });
+
+                window.realTimeSync.on('order_placed', (data) => {
+                    console.log('📡 Admin: Order placed in partner portal', data);
+                    handleNewOrderInAdmin(data);
                 });
 
                 console.log('✅ Real-time sync listeners configured for admin portal');
+
+                // Set up periodic sync verification
+                setInterval(() => {
+                    verifyAdminPortalSync();
+                }, 30000); // Check every 30 seconds
+
             } else {
                 console.warn('⚠️ Real-time sync not available, retrying in 1 second...');
                 setTimeout(setupRealTimeSyncListeners, 1000);
+            }
+        }
+
+        // Verify admin portal is in sync with shared data
+        function verifyAdminPortalSync() {
+            try {
+                if (!window.sharedDataManager) return;
+
+                const sharedData = window.sharedDataManager.getData();
+
+                // Check if product counts match
+                if (sharedData.products && sharedData.products.length !== products.length) {
+                    console.log('🔄 Admin: Product count mismatch detected, syncing...');
+                    loadDataFromSharedManager();
+                    return;
+                }
+
+                // Check if order counts match
+                if (sharedData.orders && sharedData.orders.length !== orders.length) {
+                    console.log('🔄 Admin: Order count mismatch detected, syncing...');
+                    loadDataFromSharedManager();
+                    return;
+                }
+
+                // Check for stock differences
+                let stockMismatch = false;
+                if (sharedData.products) {
+                    sharedData.products.forEach(sharedProduct => {
+                        const localProduct = products.find(p => p.id === sharedProduct.id);
+                        if (localProduct && localProduct.stock !== sharedProduct.stock) {
+                            console.log(`🔄 Admin: Stock mismatch for ${sharedProduct.strain}: local=${localProduct.stock}, shared=${sharedProduct.stock}`);
+                            stockMismatch = true;
+                        }
+                    });
+                }
+
+                if (stockMismatch) {
+                    loadDataFromSharedManager();
+                }
+
+            } catch (error) {
+                console.warn('Error in admin sync verification:', error);
             }
         }
 
@@ -3009,9 +3064,131 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             ];
         }
 
+        // Handle new orders from partner portals
+        function handleNewOrderInAdmin(orderData) {
+            try {
+                console.log('🚨 Processing new order in admin:', orderData);
+
+                // Add order to local orders array if not already present
+                const existingOrder = orders.find(o => o.id === orderData.id);
+                if (!existingOrder) {
+                    // Ensure order has proper structure
+                    const formattedOrder = {
+                        ...orderData,
+                        statusHistory: orderData.statusHistory || [{
+                            status: orderData.status || 'PENDING',
+                            timestamp: new Date().toISOString(),
+                            note: 'Order received from partner portal'
+                        }]
+                    };
+
+                    orders.unshift(formattedOrder);
+                    console.log('�� Added new order to admin view:', formattedOrder.id);
+                }
+
+                // Update inventory to reflect reduced stock
+                updateInventoryAfterOrder(orderData);
+
+                // Refresh admin dashboard
+                loadDataFromSharedManager();
+                updateAllDashboardViews();
+
+                // Show notification with order details
+                const partnerName = orderData.partnerName || orderData.partner || 'Partner';
+                const orderTotal = orderData.total || 0;
+                showNotification(`🚨 NEW ORDER: ${orderData.id} from ${partnerName} - $${orderTotal.toLocaleString()}`, 'success');
+
+                // Play notification sound if available
+                if (window.orderSyncManager && window.orderSyncManager.orderNotificationSound) {
+                    window.orderSyncManager.orderNotificationSound.play().catch(e => {
+                        console.log('Could not play notification sound:', e);
+                    });
+                }
+
+                // Log the order receipt
+                if (window.simpleLogger) {
+                    window.simpleLogger.order('New order received in admin portal', {
+                        orderId: orderData.id,
+                        partner: partnerName,
+                        total: orderTotal,
+                        items: orderData.items,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error handling new order in admin:', error);
+                showNotification('❌ Error processing new order', 'error');
+            }
+        }
+
+        // Update inventory after order placement
+        function updateInventoryAfterOrder(orderData) {
+            try {
+                if (!orderData.items) return;
+
+                let itemStrings = [];
+
+                // Handle different data types for order.items
+                if (typeof orderData.items === 'string') {
+                    itemStrings = orderData.items.split(', ');
+                } else if (Array.isArray(orderData.items)) {
+                    itemStrings = orderData.items.map(item => {
+                        if (typeof item === 'string') {
+                            return item;
+                        } else if (item && typeof item === 'object') {
+                            const name = item.name || item.product || item.strain || 'Unknown Product';
+                            const qty = item.quantity || item.qty || 1;
+                            return `${name} (x${qty})`;
+                        }
+                        return String(item);
+                    });
+                } else {
+                    itemStrings = [String(orderData.items)];
+                }
+
+                // Update stock for each item
+                itemStrings.forEach(itemStr => {
+                    if (!itemStr || typeof itemStr !== 'string') return;
+
+                    const match = itemStr.match(/^(.+?)\s*\(x(\d+)\)$/);
+                    if (match) {
+                        const productName = match[1].trim();
+                        const quantity = parseInt(match[2]);
+
+                        // Find matching product
+                        const product = products.find(p =>
+                            p && p.strain &&
+                            (p.strain.toLowerCase().includes(productName.toLowerCase()) ||
+                            productName.toLowerCase().includes(p.strain.toLowerCase()))
+                        );
+
+                        if (product && product.stock >= quantity) {
+                            const newStock = Math.max(0, product.stock - quantity);
+                            product.stock = newStock;
+
+                            // Update in shared data manager
+                            if (window.sharedDataManager) {
+                                window.sharedDataManager.updateProduct(product.id, { stock: newStock });
+                            }
+
+                            console.log(`📦 Updated stock for ${productName}: ${product.stock + quantity} → ${newStock}`);
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error updating inventory after order:', error);
+            }
+        }
+
         // Enhanced live systems integration - to be loaded after scripts
         function initializeLiveSystems() {
             console.log('🚀 Initializing Admin Live Systems...');
+
+            // Ensure all existing orders have proper statusHistory
+            ensureOrdersHaveStatusHistory();
 
             // Set up real-time sync monitoring
             if (window.realTimeSync) {
@@ -3067,6 +3244,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     if (liveOrders && liveOrders.length > 0) {
                         orders = liveOrders;
                         console.log('📋 Loaded', orders.length, 'orders from live data manager');
+
+                        // Ensure all orders have proper statusHistory
+                        ensureOrdersHaveStatusHistory();
                     }
 
                     // Force UI update
@@ -3168,7 +3348,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     break;
                 case 'cart_updated':
                     if (data.userEmail) {
-                        console.log(`📦 Cart updated for user: ${data.userEmail}`);
+                        console.log(`��� Cart updated for user: ${data.userEmail}`);
                         // Could update user activity indicators here
                     }
                     break;
@@ -3301,6 +3481,12 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 if (pendingOrders.length > 0) {
                     const randomOrder = pendingOrders[Math.floor(Math.random() * pendingOrders.length)];
                     randomOrder.status = 'PROCESSING';
+
+                    // Ensure statusHistory exists before pushing
+                    if (!randomOrder.statusHistory || !Array.isArray(randomOrder.statusHistory)) {
+                        randomOrder.statusHistory = [];
+                    }
+
                     randomOrder.statusHistory.push({
                         status: 'PROCESSING',
                         timestamp: new Date().toISOString(),
@@ -3337,6 +3523,18 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             updateSyncStatus('syncing');
             console.log('🔄 Admin: Force syncing to partner portal...');
 
+            // Log sync initiation
+            if (window.simpleLogger) {
+                window.simpleLogger.system('Manual sync to portal initiated', {
+                    admin: currentUser?.email,
+                    productsCount: products?.length || 0,
+                    ordersCount: orders?.length || 0,
+                    timestamp: new Date().toISOString(),
+                    action: 'manual_sync',
+                    system: 'admin-portal'
+                });
+            }
+
             try {
                 // Force sync products to shared data manager with real-time broadcasting
                 window.sharedDataManager.forceSyncProducts(products);
@@ -3362,6 +3560,17 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     updateSyncStatus('connected');
                     showNotification('📊 Inventory synced to partner portal successfully! All changes are now live.', 'success');
 
+                    // Log successful sync
+                    if (window.simpleLogger) {
+                        window.simpleLogger.system('Sync to portal completed successfully', {
+                            admin: currentUser?.email,
+                            productsCount: products?.length || 0,
+                            ordersCount: orders?.length || 0,
+                            timestamp: new Date().toISOString(),
+                            system: 'admin-portal'
+                        });
+                    }
+
                     // Update last sync timestamp
                     const lastSyncElement = document.getElementById('lastSync');
                     if (lastSyncElement) {
@@ -3372,16 +3581,26 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 console.error('❌ Error syncing to portal:', error);
                 updateSyncStatus('error');
                 showNotification('❌ Failed to sync inventory. Please try again.', 'error');
+
+                // Log sync error
+                if (window.simpleLogger) {
+                    window.simpleLogger.error('Sync to portal failed', {
+                        admin: currentUser?.email,
+                        error: error.message,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
             }
         }
 
         // Authentication Functions
         function adminLogin(event) {
             event.preventDefault();
-            
+
             const email = document.getElementById('adminEmail').value;
             const password = document.getElementById('adminPassword').value;
-            
+
             if (!email || !password) {
                 showNotification('All fields are required', 'error');
                 return;
@@ -3389,21 +3608,49 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
             // Admin authentication
             if (email === 'admin@fadedskies.com' && password === 'admin123') {
-                currentUser = { 
-                    email, 
+                currentUser = {
+                    email,
                     role: 'admin',
                     loginTime: new Date().toISOString()
                 };
-                
+
+                // Log successful admin login
+                if (window.simpleLogger) {
+                    window.simpleLogger.system('Admin login successful', {
+                        admin: email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
                 showAdminDashboard();
                 showNotification('🔧 Welcome to Admin Dashboard!', 'success');
             } else {
+                // Log failed login attempt
+                if (window.simpleLogger) {
+                    window.simpleLogger.warning('Admin login failed', {
+                        attemptedEmail: email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
                 showNotification('Invalid admin credentials', 'error');
             }
         }
 
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
+                // Log admin logout
+                if (window.simpleLogger && currentUser) {
+                    window.simpleLogger.system('Admin logout', {
+                        admin: currentUser.email,
+                        sessionDuration: currentUser.loginTime ?
+                            Math.round((Date.now() - new Date(currentUser.loginTime).getTime()) / 1000 / 60) + ' minutes' : 'unknown',
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
                 currentUser = null;
                 showLoginScreen();
                 showNotification('🔒 Logged out successfully', 'success');
@@ -3421,9 +3668,81 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             document.getElementById('adminDashboard').classList.add('active');
             document.getElementById('adminSession').style.display = 'block';
             document.getElementById('adminWelcome').textContent = `Welcome, ${currentUser.email.split('@')[0]}`;
-            
+
+            // Log dashboard access
+            if (window.simpleLogger) {
+                window.simpleLogger.info('Admin dashboard accessed', {
+                    admin: currentUser.email,
+                    timestamp: new Date().toISOString(),
+                    system: 'admin-portal'
+                });
+            }
+
             // Load dashboard data
             updateAllDashboardViews();
+        }
+
+        // Data Integrity Functions
+        function ensureOrdersHaveStatusHistory() {
+            if (!Array.isArray(orders)) return;
+
+            let fixedOrders = 0;
+            let totalOrders = orders.length;
+
+            orders.forEach(order => {
+                if (!order) return;
+
+                let orderWasFixed = false;
+
+                // Ensure statusHistory exists and is an array
+                if (!order.statusHistory || !Array.isArray(order.statusHistory)) {
+                    order.statusHistory = [];
+                    orderWasFixed = true;
+
+                    // Add a basic status entry based on current status
+                    if (order.status) {
+                        order.statusHistory.push({
+                            status: order.status,
+                            timestamp: order.createdAt || new Date().toISOString(),
+                            note: 'Status reconstructed from order data'
+                        });
+                    }
+                }
+
+                // Ensure createdAt exists
+                if (!order.createdAt) {
+                    order.createdAt = order.date ? new Date(order.date).toISOString() : new Date().toISOString();
+                    orderWasFixed = true;
+                }
+
+                // Ensure items exists and is in proper format
+                if (!order.items) {
+                    order.items = 'Unknown Products (x1)';
+                    orderWasFixed = true;
+                } else if (typeof order.items !== 'string' && !Array.isArray(order.items)) {
+                    // Convert other types to string
+                    order.items = String(order.items);
+                    orderWasFixed = true;
+                }
+
+                if (orderWasFixed) {
+                    fixedOrders++;
+                }
+            });
+
+            console.log('✅ Ensured all orders have proper data structure (statusHistory, createdAt, items)');
+
+            // Log the data integrity fix
+            if (window.simpleLogger && fixedOrders > 0) {
+                window.simpleLogger.system('Order data integrity fix applied', {
+                    totalOrders: totalOrders,
+                    fixedOrders: fixedOrders,
+                    fixesApplied: ['statusHistory', 'createdAt', 'items'],
+                    admin: currentUser?.email || 'system',
+                    timestamp: new Date().toISOString(),
+                    system: 'admin-portal'
+                });
+            }
         }
 
         // Data Update Functions
@@ -3633,7 +3952,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     </td>
                     <td>
                         <button class="btn btn-secondary btn-sm" onclick="editOrder('${order.id}')">Edit</button>
-                        <button class="btn btn-primary btn-sm" onclick="addTracking('${order.id}')">📦 Track</button>
+                        <button class="btn btn-primary btn-sm" onclick="addTracking('${order.id}')">�� Track</button>
                         <button class="btn btn-admin btn-sm" onclick="viewOrderDetails('${order.id}')">Details</button>
                     </td>
                 `;
@@ -3796,6 +4115,19 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         function deleteProduct(productId) {
             const product = products.find(p => p.id === productId);
             if (product && confirm(`Are you sure you want to delete ${product.strain}?`)) {
+                // Log product deletion
+                if (window.simpleLogger) {
+                    window.simpleLogger.inventory('Product deletion initiated', {
+                        productId: productId,
+                        productName: product.strain,
+                        grade: product.grade,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        action: 'delete',
+                        system: 'admin-portal'
+                    });
+                }
+
                 // Remove from local array
                 products = products.filter(p => p.id !== productId);
 
@@ -3807,6 +4139,17 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
                 updateAllDashboardViews();
                 showNotification(`🗑️ Product ${product.strain} deleted`, 'success');
+
+                // Log successful deletion
+                if (window.simpleLogger) {
+                    window.simpleLogger.inventory('Product deleted successfully', {
+                        productId: productId,
+                        productName: product.strain,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
 
                 // Trigger auto-sync to partner portal
                 triggerAutoSync('product_delete');
@@ -3867,6 +4210,20 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             if (window.editingProductId) {
                 // Edit existing product
                 const product = products.find(p => p.id === window.editingProductId);
+
+                // Log product update
+                if (window.simpleLogger) {
+                    window.simpleLogger.inventory('Product update initiated', {
+                        productId: window.editingProductId,
+                        productName: productData.strain,
+                        changes: Object.keys(productData),
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        action: 'update',
+                        system: 'admin-portal'
+                    });
+                }
+
                 Object.assign(product, productData);
 
                 // Update shared data manager (this will notify partner portals)
@@ -3876,10 +4233,37 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 loadDataFromSharedManager();
 
                 showNotification(`✅ Product ${product.strain} updated successfully!`, 'success');
+
+                // Log successful update
+                if (window.simpleLogger) {
+                    window.simpleLogger.inventory('Product updated successfully', {
+                        productId: window.editingProductId,
+                        productName: productData.strain,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
                 delete window.editingProductId;
             } else {
                 // Add new product
                 productData.id = nextProductId++;
+
+                // Log new product creation
+                if (window.simpleLogger) {
+                    window.simpleLogger.inventory('New product creation initiated', {
+                        productId: productData.id,
+                        productName: productData.strain,
+                        grade: productData.grade,
+                        price: productData.price,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        action: 'create',
+                        system: 'admin-portal'
+                    });
+                }
+
                 products.push(productData);
 
                 // Add to shared data manager (this will notify partner portals)
@@ -3889,6 +4273,17 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 loadDataFromSharedManager();
 
                 showNotification(`✅ Product ${productData.strain} added successfully!`, 'success');
+
+                // Log successful creation
+                if (window.simpleLogger) {
+                    window.simpleLogger.inventory('Product created successfully', {
+                        productId: productData.id,
+                        productName: productData.strain,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
             }
 
             updateAllDashboardViews();
@@ -3908,19 +4303,53 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         function updateOrderStatus(orderId, newStatus) {
             const order = orders.find(o => o.id === orderId);
             if (order) {
+                const oldStatus = order.status;
+
+                // Log order status update
+                if (window.simpleLogger) {
+                    window.simpleLogger.order('Order status update initiated', {
+                        orderId: orderId,
+                        oldStatus: oldStatus,
+                        newStatus: newStatus,
+                        partner: order.partnerName,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        action: 'status_update',
+                        system: 'admin-portal'
+                    });
+                }
+
                 order.status = newStatus;
-                
+
+                // Ensure statusHistory exists
+                if (!order.statusHistory || !Array.isArray(order.statusHistory)) {
+                    order.statusHistory = [];
+                }
+
                 // Add to status history
                 order.statusHistory.push({
                     status: newStatus,
                     timestamp: new Date().toISOString(),
                     note: `Status updated to ${newStatus} by admin`
                 });
-                
+
                 updateOrdersTable();
                 updateDashboardStats();
                 showNotification(`📋 Order ${orderId} status updated to ${newStatus}`, 'success');
-                
+
+                // Log successful status update
+                if (window.simpleLogger) {
+                    window.simpleLogger.order('Order status updated successfully', {
+                        orderId: orderId,
+                        newStatus: newStatus,
+                        partner: order.partnerName,
+                        orderTotal: order.total,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
                 // Send notification email if shipped or delivered
                 if (newStatus === 'SHIPPED' || newStatus === 'DELIVERED') {
                     sendOrderStatusEmail(order, newStatus);
@@ -3971,6 +4400,11 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             order.trackingUrl = document.getElementById('trackingUrl').value || null;
             order.shippingNotes = document.getElementById('shippingNotes').value || null;
             
+            // Ensure statusHistory exists
+            if (!order.statusHistory || !Array.isArray(order.statusHistory)) {
+                order.statusHistory = [];
+            }
+
             // Update status if requested
             const newStatus = document.getElementById('newTrackingStatus').value;
             if (newStatus !== order.status) {
@@ -3981,7 +4415,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     note: `Status updated to ${newStatus} with tracking info`
                 });
             }
-            
+
             // Add tracking to status history
             order.statusHistory.push({
                 status: order.status,
@@ -4092,12 +4526,12 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 <div class="card">
                     <h3>📈 Status History</h3>
                     <div style="font-family: monospace; font-size: 12px; line-height: 1.8;">
-                        ${order.statusHistory.map(status => `
+                        ${(order.statusHistory && Array.isArray(order.statusHistory) ? order.statusHistory : []).map(status => `
                             <div style="margin-bottom: 8px; padding: 8px; background: var(--surface-elevated); border-radius: 4px;">
-                                <strong style="color: var(--brand-green);">${status.status}</strong> - ${formatDateTime(status.timestamp)}<br>
-                                <small style="color: var(--text-muted);">${status.note}</small>
+                                <strong style="color: var(--brand-green);">${status?.status || 'Unknown'}</strong> - ${formatDateTime(status?.timestamp || new Date().toISOString())}<br>
+                                <small style="color: var(--text-muted);">${status?.note || 'No note available'}</small>
                             </div>
-                        `).join('')}
+                        `).join('') || '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No status history available</div>'}
                     </div>
                 </div>
                 
@@ -4142,7 +4576,7 @@ Faded Skies Wholesale Team
             
             console.log('📧 Tracking notification sent to:', order.partner);
             console.log(trackingMessage);
-            showNotification(`📧 Tracking notification sent to ${order.partnerName}`, 'success');
+            showNotification(`���� Tracking notification sent to ${order.partnerName}`, 'success');
         }
 
         function sendOrderStatusEmail(order, status) {
@@ -4153,7 +4587,7 @@ Faded Skies Wholesale Team
             
             console.log(`📧 ${status} notification sent to:`, order.partner);
             console.log(statusMessages[status]);
-            showNotification(`📧 ${status} notification sent to ${order.partnerName}`, 'success');
+            showNotification(`�� ${status} notification sent to ${order.partnerName}`, 'success');
         }
 
         function lookupCustomerOrder() {
@@ -4230,15 +4664,15 @@ Faded Skies Wholesale Team
                     <div>
                         <h5 style="color: var(--brand-green); margin-bottom: 12px;">📈 Order Progress</h5>
                         <div style="font-family: monospace; font-size: 12px; line-height: 1.6;">
-                            ${order.statusHistory.map((status, index) => `
+                            ${(order.statusHistory && Array.isArray(order.statusHistory) ? order.statusHistory : []).map((status, index) => `
                                 <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                                    <span style="width: 12px; height: 12px; background: ${index === order.statusHistory.length - 1 ? 'var(--brand-green)' : 'var(--text-muted)'}; border-radius: 50%; margin-right: 12px;"></span>
+                                    <span style="width: 12px; height: 12px; background: ${index === (order.statusHistory?.length || 1) - 1 ? 'var(--brand-green)' : 'var(--text-muted)'}; border-radius: 50%; margin-right: 12px;"></span>
                                     <div>
-                                        <strong>${status.status}</strong> - ${formatDateTime(status.timestamp)}<br>
-                                        <small style="color: var(--text-muted);">${status.note}</small>
+                                        <strong>${status?.status || 'Unknown'}</strong> - ${formatDateTime(status?.timestamp || new Date().toISOString())}<br>
+                                        <small style="color: var(--text-muted);">${status?.note || 'No note available'}</small>
                                     </div>
                                 </div>
-                            `).join('')}
+                            `).join('') || '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No order progress history available</div>'}
                         </div>
                     </div>
                 </div>
@@ -4289,7 +4723,7 @@ Faded Skies Wholesale Team
                         </div>
                     </div>
                     <div style="margin-top: 20px; text-align: center;">
-                        <button onclick="window.print()" style="padding: 10px 20px; background: #00C851; color: white; border: none; border-radius: 4px; cursor: pointer;">��️ Print Label</button>
+                        <button onclick="window.print()" style="padding: 10px 20px; background: #00C851; color: white; border: none; border-radius: 4px; cursor: pointer;">����� Print Label</button>
                     </div>
                 </body>
                 </html>
@@ -4342,11 +4776,32 @@ Faded Skies Wholesale Team
                 return;
             }
             
-            // Parse items into editable fields
-            const itemsArr = order.items.split(', ').map(itemStr => {
-                const match = itemStr.match(/^(.+?) \(x(\d+)\)$/);
-                return match ? { name: match[1], quantity: parseInt(match[2]) } : { name: itemStr, quantity: 1 };
-            });
+            // Parse items into editable fields with safe handling
+            let itemsArr = [];
+
+            if (!order.items) {
+                itemsArr = [{ name: 'Unknown Product', quantity: 1 }];
+            } else if (typeof order.items === 'string') {
+                itemsArr = order.items.split(', ').map(itemStr => {
+                    const match = itemStr.match(/^(.+?) \(x(\d+)\)$/);
+                    return match ? { name: match[1], quantity: parseInt(match[2]) } : { name: itemStr, quantity: 1 };
+                });
+            } else if (Array.isArray(order.items)) {
+                itemsArr = order.items.map(item => {
+                    if (typeof item === 'string') {
+                        const match = item.match(/^(.+?) \(x(\d+)\)$/);
+                        return match ? { name: match[1], quantity: parseInt(match[2]) } : { name: item, quantity: 1 };
+                    } else if (item && typeof item === 'object') {
+                        return {
+                            name: item.name || item.product || item.strain || 'Unknown Product',
+                            quantity: item.quantity || item.qty || 1
+                        };
+                    }
+                    return { name: String(item), quantity: 1 };
+                });
+            } else {
+                itemsArr = [{ name: String(order.items), quantity: 1 }];
+            }
             
             const modal = document.createElement('div');
             modal.className = 'modal';
@@ -4354,7 +4809,7 @@ Faded Skies Wholesale Team
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 600px;">
                     <div class="modal-header">
-                        <h3 class="modal-title">��️ Edit Order - ${order.id}</h3>
+                        <h3 class="modal-title">����� Edit Order - ${order.id}</h3>
                         <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
                     </div>
                     <form id="editOrderForm">
@@ -4678,14 +5133,29 @@ Faded Skies Wholesale Team
             const ordersWithTracking = orders.filter(o => o.trackingNumber).length;
             const fulfillmentRate = totalOrders > 0 ? Math.round((ordersWithTracking / totalOrders) * 100) : 0;
             
-            // Calculate average delivery time
-            const deliveredOrders = orders.filter(o => o.status === 'DELIVERED');
+            // Calculate average delivery time with defensive programming
+            const deliveredOrders = orders.filter(o => o && o.status === 'DELIVERED');
             let avgDeliveryTime = 0;
             if (deliveredOrders.length > 0) {
                 const deliveryTimes = deliveredOrders.map(order => {
+                    // Check if order has required properties
+                    if (!order || !order.createdAt) return 3; // Default delivery time
+
                     const createdDate = new Date(order.createdAt);
-                    const deliveredStatus = order.statusHistory.find(s => s.status === 'DELIVERED');
-                    if (deliveredStatus) {
+
+                    // Check if statusHistory exists and is an array
+                    if (!order.statusHistory || !Array.isArray(order.statusHistory) || order.statusHistory.length === 0) {
+                        return 3; // Default delivery time
+                    }
+
+                    // Double-check statusHistory is still valid before calling find
+                    const statusHistory = order.statusHistory;
+                    if (!statusHistory || !Array.isArray(statusHistory)) {
+                        return 3; // Default delivery time
+                    }
+
+                    const deliveredStatus = statusHistory.find(s => s && s.status === 'DELIVERED');
+                    if (deliveredStatus && deliveredStatus.timestamp) {
                         const deliveredDate = new Date(deliveredStatus.timestamp);
                         return Math.ceil((deliveredDate - createdDate) / (1000 * 60 * 60 * 24));
                     }
@@ -4711,15 +5181,59 @@ Faded Skies Wholesale Team
         }
 
         function updateFulfillmentMetrics() {
+            // Ensure orders is defined and is an array
+            if (!Array.isArray(orders)) {
+                console.warn('Orders array is not defined or not an array:', orders);
+
+                // Log this issue
+                if (window.simpleLogger) {
+                    window.simpleLogger.warning('Orders array issue in updateFulfillmentMetrics', {
+                        ordersType: typeof orders,
+                        ordersValue: orders,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
+                return;
+            }
+
+            // Immediately ensure all orders have valid statusHistory to prevent runtime errors
+            orders.forEach(order => {
+                if (order && (!order.statusHistory || !Array.isArray(order.statusHistory))) {
+                    order.statusHistory = [{
+                        status: order.status || 'PENDING',
+                        timestamp: order.createdAt || new Date().toISOString(),
+                        note: 'Status history created on-demand'
+                    }];
+                }
+            });
+
             const totalOrders = orders.length;
-            const ordersWithTracking = orders.filter(o => o.trackingNumber).length;
+            const ordersWithTracking = orders.filter(o => o && o.trackingNumber).length;
             const trackingPercentage = totalOrders > 0 ? Math.round((ordersWithTracking / totalOrders) * 100) : 0;
-            
-            // Calculate same-day processing
+
+            // Calculate same-day processing with defensive programming
             const sameDayProcessed = orders.filter(order => {
+                // Check if order exists and has required properties
+                if (!order || !order.createdAt) return false;
+
                 const createdDate = new Date(order.createdAt);
-                const processingStatus = order.statusHistory.find(s => s.status === 'PROCESSING');
-                if (processingStatus) {
+
+                // Check if statusHistory exists and is an array
+                if (!order.statusHistory || !Array.isArray(order.statusHistory) || order.statusHistory.length === 0) {
+                    return false;
+                }
+
+                // Double-check statusHistory is still valid before calling find
+                const statusHistory = order.statusHistory;
+                if (!statusHistory || !Array.isArray(statusHistory)) {
+                    return false;
+                }
+
+                const processingStatus = statusHistory.find(s => s && s.status === 'PROCESSING');
+                if (processingStatus && processingStatus.timestamp) {
                     const processedDate = new Date(processingStatus.timestamp);
                     const daysDiff = Math.ceil((processedDate - createdDate) / (1000 * 60 * 60 * 24));
                     return daysDiff <= 1;
@@ -4743,23 +5257,72 @@ Faded Skies Wholesale Team
         function updateTopProductsAnalytics() {
             // Calculate product revenue from orders
             const productRevenue = {};
-            
+
+            // Ensure orders is an array and handle each order safely
+            if (!Array.isArray(orders)) {
+                console.warn('Orders is not an array in updateTopProductsAnalytics:', orders);
+
+                // Log this issue
+                if (window.simpleLogger) {
+                    window.simpleLogger.warning('Orders array issue in updateTopProductsAnalytics', {
+                        ordersType: typeof orders,
+                        ordersValue: orders,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
+                return;
+            }
+
             orders.forEach(order => {
-                // Parse order items to extract product names and quantities
-                const items = order.items.split(', ');
+                // Skip invalid orders
+                if (!order || !order.items) {
+                    return;
+                }
+
+                let items = [];
+
+                // Handle different data types for order.items
+                if (typeof order.items === 'string') {
+                    // Parse string format like "OG Kush (x5), Blue Runtz (x3)"
+                    items = order.items.split(', ');
+                } else if (Array.isArray(order.items)) {
+                    // Handle array format
+                    items = order.items.map(item => {
+                        if (typeof item === 'string') {
+                            return item;
+                        } else if (item && typeof item === 'object') {
+                            // Handle object format like {name: "OG Kush", quantity: 5}
+                            const name = item.name || item.product || item.strain || 'Unknown Product';
+                            const qty = item.quantity || item.qty || 1;
+                            return `${name} (x${qty})`;
+                        }
+                        return String(item);
+                    });
+                } else {
+                    // Convert other types to string and try to parse
+                    items = [String(order.items)];
+                }
+
+                // Process each item
                 items.forEach(item => {
+                    if (!item || typeof item !== 'string') return;
+
                     const match = item.match(/^(.+?)\s*\(x(\d+)\)$/);
                     if (match) {
                         const productName = match[1].trim();
                         const quantity = parseInt(match[2]);
-                        
+
                         // Find matching product to get price
-                        const product = products.find(p => 
-                            p.strain.toLowerCase().includes(productName.toLowerCase()) ||
-                            productName.toLowerCase().includes(p.strain.toLowerCase())
+                        const product = products.find(p =>
+                            p && p.strain &&
+                            (p.strain.toLowerCase().includes(productName.toLowerCase()) ||
+                            productName.toLowerCase().includes(p.strain.toLowerCase()))
                         );
-                        
-                        if (product) {
+
+                        if (product && product.price) {
                             const revenue = product.price * quantity;
                             productRevenue[productName] = (productRevenue[productName] || 0) + revenue;
                         }
@@ -5403,7 +5966,7 @@ Your account provides access to:
 ✅ Live inventory and pricing
 ✅ Order management and tracking  
 ✅ Account statements and invoices
-✅ Product catalogs and updates
+�� Product catalogs and updates
 
 Welcome to the Faded Skies family!
 
@@ -5607,7 +6170,7 @@ This message is to inform you of recent pricing updates in our wholesale catalog
 �� PRICING CHANGES:
 • Effective immediately
 • Updated pricing reflects current market conditions
-• Your tier discounts remain unchanged
+��� Your tier discounts remain unchanged
 
 Please review the updated pricing in your partner portal:
 🌐 https://portal.fadedskies.com
@@ -5671,7 +6234,7 @@ Welcome to this month's Faded Skies Wholesale newsletter!
 🎯 THIS MONTH'S HIGHLIGHTS:
 • Industry market trends and insights
 �� New product announcements and arrivals
-• Partnership program updates and tier benefits
+��� Partnership program updates and tier benefits
 • Educational resources and compliance updates
 
 📈 PARTNERSHIP BENEFITS:
@@ -5845,7 +6408,17 @@ Faded Skies Wholesale Team`
         }
 
         function bulkStatusUpdate() {
-            showNotification('�� Bulk status update functionality coming soon!', 'warning');
+            // Log bulk status update attempt
+            if (window.simpleLogger) {
+                window.simpleLogger.info('Bulk status update feature accessed', {
+                    admin: currentUser?.email,
+                    timestamp: new Date().toISOString(),
+                    action: 'bulk_status_update_attempt',
+                    system: 'admin-portal'
+                });
+            }
+
+            showNotification('📦 Bulk status update functionality coming soon!', 'warning');
         }
 
         function generateShippingLabels() {
@@ -5897,14 +6470,25 @@ Faded Skies Wholesale Team`
 
         // Tab Switching
         function switchTab(tabName) {
+            // Log tab navigation
+            if (window.simpleLogger) {
+                window.simpleLogger.info('Admin tab navigation', {
+                    tabName: tabName,
+                    admin: currentUser?.email,
+                    timestamp: new Date().toISOString(),
+                    action: 'tab_switch',
+                    system: 'admin-portal'
+                });
+            }
+
             // Remove active class from all tabs and contents
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
+
             // Add active class to clicked tab and corresponding content
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
-            
+
             // Update view based on tab
             if (tabName === 'pricing') {
                 updatePricingTable();
@@ -6132,7 +6716,7 @@ Faded Skies Wholesale Team`
                         <td>
                             <div style="display: flex; gap: 8px;">
                                 <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openApplicationReview('${app.applicationId}')">
-                                    📋 Review
+                                    ���� Review
                                 </button>
                                 ${app.status === 'pending' ? `
                                     <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); quickApproveApplication('${app.applicationId}')">
@@ -6307,13 +6891,26 @@ Faded Skies Wholesale Team`
                 return;
             }
 
+            // Log application review action
+            if (window.simpleLogger) {
+                window.simpleLogger.system('Application review action initiated', {
+                    applicationId: currentReviewingApplication.applicationId,
+                    businessName: currentReviewingApplication.businessName,
+                    action: action,
+                    partnerTier: partnerTier,
+                    admin: currentUser?.email,
+                    timestamp: new Date().toISOString(),
+                    system: 'admin-portal'
+                });
+            }
+
             // Update application
             const appIndex = currentApplications.findIndex(app =>
                 app.applicationId === currentReviewingApplication.applicationId
             );
 
             if (appIndex === -1) {
-                showNotification('❌ Application not found', 'error');
+                showNotification('�� Application not found', 'error');
                 return;
             }
 
@@ -6343,6 +6940,20 @@ Faded Skies Wholesale Team`
             };
 
             showNotification(`✅ Application ${actionText[action]} successfully!`, 'success');
+
+            // Log successful application action
+            if (window.simpleLogger) {
+                window.simpleLogger.system('Application review completed', {
+                    applicationId: currentApplications[appIndex].applicationId,
+                    businessName: currentApplications[appIndex].businessName,
+                    action: action,
+                    finalStatus: currentApplications[appIndex].status,
+                    partnerTier: currentApplications[appIndex].partnerTier,
+                    admin: currentUser?.email,
+                    timestamp: new Date().toISOString(),
+                    system: 'admin-portal'
+                });
+            }
 
             // Close modal and refresh data
             closeModal('applicationNotesModal');
@@ -6682,6 +7293,119 @@ Faded Skies Partnership Team`
         window.quickApproveApplication = quickApproveApplication;
         window.quickRejectApplication = quickRejectApplication;
 
+        // Export admin portal logger functions for global access
+        window.adminPortalLogger = {
+            updateLoggerStatus: updateLoggerStatus,
+            testSystemCommunication: testSystemCommunication,
+            verifyCrossPortalCommunication: verifyCrossPortalCommunication,
+            getLoggerStats: () => window.simpleLogger?.getStats?.() || {},
+            getSystemStatus: () => ({
+                logger: !!window.simpleLogger,
+                sharedData: !!window.sharedDataManager,
+                realTimeSync: !!window.realTimeSync,
+                currentUser: !!currentUser,
+                timestamp: new Date().toISOString()
+            })
+        };
+
+        // Initialize logger status monitoring
+        function updateLoggerStatus() {
+            const loggerStatusDiv = document.getElementById('loggerStatus');
+            const loggerStatusText = document.getElementById('loggerStatusText');
+
+            if (window.simpleLogger && window.simpleLogger.getStatus) {
+                const status = window.simpleLogger.getStatus();
+                const stats = window.simpleLogger.getStats();
+
+                if (status.initialized) {
+                    loggerStatusDiv.style.display = 'flex';
+                    loggerStatusText.textContent = `Logger Active (${stats.total || 0} logs)`;
+                    loggerStatusDiv.style.borderColor = 'var(--brand-green)';
+                    loggerStatusDiv.style.color = 'var(--brand-green)';
+                } else {
+                    loggerStatusDiv.style.display = 'flex';
+                    loggerStatusText.textContent = 'Logger Inactive';
+                    loggerStatusDiv.style.borderColor = 'var(--accent-orange)';
+                    loggerStatusDiv.style.color = 'var(--accent-orange)';
+                }
+            } else {
+                loggerStatusDiv.style.display = 'flex';
+                loggerStatusText.textContent = 'Logger Loading...';
+                loggerStatusDiv.style.borderColor = 'var(--accent-orange)';
+                loggerStatusDiv.style.color = 'var(--accent-orange)';
+            }
+        }
+
+        // Enhanced system communication test
+        function testSystemCommunication() {
+            if (window.simpleLogger) {
+                window.simpleLogger.system('Admin portal system communication test', {
+                    admin: currentUser?.email || 'system',
+                    timestamp: new Date().toISOString(),
+                    portalType: 'admin',
+                    testType: 'communication_verification',
+                    sharedDataManager: !!window.sharedDataManager,
+                    realTimeSync: !!window.realTimeSync,
+                    activeSystems: {
+                        dataManager: !!window.sharedDataManager,
+                        orderSync: !!window.orderSyncManager,
+                        liveDemo: !!window.liveDemoManager,
+                        systemIntegration: !!window.systemIntegration
+                    },
+                    system: 'admin-portal'
+                });
+
+                // Update status display
+                updateLoggerStatus();
+
+                console.log('📊 Admin Portal: System communication test completed');
+                return true;
+            }
+            return false;
+        }
+
+        // Cross-portal communication verification
+        function verifyCrossPortalCommunication() {
+            if (window.simpleLogger) {
+                const communicationTest = {
+                    timestamp: new Date().toISOString(),
+                    admin: currentUser?.email || 'system',
+                    portalType: 'admin',
+                    targetPortal: 'partner-portal',
+                    message: 'Cross-portal communication verification from admin portal',
+                    dataSync: {
+                        products: products?.length || 0,
+                        orders: orders?.length || 0,
+                        sharedDataActive: !!window.sharedDataManager
+                    },
+                    system: 'admin-portal'
+                };
+
+                window.simpleLogger.system('Cross-portal communication test', communicationTest);
+
+                // Test if partner portal can see our messages by checking logs
+                setTimeout(() => {
+                    const logs = window.simpleLogger.getLogs();
+                    const recentLogs = logs.filter(log =>
+                        log.timestamp > new Date(Date.now() - 60000).toISOString()
+                    );
+
+                    window.simpleLogger.info('Communication verification completed', {
+                        admin: currentUser?.email || 'system',
+                        recentLogCount: recentLogs.length,
+                        crossPortalStatus: 'active',
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+
+                    console.log('🔄 Admin Portal: Cross-portal communication verified');
+                }, 2000);
+
+                return true;
+            }
+            return false;
+        }
+
         // Initialize live systems when everything is loaded
         document.addEventListener('DOMContentLoaded', function() {
             // Wait for all scripts to load, then initialize live systems
@@ -6689,6 +7413,24 @@ Faded Skies Partnership Team`
                 if (typeof initializeLiveSystems === 'function') {
                     initializeLiveSystems();
                 }
+
+                // Initialize logger status monitoring
+                updateLoggerStatus();
+
+                // Test system communication every 30 seconds
+                setInterval(() => {
+                    updateLoggerStatus();
+                }, 30000);
+
+                // Test communication immediately
+                setTimeout(() => {
+                    testSystemCommunication();
+
+                    // Also test cross-portal communication
+                    setTimeout(() => {
+                        verifyCrossPortalCommunication();
+                    }, 1000);
+                }, 2000);
             }, 1000);
         });
     </script>

@@ -968,6 +968,7 @@ class CartManager {
                     const userEmail = window.currentUser?.email || 'guest@example.com';
                     const userName = window.currentUser?.name || 'Guest User';
 
+                    const currentTime = new Date().toISOString();
                     const newOrder = {
                         id: `ORD-${String((window.sharedDataManager?.getOrders()?.length || 0) + 1).padStart(3, '0')}`,
                         partner: userEmail,
@@ -983,15 +984,34 @@ class CartManager {
                         })),
                         total: totals.total,
                         status: 'PENDING',
+                        priority: totals.total > 1000 ? 'HIGH' : 'NORMAL',
                         date: new Date().toISOString().split('T')[0],
+                        createdAt: currentTime,
                         notes: '',
                         delivery: totals.total > 1000 ? 'priority' : 'standard',
-                        created: new Date().toISOString()
+                        created: currentTime,
+                        paymentStatus: 'Paid',
+                        statusHistory: [{
+                            status: 'PENDING',
+                            timestamp: currentTime,
+                            note: 'Order placed via partner portal'
+                        }],
+                        shippingAddress: `${userName} Store, Partner Portal Order`
                     };
 
                     // Add order to shared data manager
                     if (window.sharedDataManager) {
                         window.sharedDataManager.addOrder(newOrder);
+                    }
+
+                    // Broadcast order placement directly for immediate admin notification
+                    if (window.realTimeSync) {
+                        window.realTimeSync.broadcast('order_placed', {
+                            ...newOrder,
+                            isUrgent: totals.total > 1000,
+                            source: 'partner_portal'
+                        });
+                        console.log('📡 Order broadcast to admin portal:', newOrder.id);
                     }
 
                     // Update inventory

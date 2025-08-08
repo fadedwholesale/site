@@ -3283,7 +3283,7 @@
                 <!-- Additional Information Section -->
                 <div class="form-section" style="margin-bottom: 24px;">
                     <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                        �� Additional Information
+                        ��� Additional Information
                     </h4>
                     <div class="form-row">
                         <div class="form-group">
@@ -4332,7 +4332,7 @@
             try {
                 if (!currentUser) {
                     openModal('loginModal');
-                    showNotification('���� Please log in to access the partner portal', 'warning');
+                    showNotification('������ Please log in to access the partner portal', 'warning');
                     return;
                 }
                 
@@ -5261,6 +5261,9 @@
                     forceUpdateWithImages();
                 }, 200);
                 
+                // Set up real-time sync for inventory and orders
+                setupPartnerRealTimeSync();
+
                 // Add all production features with mobile support
                 setTimeout(() => {
                     try {
@@ -5270,7 +5273,7 @@
                         enhanceAccessibility();
                         initializeToggleButtons();
                         addUniversalTouchHandlers(); // New comprehensive mobile handler
-                        
+
                         // Mobile-specific initialization
                         initializeMobileFeatures();
                         
@@ -5290,6 +5293,173 @@
             } catch (error) {
                 console.error('Initialization error:', error);
                 showNotification('❌ Some features may be limited. Please refresh if you experience issues.', 'warning');
+            }
+        }
+
+        // Real-time sync setup for partner portal
+        function setupPartnerRealTimeSync() {
+            console.log('🔄 Setting up real-time sync for partner portal...');
+
+            // Wait for real-time sync to be available
+            const checkRealTimeSync = () => {
+                if (window.realTimeSync) {
+                    console.log('✅ Real-time sync available, setting up listeners...');
+
+                    // Listen for product updates from admin
+                    window.realTimeSync.on('product_updated', (productData) => {
+                        console.log('📡 Partner: Product updated', productData);
+                        updatePartnerInventoryView(productData);
+                        showNotification(`📦 Product "${productData.strain || 'Unknown'}" updated`, 'info');
+                    });
+
+                    window.realTimeSync.on('product_added', (productData) => {
+                        console.log('📡 Partner: New product added', productData);
+                        refreshAllProducts();
+                        showNotification(`🆕 New product "${productData.strain || 'Unknown'}" added`, 'success');
+                    });
+
+                    window.realTimeSync.on('product_deleted', (productData) => {
+                        console.log('📡 Partner: Product deleted', productData);
+                        removeProductFromView(productData.id);
+                        showNotification(`🗑️ Product removed from inventory`, 'warning');
+                    });
+
+                    // Listen for inventory/stock changes
+                    window.realTimeSync.on('inventory_updated', (data) => {
+                        console.log('📡 Partner: Inventory updated', data);
+                        refreshAllProducts();
+                        showNotification('📊 Inventory updated', 'info');
+                    });
+
+                    // Listen for order confirmations
+                    window.realTimeSync.on('order_confirmed', (orderData) => {
+                        if (orderData.partner === currentUser?.email) {
+                            console.log('📡 Partner: Order confirmed', orderData);
+                            showNotification(`✅ Order ${orderData.id} confirmed by admin`, 'success');
+                            updateOrderStatus(orderData);
+                        }
+                    });
+
+                    console.log('✅ Real-time sync listeners configured for partner portal');
+
+                    // Set up periodic sync verification
+                    setInterval(() => {
+                        verifyPartnerPortalSync();
+                    }, 30000); // Check every 30 seconds
+
+                } else {
+                    console.log('⏳ Real-time sync not ready, retrying in 1 second...');
+                    setTimeout(checkRealTimeSync, 1000);
+                }
+            };
+
+            checkRealTimeSync();
+        }
+
+        // Verify partner portal is in sync with shared data
+        function verifyPartnerPortalSync() {
+            try {
+                if (!window.sharedDataManager) return;
+
+                const sharedData = window.sharedDataManager.getData();
+
+                // Check if product counts match
+                if (sharedData.products && sharedData.products.length !== products.length) {
+                    console.log('🔄 Partner: Product count mismatch detected, syncing...');
+                    refreshAllProducts();
+                    return;
+                }
+
+                // Check for stock or price differences
+                let dataMismatch = false;
+                if (sharedData.products) {
+                    sharedData.products.forEach(sharedProduct => {
+                        const localProduct = products.find(p => p.id === sharedProduct.id);
+                        if (localProduct) {
+                            if (localProduct.stock !== sharedProduct.stock ||
+                                localProduct.price !== sharedProduct.price ||
+                                localProduct.status !== sharedProduct.status) {
+                                console.log(`🔄 Partner: Data mismatch for ${sharedProduct.strain}`);
+                                dataMismatch = true;
+                            }
+                        }
+                    });
+                }
+
+                if (dataMismatch) {
+                    refreshAllProducts();
+                    showNotification('📊 Inventory updated', 'info');
+                }
+
+            } catch (error) {
+                console.warn('Error in partner sync verification:', error);
+            }
+        }
+
+        // Update specific product in partner view
+        function updatePartnerInventoryView(productData) {
+            try {
+                // Update products array
+                const productIndex = products.findIndex(p => p.id === productData.id);
+                if (productIndex !== -1) {
+                    products[productIndex] = { ...products[productIndex], ...productData };
+
+                    // Refresh all views to reflect changes
+                    updateAllViews();
+                    forceUpdateWithImages();
+                }
+            } catch (error) {
+                console.error('Error updating partner inventory view:', error);
+            }
+        }
+
+        // Remove product from partner view
+        function removeProductFromView(productId) {
+            try {
+                // Remove from products array
+                products = products.filter(p => p.id !== productId);
+
+                // Refresh all views
+                updateAllViews();
+                forceUpdateWithImages();
+            } catch (error) {
+                console.error('Error removing product from view:', error);
+            }
+        }
+
+        // Refresh all products from shared data
+        function refreshAllProducts() {
+            try {
+                if (window.sharedDataManager) {
+                    const sharedData = window.sharedDataManager.getData();
+                    if (sharedData && sharedData.products) {
+                        products = sharedData.products;
+                        updateAllViews();
+                        forceUpdateWithImages();
+                    }
+                }
+            } catch (error) {
+                console.error('Error refreshing products:', error);
+            }
+        }
+
+        // Update order status in partner view
+        function updateOrderStatus(orderData) {
+            try {
+                // Update orders array if exists
+                if (window.orders) {
+                    const orderIndex = orders.findIndex(o => o.id === orderData.id);
+                    if (orderIndex !== -1) {
+                        orders[orderIndex] = { ...orders[orderIndex], ...orderData };
+
+                        // Update any order displays
+                        if (typeof updateAnalyticsTab === 'function') {
+                            updateAnalyticsTab();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating order status:', error);
             }
         }
 
@@ -6521,8 +6691,29 @@ Phone: (210) 835-7834
                 const order = orders.find(o => o.id === orderId);
                 if (!order) return;
                 
-                // Parse items and add to cart
-                const itemStrings = order.items.split(', ');
+                // Parse items and add to cart with safe handling
+                let itemStrings = [];
+
+                if (!order.items) {
+                    showNotification('❌ Order has no items to reorder', 'error');
+                    return;
+                } else if (typeof order.items === 'string') {
+                    itemStrings = order.items.split(', ');
+                } else if (Array.isArray(order.items)) {
+                    itemStrings = order.items.map(item => {
+                        if (typeof item === 'string') {
+                            return item;
+                        } else if (item && typeof item === 'object') {
+                            const name = item.name || item.product || item.strain || 'Unknown Product';
+                            const qty = item.quantity || item.qty || 1;
+                            return `${name} (x${qty})`;
+                        }
+                        return String(item);
+                    });
+                } else {
+                    itemStrings = [String(order.items)];
+                }
+
                 let itemsAdded = 0;
                 
                 itemStrings.forEach(itemStr => {
@@ -7513,7 +7704,7 @@ Phone: (210) 835-7834
 
         console.log('🌿 Faded Skies Wholesale Portal - CART FIXED VERSION! 🚀');
         console.log('📊 All template literals replaced with string concatenation');
-        console.log('🛒 Cart quantity +/- buttons now work properly and update ticker');
+        console.log('�� Cart quantity +/- buttons now work properly and update ticker');
         console.log('🖼️ Product images ready');
         console.log('🔄 Test functions available:');
         console.log('   - testToggle() - Test toggle functions');
@@ -7555,10 +7746,33 @@ Phone: (210) 835-7834
             }, {});
             // Average order value
             const avgOrderValue = myOrders.length > 0 ? (myOrders.reduce((sum, o) => sum + o.total, 0) / myOrders.length) : 0;
-            // Top products ordered
+            // Top products ordered with safe handling
             const productCounts = {};
             myOrders.forEach(order => {
-                order.items.split(',').forEach(itemStr => {
+                if (!order || !order.items) return;
+
+                let itemStrings = [];
+
+                if (typeof order.items === 'string') {
+                    itemStrings = order.items.split(',');
+                } else if (Array.isArray(order.items)) {
+                    itemStrings = order.items.map(item => {
+                        if (typeof item === 'string') {
+                            return item;
+                        } else if (item && typeof item === 'object') {
+                            const name = item.name || item.product || item.strain || 'Unknown Product';
+                            const qty = item.quantity || item.qty || 1;
+                            return `${name} (x${qty})`;
+                        }
+                        return String(item);
+                    });
+                } else {
+                    itemStrings = [String(order.items)];
+                }
+
+                itemStrings.forEach(itemStr => {
+                    if (!itemStr || typeof itemStr !== 'string') return;
+
                     const match = itemStr.match(/^(.+?) \(x(\d+)\)$/);
                     if (match) {
                         const name = match[1].trim();
