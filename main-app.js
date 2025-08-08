@@ -417,21 +417,41 @@ function updateAllViews() {
 function updatePublicInventoryDisplay() {
     const tbody = document.getElementById('publicInventoryBody');
     if (!tbody) return;
-    
+
     const availableProducts = products.filter(p => p.status === 'AVAILABLE');
-    
+
     if (availableProducts.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No products available at this time</td></tr>';
         return;
     }
-    
+
+    // Check if user is authenticated to show action buttons
+    const isAuthenticated = !!(currentUser || window.currentUser);
+
     tbody.innerHTML = availableProducts.map(product => {
         const unitLabel = getUnitLabel(product.grade);
+
+        // Different action column content based on authentication status
+        let actionColumn;
+        if (isAuthenticated) {
+            actionColumn = `
+                <button class="btn btn-primary btn-sm" onclick="addToCart(${product.id})" title="Add ${product.strain} to cart">
+                    🛒 Add to Cart
+                </button>
+            `;
+        } else {
+            actionColumn = `
+                <button class="btn btn-secondary btn-sm" onclick="showAuthRequiredNotification()" title="Login required to add to cart">
+                    🔒 Partner Login Required
+                </button>
+            `;
+        }
+
         return `
             <tr>
                 <td class="product-image-container">
-                    <img src="${product.image || 'https://via.placeholder.com/80x80/1a1a1a/00C851?text=' + product.grade}" 
-                         alt="${product.strain}" class="product-image" 
+                    <img src="${product.image || 'https://via.placeholder.com/80x80/1a1a1a/00C851?text=' + product.grade}"
+                         alt="${product.strain}" class="product-image"
                          onerror="this.src='https://via.placeholder.com/80x80/1a1a1a/00C851?text=${product.grade}'" />
                 </td>
                 <td><strong>${product.grade}</strong></td>
@@ -442,11 +462,7 @@ function updatePublicInventoryDisplay() {
                 <td><strong style="color: var(--brand-green);">$${product.price}${unitLabel}</strong></td>
                 <td><span style="color: var(--brand-green); font-weight: 700;">${product.thca}%</span></td>
                 <td><span class="status-available">${product.stock} Available</span></td>
-                <td>
-                    <button class="btn btn-primary btn-sm" onclick="addToCart(${product.id})">
-                        🛒 Add to Cart
-                    </button>
-                </td>
+                <td>${actionColumn}</td>
             </tr>
         `;
     }).join('');
