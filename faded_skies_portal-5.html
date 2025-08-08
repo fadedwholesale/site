@@ -1774,7 +1774,7 @@
                         </div>
 
                         <div class="card">
-                            <h3>���� Purchase Insights</h3>
+                            <h3>📊 Purchase Insights</h3>
                             <div style="margin-top: 16px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                                     <span>THCA Flower</span>
@@ -2036,27 +2036,33 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="editBusinessType">Business Type *</label>
-                        <select id="editBusinessType" required>
-                            <option value="">Select your business type</option>
-                            <option value="dispensary">Licensed Dispensary</option>
-                            <option value="smoke-shop">Smoke Shop</option>
-                            <option value="cbd-store">CBD/Hemp Store</option>
-                            <option value="distributor">Wholesale Distributor</option>
-                            <option value="delivery">Delivery Service</option>
-                            <option value="other">Other Licensed Retailer</option>
-                        </select>
+                <!-- Business Details Section -->
+                <div class="form-section" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);">
+                    <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        📋 Business Details
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editBusinessType">Business Type *</label>
+                            <select id="editBusinessType" required>
+                                <option value="">Select your business type</option>
+                                <option value="dispensary">Licensed Dispensary</option>
+                                <option value="smoke-shop">Smoke Shop</option>
+                                <option value="cbd-store">CBD/Hemp Store</option>
+                                <option value="distributor">Wholesale Distributor</option>
+                                <option value="delivery">Delivery Service</option>
+                                <option value="other">Other Licensed Retailer</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editLicenseNumber">License Number</label>
+                            <input type="text" id="editLicenseNumber" placeholder="Your business license number">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="editLicenseNumber">License Number</label>
-                        <input type="text" id="editLicenseNumber" placeholder="Your business license number">
+                        <label for="editBusinessAddress">Business Address *</label>
+                        <textarea id="editBusinessAddress" rows="3" required placeholder="Full business address including city, state, zip"></textarea>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="editBusinessAddress">Business Address *</label>
-                    <textarea id="editBusinessAddress" rows="3" required placeholder="Full business address including city, state, zip"></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -3019,7 +3025,7 @@
                     showNotification('🛒 Products tab loaded with images!', 'success');
                 } else if (tabName === 'orders') {
                     updateOrderHistory();
-                    showNotification('��� Orders tab loaded!', 'success');
+                    showNotification('📋 Orders tab loaded!', 'success');
                 } else {
                     showNotification(`📊 ${tabName.charAt(0).toUpperCase() + tabName.slice(1)} tab loaded!`, 'success');
                 }
@@ -4588,7 +4594,7 @@
 
         function updateQuantity(productId, quantity) {
             try {
-                console.log('🔄 Updating quantity for product:', productId, 'to:', quantity);
+                console.log('��� Updating quantity for product:', productId, 'to:', quantity);
                 
                 const item = cart.find(item => item.id === productId);
                 const product = products.find(p => p.id === productId);
@@ -5585,7 +5591,7 @@ Phone: (210) 835-7834
                         }, 1000);
                     } else {
                         console.log('❌ Failed to add product to cart');
-                        showNotification('��� Failed to add product to cart', 'error');
+                        showNotification('❌ Failed to add product to cart', 'error');
                     }
                 }, 500);
                 
@@ -5895,7 +5901,7 @@ Phone: (210) 835-7834
         console.log('📱🌿 Faded Skies Wholesale Portal - MOBILE OPTIMIZED! 🚀');
         console.log('📱 Complete mobile touch support with visual feedback');
         console.log('📱 Modal triggers work on all devices with comprehensive event handling');
-        console.log('���� Mobile debugging tools available: testMobileFunction(), testMobileInteraction()');
+        console.log('📱 Mobile debugging tools available: testMobileFunction(), testMobileInteraction()');
         console.log('🔥 READY FOR MOBILE DEPLOYMENT! 🔥');
 
         // Debug Function to Check System Status
