@@ -1358,7 +1358,7 @@
                         </div>
                         <div class="action-group">
                             <button class="btn btn-primary" onclick="openModal('createOrderModal')">➕ Create Order</button>
-                            <button class="btn btn-secondary" onclick="bulkStatusUpdate()">🔄 Bulk Status Update</button>
+                            <button class="btn btn-secondary" onclick="bulkStatusUpdate()">���� Bulk Status Update</button>
                             <button class="btn btn-secondary" onclick="exportOrders()">📄 Export Orders</button>
                             <button class="btn btn-secondary" onclick="openModal('customerTrackingModal')">🔍 Customer Tracking</button>
                             <button class="btn btn-admin" onclick="generateBulkShippingLabels()">📦 Bulk Labels</button>
@@ -1837,7 +1837,7 @@
                         </div>
 
                         <div class="card">
-                            <h3>⚙️ System Configuration</h3>
+                            <h3>���️ System Configuration</h3>
                             <div class="form-group">
                                 <label>Auto-Sync Interval (minutes)</label>
                                 <input type="number" class="editable" value="45" style="width: 100%;">
@@ -2251,7 +2251,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 <div style="display: flex; gap: 16px; margin-bottom: 24px;">
                     <button class="btn btn-primary" onclick="generatePartnerResetLinks()">🔗 Generate Reset Links</button>
                     <button class="btn btn-secondary" onclick="sendBulkPasswordResets()">📧 Send Bulk Reset Emails</button>
-                    <button class="btn btn-secondary" onclick="refreshPasswordResetTable()">🔄 Refresh</button>
+                    <button class="btn btn-secondary" onclick="refreshPasswordResetTable()">��� Refresh</button>
                 </div>
                 
                 <table class="data-table" id="passwordResetTable">
@@ -3771,6 +3771,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 updateInventoryTable();
                 updateDashboardStats();
                 showNotification(`📦 Stock updated for ${product.strain}`, 'success');
+
+                // Trigger auto-sync to partner portal
+                triggerAutoSync('stock_update');
             }
         }
 
@@ -6503,7 +6506,7 @@ Faded Skies Partnership Team`
             localStorage.setItem('sentEmails', JSON.stringify(emails));
 
             // Show confirmation
-            showNotification(`📧 Email sent to ${application.businessEmail}`, 'success');
+            showNotification(`�� Email sent to ${application.businessEmail}`, 'success');
 
             console.log('📧 Email notification sent:', {
                 to: application.businessEmail,
