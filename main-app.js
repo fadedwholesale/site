@@ -14,7 +14,7 @@ function setCurrentUser(user) {
         console.log('✅ User authenticated globally:', user.email);
     } else {
         localStorage.removeItem('currentUser');
-        console.log('✅ User logged out globally');
+        console.log('��� User logged out globally');
     }
     
     // Immediately notify cart manager of auth state change
@@ -57,34 +57,52 @@ function initializeApplication() {
     // Initialize real-time status indicator
     initializeRealTimeStatusIndicator();
 
-    // Check if user is already logged in
+    // Check if user is already logged in from a previous session
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
         try {
             const userData = JSON.parse(savedUser);
-            setCurrentUser(userData);
-            showUserSession();
-            console.log('✅ User session restored:', currentUser.email);
+            // Validate the saved user data has required fields
+            if (userData.email && userData.name) {
+                setCurrentUser(userData);
+                showUserSession();
+                console.log('✅ User session restored:', currentUser.email);
+            } else {
+                console.log('⚠️ Invalid saved user data, clearing session');
+                localStorage.removeItem('currentUser');
+                showGuestSession();
+            }
         } catch (error) {
             console.error('Error restoring user session:', error);
             localStorage.removeItem('currentUser');
+            showGuestSession();
         }
+    } else {
+        // No saved user, start in guest mode
+        console.log('👤 No user session found, showing guest session');
+        showGuestSession();
     }
 
     // Initialize live checkout system
     initializeLiveCheckout();
 
-    // Ensure users start in logged out state
-    if (!currentUser) {
-        console.log('👤 No user session found, showing guest session');
-        showGuestSession();
-    }
-
-    // Initialize view state
+    // Initialize view state - only show portal if user is actually logged in
     const urlParams = new URLSearchParams(window.location.search);
     const initialView = urlParams.get('view');
-    if (initialView === 'portal' && currentUser) {
-        showPartnerPortal();
+    if (initialView === 'portal') {
+        if (currentUser) {
+            showPartnerPortal();
+        } else {
+            // Redirect to public view and show login modal
+            showPublicWebsite();
+            setTimeout(() => {
+                showNotification('🔒 Please log in to access the partner portal', 'warning');
+                openModal('loginModal');
+            }, 500);
+        }
+    } else {
+        // Default to public view
+        showPublicWebsite();
     }
 }
 
@@ -3049,7 +3067,7 @@ function register(event) {
         closeModal('registerModal');
         showPartnerPortal();
 
-        showNotification(`🎉 Welcome to Faded Skies, ${contactName}!`, 'success');
+        showNotification(`��� Welcome to Faded Skies, ${contactName}!`, 'success');
 
         // Restore button state
         submitBtn.textContent = originalText;
