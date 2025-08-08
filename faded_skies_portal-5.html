@@ -4332,7 +4332,7 @@
             try {
                 if (!currentUser) {
                     openModal('loginModal');
-                    showNotification('���� Please log in to access the partner portal', 'warning');
+                    showNotification('������ Please log in to access the partner portal', 'warning');
                     return;
                 }
                 
@@ -6521,8 +6521,29 @@ Phone: (210) 835-7834
                 const order = orders.find(o => o.id === orderId);
                 if (!order) return;
                 
-                // Parse items and add to cart
-                const itemStrings = order.items.split(', ');
+                // Parse items and add to cart with safe handling
+                let itemStrings = [];
+
+                if (!order.items) {
+                    showNotification('❌ Order has no items to reorder', 'error');
+                    return;
+                } else if (typeof order.items === 'string') {
+                    itemStrings = order.items.split(', ');
+                } else if (Array.isArray(order.items)) {
+                    itemStrings = order.items.map(item => {
+                        if (typeof item === 'string') {
+                            return item;
+                        } else if (item && typeof item === 'object') {
+                            const name = item.name || item.product || item.strain || 'Unknown Product';
+                            const qty = item.quantity || item.qty || 1;
+                            return `${name} (x${qty})`;
+                        }
+                        return String(item);
+                    });
+                } else {
+                    itemStrings = [String(order.items)];
+                }
+
                 let itemsAdded = 0;
                 
                 itemStrings.forEach(itemStr => {
@@ -7513,7 +7534,7 @@ Phone: (210) 835-7834
 
         console.log('🌿 Faded Skies Wholesale Portal - CART FIXED VERSION! 🚀');
         console.log('📊 All template literals replaced with string concatenation');
-        console.log('🛒 Cart quantity +/- buttons now work properly and update ticker');
+        console.log('�� Cart quantity +/- buttons now work properly and update ticker');
         console.log('🖼️ Product images ready');
         console.log('🔄 Test functions available:');
         console.log('   - testToggle() - Test toggle functions');
