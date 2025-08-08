@@ -276,6 +276,9 @@ function showUserSession() {
     if (window.cartManager) {
         window.cartManager.updateDisplay();
     }
+
+    // Update public inventory display to show action buttons for authenticated users
+    updatePublicInventoryDisplay();
 }
 
 function showGuestSession() {
@@ -2039,7 +2042,7 @@ function validateFieldLive(input) {
                 break;
             case 'checkoutCustomerPhone':
                 isValid = /^[\+]?[1-9][\d]{0,15}$/.test(value.replace(/\D/g, ''));
-                message = isValid ? '��' : '❌ Invalid phone';
+                message = isValid ? '✅' : '❌ Invalid phone';
                 break;
             case 'checkoutBusinessName':
                 isValid = value.length >= 2;
