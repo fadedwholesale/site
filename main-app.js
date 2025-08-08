@@ -1143,12 +1143,14 @@ function nextRegistrationStep() {
 
 function previousRegistrationStep() {
     if (currentRegistrationStep === 2) {
-        document.getElementById('registrationStep2').classList.remove('active');
-        document.getElementById('registrationStep1').classList.add('active');
+        updateApplicationProgress(1);
+        document.getElementById('registrationStep2').style.display = 'none';
+        document.getElementById('registrationStep1').style.display = 'block';
         currentRegistrationStep = 1;
     } else if (currentRegistrationStep === 3) {
-        document.getElementById('registrationStep3').classList.remove('active');
-        document.getElementById('registrationStep2').classList.add('active');
+        updateApplicationProgress(2);
+        document.getElementById('registrationStep3').style.display = 'none';
+        document.getElementById('registrationStep2').style.display = 'block';
         currentRegistrationStep = 2;
     }
 }
