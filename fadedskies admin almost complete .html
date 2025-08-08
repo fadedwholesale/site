@@ -3707,7 +3707,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     </td>
                     <td>
                         <button class="btn btn-secondary btn-sm" onclick="editOrder('${order.id}')">Edit</button>
-                        <button class="btn btn-primary btn-sm" onclick="addTracking('${order.id}')">📦 Track</button>
+                        <button class="btn btn-primary btn-sm" onclick="addTracking('${order.id}')">�� Track</button>
                         <button class="btn btn-admin btn-sm" onclick="viewOrderDetails('${order.id}')">Details</button>
                     </td>
                 `;
@@ -4155,6 +4155,11 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             order.trackingUrl = document.getElementById('trackingUrl').value || null;
             order.shippingNotes = document.getElementById('shippingNotes').value || null;
             
+            // Ensure statusHistory exists
+            if (!order.statusHistory || !Array.isArray(order.statusHistory)) {
+                order.statusHistory = [];
+            }
+
             // Update status if requested
             const newStatus = document.getElementById('newTrackingStatus').value;
             if (newStatus !== order.status) {
@@ -4165,7 +4170,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     note: `Status updated to ${newStatus} with tracking info`
                 });
             }
-            
+
             // Add tracking to status history
             order.statusHistory.push({
                 status: order.status,
