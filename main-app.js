@@ -1142,7 +1142,7 @@ function handleFileUpload(input, documentType) {
                             <div class="file-name">${file.name}</div>
                             <div class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
                         </div>
-                        <span class="file-status">✅</span>
+                        <span class="file-status">��</span>
                     </div>
                 </div>
             `;
@@ -2148,6 +2148,33 @@ window.processPayment = processPayment;
 window.updateProfile = updateProfile;
 window.populateProfileEditForm = populateProfileEditForm;
 window.refreshProfileData = refreshProfileData;
+
+// Test function to verify profile edit modal
+window.testProfileEditModal = function() {
+    console.log('🧪 Testing profile edit modal functionality...');
+
+    if (!window.currentUser) {
+        console.log('👤 No user logged in, creating test user...');
+        const testUser = {
+            email: 'test@business.com',
+            name: 'Test User',
+            businessName: 'Test Business',
+            tier: 'Gold Partner',
+            loginTime: new Date().toISOString()
+        };
+        setCurrentUser(testUser);
+        showUserSession();
+        showPartnerPortal();
+        switchPortalTab('profile');
+    }
+
+    setTimeout(() => {
+        console.log('🔄 Opening profile edit modal...');
+        openProfileEditModal();
+    }, 1000);
+
+    return 'Profile edit modal test initiated - check console for results';
+};
 window.register = register;
 window.proceedToPayment = proceedToPayment;
 window.updateDeliveryMethodLive = updateDeliveryMethodLive;
