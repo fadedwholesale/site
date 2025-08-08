@@ -4076,6 +4076,11 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
                 order.status = newStatus;
 
+                // Ensure statusHistory exists
+                if (!order.statusHistory || !Array.isArray(order.statusHistory)) {
+                    order.statusHistory = [];
+                }
+
                 // Add to status history
                 order.statusHistory.push({
                     status: newStatus,
