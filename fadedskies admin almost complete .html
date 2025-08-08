@@ -2893,7 +2893,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Listen for product updates
                 window.realTimeSync.on('products_updated', (data) => {
                     console.log('📡 Admin: Products updated via real-time sync');
-                    products = [...data]; // Always use fresh data
+                    // Use SharedDataManager as single source of truth
+                    window.sharedDataManager.updateProducts(data);
+                    loadDataFromSharedManager(); // Reload from shared manager
                     updateAllDashboardViews();
                     showNotification('📦 Products synchronized from partner portal', 'info');
                 });
