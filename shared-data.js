@@ -63,26 +63,55 @@ class SharedDataManager {
     addProduct(product) {
         const data = this.getData();
         if (!data.products) data.products = [];
-        
+
         // Generate ID if not provided
         if (!product.id) {
             product.id = Date.now() + Math.random();
         }
-        
+
         data.products.push(product);
         this.saveData(data);
         this.notifyChange('product_added', product);
+
+        // Broadcast real-time update
+        if (this.realTimeSync) {
+            this.realTimeSync.broadcast('product_added', product);
+        }
+
         return product;
     }
 
     updateProduct(productId, updates) {
         const data = this.getData();
         const productIndex = data.products.findIndex(p => p.id === productId);
-        
+
         if (productIndex !== -1) {
+            const oldProduct = { ...data.products[productIndex] };
             data.products[productIndex] = { ...data.products[productIndex], ...updates };
             this.saveData(data);
             this.notifyChange('product_updated', data.products[productIndex]);
+
+            // Broadcast real-time update with before/after data
+            if (this.realTimeSync) {
+                this.realTimeSync.broadcast('product_updated', {
+                    productId,
+                    before: oldProduct,
+                    after: data.products[productIndex],
+                    updates
+                });
+
+                // If stock changed, broadcast inventory update
+                if (updates.stock !== undefined && updates.stock !== oldProduct.stock) {
+                    this.realTimeSync.broadcast('inventory_updated', {
+                        productId,
+                        productName: data.products[productIndex].strain,
+                        oldStock: oldProduct.stock,
+                        newStock: updates.stock,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            }
+
             return data.products[productIndex];
         }
         return null;
@@ -91,11 +120,17 @@ class SharedDataManager {
     deleteProduct(productId) {
         const data = this.getData();
         const productIndex = data.products.findIndex(p => p.id === productId);
-        
+
         if (productIndex !== -1) {
             const deletedProduct = data.products.splice(productIndex, 1)[0];
             this.saveData(data);
             this.notifyChange('product_deleted', deletedProduct);
+
+            // Broadcast real-time update
+            if (this.realTimeSync) {
+                this.realTimeSync.broadcast('product_deleted', deletedProduct);
+            }
+
             return deletedProduct;
         }
         return null;
