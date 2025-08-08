@@ -68,7 +68,7 @@ class ActivityLogger {
         });
     }
 
-    // Initialize session tracking
+    // Initialize session tracking (without events array to prevent circular references)
     initializeSession() {
         this.currentSession = {
             id: this.generateSessionId(),
@@ -85,8 +85,8 @@ class ActivityLogger {
             viewport: {
                 width: window.innerWidth,
                 height: window.innerHeight
-            },
-            events: []
+            }
+            // events array removed to prevent circular references
         };
 
         // Store session in session storage for quick access (completely safe)
