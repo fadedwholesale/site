@@ -1731,7 +1731,7 @@
                         </div>
 
                         <div class="chart-container">
-                            <h3 class="chart-title">��� Partner Performance Analysis</h3>
+                            <h3 class="chart-title">👥 Partner Performance Analysis</h3>
                             <div id="partnerPerformanceAnalytics">
                                 <!-- Will be populated by updatePartnerPerformanceAnalytics() -->
                             </div>
@@ -3737,6 +3737,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 updateInventoryTable();
                 updateDashboardStats();
                 showNotification(`📊 Status updated for ${product.strain}`, 'success');
+
+                // Trigger auto-sync to partner portal
+                triggerAutoSync('status_update');
             }
         }
 
