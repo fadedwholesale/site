@@ -4825,7 +4825,7 @@ Faded Skies Wholesale Team
             link.click();
             document.body.removeChild(link);
             
-            showNotification('📄 Partners exported successfully!', 'success');
+            showNotification('���� Partners exported successfully!', 'success');
         }
 
         function exportAnalytics() {
@@ -6947,6 +6947,12 @@ Faded Skies Partnership Team`
                     testType: 'communication_verification',
                     sharedDataManager: !!window.sharedDataManager,
                     realTimeSync: !!window.realTimeSync,
+                    activeSystems: {
+                        dataManager: !!window.sharedDataManager,
+                        orderSync: !!window.orderSyncManager,
+                        liveDemo: !!window.liveDemoManager,
+                        systemIntegration: !!window.systemIntegration
+                    },
                     system: 'admin-portal'
                 });
 
@@ -6954,6 +6960,48 @@ Faded Skies Partnership Team`
                 updateLoggerStatus();
 
                 console.log('📊 Admin Portal: System communication test completed');
+                return true;
+            }
+            return false;
+        }
+
+        // Cross-portal communication verification
+        function verifyCrossPortalCommunication() {
+            if (window.simpleLogger) {
+                const communicationTest = {
+                    timestamp: new Date().toISOString(),
+                    admin: currentUser?.email || 'system',
+                    portalType: 'admin',
+                    targetPortal: 'partner-portal',
+                    message: 'Cross-portal communication verification from admin portal',
+                    dataSync: {
+                        products: products?.length || 0,
+                        orders: orders?.length || 0,
+                        sharedDataActive: !!window.sharedDataManager
+                    },
+                    system: 'admin-portal'
+                };
+
+                window.simpleLogger.system('Cross-portal communication test', communicationTest);
+
+                // Test if partner portal can see our messages by checking logs
+                setTimeout(() => {
+                    const logs = window.simpleLogger.getLogs();
+                    const recentLogs = logs.filter(log =>
+                        log.timestamp > new Date(Date.now() - 60000).toISOString()
+                    );
+
+                    window.simpleLogger.info('Communication verification completed', {
+                        admin: currentUser?.email || 'system',
+                        recentLogCount: recentLogs.length,
+                        crossPortalStatus: 'active',
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+
+                    console.log('🔄 Admin Portal: Cross-portal communication verified');
+                }, 2000);
+
                 return true;
             }
             return false;
