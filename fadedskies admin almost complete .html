@@ -1802,7 +1802,7 @@
                     <div class="controls">
                         <h3 style="color: var(--brand-green); margin: 0;">System Configuration</h3>
                         <div class="action-group">
-                            <button class="btn btn-primary" onclick="saveSettings()">���� Save Settings</button>
+                            <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
                             <button class="btn btn-secondary" onclick="backupSystem()">📦 Backup System</button>
                             <button class="btn btn-secondary" onclick="exportLogs()">📋 Export Logs</button>
                             <button class="btn btn-danger" onclick="resetSystem()">🔄 Reset System</button>
@@ -2890,7 +2890,10 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         function initializeAdminDashboard() {
             console.log('🔧 Initializing Faded Skies Admin Dashboard...');
 
-            // Load system logos first
+            // Initialize system logo with the provided URL
+            updateSystemLogo('https://cdn.builder.io/api/v1/image/assets%2F9ee94cd3e5524451b5a43eae8f0b9627%2F2a1db2e6b6bc4987bc3bab24606d5f80?format=webp&width=800');
+
+            // Load system logos
             loadSystemLogos();
 
             // Load products from shared data manager
@@ -3721,7 +3724,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             
             const trackingSection = order.trackingNumber ? `
                 <div class="card" style="margin-bottom: 20px;">
-                    <h3>���� Tracking Information</h3>
+                    <h3>📦 Tracking Information</h3>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div>
                             <strong>Tracking Number:</strong><br>
@@ -5372,7 +5375,7 @@ Best regards,
 Faded Skies Wholesale Team`
                 },
                 newsletter: {
-                    subject: '📰 Monthly Newsletter - Faded Skies Wholesale',
+                    subject: '��� Monthly Newsletter - Faded Skies Wholesale',
                     message: `Dear Partners,
 
 Welcome to this month's Faded Skies Wholesale newsletter!
