@@ -1452,6 +1452,86 @@
                     </table>
                 </div>
 
+                <!-- Business Applications Tab -->
+                <div id="applications" class="tab-content">
+                    <div class="controls">
+                        <h3 style="color: var(--brand-green); margin: 0;">Business Application Review Center</h3>
+                        <div class="action-group">
+                            <button class="btn btn-primary" onclick="refreshApplications()">🔄 Refresh Applications</button>
+                            <button class="btn btn-secondary" onclick="exportApplications()">📄 Export Applications</button>
+                            <button class="btn btn-admin" onclick="bulkApplicationAction()">📦 Bulk Actions</button>
+                            <button class="btn btn-secondary" onclick="openModal('applicationNotificationsModal')">🔔 Notifications</button>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid" style="margin-bottom: 30px;">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalApplications">0</div>
+                            <div class="stat-label">Total Applications</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="pendingApplications">0</div>
+                            <div class="stat-label">Pending Review</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="approvedApplications">0</div>
+                            <div class="stat-label">Approved</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="rejectedApplications">0</div>
+                            <div class="stat-label">Rejected</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="avgReviewTime">0</div>
+                            <div class="stat-label">Avg Review Time (hrs)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="todaysApplications">0</div>
+                            <div class="stat-label">Today's Applications</div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Controls -->
+                    <div class="controls" style="margin-bottom: 20px;">
+                        <div class="search-group">
+                            <input type="text" class="search-input" placeholder="Search applications..." onkeyup="filterApplications(this.value)">
+                            <div class="filter-buttons">
+                                <button class="filter-btn active" onclick="filterApplicationsByStatus('all')">All</button>
+                                <button class="filter-btn" onclick="filterApplicationsByStatus('pending')">Pending</button>
+                                <button class="filter-btn" onclick="filterApplicationsByStatus('approved')">Approved</button>
+                                <button class="filter-btn" onclick="filterApplicationsByStatus('rejected')">Rejected</button>
+                                <button class="filter-btn" onclick="filterApplicationsByStatus('today')">Today</button>
+                            </div>
+                        </div>
+                        <div class="action-group">
+                            <select class="editable" style="width: auto;" onchange="sortApplications(this.value)">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="businessName">Business Name</option>
+                                <option value="volume">Monthly Volume</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <table class="data-table" id="applicationsTable">
+                        <thead>
+                            <tr>
+                                <th>Application ID</th>
+                                <th>Business Information</th>
+                                <th>Contact Details</th>
+                                <th>Business Type & Volume</th>
+                                <th>Submission Date</th>
+                                <th>Status</th>
+                                <th>Documents</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applicationsBody">
+                            <!-- Applications will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
                 <!-- Analytics Tab -->
                 <div id="analytics" class="tab-content">
                     <div class="controls">
@@ -5035,7 +5115,7 @@ This is a friendly reminder regarding your account and payment terms.
 
 📋 ACCOUNT REMINDERS:
 • Orders require immediate payment upon placement
-• Credit terms available for approved partners only
+��� Credit terms available for approved partners only
 • Please ensure payment methods are up to date
 • Contact us for any payment or billing questions
 
