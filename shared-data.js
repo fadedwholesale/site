@@ -410,6 +410,16 @@ class SharedDataManager {
                 console.log('📡 Full sync received:', data);
                 this.handleFullSync(data);
             });
+
+            this.realTimeSync.on('product_image_updated', (data) => {
+                console.log('📡 Real-time product image update:', data);
+                this.handleRealTimeImageUpdate(data);
+            });
+
+            this.realTimeSync.on('admin_product_change', (data) => {
+                console.log('📡 Real-time admin product change:', data);
+                this.handleRealTimeAdminChange(data);
+            });
         }
     }
 
