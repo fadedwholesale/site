@@ -87,7 +87,7 @@ class CartManager {
 
         console.log('📝 Cart: Adding product', { productId, quantity });
 
-        console.log('✅ Cart: Authenticated user found:', window.currentUser.email);
+        console.log('�� Cart: Authenticated user found:', window.currentUser.email);
 
         try {
             const products = window.sharedDataManager?.getProducts() || window.products || [];
@@ -105,14 +105,16 @@ class CartManager {
 
             // Check if product already exists in cart
             const existingItem = this.cart.find(item => item.id == productId);
-            
+
             if (existingItem) {
+                const oldQuantity = existingItem.quantity;
                 const newQuantity = Math.min(existingItem.quantity + quantity, product.stock);
                 if (newQuantity === existingItem.quantity) {
                     this.showNotification(`⚠️ Maximum quantity (${product.stock}) reached for ${product.strain}`, 'warning');
                     return false;
                 }
                 existingItem.quantity = newQuantity;
+                console.log(`🔄 Updated existing cart item: ${product.strain} from ${oldQuantity} to ${newQuantity}`);
                 this.showNotification(`⬆️ Updated ${product.strain} quantity to ${newQuantity}`, 'success');
             } else {
                 const cartItem = {
@@ -122,13 +124,16 @@ class CartManager {
                     price: product.price,
                     quantity: Math.min(quantity, product.stock),
                     maxStock: product.stock,
-                    image: product.image || 'https://via.placeholder.com/60x60/1a1a1a/00C851?text=' + product.grade,
+                    image: product.image || 'https://via.placeholder.com/60x60/1a1a1a/00C851?text=' + encodeURIComponent(product.grade),
                     addedAt: new Date().toISOString()
                 };
-                
+
                 this.cart.push(cartItem);
+                console.log(`➕ Added new cart item:`, cartItem);
                 this.showNotification(`✅ Added ${product.strain} to cart!`, 'success');
             }
+
+            console.log(`🛒 Cart now contains ${this.cart.length} unique items:`, this.cart.map(item => `${item.strain} (x${item.quantity})`));
 
             this.saveCart();
             this.updateDisplay();
@@ -245,18 +250,47 @@ class CartManager {
 
     // Get cart totals
     getTotals() {
-        const subtotal = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
-        const shipping = subtotal > 1000 ? 0 : 25;
-        const total = subtotal + shipping;
+        try {
+            console.log('💰 Calculating totals for cart items:', this.cart.map(item => `${item.strain}: $${item.price} x ${item.quantity}`));
 
-        return {
-            subtotal: subtotal,
-            shipping: shipping,
-            total: total,
-            totalItems: totalItems,
-            itemCount: this.cart.length
-        };
+            let subtotal = 0;
+            let totalItems = 0;
+
+            this.cart.forEach((item, index) => {
+                const itemPrice = parseFloat(item.price) || 0;
+                const itemQuantity = parseInt(item.quantity) || 0;
+                const itemSubtotal = itemPrice * itemQuantity;
+
+                console.log(`💰 Item ${index + 1} (${item.strain}): $${itemPrice} x ${itemQuantity} = $${itemSubtotal}`);
+
+                subtotal += itemSubtotal;
+                totalItems += itemQuantity;
+            });
+
+            const shipping = subtotal > 1000 ? 0 : 25;
+            const total = subtotal + shipping;
+
+            const totals = {
+                subtotal: Math.round(subtotal * 100) / 100, // Round to 2 decimal places
+                shipping: shipping,
+                total: Math.round(total * 100) / 100, // Round to 2 decimal places
+                totalItems: totalItems,
+                itemCount: this.cart.length
+            };
+
+            console.log('💰 Final totals calculated:', totals);
+            return totals;
+
+        } catch (error) {
+            console.error('Error calculating totals:', error);
+            return {
+                subtotal: 0,
+                shipping: 25,
+                total: 25,
+                totalItems: 0,
+                itemCount: 0
+            };
+        }
     }
 
     // Update cart display
@@ -275,25 +309,64 @@ class CartManager {
             if (cartCount) {
                 cartCount.textContent = totals.totalItems;
                 console.log('✅ Updated cartCount to:', totals.totalItems);
+            } else {
+                console.warn('⚠️ cartCount element not found');
             }
+
             if (cartCount2) {
                 cartCount2.textContent = totals.totalItems;
                 console.log('✅ Updated cartCount2 to:', totals.totalItems);
+            } else {
+                console.warn('⚠️ cartCount2 element not found');
             }
 
-            if (!cartItems || !cartTotal) {
-                console.warn('Cart elements not found');
+            // Also update any other cart counters in the DOM
+            const allCartCounters = document.querySelectorAll('[id*="cartCount"], .cart-counter');
+            allCartCounters.forEach((counter, index) => {
+                if (counter.id !== 'cartCount' && counter.id !== 'cartCount2') {
+                    counter.textContent = totals.totalItems;
+                    console.log(`✅ Updated additional cart counter ${index}:`, counter.id || counter.className);
+                }
+            });
+
+            if (!cartItems) {
+                console.warn('Cart items container not found');
                 return;
             }
 
             // Update cart total
-            cartTotal.textContent = totals.total.toFixed(2);
+            if (cartTotal) {
+                cartTotal.textContent = totals.total.toFixed(2);
+                console.log('✅ Updated cart total to:', totals.total.toFixed(2));
+            }
 
-            // Generate cart items HTML
+            // Generate cart items HTML - ensure all items are displayed
             if (this.cart.length === 0) {
                 cartItems.innerHTML = this.getEmptyCartHTML();
+                console.log('🛒 Cart is empty - showing empty state');
             } else {
-                cartItems.innerHTML = this.cart.map(item => this.getCartItemHTML(item)).join('');
+                console.log('🛒 Generating HTML for', this.cart.length, 'cart items');
+                const cartItemsHTML = this.cart.map((item, index) => {
+                    console.log(`🛒 Item ${index + 1}:`, {
+                        strain: item.strain,
+                        quantity: item.quantity,
+                        price: item.price,
+                        total: (item.price * item.quantity).toFixed(2)
+                    });
+                    return this.getCartItemHTML(item);
+                }).join('');
+
+                cartItems.innerHTML = cartItemsHTML;
+                console.log('✅ Cart items HTML updated with', this.cart.length, 'items');
+
+                // Verify DOM update
+                setTimeout(() => {
+                    const cartItemElements = document.querySelectorAll('.cart-item');
+                    console.log('🔍 Cart items in DOM:', cartItemElements.length);
+                    if (cartItemElements.length !== this.cart.length) {
+                        console.warn('⚠️ Mismatch between cart items and DOM elements!');
+                    }
+                }, 100);
             }
 
             // Update cart total section
@@ -324,83 +397,109 @@ class CartManager {
 
     // Generate cart item HTML
     getCartItemHTML(item) {
-        const products = window.sharedDataManager?.getProducts() || window.products || [];
-        const product = products.find(p => p.id == item.id);
-        const maxStock = product ? product.stock : item.maxStock;
-        const currentQuantity = parseInt(item.quantity) || 1;
-        const decreaseQuantity = Math.max(0, currentQuantity - 1);
-        const increaseQuantity = currentQuantity + 1;
+        try {
+            const products = window.sharedDataManager?.getProducts() || window.products || [];
+            const product = products.find(p => p.id == item.id);
+            const maxStock = product ? product.stock : (item.maxStock || 999);
+            const currentQuantity = parseInt(item.quantity) || 1;
+            const decreaseQuantity = Math.max(0, currentQuantity - 1);
+            const increaseQuantity = currentQuantity + 1;
+            const itemPrice = parseFloat(item.price) || 0;
+            const itemTotal = itemPrice * currentQuantity;
 
-        return `
-            <div class="cart-item" data-product-id="${item.id}">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                    <img src="${item.image}" alt="${item.strain}" class="cart-product-image" 
-                         style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover;"
-                         onerror="this.src='https://via.placeholder.com/60x60/1a1a1a/00C851?text=${item.grade}'" />
-                    <div style="flex: 1;">
-                        <h4 style="margin: 0; font-size: 14px; font-weight: 600;">${item.strain}</h4>
-                        <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 12px;">
-                            ${item.grade} • $${item.price}${this.getUnitLabel(item.grade)}
-                        </p>
+            console.log(`🛒 Generating HTML for cart item:`, {
+                strain: item.strain,
+                quantity: currentQuantity,
+                price: itemPrice,
+                total: itemTotal,
+                maxStock: maxStock
+            });
+
+            return `
+                <div class="cart-item" data-product-id="${item.id}" style="margin-bottom: 16px; border: 1px solid var(--border-subtle); border-radius: 12px; padding: 16px; background: var(--surface-dark);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <img src="${item.image || 'https://via.placeholder.com/60x60/1a1a1a/00C851?text=' + encodeURIComponent(item.grade)}"
+                             alt="${item.strain}" class="cart-product-image"
+                             style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 2px solid var(--border-subtle);"
+                             onerror="this.src='https://via.placeholder.com/60x60/1a1a1a/00C851?text=${encodeURIComponent(item.grade)}'" />
+                        <div style="flex: 1;">
+                            <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-primary);">${item.strain}</h4>
+                            <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 13px;">
+                                ${item.grade} • $${itemPrice.toFixed(2)}${this.getUnitLabel(item.grade)}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="cart-item-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div class="quantity-controls" style="display: flex; align-items: center; gap: 10px;">
+                            <button class="quantity-btn"
+                                    onclick="window.cartManager.updateQuantity(${item.id}, ${decreaseQuantity})"
+                                    ${currentQuantity <= 1 ? 'disabled' : ''}
+                                    style="background: ${currentQuantity <= 1 ? '#666' : 'var(--accent-red)'}; color: white; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: ${currentQuantity <= 1 ? 'not-allowed' : 'pointer'}; font-weight: bold;"
+                                    title="Decrease quantity">−</button>
+                            <span class="quantity-display" style="font-weight: 700; min-width: 30px; text-align: center; color: var(--text-primary); font-size: 16px; background: var(--surface-card); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-subtle);">${currentQuantity}</span>
+                            <button class="quantity-btn"
+                                    onclick="window.cartManager.updateQuantity(${item.id}, ${increaseQuantity})"
+                                    ${currentQuantity >= maxStock ? 'disabled' : ''}
+                                    style="background: ${currentQuantity >= maxStock ? '#666' : 'var(--brand-green)'}; color: white; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: ${currentQuantity >= maxStock ? 'not-allowed' : 'pointer'}; font-weight: bold;"
+                                    title="Increase quantity">+</button>
+                        </div>
+                        <button class="btn btn-danger btn-sm"
+                                onclick="window.cartManager.removeProduct(${item.id})"
+                                style="padding: 6px 12px; font-size: 12px; border-radius: 6px; background: var(--accent-red); color: white; border: none;"
+                                title="Remove ${item.strain} from cart">🗑️ Remove</button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+                        <small style="color: var(--text-muted);">${maxStock} in stock</small>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 700; color: var(--brand-green); font-size: 18px;">
+                                $${itemTotal.toFixed(2)}
+                            </div>
+                            <small style="color: var(--text-muted);">Item Total</small>
+                        </div>
                     </div>
                 </div>
-                <div class="cart-item-controls" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div class="quantity-controls" style="display: flex; align-items: center; gap: 8px;">
-                        <button class="quantity-btn" 
-                                onclick="window.cartManager.updateQuantity(${item.id}, ${decreaseQuantity})"
-                                ${currentQuantity <= 1 ? 'disabled' : ''}
-                                style="background: var(--accent-red); color: white; border: none; border-radius: 4px; width: 30px; height: 30px; cursor: pointer;"
-                                title="Decrease quantity">-</button>
-                        <span class="quantity-display" style="font-weight: 600; min-width: 20px; text-align: center;">${currentQuantity}</span>
-                        <button class="quantity-btn" 
-                                onclick="window.cartManager.updateQuantity(${item.id}, ${increaseQuantity})"
-                                ${currentQuantity >= maxStock ? 'disabled' : ''}
-                                style="background: var(--brand-green); color: white; border: none; border-radius: 4px; width: 30px; height: 30px; cursor: pointer;"
-                                title="Increase quantity">+</button>
-                    </div>
-                    <button class="btn btn-danger btn-sm" 
-                            onclick="window.cartManager.removeProduct(${item.id})" 
-                            style="padding: 4px 8px; font-size: 12px;"
-                            title="Remove from cart">Remove</button>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                    <small style="color: var(--text-muted);">${maxStock} available</small>
-                    <p style="font-weight: 700; color: var(--brand-green); margin: 0; font-size: 16px;">
-                        $${(item.price * currentQuantity).toFixed(2)}
-                    </p>
-                </div>
-            </div>
-        `;
+            `;
+        } catch (error) {
+            console.error('Error generating cart item HTML for:', item, error);
+            return `<div class="cart-item" style="padding: 16px; color: var(--accent-red); border: 1px solid var(--accent-red); border-radius: 8px; margin-bottom: 8px;">
+                        ❌ Error loading item: ${item.strain || 'Unknown'}
+                    </div>`;
+        }
     }
 
     // Update cart total section
     updateCartTotalSection(totals) {
         const cartTotalSection = document.querySelector('.cart-total');
         if (cartTotalSection) {
+            console.log('💰 Updating cart total section with:', totals);
             cartTotalSection.innerHTML = `
-                <div style="margin-bottom: 16px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span>Subtotal:</span>
-                        <span>$${totals.subtotal.toFixed(2)}</span>
+                <div style="margin-bottom: 20px; padding: 16px; background: var(--surface-elevated); border-radius: 12px; border: 1px solid var(--border-subtle);">
+                    <h4 style="margin: 0 0 12px 0; color: var(--brand-green); font-size: 16px;">Order Summary</h4>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--text-primary);">
+                        <span>Subtotal (${totals.itemCount} items):</span>
+                        <span style="font-weight: 600;">$${totals.subtotal.toFixed(2)}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; color: var(--text-primary);">
                         <span>Shipping:</span>
-                        <span style="color: ${totals.shipping === 0 ? 'var(--brand-green)' : 'var(--text-primary)'};">
-                            ${totals.shipping === 0 ? 'FREE' : '$' + totals.shipping.toFixed(2)}
+                        <span style="color: ${totals.shipping === 0 ? 'var(--brand-green)' : 'var(--text-primary)'}; font-weight: 600;">
+                            ${totals.shipping === 0 ? 'FREE 🚚' : '$' + totals.shipping.toFixed(2)}
                         </span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; border-top: 1px solid var(--border-color); padding-top: 8px;">
+                    ${totals.shipping === 0 ? '<div style="color: var(--brand-green); font-size: 12px; margin-bottom: 12px;">✅ Free shipping on orders over $1,000!</div>' : ''}
+                    <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 20px; border-top: 2px solid var(--border-subtle); padding-top: 12px; color: var(--text-primary);">
                         <span>Total:</span>
                         <span style="color: var(--brand-green);">$${totals.total.toFixed(2)}</span>
                     </div>
                 </div>
-                <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 16px; font-weight: 600;" onclick="window.cartManager.checkout()">
-                    Place Order 🚀
+                <button class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 700; border-radius: 8px;" onclick="window.cartManager.checkout()">
+                    🚀 Place Order - $${totals.total.toFixed(2)}
                 </button>
-                <button class="btn btn-secondary" style="width: 100%; margin-top: 8px;" onclick="window.cartManager.clear()">
-                    Clear Cart
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 8px; padding: 10px; border-radius: 8px;" onclick="window.cartManager.clear()">
+                    🗑️ Clear Cart
                 </button>
             `;
+        } else {
+            console.warn('Cart total section not found');
         }
     }
 

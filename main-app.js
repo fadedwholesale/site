@@ -50,10 +50,13 @@ function initializeApplication() {
         window.cartManager = new CartManager();
         console.log('✅ Cart manager initialized');
     }
-    
+
     // Setup shared data manager event listeners
     window.addEventListener('sharedDataChange', handleSharedDataChange);
-    
+
+    // Initialize real-time status indicator
+    initializeRealTimeStatusIndicator();
+
     // Check if user is already logged in
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
@@ -67,12 +70,61 @@ function initializeApplication() {
             localStorage.removeItem('currentUser');
         }
     }
-    
+
     // Initialize view state
     const urlParams = new URLSearchParams(window.location.search);
     const initialView = urlParams.get('view');
     if (initialView === 'portal' && currentUser) {
         showPartnerPortal();
+    }
+}
+
+// Initialize real-time status indicator
+function initializeRealTimeStatusIndicator() {
+    const syncIcon = document.getElementById('syncIcon');
+    const syncText = document.getElementById('syncText');
+
+    if (!syncIcon || !syncText) return;
+
+    // Check real-time system status periodically
+    const checkStatus = () => {
+        const isOnline = navigator.onLine;
+        const hasRealTimeSync = !!window.realTimeSync;
+        const hasDataManager = !!window.sharedDataManager;
+
+        if (!isOnline) {
+            syncIcon.textContent = '📡';
+            syncText.textContent = 'Offline';
+            syncIcon.parentElement.style.background = 'linear-gradient(135deg, var(--accent-red), #FF6666)';
+        } else if (hasRealTimeSync && hasDataManager) {
+            syncIcon.textContent = '✅';
+            syncText.textContent = 'Live Sync';
+            syncIcon.parentElement.style.background = 'linear-gradient(135deg, var(--brand-green), var(--brand-green-light))';
+        } else {
+            syncIcon.textContent = '🔄';
+            syncText.textContent = 'Initializing...';
+            syncIcon.parentElement.style.background = 'linear-gradient(135deg, var(--accent-orange), #FFB366)';
+        }
+    };
+
+    // Initial check
+    checkStatus();
+
+    // Check every 3 seconds
+    setInterval(checkStatus, 3000);
+
+    // Listen for online/offline events
+    window.addEventListener('online', checkStatus);
+    window.addEventListener('offline', checkStatus);
+
+    // Listen for real-time sync events to show activity
+    if (window.realTimeSync) {
+        window.realTimeSync.on('*', () => {
+            syncIcon.style.animation = 'pulse 0.5s ease-in-out';
+            setTimeout(() => {
+                syncIcon.style.animation = '';
+            }, 500);
+        });
     }
 }
 
@@ -792,7 +844,7 @@ function submitRegistration() {
         document.getElementById('registrationStep1').classList.add('active');
         
         if (submitBtn) {
-            submitBtn.textContent = 'Submit Application 🚀';
+            submitBtn.textContent = 'Submit Application ���';
             submitBtn.disabled = false;
         }
     }, 2000);
@@ -901,9 +953,374 @@ function forceLogin(email = 'test@example.com') {
     return userData;
 }
 
+// Test cart functionality with multiple items
+function testCartFunctionality() {
+    console.log('🧪 Testing cart functionality...');
+
+    if (!window.cartManager) {
+        console.error('❌ Cart manager not available');
+        return false;
+    }
+
+    if (!currentUser) {
+        console.log('👤 Logging in test user...');
+        forceLogin('test@carttest.com');
+    }
+
+    // Clear cart first
+    window.cartManager.cart = [];
+    window.cartManager.updateDisplay();
+
+    // Add multiple different items
+    const testProductIds = [2, 3, 4]; // Blue Gelatti, Candy Gas, OG Kush
+    const testResults = [];
+
+    testProductIds.forEach((productId, index) => {
+        setTimeout(() => {
+            console.log(`🧪 Adding product ${productId} to cart...`);
+            const result = addToCart(productId, index + 1);
+            testResults.push({ productId, success: result });
+
+            console.log(`🧪 Cart state after adding product ${productId}:`, {
+                itemCount: window.cartManager.cart.length,
+                totalItems: window.cartManager.getTotals().totalItems,
+                cartItems: window.cartManager.cart.map(item => ({ strain: item.strain, quantity: item.quantity }))
+            });
+
+            // Open cart after adding all items
+            if (index === testProductIds.length - 1) {
+                setTimeout(() => {
+                    console.log('🧪 Opening cart to show results...');
+                    window.cartManager.open();
+
+                    // Final validation
+                    setTimeout(() => {
+                        const cartElements = document.querySelectorAll('.cart-item');
+                        console.log('🧪 Final test results:', {
+                            expectedItems: testProductIds.length,
+                            cartArrayLength: window.cartManager.cart.length,
+                            domElements: cartElements.length,
+                            totals: window.cartManager.getTotals()
+                        });
+
+                        if (cartElements.length === window.cartManager.cart.length) {
+                            console.log('✅ Cart test passed - items display correctly');
+                            showNotification('✅ Cart test passed!', 'success');
+                        } else {
+                            console.error('❌ Cart test failed - display mismatch');
+                            showNotification('❌ Cart test failed - check console', 'error');
+                        }
+                    }, 500);
+                }, 1000);
+            }
+        }, index * 300);
+    });
+
+    return true;
+}
+
+// Debug cart state
+function debugCartState() {
+    if (!window.cartManager) {
+        console.log('❌ Cart manager not available');
+        return;
+    }
+
+    const state = {
+        isAuthenticated: !!currentUser,
+        userEmail: currentUser?.email,
+        cartItems: window.cartManager.cart.length,
+        cartArray: window.cartManager.cart,
+        domElements: document.querySelectorAll('.cart-item').length,
+        totals: window.cartManager.getTotals(),
+        cartOpen: window.cartManager.isOpen
+    };
+
+    console.log('🔍 Cart Debug State:', state);
+    return state;
+}
+
+// Test real-time functionality across tabs
+function testRealTimeSync() {
+    console.log('🧪 Testing Real-Time Synchronization...');
+
+    if (!window.realTimeSync) {
+        console.error('❌ Real-Time Sync not available');
+        return false;
+    }
+
+    // Test 1: Basic sync status
+    const syncStatus = window.realTimeSync.getSyncStatus();
+    console.log('📊 Sync Status:', syncStatus);
+
+    // Test 2: Test broadcasting
+    console.log('📡 Testing broadcast functionality...');
+    window.realTimeSync.broadcast('test_event', {
+        message: 'Test broadcast from tab',
+        timestamp: new Date().toISOString(),
+        testId: Math.random().toString(36).substr(2, 9)
+    });
+
+    // Test 3: Test product updates
+    setTimeout(() => {
+        console.log('📦 Testing product update sync...');
+        if (window.sharedDataManager) {
+            const products = window.sharedDataManager.getProducts();
+            if (products.length > 0) {
+                const testProduct = products[0];
+                const newStock = Math.floor(Math.random() * 50) + 1;
+
+                window.sharedDataManager.updateProduct(testProduct.id, {
+                    stock: newStock,
+                    lastModified: new Date().toISOString()
+                });
+
+                console.log(`📦 Updated ${testProduct.strain} stock to ${newStock}`);
+            }
+        }
+    }, 1000);
+
+    // Test 4: Test order creation
+    setTimeout(() => {
+        console.log('🛒 Testing order creation sync...');
+        if (window.sharedDataManager && currentUser) {
+            const testOrder = {
+                id: `TEST-${Date.now()}`,
+                partner: currentUser.email,
+                partnerName: currentUser.name + ' (Test)',
+                items: 'Test Product (x1)',
+                total: 99.99,
+                status: 'PENDING',
+                date: new Date().toISOString().split('T')[0],
+                notes: 'Real-time sync test order'
+            };
+
+            window.sharedDataManager.addOrder(testOrder);
+            console.log(`🛒 Created test order: ${testOrder.id}`);
+        }
+    }, 2000);
+
+    // Test 5: Test cart sync (if logged in)
+    setTimeout(() => {
+        if (currentUser && window.cartManager) {
+            console.log('🛒 Testing cart sync...');
+
+            // Add a test item to cart
+            const products = window.sharedDataManager?.getProducts() || [];
+            if (products.length > 0) {
+                const testProduct = products.find(p => p.status === 'AVAILABLE');
+                if (testProduct) {
+                    window.cartManager.addProduct(testProduct.id, 1);
+                    console.log(`🛒 Added ${testProduct.strain} to cart for sync test`);
+                }
+            }
+        }
+    }, 3000);
+
+    // Test 6: Test notifications
+    setTimeout(() => {
+        console.log('🔔 Testing notification system...');
+        if (window.notificationSystem || window.showNotification) {
+            showNotification('🧪 Real-time sync test notification', 'info', {
+                details: 'This notification tests the real-time system',
+                duration: 3000
+            });
+        }
+    }, 4000);
+
+    showNotification('🧪 Real-time sync test started - check console for details', 'info');
+    return true;
+}
+
+// Test real-time functionality with multiple simulated users
+function testMultiUserSync() {
+    console.log('👥 Testing multi-user sync simulation...');
+
+    if (!window.realTimeSync) {
+        console.error('❌ Real-Time Sync not available');
+        return false;
+    }
+
+    // Simulate different user actions
+    const testUsers = [
+        { email: 'user1@test.com', name: 'Test User 1' },
+        { email: 'user2@test.com', name: 'Test User 2' },
+        { email: 'user3@test.com', name: 'Test User 3' }
+    ];
+
+    testUsers.forEach((user, index) => {
+        setTimeout(() => {
+            console.log(`👤 Simulating action from ${user.name}...`);
+
+            // Simulate user joining
+            window.realTimeSync.broadcast('user_action', {
+                action: 'user_joined',
+                userEmail: user.email,
+                userName: user.name,
+                type: 'info'
+            });
+
+            // Simulate order placement
+            setTimeout(() => {
+                window.realTimeSync.broadcast('user_action', {
+                    action: 'order_placed',
+                    orderId: `ORD-${Date.now()}-${index}`,
+                    userEmail: user.email,
+                    userName: user.name,
+                    amount: Math.random() * 1000 + 100,
+                    type: 'success'
+                });
+            }, 1000);
+
+        }, index * 2000);
+    });
+
+    showNotification('👥 Multi-user sync test started', 'info');
+    return true;
+}
+
+// Test data persistence and recovery
+function testDataPersistence() {
+    console.log('💾 Testing data persistence and recovery...');
+
+    if (!window.dataPersistence) {
+        console.error('❌ Data Persistence not available');
+        return false;
+    }
+
+    // Test 1: Manual backup
+    console.log('💾 Creating manual backup...');
+    window.dataPersistence.createManualBackup();
+
+    // Test 2: Check backup status
+    const recoveryStatus = window.dataPersistence.getRecoveryStatus();
+    console.log('📊 Recovery Status:', recoveryStatus);
+
+    // Test 3: Simulate data corruption and recovery
+    setTimeout(() => {
+        console.log('🧪 Simulating data recovery test...');
+        if (confirm('Test data recovery? This will temporarily corrupt and then restore data.')) {
+            // Backup current data first
+            const currentData = window.sharedDataManager.getData();
+
+            // Corrupt data temporarily
+            localStorage.setItem('fadedSkiesSharedData', '{"invalid": "json",}');
+
+            // Trigger recovery
+            setTimeout(() => {
+                window.dataPersistence.initiateRecovery();
+            }, 1000);
+        }
+    }, 2000);
+
+    showNotification('💾 Data persistence test started', 'info');
+    return true;
+}
+
+// Test UI real-time updates
+function testRealTimeUI() {
+    console.log('🎨 Testing real-time UI updates...');
+
+    if (!window.realTimeUI) {
+        console.error('❌ Real-Time UI not available');
+        return false;
+    }
+
+    // Test UI update status
+    const uiStatus = window.realTimeUI.getUpdateStatus();
+    console.log('📊 UI Update Status:', uiStatus);
+
+    // Test forced UI refresh
+    setTimeout(() => {
+        console.log('🔄 Testing forced UI refresh...');
+        window.realTimeUI.forceRefreshUI();
+    }, 1000);
+
+    // Test highlight animations
+    setTimeout(() => {
+        console.log('✨ Testing highlight animations...');
+        const products = window.sharedDataManager?.getProducts() || [];
+        if (products.length > 0) {
+            window.realTimeUI.highlightNewProduct(products[0].id);
+        }
+    }, 2000);
+
+    showNotification('🎨 Real-time UI test started', 'info');
+    return true;
+}
+
+// Comprehensive real-time system test
+function testCompleteRealTimeSystem() {
+    console.log('🚀 Running comprehensive real-time system test...');
+
+    // Test each component
+    const tests = [
+        { name: 'Real-Time Sync', fn: testRealTimeSync },
+        { name: 'Data Persistence', fn: testDataPersistence },
+        { name: 'Real-Time UI', fn: testRealTimeUI },
+        { name: 'Multi-User Sync', fn: testMultiUserSync }
+    ];
+
+    tests.forEach((test, index) => {
+        setTimeout(() => {
+            console.log(`🧪 Running test: ${test.name}`);
+            try {
+                test.fn();
+            } catch (error) {
+                console.error(`❌ Test failed: ${test.name}`, error);
+            }
+        }, index * 3000);
+    });
+
+    // Final system status check
+    setTimeout(() => {
+        console.log('📊 Final system status check...');
+        debugRealTimeSystemStatus();
+    }, tests.length * 3000 + 2000);
+
+    showNotification('🚀 Comprehensive real-time test suite started', 'success', {
+        details: 'Check console for detailed results',
+        duration: 6000
+    });
+
+    return true;
+}
+
+// Debug real-time system status
+function debugRealTimeSystemStatus() {
+    console.log('🔍 Real-Time System Status Debug:');
+
+    const status = {
+        realTimeSync: window.realTimeSync ? window.realTimeSync.getSyncStatus() : 'Not available',
+        dataPersistence: window.dataPersistence ? window.dataPersistence.getRecoveryStatus() : 'Not available',
+        realTimeUI: window.realTimeUI ? window.realTimeUI.getUpdateStatus() : 'Not available',
+        notificationSystem: window.notificationSystem ? window.notificationSystem.getStatus() : 'Not available',
+        sharedDataManager: window.sharedDataManager ? {
+            products: window.sharedDataManager.getProducts().length,
+            orders: window.sharedDataManager.getOrders().length,
+            syncStatus: window.sharedDataManager.getRealTimeSyncStatus()
+        } : 'Not available',
+        currentUser: currentUser ? {
+            email: currentUser.email,
+            name: currentUser.name
+        } : 'Not logged in'
+    };
+
+    console.table(status);
+    return status;
+}
+
 // Make functions globally available
 window.debugAuthState = debugAuthState;
 window.forceLogin = forceLogin;
+window.testCartFunctionality = testCartFunctionality;
+window.debugCartState = debugCartState;
+window.testRealTimeSync = testRealTimeSync;
+window.testMultiUserSync = testMultiUserSync;
+window.testDataPersistence = testDataPersistence;
+window.testRealTimeUI = testRealTimeUI;
+window.testCompleteRealTimeSystem = testCompleteRealTimeSystem;
+window.debugRealTimeSystemStatus = debugRealTimeSystemStatus;
 window.login = login;
 window.logout = logout;
 window.showPublicWebsite = showPublicWebsite;
