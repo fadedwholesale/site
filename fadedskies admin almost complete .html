@@ -3247,11 +3247,23 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 if (window.liveDataManager) {
                     // Force save all admin changes
                     products.forEach(product => {
-                        window.liveDataManager.updateProduct(product.id, {
-                            ...product,
-                            lastModified: new Date().toISOString(),
-                            modifiedBy: currentUser?.email || 'admin'
-                        });
+                        // Check if product exists before updating
+                        const existingProduct = window.liveDataManager.getProduct(product.id);
+                        if (existingProduct) {
+                            window.liveDataManager.updateProduct(product.id, {
+                                ...product,
+                                lastModified: new Date().toISOString(),
+                                modifiedBy: currentUser?.email || 'admin'
+                            });
+                        } else {
+                            // If product doesn't exist, add it instead
+                            console.log('🌱 Adding new product to live data manager:', product.id);
+                            window.liveDataManager.addProduct({
+                                ...product,
+                                lastModified: new Date().toISOString(),
+                                modifiedBy: currentUser?.email || 'admin'
+                            });
+                        }
                     });
                 }
 
@@ -3507,7 +3519,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             setTimeout(() => {
                 updateSyncStatus('connected');
                 updateAllDashboardViews();
-                showNotification('�� All portals force-synchronized successfully!', 'success');
+                showNotification('🔄 All portals force-synchronized successfully!', 'success');
             }, 2000);
         }
 
@@ -4856,7 +4868,7 @@ Faded Skies Wholesale Team
                 order.items = itemsStr;
                 order.notes = modal.querySelector('#editOrderNotes').value.trim();
                 updateOrdersTable();
-                showNotification('�� Order updated successfully!', 'success');
+                showNotification('✅ Order updated successfully!', 'success');
                 modal.remove();
                 document.body.style.overflow = 'auto';
             };
