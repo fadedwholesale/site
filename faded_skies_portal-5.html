@@ -5167,18 +5167,40 @@
 
                 // Update partner header logo
                 const partnerLogo = document.getElementById('partnerHeaderLogo');
-                if (partnerLogo && logos.partnerHeader) {
-                    partnerLogo.src = logos.partnerHeader;
-                    partnerLogo.style.display = 'block';
-                    console.log('✅ Partner header logo loaded');
-                } else if (partnerLogo && logos.main) {
-                    // Fallback to main logo
-                    partnerLogo.src = logos.main;
-                    partnerLogo.style.display = 'block';
-                    console.log('✅ Partner header logo loaded (fallback)');
+                if (partnerLogo) {
+                    // Try partnerHeader first, then main, then fallback
+                    if (logos.partnerHeader) {
+                        partnerLogo.src = logos.partnerHeader;
+                        partnerLogo.style.display = 'block';
+                        console.log('✅ Partner header logo loaded:', logos.partnerHeader);
+                    } else if (logos.main) {
+                        partnerLogo.src = logos.main;
+                        partnerLogo.style.display = 'block';
+                        console.log('✅ Partner header logo loaded (main fallback):', logos.main);
+                    } else {
+                        // Use a default FS logo if nothing is configured
+                        partnerLogo.src = 'https://cdn.builder.io/api/v1/image/assets%2F9ee94cd3e5524451b5a43eae8f0b9627%2F2a1db2e6b6bc4987bc3bab24606d5f80?format=webp&width=200';
+                        partnerLogo.style.display = 'block';
+                        console.log('✅ Partner header logo loaded (default FS):', partnerLogo.src);
+                    }
+
+                    // Force reload if image fails
+                    partnerLogo.onerror = function() {
+                        console.warn('⚠️ Logo failed to load, trying default...');
+                        this.src = 'https://cdn.builder.io/api/v1/image/assets%2F9ee94cd3e5524451b5a43eae8f0b9627%2F2a1db2e6b6bc4987bc3bab24606d5f80?format=webp&width=200';
+                        this.onerror = null; // Prevent infinite loop
+                    };
+                } else {
+                    console.warn('⚠️ Partner header logo element not found');
                 }
             } catch (error) {
                 console.error('❌ Error loading system logos:', error);
+                // Fallback to default logo
+                const partnerLogo = document.getElementById('partnerHeaderLogo');
+                if (partnerLogo) {
+                    partnerLogo.src = 'https://cdn.builder.io/api/v1/image/assets%2F9ee94cd3e5524451b5a43eae8f0b9627%2F2a1db2e6b6bc4987bc3bab24606d5f80?format=webp&width=200';
+                    partnerLogo.style.display = 'block';
+                }
             }
         }
 
@@ -6528,7 +6550,7 @@ Phone: (210) 835-7834
 
         function quickOrder() {
             try {
-                showNotification('⚡ Quick order feature coming soon! Use the products tab to add items to cart.', 'success');
+                showNotification('�� Quick order feature coming soon! Use the products tab to add items to cart.', 'success');
             } catch (error) {
                 console.error('Error with quick order:', error);
             }
