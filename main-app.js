@@ -1547,7 +1547,7 @@ function testRealTimeSync() {
 
     // Test 3: Test product updates
     setTimeout(() => {
-        console.log('���� Testing product update sync...');
+        console.log('📦 Testing product update sync...');
         if (window.sharedDataManager) {
             const products = window.sharedDataManager.getProducts();
             if (products.length > 0) {
@@ -2114,7 +2114,7 @@ function testAuthorizationAndSync() {
                     console.log('✅ Login test passed - action buttons visible for authenticated users');
                     showNotification('✅ Login controls working correctly', 'success');
                 } else {
-                    console.error('❌ Login test failed - action buttons not visible for authenticated users');
+                    console.error('�� Login test failed - action buttons not visible for authenticated users');
                     showNotification('❌ Login test failed', 'error');
                 }
 
@@ -2255,6 +2255,47 @@ function showTestResults(results) {
 window.testAuthorizationAndSync = testAuthorizationAndSync;
 window.testRealTimeSyncFeatures = testRealTimeSyncFeatures;
 window.showTestResults = showTestResults;
+
+// Test bulk order functions are properly defined
+window.testBulkOrderFunctions = function() {
+    console.log('🧪 Testing bulk order function definitions...');
+
+    const requiredFunctions = [
+        'openBulkOrderModal', 'closeBulkOrderModal', 'nextBulkStep', 'previousBulkStep',
+        'selectAllBulkProducts', 'clearBulkSelection', 'loadPresetSelection',
+        'applyMinimumQuantities', 'optimizeForDiscount', 'saveBulkPreset', 'submitBulkOrder',
+        'openPresetManager', 'viewBulkHistory', 'createNewPreset', 'importPreset', 'exportAllPresets',
+        'filterBulkHistory', 'filterBulkHistoryByStatus', 'downloadBulkHistory', 'refreshBulkHistory'
+    ];
+
+    const results = {
+        defined: [],
+        undefined: [],
+        total: requiredFunctions.length
+    };
+
+    requiredFunctions.forEach(funcName => {
+        if (typeof window[funcName] === 'function') {
+            results.defined.push(funcName);
+            console.log(`✅ ${funcName} - defined`);
+        } else {
+            results.undefined.push(funcName);
+            console.error(`❌ ${funcName} - undefined`);
+        }
+    });
+
+    console.log(`📊 Bulk Order Functions Test Results: ${results.defined.length}/${results.total} defined`);
+
+    if (results.undefined.length > 0) {
+        console.error('❌ Missing functions:', results.undefined);
+        showNotification(`⚠️ ${results.undefined.length} bulk order functions missing`, 'warning');
+    } else {
+        console.log('✅ All bulk order functions are properly defined');
+        showNotification('✅ All bulk order functions available!', 'success');
+    }
+
+    return results;
+};
 // Payment Processing Functions
 function selectPaymentMethod(method) {
     if (window.cartManager) {
