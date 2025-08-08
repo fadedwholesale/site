@@ -3554,13 +3554,14 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 }
             });
 
-            console.log('✅ Ensured all orders have proper statusHistory structure');
+            console.log('✅ Ensured all orders have proper data structure (statusHistory, createdAt, items)');
 
             // Log the data integrity fix
             if (window.simpleLogger && fixedOrders > 0) {
                 window.simpleLogger.system('Order data integrity fix applied', {
                     totalOrders: totalOrders,
                     fixedOrders: fixedOrders,
+                    fixesApplied: ['statusHistory', 'createdAt', 'items'],
                     admin: currentUser?.email || 'system',
                     timestamp: new Date().toISOString(),
                     system: 'admin-portal'
@@ -4611,7 +4612,7 @@ Faded Skies Wholesale Team
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 600px;">
                     <div class="modal-header">
-                        <h3 class="modal-title">��️ Edit Order - ${order.id}</h3>
+                        <h3 class="modal-title">����� Edit Order - ${order.id}</h3>
                         <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
                     </div>
                     <form id="editOrderForm">
