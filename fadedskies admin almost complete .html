@@ -4419,15 +4419,15 @@ Faded Skies Wholesale Team
                     <div>
                         <h5 style="color: var(--brand-green); margin-bottom: 12px;">📈 Order Progress</h5>
                         <div style="font-family: monospace; font-size: 12px; line-height: 1.6;">
-                            ${order.statusHistory.map((status, index) => `
+                            ${(order.statusHistory && Array.isArray(order.statusHistory) ? order.statusHistory : []).map((status, index) => `
                                 <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                                    <span style="width: 12px; height: 12px; background: ${index === order.statusHistory.length - 1 ? 'var(--brand-green)' : 'var(--text-muted)'}; border-radius: 50%; margin-right: 12px;"></span>
+                                    <span style="width: 12px; height: 12px; background: ${index === (order.statusHistory?.length || 1) - 1 ? 'var(--brand-green)' : 'var(--text-muted)'}; border-radius: 50%; margin-right: 12px;"></span>
                                     <div>
-                                        <strong>${status.status}</strong> - ${formatDateTime(status.timestamp)}<br>
-                                        <small style="color: var(--text-muted);">${status.note}</small>
+                                        <strong>${status?.status || 'Unknown'}</strong> - ${formatDateTime(status?.timestamp || new Date().toISOString())}<br>
+                                        <small style="color: var(--text-muted);">${status?.note || 'No note available'}</small>
                                     </div>
                                 </div>
-                            `).join('')}
+                            `).join('') || '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No order progress history available</div>'}
                         </div>
                     </div>
                 </div>
