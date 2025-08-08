@@ -5202,7 +5202,7 @@ Faded Skies Wholesale Team`
 This is a friendly reminder regarding your account and payment terms.
 
 📋 ACCOUNT REMINDERS:
-• Orders require immediate payment upon placement
+��� Orders require immediate payment upon placement
 ��� Credit terms available for approved partners only
 • Please ensure payment methods are up to date
 • Contact us for any payment or billing questions
@@ -5545,6 +5545,475 @@ Faded Skies Wholesale Team`
                 window._productPhotoData = '';
             }
         }
+
+        // Business Application Management Functions
+        let currentApplications = [];
+        let currentReviewingApplication = null;
+
+        function loadApplicationsData() {
+            try {
+                currentApplications = JSON.parse(localStorage.getItem('businessApplications') || '[]');
+                updateApplicationStats();
+                populateApplicationsTable();
+            } catch (error) {
+                console.error('Error loading applications:', error);
+                currentApplications = [];
+            }
+        }
+
+        function updateApplicationStats() {
+            const total = currentApplications.length;
+            const pending = currentApplications.filter(app => app.status === 'pending').length;
+            const approved = currentApplications.filter(app => app.status === 'approved').length;
+            const rejected = currentApplications.filter(app => app.status === 'rejected').length;
+
+            // Calculate average review time for processed applications
+            const processedApps = currentApplications.filter(app => app.status !== 'pending' && app.reviewedDate);
+            let avgReviewTime = 0;
+            if (processedApps.length > 0) {
+                const totalTime = processedApps.reduce((sum, app) => {
+                    const reviewTime = new Date(app.reviewedDate) - new Date(app.submissionDate);
+                    return sum + reviewTime;
+                }, 0);
+                avgReviewTime = Math.round((totalTime / processedApps.length) / (1000 * 60 * 60)); // Convert to hours
+            }
+
+            // Count today's applications
+            const today = new Date().toDateString();
+            const todaysApps = currentApplications.filter(app =>
+                new Date(app.submissionDate).toDateString() === today
+            ).length;
+
+            // Update DOM elements
+            if (document.getElementById('totalApplications')) document.getElementById('totalApplications').textContent = total;
+            if (document.getElementById('pendingApplications')) document.getElementById('pendingApplications').textContent = pending;
+            if (document.getElementById('approvedApplications')) document.getElementById('approvedApplications').textContent = approved;
+            if (document.getElementById('rejectedApplications')) document.getElementById('rejectedApplications').textContent = rejected;
+            if (document.getElementById('avgReviewTime')) document.getElementById('avgReviewTime').textContent = avgReviewTime;
+            if (document.getElementById('todaysApplications')) document.getElementById('todaysApplications').textContent = todaysApps;
+        }
+
+        function populateApplicationsTable() {
+            const tbody = document.getElementById('applicationsBody');
+            if (!tbody) return;
+
+            if (currentApplications.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            📋 No business applications found. Applications will appear here when businesses submit partnership requests.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = currentApplications.map(app => {
+                const submissionDate = new Date(app.submissionDate).toLocaleDateString();
+                const submissionTime = new Date(app.submissionDate).toLocaleTimeString();
+
+                let statusClass = '';
+                let statusText = '';
+                switch (app.status) {
+                    case 'pending':
+                        statusClass = 'status-pending';
+                        statusText = '⏳ Pending Review';
+                        break;
+                    case 'approved':
+                        statusClass = 'status-available';
+                        statusText = '✅ Approved';
+                        break;
+                    case 'rejected':
+                        statusClass = 'status-cancelled';
+                        statusText = '❌ Rejected';
+                        break;
+                    default:
+                        statusClass = 'status-pending';
+                        statusText = '⏳ Pending';
+                }
+
+                const documentCount = Object.keys(app.documents || {}).length;
+                const hasRequiredDocs = documentCount >= 3;
+
+                return `
+                    <tr onclick="openApplicationReview('${app.applicationId}')" style="cursor: pointer;">
+                        <td>
+                            <div style="font-weight: 600; color: var(--brand-green);">${app.applicationId}</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">${submissionTime}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600;">${app.businessName}</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">${app.businessAddress || 'Address not provided'}</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">License: ${app.licenseNumber}</div>
+                        </td>
+                        <td>
+                            <div>${app.contactName}</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">${app.businessEmail}</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">${app.phone}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600;">${app.businessType}</div>
+                            <div style="font-size: 12px; color: var(--brand-green);">${app.estimatedMonthlyVolume}</div>
+                            ${app.yearsInBusiness ? `<div style="font-size: 12px; color: var(--text-muted);">${app.yearsInBusiness}</div>` : ''}
+                        </td>
+                        <td>
+                            <div>${submissionDate}</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">${submissionTime}</div>
+                        </td>
+                        <td>
+                            <span class="${statusClass}">${statusText}</span>
+                            ${app.reviewedBy ? `<div style="font-size: 11px; color: var(--text-muted);">by ${app.reviewedBy}</div>` : ''}
+                        </td>
+                        <td>
+                            <div style="font-weight: 600; color: ${hasRequiredDocs ? 'var(--brand-green)' : 'var(--accent-red)'};">
+                                ${documentCount} docs
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-muted);">
+                                ${hasRequiredDocs ? '✅ Complete' : '⚠️ Incomplete'}
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openApplicationReview('${app.applicationId}')">
+                                    📋 Review
+                                </button>
+                                ${app.status === 'pending' ? `
+                                    <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); quickApproveApplication('${app.applicationId}')">
+                                        ✅
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); quickRejectApplication('${app.applicationId}')">
+                                        ❌
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openApplicationReview(applicationId) {
+            const application = currentApplications.find(app => app.applicationId === applicationId);
+            if (!application) {
+                showNotification('❌ Application not found', 'error');
+                return;
+            }
+
+            currentReviewingApplication = application;
+
+            // Generate document list
+            const docsList = Object.keys(application.documents || {}).map(docType => {
+                if (docType === 'additionalDocs' && Array.isArray(application.documents[docType])) {
+                    return application.documents[docType].map(doc =>
+                        `<div class="doc-item">📄 ${doc.name} (${(doc.size / 1024 / 1024).toFixed(2)} MB)</div>`
+                    ).join('');
+                } else if (application.documents[docType]) {
+                    const friendlyNames = {
+                        businessLicense: 'Business License',
+                        cannabisLicense: 'Cannabis/Hemp License',
+                        taxId: 'Tax ID/EIN Document'
+                    };
+                    const doc = application.documents[docType];
+                    return `<div class="doc-item">📄 ${friendlyNames[docType] || docType}: ${doc.name} (${(doc.size / 1024 / 1024).toFixed(2)} MB)</div>`;
+                }
+                return '';
+            }).join('');
+
+            const reviewContent = document.getElementById('applicationReviewContent');
+            reviewContent.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                    <div class="application-section">
+                        <h4 style="color: var(--brand-green); margin-bottom: 16px;">🏢 Business Information</h4>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Application ID</label>
+                                <span style="font-weight: 600; color: var(--brand-green);">${application.applicationId}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Business Name</label>
+                                <span>${application.businessName}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Contact Name</label>
+                                <span>${application.contactName}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Business Type</label>
+                                <span>${application.businessType}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>License Number</label>
+                                <span>${application.licenseNumber}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Estimated Monthly Volume</label>
+                                <span style="color: var(--brand-green); font-weight: 600;">${application.estimatedMonthlyVolume}</span>
+                            </div>
+                            ${application.yearsInBusiness ? `
+                                <div class="info-item">
+                                    <label>Years in Business</label>
+                                    <span>${application.yearsInBusiness}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <div class="application-section">
+                        <h4 style="color: var(--brand-green); margin-bottom: 16px;">📞 Contact Information</h4>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Email</label>
+                                <span>${application.businessEmail}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Phone</label>
+                                <span>${application.phone}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Business Address</label>
+                                <span style="white-space: pre-wrap;">${application.businessAddress}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Submission Date</label>
+                                <span>${new Date(application.submissionDate).toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                ${application.businessDescription ? `
+                    <div class="application-section" style="margin-bottom: 24px;">
+                        <h4 style="color: var(--brand-green); margin-bottom: 16px;">📝 Business Description</h4>
+                        <div style="background: var(--surface-elevated); padding: 16px; border-radius: 8px; white-space: pre-wrap;">
+                            ${application.businessDescription}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="application-section">
+                    <h4 style="color: var(--brand-green); margin-bottom: 16px;">📁 Documents Submitted</h4>
+                    <div class="review-documents" style="background: var(--surface-elevated); padding: 16px; border-radius: 8px;">
+                        ${docsList || '<div style="color: var(--text-muted);">No documents uploaded</div>'}
+                    </div>
+                </div>
+
+                ${application.reviewNotes ? `
+                    <div class="application-section" style="margin-top: 24px;">
+                        <h4 style="color: var(--brand-green); margin-bottom: 16px;">📋 Review Notes</h4>
+                        <div style="background: var(--surface-elevated); padding: 16px; border-radius: 8px;">
+                            <div style="font-weight: 600; margin-bottom: 8px;">Reviewed by: ${application.reviewedBy}</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+                                ${new Date(application.reviewedDate).toLocaleString()}
+                            </div>
+                            <div style="white-space: pre-wrap;">${application.reviewNotes}</div>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            openModal('applicationReviewModal');
+        }
+
+        function approveApplication() {
+            if (!currentReviewingApplication) return;
+            openApplicationNotesModal('approve');
+        }
+
+        function rejectApplication() {
+            if (!currentReviewingApplication) return;
+            openApplicationNotesModal('reject');
+        }
+
+        function openApplicationNotesModal(action) {
+            document.getElementById('reviewAction').value = action;
+
+            // Show/hide approval options
+            const approvalSection = document.getElementById('approvalOptionsSection');
+            if (approvalSection) {
+                approvalSection.style.display = action === 'approve' ? 'block' : 'none';
+            }
+
+            closeModal('applicationReviewModal');
+            openModal('applicationNotesModal');
+        }
+
+        function submitApplicationAction(event) {
+            event.preventDefault();
+
+            const action = document.getElementById('reviewAction').value;
+            const notes = document.getElementById('reviewNotes').value;
+            const sendEmail = document.getElementById('sendEmailNotification').checked;
+            const partnerTier = document.getElementById('partnerTier').value;
+
+            if (!currentReviewingApplication) {
+                showNotification('❌ No application selected for review', 'error');
+                return;
+            }
+
+            // Update application
+            const appIndex = currentApplications.findIndex(app =>
+                app.applicationId === currentReviewingApplication.applicationId
+            );
+
+            if (appIndex === -1) {
+                showNotification('❌ Application not found', 'error');
+                return;
+            }
+
+            const now = new Date().toISOString();
+            currentApplications[appIndex] = {
+                ...currentApplications[appIndex],
+                status: action === 'request_info' ? 'pending' : action + 'd',
+                reviewNotes: notes,
+                reviewedBy: 'Admin User',
+                reviewedDate: now,
+                partnerTier: action === 'approve' ? partnerTier : null
+            };
+
+            // Save to localStorage
+            localStorage.setItem('businessApplications', JSON.stringify(currentApplications));
+
+            // If approved, add to partners list
+            if (action === 'approve') {
+                addApprovedPartner(currentApplications[appIndex]);
+            }
+
+            // Show success notification
+            const actionText = {
+                'approve': 'approved',
+                'reject': 'rejected',
+                'request_info': 'updated with information request'
+            };
+
+            showNotification(`✅ Application ${actionText[action]} successfully!`, 'success');
+
+            // Close modal and refresh data
+            closeModal('applicationNotesModal');
+            loadApplicationsData();
+
+            // Reset form
+            document.getElementById('reviewNotes').value = '';
+            currentReviewingApplication = null;
+        }
+
+        function addApprovedPartner(application) {
+            try {
+                const existingPartners = JSON.parse(localStorage.getItem('partners') || '[]');
+
+                const newPartner = {
+                    id: 'PARTNER-' + Date.now(),
+                    businessName: application.businessName,
+                    contactName: application.contactName,
+                    email: application.businessEmail,
+                    phone: application.phone,
+                    businessType: application.businessType,
+                    address: application.businessAddress,
+                    licenseNumber: application.licenseNumber,
+                    tier: application.partnerTier || 'starter',
+                    status: 'active',
+                    joinDate: new Date().toISOString(),
+                    estimatedVolume: application.estimatedMonthlyVolume,
+                    applicationId: application.applicationId
+                };
+
+                existingPartners.push(newPartner);
+                localStorage.setItem('partners', JSON.stringify(existingPartners));
+
+                console.log('✅ New partner added to partners list:', newPartner);
+            } catch (error) {
+                console.error('Error adding partner:', error);
+            }
+        }
+
+        function quickApproveApplication(applicationId) {
+            const app = currentApplications.find(app => app.applicationId === applicationId);
+            if (!app) return;
+
+            currentReviewingApplication = app;
+
+            // Quick approve with default notes
+            const appIndex = currentApplications.findIndex(app => app.applicationId === applicationId);
+            currentApplications[appIndex] = {
+                ...currentApplications[appIndex],
+                status: 'approved',
+                reviewNotes: 'Quick approval - application meets all requirements.',
+                reviewedBy: 'Admin User',
+                reviewedDate: new Date().toISOString(),
+                partnerTier: 'starter'
+            };
+
+            localStorage.setItem('businessApplications', JSON.stringify(currentApplications));
+            addApprovedPartner(currentApplications[appIndex]);
+
+            showNotification('✅ Application approved successfully!', 'success');
+            loadApplicationsData();
+        }
+
+        function quickRejectApplication(applicationId) {
+            const appIndex = currentApplications.findIndex(app => app.applicationId === applicationId);
+            if (appIndex === -1) return;
+
+            currentApplications[appIndex] = {
+                ...currentApplications[appIndex],
+                status: 'rejected',
+                reviewNotes: 'Application rejected - does not meet current partnership requirements.',
+                reviewedBy: 'Admin User',
+                reviewedDate: new Date().toISOString()
+            };
+
+            localStorage.setItem('businessApplications', JSON.stringify(currentApplications));
+
+            showNotification('❌ Application rejected', 'warning');
+            loadApplicationsData();
+        }
+
+        function refreshApplications() {
+            loadApplicationsData();
+            showNotification('🔄 Applications refreshed', 'success');
+        }
+
+        function filterApplicationsByStatus(status) {
+            // Update filter button states
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const rows = document.querySelectorAll('#applicationsTable tbody tr');
+            rows.forEach(row => {
+                if (status === 'all') {
+                    row.style.display = '';
+                } else if (status === 'today') {
+                    // Show only today's applications
+                    const rowDate = row.cells[4]?.textContent?.trim();
+                    const today = new Date().toLocaleDateString();
+                    row.style.display = rowDate?.includes(today) ? '' : 'none';
+                } else {
+                    const statusCell = row.cells[5]?.textContent?.toLowerCase();
+                    row.style.display = statusCell?.includes(status) ? '' : 'none';
+                }
+            });
+        }
+
+        function filterApplications(searchTerm) {
+            const rows = document.querySelectorAll('#applicationsTable tbody tr');
+            const term = searchTerm.toLowerCase();
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
+            });
+        }
+
+        // Initialize applications when switching to applications tab
+        window.loadApplicationsData = loadApplicationsData;
+        window.refreshApplications = refreshApplications;
+        window.filterApplicationsByStatus = filterApplicationsByStatus;
+        window.filterApplications = filterApplications;
+        window.openApplicationReview = openApplicationReview;
+        window.approveApplication = approveApplication;
+        window.rejectApplication = rejectApplication;
+        window.submitApplicationAction = submitApplicationAction;
+        window.quickApproveApplication = quickApproveApplication;
+        window.quickRejectApplication = quickRejectApplication;
     </script>
 </body>
 </html>
