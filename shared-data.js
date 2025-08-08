@@ -49,6 +49,11 @@ class SharedDataManager {
         data.products = products;
         this.saveData(data);
         this.notifyChange('products_updated', products);
+
+        // Broadcast real-time update
+        if (this.realTimeSync) {
+            this.realTimeSync.broadcast('products_updated', products);
+        }
     }
 
     getProducts() {
