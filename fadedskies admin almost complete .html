@@ -6681,6 +6681,23 @@ Faded Skies Partnership Team`
         window.submitApplicationAction = submitApplicationAction;
         window.quickApproveApplication = quickApproveApplication;
         window.quickRejectApplication = quickRejectApplication;
+
+        // Initialize live systems when everything is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for all scripts to load, then initialize live systems
+            setTimeout(() => {
+                if (typeof initializeLiveSystems === 'function') {
+                    initializeLiveSystems();
+                }
+            }, 1000);
+        });
     </script>
+
+    <!-- Enhanced live data and real-time synchronization systems -->
+    <script src="realtime-sync.js"></script>
+    <script src="data-persistence.js"></script>
+    <script src="live-data-manager.js"></script>
+    <script src="order-sync-manager.js"></script>
+    <script src="activity-logger.js"></script>
 </body>
 </html>
