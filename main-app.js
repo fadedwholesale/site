@@ -2131,6 +2131,7 @@ window.formatRoutingNumber = formatRoutingNumber;
 window.processPayment = processPayment;
 window.updateProfile = updateProfile;
 window.populateProfileEditForm = populateProfileEditForm;
+window.refreshProfileData = refreshProfileData;
 window.register = register;
 window.proceedToPayment = proceedToPayment;
 window.updateDeliveryMethodLive = updateDeliveryMethodLive;
