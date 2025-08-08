@@ -231,7 +231,7 @@ function login(event) {
         window.dispatchEvent(new CustomEvent('userAuthenticated', { detail: currentUser }));
 
         showNotification(`Welcome back, ${currentUser.name}! 🎉`, 'success');
-        console.log('�� User logged in:', currentUser.email);
+        console.log('✅ User logged in:', currentUser.email);
     } else {
         showNotification('❌ Please enter valid credentials', 'error');
     }
@@ -706,7 +706,7 @@ function updateProfileDisplay() {
 
 function refreshProfileData() {
     if (!currentUser) {
-        showNotification('��� No user data to refresh', 'error');
+        showNotification('❌ No user data to refresh', 'error');
         return;
     }
 
@@ -1480,7 +1480,7 @@ function testCartFunctionality() {
                     // Final validation
                     setTimeout(() => {
                         const cartElements = document.querySelectorAll('.cart-item');
-                        console.log('🧪 Final test results:', {
+                        console.log('��� Final test results:', {
                             expectedItems: testProductIds.length,
                             cartArrayLength: window.cartManager.cart.length,
                             domElements: cartElements.length,
@@ -1821,68 +1821,7 @@ function updateBulkOrderStats() {
     }
 }
 
-// Bulk order modal navigation functions
-function closeBulkOrderModal() {
-    if (window.bulkOrderManager) {
-        window.bulkOrderManager.closeBulkOrderModal();
-    } else {
-        closeModal('bulkOrderModal');
-    }
-}
-
-function nextBulkStep() {
-    if (window.bulkOrderManager) {
-        window.bulkOrderManager.nextBulkStep();
-    }
-}
-
-function previousBulkStep() {
-    if (window.bulkOrderManager) {
-        window.bulkOrderManager.previousBulkStep();
-    }
-}
-
-function selectAllBulkProducts() {
-    if (window.bulkOrderManager) {
-        window.bulkOrderManager.selectAllBulkProducts();
-    }
-}
-
-function clearBulkSelection() {
-    if (window.bulkOrderManager) {
-        window.bulkOrderManager.clearBulkSelection();
-    }
-}
-
-function loadPresetSelection() {
-    if (window.bulkOrderManager) {
-        window.bulkOrderManager.loadPresetSelection();
-    }
-}
-
-function applyMinimumQuantities() {
-    if (window.bulkOrderManager) {
-        window.bulkOrderManager.applyMinimumQuantities();
-    }
-}
-
-function optimizeForDiscount() {
-    if (window.bulkOrderManager) {
-        window.bulkOrderManager.optimizeForDiscount();
-    }
-}
-
-function saveBulkPreset() {
-    if (window.bulkOrderManager) {
-        window.bulkOrderManager.saveBulkPreset();
-    }
-}
-
-function submitBulkOrder() {
-    if (window.bulkOrderManager) {
-        window.bulkOrderManager.submitBulkOrder();
-    }
-}
+// Bulk order modal navigation functions - these are now defined above as window properties
 
 // Debug real-time system status
 function debugRealTimeSystemStatus() {
@@ -1956,16 +1895,86 @@ window.viewBulkHistory = viewBulkHistory;
 window.requestCustomQuote = requestCustomQuote;
 window.submitCustomQuote = submitCustomQuote;
 window.openSupportModal = openSupportModal;
-window.closeBulkOrderModal = closeBulkOrderModal;
-window.nextBulkStep = nextBulkStep;
-window.previousBulkStep = previousBulkStep;
-window.selectAllBulkProducts = selectAllBulkProducts;
-window.clearBulkSelection = clearBulkSelection;
-window.loadPresetSelection = loadPresetSelection;
-window.applyMinimumQuantities = applyMinimumQuantities;
-window.optimizeForDiscount = optimizeForDiscount;
-window.saveBulkPreset = saveBulkPreset;
-window.submitBulkOrder = submitBulkOrder;
+// Bulk order function safety wrappers - ensure they exist even if manager isn't ready
+window.closeBulkOrderModal = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.closeBulkOrderModal();
+    } else {
+        closeModal('bulkOrderModal');
+    }
+};
+
+window.nextBulkStep = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.nextBulkStep();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.previousBulkStep = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.previousBulkStep();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.selectAllBulkProducts = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.selectAllBulkProducts();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.clearBulkSelection = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.clearBulkSelection();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.loadPresetSelection = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.loadPresetSelection();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.applyMinimumQuantities = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.applyMinimumQuantities();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.optimizeForDiscount = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.optimizeForDiscount();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.saveBulkPreset = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.saveBulkPreset();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
+
+window.submitBulkOrder = function() {
+    if (window.bulkOrderManager) {
+        window.bulkOrderManager.submitBulkOrder();
+    } else {
+        showNotification('⚠️ Bulk order system loading...', 'warning');
+    }
+};
 
 // Comprehensive test for authorization controls and real-time sync
 function testAuthorizationAndSync() {
@@ -2231,7 +2240,7 @@ async function processPayment(event) {
             showNotification('🎉 Payment processed successfully!', 'success');
 
             setTimeout(() => {
-                showNotification('�� Order confirmation sent to your email', 'success');
+                showNotification('📧 Order confirmation sent to your email', 'success');
             }, 2000);
 
         } else {
