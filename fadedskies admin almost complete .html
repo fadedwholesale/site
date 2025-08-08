@@ -1191,7 +1191,10 @@
 
     <header>
         <nav class="container">
-            <div class="logo">🔧 Faded Skies Admin</div>
+            <div class="logo">
+                <img id="adminHeaderLogo" src="" alt="Faded Skies Admin Logo" style="height: 48px; width: auto; margin-right: 10px;" />
+                🔧 Faded Skies Admin
+            </div>
             <div class="nav-info">
                 <div class="admin-indicator">
                     <span>👑</span>
@@ -3459,7 +3462,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 window.sharedDataManager.deleteProduct(productId);
 
                 updateAllDashboardViews();
-                showNotification(`🗑️ Product ${product.strain} deleted`, 'success');
+                showNotification(`���️ Product ${product.strain} deleted`, 'success');
             }
         }
 
