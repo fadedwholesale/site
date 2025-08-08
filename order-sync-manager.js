@@ -274,7 +274,7 @@ class OrderSyncManager {
                 console.log(`📦 Updated inventory for ${product.strain}: ${product.stock} → ${newStock}`);
                 
                 // Check for low stock alerts
-                if (newStock <= 5 && newStock > 0) {
+                if (newStock <= 3 && newStock > 0) {
                     this.sendLowStockAlert(product, newStock);
                 } else if (newStock === 0) {
                     this.sendOutOfStockAlert(product);
