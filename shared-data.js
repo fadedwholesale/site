@@ -69,15 +69,40 @@ class SharedDataManager {
             product.id = Date.now() + Math.random();
         }
 
+        // Ensure image field exists
+        if (!product.image) {
+            product.image = product.photo || ''; // Support both 'image' and 'photo' fields
+        }
+
+        // Add creation timestamp
+        product.createdAt = new Date().toISOString();
+        if (!product.lastModified) {
+            product.lastModified = product.createdAt;
+        }
+
         data.products.push(product);
         this.saveData(data);
         this.notifyChange('product_added', product);
 
         // Broadcast real-time update
         if (this.realTimeSync) {
-            this.realTimeSync.broadcast('product_added', product);
+            this.realTimeSync.broadcast('product_added', {
+                ...product,
+                isNewProduct: true
+            });
+
+            // Also broadcast admin action for notifications
+            this.realTimeSync.broadcast('admin_product_change', {
+                productId: product.id,
+                productName: product.strain,
+                changes: ['new_product'],
+                action: 'product_added',
+                newProduct: product,
+                timestamp: new Date().toISOString()
+            });
         }
 
+        console.log('📦 Product added with real-time sync:', product.strain);
         return product;
     }
 
