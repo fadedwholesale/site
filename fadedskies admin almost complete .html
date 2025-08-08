@@ -4045,11 +4045,24 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                     timestamp: new Date().toISOString(),
                     note: `Status updated to ${newStatus} by admin`
                 });
-                
+
                 updateOrdersTable();
                 updateDashboardStats();
                 showNotification(`📋 Order ${orderId} status updated to ${newStatus}`, 'success');
-                
+
+                // Log successful status update
+                if (window.simpleLogger) {
+                    window.simpleLogger.order('Order status updated successfully', {
+                        orderId: orderId,
+                        newStatus: newStatus,
+                        partner: order.partnerName,
+                        orderTotal: order.total,
+                        admin: currentUser?.email,
+                        timestamp: new Date().toISOString(),
+                        system: 'admin-portal'
+                    });
+                }
+
                 // Send notification email if shipped or delivered
                 if (newStatus === 'SHIPPED' || newStatus === 'DELIVERED') {
                     sendOrderStatusEmail(order, newStatus);
@@ -4418,7 +4431,7 @@ Faded Skies Wholesale Team
                         </div>
                     </div>
                     <div style="margin-top: 20px; text-align: center;">
-                        <button onclick="window.print()" style="padding: 10px 20px; background: #00C851; color: white; border: none; border-radius: 4px; cursor: pointer;">��️ Print Label</button>
+                        <button onclick="window.print()" style="padding: 10px 20px; background: #00C851; color: white; border: none; border-radius: 4px; cursor: pointer;">����� Print Label</button>
                     </div>
                 </body>
                 </html>
@@ -6026,14 +6039,25 @@ Faded Skies Wholesale Team`
 
         // Tab Switching
         function switchTab(tabName) {
+            // Log tab navigation
+            if (window.simpleLogger) {
+                window.simpleLogger.info('Admin tab navigation', {
+                    tabName: tabName,
+                    admin: currentUser?.email,
+                    timestamp: new Date().toISOString(),
+                    action: 'tab_switch',
+                    system: 'admin-portal'
+                });
+            }
+
             // Remove active class from all tabs and contents
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
+
             // Add active class to clicked tab and corresponding content
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
-            
+
             // Update view based on tab
             if (tabName === 'pricing') {
                 updatePricingTable();
