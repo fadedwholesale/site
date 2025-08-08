@@ -3625,36 +3625,138 @@
             }
         ];
 
+        // Mobile Navigation Functions
+        function toggleMobileMenu() {
+            try {
+                const navLinks = document.getElementById('mobileNavLinks');
+                const isOpen = navLinks.classList.contains('open');
+
+                if (isOpen) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
+                }
+            } catch (error) {
+                console.error('Error toggling mobile menu:', error);
+            }
+        }
+
+        function openMobileMenu() {
+            try {
+                const navLinks = document.getElementById('mobileNavLinks');
+                navLinks.classList.add('open');
+                document.body.style.overflow = 'hidden';
+                console.log('📱 Mobile menu opened');
+            } catch (error) {
+                console.error('Error opening mobile menu:', error);
+            }
+        }
+
+        function closeMobileMenu() {
+            try {
+                const navLinks = document.getElementById('mobileNavLinks');
+                navLinks.classList.remove('open');
+                document.body.style.overflow = '';
+                console.log('📱 Mobile menu closed');
+            } catch (error) {
+                console.error('Error closing mobile menu:', error);
+            }
+        }
+
         // Initialize Application with Session Restoration and Mobile Support - FIXED
         document.addEventListener('DOMContentLoaded', function() {
             try {
                 console.log('🚀 DOM Content Loaded - Starting initialization...');
-                
+
                 // Detect mobile device
                 const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 if (isMobile) {
                     console.log('📱 Mobile device detected');
                     document.body.classList.add('mobile-device');
+
+                    // Show mobile menu toggle button
+                    const mobileToggle = document.querySelector('.mobile-menu-toggle');
+                    if (mobileToggle) {
+                        mobileToggle.style.display = 'block';
+                    }
                 }
-                
+
                 // Initialize core app
                 initializeApp();
-                
+
                 // Periodic data backup
                 setInterval(backupSessionData, 60000); // Backup every minute
-                
+
                 // Mobile-specific event listeners
                 if (isMobile) {
                     setupMobileDebugging();
+                    setupMobileOptimizations();
                 }
-                
+
                 console.log('✅ Application initialization complete');
-                
+
             } catch (error) {
                 console.error('Application failed to initialize:', error);
                 showNotification('❌ Application failed to initialize. Please refresh the page.', 'error');
             }
         });
+
+        // Setup Mobile Optimizations
+        function setupMobileOptimizations() {
+            try {
+                console.log('📱 Setting up mobile optimizations...');
+
+                // Handle orientation changes
+                window.addEventListener('orientationchange', function() {
+                    setTimeout(() => {
+                        // Close mobile menu on orientation change
+                        closeMobileMenu();
+
+                        // Resize modal if open
+                        const openModals = document.querySelectorAll('.modal[style*="block"]');
+                        openModals.forEach(modal => {
+                            const modalContent = modal.querySelector('.modal-content');
+                            if (modalContent) {
+                                modalContent.style.maxHeight = '90vh';
+                            }
+                        });
+                    }, 100);
+                });
+
+                // Handle window resize
+                window.addEventListener('resize', function() {
+                    const isMobile = window.innerWidth <= 768;
+                    const mobileToggle = document.querySelector('.mobile-menu-toggle');
+
+                    if (isMobile) {
+                        if (mobileToggle) mobileToggle.style.display = 'block';
+                        document.body.classList.add('mobile-device');
+                    } else {
+                        if (mobileToggle) mobileToggle.style.display = 'none';
+                        document.body.classList.remove('mobile-device');
+                        closeMobileMenu();
+                    }
+                });
+
+                // Add touch events for better mobile interaction
+                document.addEventListener('touchstart', function(e) {
+                    // Close mobile menu when touching outside
+                    const navLinks = document.getElementById('mobileNavLinks');
+                    const mobileToggle = document.querySelector('.mobile-menu-toggle');
+
+                    if (navLinks && navLinks.classList.contains('open')) {
+                        if (!navLinks.contains(e.target) && !mobileToggle.contains(e.target)) {
+                            closeMobileMenu();
+                        }
+                    }
+                });
+
+                console.log('✅ Mobile optimizations setup complete');
+
+            } catch (error) {
+                console.error('Error setting up mobile optimizations:', error);
+            }
+        }
 
         // Fixed Mobile debugging and testing functions
         function setupMobileDebugging() {
