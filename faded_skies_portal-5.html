@@ -946,6 +946,155 @@
             gap: 16px;
         }
 
+        /* Payment Form Styles */
+        .payment-form {
+            transition: all 0.3s ease;
+        }
+
+        .payment-form.active {
+            display: block;
+        }
+
+        .payment-tab {
+            transition: all 0.3s ease;
+        }
+
+        .payment-tab:hover {
+            background: var(--surface-elevated) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .payment-tab.active {
+            background: var(--brand-green) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(0, 200, 81, 0.3);
+        }
+
+        .order-summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+        }
+
+        .order-summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item-details {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .order-item-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .order-item-info h5 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .order-item-info p {
+            margin: 2px 0 0 0;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .order-item-price {
+            text-align: right;
+        }
+
+        .order-item-quantity {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .order-item-total {
+            font-weight: 600;
+            color: var(--brand-green);
+        }
+
+        /* Enhanced form input styles */
+        .form-group input[type="text"]:focus,
+        .form-group input[type="email"]:focus,
+        .form-group input[type="tel"]:focus,
+        .form-group input[type="url"]:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 3px rgba(0, 200, 81, 0.1);
+            outline: none;
+        }
+
+        /* Input formatting for payment fields */
+        input[type="text"]::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Security badge styling */
+        .security-section {
+            background: linear-gradient(135deg, var(--surface-elevated), rgba(0, 200, 81, 0.05));
+        }
+
+        /* Profile form enhancements */
+        #profileEditModal .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #paymentModal .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Payment method transition effects */
+        .payment-form {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive payment forms */
+        @media (max-width: 768px) {
+            .payment-method-tabs {
+                flex-direction: column;
+            }
+
+            .payment-tab {
+                padding: 16px !important;
+            }
+
+            .order-item-details {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .order-item-image {
+                width: 60px;
+                height: 60px;
+            }
+        }
+
         /* Notification System */
         .notification {
             position: fixed;
@@ -1142,7 +1291,7 @@
                 <!-- Guest Section -->
                 <div id="guestSection">
                     <div class="sync-indicator">
-                        <span>🌐</span>
+                        <span>��</span>
                         <span>Live Data</span>
                     </div>
                     <button class="btn btn-secondary btn-sm" onclick="openModal('loginModal')">Partner Login</button>
@@ -1790,7 +1939,7 @@
             <!-- Order Summary -->
             <div class="order-summary-section" style="background: var(--surface-elevated); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border-subtle);">
                 <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                    ��� Order Summary
+                    📦 Order Summary
                 </h4>
                 <div id="orderSummaryItems" style="margin-bottom: 16px;">
                     <!-- Order items will be populated here -->
@@ -4428,7 +4577,7 @@ Phone: (210) 835-7834
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
                 
-                showNotification(`���� Invoice ${orderId} downloaded`, 'success');
+                showNotification(`📄 Invoice ${orderId} downloaded`, 'success');
             } catch (error) {
                 console.error('Error downloading invoice:', error);
                 showNotification('Download error. Please try again.', 'error');
