@@ -3273,18 +3273,44 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
         function syncToPortal() {
             updateSyncStatus('syncing');
+            console.log('🔄 Admin: Force syncing to partner portal...');
 
-            // Actually sync products to shared data manager
-            window.sharedDataManager.updateProducts(products);
-            console.log('🔄 Synced', products.length, 'products to shared data manager');
+            try {
+                // Force sync products to shared data manager with real-time broadcasting
+                window.sharedDataManager.forceSyncProducts(products);
+                console.log('🔄 Force synced', products.length, 'products to shared data manager');
 
-            setTimeout(() => {
-                updateSyncStatus('connected');
-                showNotification('📊 Inventory synced to partner portal successfully!', 'success');
+                // Force sync orders as well
+                orders.forEach(order => {
+                    const existingOrder = window.sharedDataManager.getOrders().find(o => o.id === order.id);
+                    if (!existingOrder) {
+                        window.sharedDataManager.addOrder(order);
+                    } else {
+                        window.sharedDataManager.updateOrder(order.id, order);
+                    }
+                });
 
-                // Update last sync timestamp
-                document.getElementById('lastSync').textContent = 'Just now';
-            }, 1500);
+                // Broadcast sync completion via real-time system
+                if (window.realTimeSync) {
+                    window.realTimeSync.forceSyncAll();
+                    console.log('📡 Real-time sync broadcast completed');
+                }
+
+                setTimeout(() => {
+                    updateSyncStatus('connected');
+                    showNotification('📊 Inventory synced to partner portal successfully! All changes are now live.', 'success');
+
+                    // Update last sync timestamp
+                    const lastSyncElement = document.getElementById('lastSync');
+                    if (lastSyncElement) {
+                        lastSyncElement.textContent = 'Just now';
+                    }
+                }, 1500);
+            } catch (error) {
+                console.error('❌ Error syncing to portal:', error);
+                updateSyncStatus('error');
+                showNotification('❌ Failed to sync inventory. Please try again.', 'error');
+            }
         }
 
         // Authentication Functions
@@ -5528,7 +5554,7 @@ Best regards,
 Faded Skies Wholesale Team`
                 },
                 newsletter: {
-                    subject: '���� Monthly Newsletter - Faded Skies Wholesale',
+                    subject: '📰 Monthly Newsletter - Faded Skies Wholesale',
                     message: `Dear Partners,
 
 Welcome to this month's Faded Skies Wholesale newsletter!
