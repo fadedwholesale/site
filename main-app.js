@@ -1058,31 +1058,43 @@ function nextRegistrationStep() {
     if (currentRegistrationStep === 1) {
         // Validate step 1
         const form = document.getElementById('businessInfoForm');
-        const formData = new FormData(form);
         let isValid = true;
-        
-        // Basic validation
+
+        // Required fields validation
         const requiredFields = ['businessName', 'contactName', 'businessEmail', 'phone', 'businessAddress', 'businessType', 'licenseNumber', 'estimatedMonthlyVolume'];
         requiredFields.forEach(field => {
             const input = document.getElementById(field);
-            if (!input.value.trim()) {
+            if (!input || !input.value.trim()) {
                 isValid = false;
-                input.style.borderColor = 'var(--accent-red)';
+                if (input) {
+                    input.style.borderColor = 'var(--accent-red)';
+                }
             } else {
                 input.style.borderColor = 'var(--border-subtle)';
-                registrationData[field] = input.value;
+                registrationData[field] = input.value.trim();
             }
         });
-        
+
+        // Optional fields
+        const optionalFields = ['yearsInBusiness', 'businessDescription'];
+        optionalFields.forEach(field => {
+            const input = document.getElementById(field);
+            if (input && input.value.trim()) {
+                registrationData[field] = input.value.trim();
+            }
+        });
+
         if (!isValid) {
             showNotification('❌ Please fill in all required fields', 'error');
             return;
         }
-        
-        // Proceed to step 2
-        document.getElementById('registrationStep1').classList.remove('active');
-        document.getElementById('registrationStep2').classList.add('active');
+
+        // Update progress and proceed to step 2
+        updateApplicationProgress(2);
+        document.getElementById('registrationStep1').style.display = 'none';
+        document.getElementById('registrationStep2').style.display = 'block';
         currentRegistrationStep = 2;
+
     } else if (currentRegistrationStep === 2) {
         // Check if required documents are uploaded
         const requiredDocs = ['businessLicense', 'cannabisLicense', 'taxId'];
@@ -1090,16 +1102,41 @@ function nextRegistrationStep() {
             const input = document.getElementById(doc);
             return input && input.files.length > 0;
         });
-        
+
         if (uploadedDocs.length < 3) {
-            showNotification('❌ Please upload all required documents', 'error');
+            showNotification('❌ Please upload all required documents (Business License, Cannabis License, Tax ID)', 'error');
             return;
         }
-        
-        // Proceed to step 3
+
+        // Store document information
+        requiredDocs.forEach(doc => {
+            const input = document.getElementById(doc);
+            if (input && input.files.length > 0) {
+                uploadedDocuments[doc] = {
+                    name: input.files[0].name,
+                    size: input.files[0].size,
+                    type: input.files[0].type,
+                    lastModified: input.files[0].lastModified
+                };
+            }
+        });
+
+        // Check for additional docs
+        const additionalInput = document.getElementById('additionalDocs');
+        if (additionalInput && additionalInput.files.length > 0) {
+            uploadedDocuments.additionalDocs = Array.from(additionalInput.files).map(file => ({
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                lastModified: file.lastModified
+            }));
+        }
+
+        // Generate review and proceed to step 3
         generateRegistrationReview();
-        document.getElementById('registrationStep2').classList.remove('active');
-        document.getElementById('registrationStep3').classList.add('active');
+        updateApplicationProgress(3);
+        document.getElementById('registrationStep2').style.display = 'none';
+        document.getElementById('registrationStep3').style.display = 'block';
         currentRegistrationStep = 3;
     }
 }
@@ -2395,7 +2432,7 @@ window.testBulkOrderFunctions = function() {
         showNotification(`⚠️ ${results.undefined.length} bulk order functions missing`, 'warning');
     } else {
         console.log('✅ All bulk order functions are properly defined');
-        showNotification('��� All bulk order functions available!', 'success');
+        showNotification('✅ All bulk order functions available!', 'success');
     }
 
     return results;
