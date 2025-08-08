@@ -137,6 +137,7 @@ class CartManager {
 
             this.saveCart();
             this.updateDisplay();
+            this.syncCartRealTime(); // Real-time sync
             this.notifyListeners('item_added', { productId, quantity });
 
             // Auto-open cart for first item
@@ -195,7 +196,7 @@ class CartManager {
 
             const item = this.cart.find(item => item.id == productId);
             if (!item) {
-                this.showNotification('�� Item not found in cart', 'error');
+                this.showNotification('❌ Item not found in cart', 'error');
                 return false;
             }
 
