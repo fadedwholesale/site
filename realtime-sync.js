@@ -292,6 +292,51 @@ class RealTimeSync {
         }
     }
 
+    // Handle product image updates
+    handleProductImageUpdate(data) {
+        console.log('🖼️ Product image updated:', data);
+
+        // Update product images in the UI
+        const productImages = document.querySelectorAll(`.product-image[alt*="${data.productName}"]`);
+        productImages.forEach(img => {
+            if (data.newImage) {
+                img.src = data.newImage;
+                // Add a subtle animation to indicate the image was updated
+                img.style.transition = 'opacity 0.3s ease';
+                img.style.opacity = '0.7';
+                setTimeout(() => {
+                    img.style.opacity = '1';
+                }, 300);
+            }
+        });
+
+        // Show notification for image updates
+        if (window.showNotification) {
+            window.showNotification(`📸 ${data.productName} image updated in real-time`, 'info');
+        }
+    }
+
+    // Handle admin product changes
+    handleAdminProductChange(data) {
+        console.log('🔧 Admin product change:', data);
+
+        // Trigger UI updates for admin changes
+        if (window.updateAllViews) {
+            window.updateAllViews();
+        }
+
+        // Show notification for admin changes
+        if (window.showNotification) {
+            const actionText = data.action === 'product_added' ? 'added' : 'updated';
+            window.showNotification(`🔧 Admin ${actionText} ${data.productName}`, 'success');
+        }
+
+        // If viewing the partner portal, animate the updated product
+        if (data.productId && window.highlightUpdatedProduct) {
+            window.highlightUpdatedProduct(data.productId);
+        }
+    }
+
     // Get sync status
     getSyncStatus() {
         return {
