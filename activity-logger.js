@@ -589,11 +589,12 @@ class ActivityLogger {
         return 'log';
     }
 
-    // Start automatic log flushing
+    // Start automatic log flushing (DISABLED to prevent circular reference errors)
     startAutoFlush() {
-        setInterval(() => {
-            this.flushLogs();
-        }, this.flushInterval);
+        console.log('🚫 Auto-flush disabled to prevent circular reference errors');
+        // setInterval(() => {
+        //     this.flushLogs();
+        // }, this.flushInterval);
     }
 
     // Completely safe JSON serialization without using JSON.stringify
