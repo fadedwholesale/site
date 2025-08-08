@@ -872,7 +872,7 @@ function populateProfileEditForm() {
             element.value = value || '';
             console.log(`📝 Populated ${fieldId} with:`, value);
         } else {
-            console.warn(`⚠️ Field ${fieldId} not found in DOM`);
+            console.warn(`⚠��� Field ${fieldId} not found in DOM`);
         }
     });
 
@@ -1718,6 +1718,42 @@ function forceLogin(email = 'test@example.com') {
     showPartnerPortal();
     showNotification(`🧪 Test login successful: ${userData.name}`, 'success');
     return userData;
+}
+
+// Test authentication system
+function testAuthentication() {
+    console.log('🧪 Testing authentication system...');
+
+    // 1. Test initial state (should be logged out)
+    const initialState = debugAuthState();
+    console.log('1️⃣ Initial state:', initialState);
+
+    // 2. Test login with valid credentials
+    console.log('2️⃣ Testing valid login...');
+    document.getElementById('email').value = 'partner@greenvalley.com';
+    document.getElementById('password').value = 'demo123';
+    login({ preventDefault: () => {} });
+
+    setTimeout(() => {
+        const loggedInState = debugAuthState();
+        console.log('3️⃣ After login state:', loggedInState);
+
+        // 3. Test logout
+        console.log('4️⃣ Testing logout...');
+        logout();
+
+        setTimeout(() => {
+            const loggedOutState = debugAuthState();
+            console.log('5️⃣ After logout state:', loggedOutState);
+
+            // Summary
+            console.log('📋 Authentication Test Summary:', {
+                initiallyLoggedOut: !initialState.isAuthenticated,
+                canLogin: loggedInState.isAuthenticated,
+                canLogout: !loggedOutState.isAuthenticated
+            });
+        }, 100);
+    }, 100);
 }
 
 // Test cart functionality with multiple items
