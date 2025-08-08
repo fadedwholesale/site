@@ -3201,7 +3201,11 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
                 window.realTimeSync.on('product_updated', (productData) => {
                     console.log('📦 LIVE PRODUCT UPDATE!', productData);
-                    handleAdminRealTimeUpdate({ type: 'product_updated', data: productData });
+                    handleAdminRealTimeUpdate({
+                        type: 'product_updated',
+                        data: productData,
+                        timestamp: new Date().toISOString()
+                    });
                 });
             }
 
@@ -3503,7 +3507,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             setTimeout(() => {
                 updateSyncStatus('connected');
                 updateAllDashboardViews();
-                showNotification('🔄 All portals force-synchronized successfully!', 'success');
+                showNotification('�� All portals force-synchronized successfully!', 'success');
             }, 2000);
         }
 
@@ -4852,7 +4856,7 @@ Faded Skies Wholesale Team
                 order.items = itemsStr;
                 order.notes = modal.querySelector('#editOrderNotes').value.trim();
                 updateOrdersTable();
-                showNotification('✅ Order updated successfully!', 'success');
+                showNotification('�� Order updated successfully!', 'success');
                 modal.remove();
                 document.body.style.overflow = 'auto';
             };
