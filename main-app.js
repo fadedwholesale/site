@@ -1991,7 +1991,11 @@ window.updateProfile = updateProfile;
 window.populateProfileEditForm = populateProfileEditForm;
 window.register = register;
 window.proceedToPayment = proceedToPayment;
-window.updateDeliveryMethod = updateDeliveryMethod;
+window.updateDeliveryMethodLive = updateDeliveryMethodLive;
+window.validateFieldLive = validateFieldLive;
+window.updateProceedButtonState = updateProceedButtonState;
+window.checkInventoryLive = checkInventoryLive;
+window.initializeLiveCheckout = initializeLiveCheckout;
 window.showNotification = showNotification;
 window.updateAllViews = updateAllViews;
 
