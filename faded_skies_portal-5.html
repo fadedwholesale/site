@@ -5415,12 +5415,18 @@
         // Remove product from partner view
         function removeProductFromView(productId) {
             try {
-                // Remove from products array
-                products = products.filter(p => p.id !== productId);
-
-                // Refresh all views
-                updateAllViews();
-                forceUpdateWithImages();
+                // Use SharedDataManager to remove product properly
+                if (window.sharedDataManager) {
+                    window.sharedDataManager.deleteProduct(productId);
+                    // Reload from SharedDataManager to ensure consistency
+                    refreshAllProducts();
+                } else {
+                    // Fallback: Remove from local array
+                    products = products.filter(p => p.id !== productId);
+                    // Refresh all views
+                    updateAllViews();
+                    forceUpdateWithImages();
+                }
             } catch (error) {
                 console.error('Error removing product from view:', error);
             }
@@ -7324,7 +7330,7 @@ Phone: (210) 835-7834
 
         function setupModalTriggers() {
             try {
-                console.log('🔧 Setting up modal triggers for all devices...');
+                console.log('��� Setting up modal triggers for all devices...');
                 
                 // Find all modal trigger buttons and links using proper selectors
                 const modalTriggers = [
@@ -7601,7 +7607,7 @@ Phone: (210) 835-7834
                         if (inventorySection) {
                             inventorySection.classList.add('show');
                             updatePublicInventory();
-                            showNotification('��� Inventory displayed with product images!', 'success');
+                            showNotification('����� Inventory displayed with product images!', 'success');
                         } else {
                             console.error('Inventory section not found');
                         }

@@ -2893,7 +2893,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Listen for product updates
                 window.realTimeSync.on('products_updated', (data) => {
                     console.log('📡 Admin: Products updated via real-time sync');
-                    products = [...data]; // Always use fresh data
+                    // Use SharedDataManager as single source of truth
+                    window.sharedDataManager.updateProducts(data);
+                    loadDataFromSharedManager(); // Reload from shared manager
                     updateAllDashboardViews();
                     showNotification('📦 Products synchronized from partner portal', 'info');
                 });
@@ -3228,36 +3230,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             console.log('✅ Admin Live Systems initialized successfully');
         }
 
-        // Enhanced data loading from shared systems
-        function loadDataFromSharedManager() {
-            try {
-                if (window.liveDataManager) {
-                    // Load products from live data manager
-                    const liveProducts = window.liveDataManager.getProducts();
-                    if (liveProducts && liveProducts.length > 0) {
-                        products = liveProducts;
-                        console.log('📦 Loaded', products.length, 'products from live data manager');
-                    }
-
-                    // Load orders from live data manager
-                    const liveOrders = window.liveDataManager.getOrders();
-                    if (liveOrders && liveOrders.length > 0) {
-                        orders = liveOrders;
-                        console.log('📋 Loaded', orders.length, 'orders from live data manager');
-
-                        // Ensure all orders have proper statusHistory
-                        ensureOrdersHaveStatusHistory();
-                    }
-
-                    // Force UI update
-                    updateAllDashboardViews();
-                    updateSyncStatus('connected');
-                }
-            } catch (error) {
-                console.error('❌ Error loading from shared manager:', error);
-                updateSyncStatus('error');
-            }
-        }
+        // Enhanced data loading fallback (removed duplicate function)
+        // Note: Using the primary loadDataFromSharedManager() function defined earlier
+        // that correctly loads from window.sharedDataManager instead of liveDataManager
 
         // Trigger auto-sync after admin changes
         function triggerAutoSync(changeType) {
