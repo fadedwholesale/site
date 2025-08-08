@@ -71,6 +71,9 @@ function initializeApplication() {
         }
     }
 
+    // Initialize live checkout system
+    initializeLiveCheckout();
+
     // Initialize view state
     const urlParams = new URLSearchParams(window.location.search);
     const initialView = urlParams.get('view');
@@ -1270,7 +1273,7 @@ function testMultiUserSync() {
 
     testUsers.forEach((user, index) => {
         setTimeout(() => {
-            console.log(`👤 Simulating action from ${user.name}...`);
+            console.log(`�� Simulating action from ${user.name}...`);
 
             // Simulate user joining
             window.realTimeSync.broadcast('user_action', {
