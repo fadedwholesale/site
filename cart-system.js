@@ -307,7 +307,7 @@ class CartManager {
             }
             if (cartCount2) {
                 cartCount2.textContent = totals.totalItems;
-                console.log('✅ Updated cartCount2 to:', totals.totalItems);
+                console.log('��� Updated cartCount2 to:', totals.totalItems);
             }
 
             if (!cartItems) {
@@ -338,7 +338,7 @@ class CartManager {
                 }).join('');
 
                 cartItems.innerHTML = cartItemsHTML;
-                console.log('✅ Cart items HTML updated with', this.cart.length, 'items');
+                console.log('��� Cart items HTML updated with', this.cart.length, 'items');
 
                 // Verify DOM update
                 setTimeout(() => {
@@ -378,53 +378,74 @@ class CartManager {
 
     // Generate cart item HTML
     getCartItemHTML(item) {
-        const products = window.sharedDataManager?.getProducts() || window.products || [];
-        const product = products.find(p => p.id == item.id);
-        const maxStock = product ? product.stock : item.maxStock;
-        const currentQuantity = parseInt(item.quantity) || 1;
-        const decreaseQuantity = Math.max(0, currentQuantity - 1);
-        const increaseQuantity = currentQuantity + 1;
+        try {
+            const products = window.sharedDataManager?.getProducts() || window.products || [];
+            const product = products.find(p => p.id == item.id);
+            const maxStock = product ? product.stock : (item.maxStock || 999);
+            const currentQuantity = parseInt(item.quantity) || 1;
+            const decreaseQuantity = Math.max(0, currentQuantity - 1);
+            const increaseQuantity = currentQuantity + 1;
+            const itemPrice = parseFloat(item.price) || 0;
+            const itemTotal = itemPrice * currentQuantity;
 
-        return `
-            <div class="cart-item" data-product-id="${item.id}">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                    <img src="${item.image}" alt="${item.strain}" class="cart-product-image" 
-                         style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover;"
-                         onerror="this.src='https://via.placeholder.com/60x60/1a1a1a/00C851?text=${item.grade}'" />
-                    <div style="flex: 1;">
-                        <h4 style="margin: 0; font-size: 14px; font-weight: 600;">${item.strain}</h4>
-                        <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 12px;">
-                            ${item.grade} • $${item.price}${this.getUnitLabel(item.grade)}
-                        </p>
+            console.log(`🛒 Generating HTML for cart item:`, {
+                strain: item.strain,
+                quantity: currentQuantity,
+                price: itemPrice,
+                total: itemTotal,
+                maxStock: maxStock
+            });
+
+            return `
+                <div class="cart-item" data-product-id="${item.id}" style="margin-bottom: 16px; border: 1px solid var(--border-subtle); border-radius: 12px; padding: 16px; background: var(--surface-dark);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <img src="${item.image || 'https://via.placeholder.com/60x60/1a1a1a/00C851?text=' + encodeURIComponent(item.grade)}"
+                             alt="${item.strain}" class="cart-product-image"
+                             style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 2px solid var(--border-subtle);"
+                             onerror="this.src='https://via.placeholder.com/60x60/1a1a1a/00C851?text=${encodeURIComponent(item.grade)}'" />
+                        <div style="flex: 1;">
+                            <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text-primary);">${item.strain}</h4>
+                            <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 13px;">
+                                ${item.grade} • $${itemPrice.toFixed(2)}${this.getUnitLabel(item.grade)}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="cart-item-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div class="quantity-controls" style="display: flex; align-items: center; gap: 10px;">
+                            <button class="quantity-btn"
+                                    onclick="window.cartManager.updateQuantity(${item.id}, ${decreaseQuantity})"
+                                    ${currentQuantity <= 1 ? 'disabled' : ''}
+                                    style="background: ${currentQuantity <= 1 ? '#666' : 'var(--accent-red)'}; color: white; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: ${currentQuantity <= 1 ? 'not-allowed' : 'pointer'}; font-weight: bold;"
+                                    title="Decrease quantity">−</button>
+                            <span class="quantity-display" style="font-weight: 700; min-width: 30px; text-align: center; color: var(--text-primary); font-size: 16px; background: var(--surface-card); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-subtle);">${currentQuantity}</span>
+                            <button class="quantity-btn"
+                                    onclick="window.cartManager.updateQuantity(${item.id}, ${increaseQuantity})"
+                                    ${currentQuantity >= maxStock ? 'disabled' : ''}
+                                    style="background: ${currentQuantity >= maxStock ? '#666' : 'var(--brand-green)'}; color: white; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: ${currentQuantity >= maxStock ? 'not-allowed' : 'pointer'}; font-weight: bold;"
+                                    title="Increase quantity">+</button>
+                        </div>
+                        <button class="btn btn-danger btn-sm"
+                                onclick="window.cartManager.removeProduct(${item.id})"
+                                style="padding: 6px 12px; font-size: 12px; border-radius: 6px; background: var(--accent-red); color: white; border: none;"
+                                title="Remove ${item.strain} from cart">🗑️ Remove</button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+                        <small style="color: var(--text-muted);">${maxStock} in stock</small>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 700; color: var(--brand-green); font-size: 18px;">
+                                $${itemTotal.toFixed(2)}
+                            </div>
+                            <small style="color: var(--text-muted);">Item Total</small>
+                        </div>
                     </div>
                 </div>
-                <div class="cart-item-controls" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div class="quantity-controls" style="display: flex; align-items: center; gap: 8px;">
-                        <button class="quantity-btn" 
-                                onclick="window.cartManager.updateQuantity(${item.id}, ${decreaseQuantity})"
-                                ${currentQuantity <= 1 ? 'disabled' : ''}
-                                style="background: var(--accent-red); color: white; border: none; border-radius: 4px; width: 30px; height: 30px; cursor: pointer;"
-                                title="Decrease quantity">-</button>
-                        <span class="quantity-display" style="font-weight: 600; min-width: 20px; text-align: center;">${currentQuantity}</span>
-                        <button class="quantity-btn" 
-                                onclick="window.cartManager.updateQuantity(${item.id}, ${increaseQuantity})"
-                                ${currentQuantity >= maxStock ? 'disabled' : ''}
-                                style="background: var(--brand-green); color: white; border: none; border-radius: 4px; width: 30px; height: 30px; cursor: pointer;"
-                                title="Increase quantity">+</button>
-                    </div>
-                    <button class="btn btn-danger btn-sm" 
-                            onclick="window.cartManager.removeProduct(${item.id})" 
-                            style="padding: 4px 8px; font-size: 12px;"
-                            title="Remove from cart">Remove</button>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                    <small style="color: var(--text-muted);">${maxStock} available</small>
-                    <p style="font-weight: 700; color: var(--brand-green); margin: 0; font-size: 16px;">
-                        $${(item.price * currentQuantity).toFixed(2)}
-                    </p>
-                </div>
-            </div>
-        `;
+            `;
+        } catch (error) {
+            console.error('Error generating cart item HTML for:', item, error);
+            return `<div class="cart-item" style="padding: 16px; color: var(--accent-red); border: 1px solid var(--accent-red); border-radius: 8px; margin-bottom: 8px;">
+                        ❌ Error loading item: ${item.strain || 'Unknown'}
+                    </div>`;
+        }
     }
 
     // Update cart total section
