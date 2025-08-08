@@ -2254,7 +2254,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             <div>
                 <div style="display: flex; gap: 16px; margin-bottom: 24px;">
                     <button class="btn btn-primary" onclick="generatePartnerResetLinks()">🔗 Generate Reset Links</button>
-                    <button class="btn btn-secondary" onclick="sendBulkPasswordResets()">📧 Send Bulk Reset Emails</button>
+                    <button class="btn btn-secondary" onclick="sendBulkPasswordResets()">�� Send Bulk Reset Emails</button>
                     <button class="btn btn-secondary" onclick="refreshPasswordResetTable()">🔄 Refresh</button>
                 </div>
                 
@@ -3536,6 +3536,16 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 // Ensure createdAt exists
                 if (!order.createdAt) {
                     order.createdAt = order.date ? new Date(order.date).toISOString() : new Date().toISOString();
+                    orderWasFixed = true;
+                }
+
+                // Ensure items exists and is in proper format
+                if (!order.items) {
+                    order.items = 'Unknown Products (x1)';
+                    orderWasFixed = true;
+                } else if (typeof order.items !== 'string' && !Array.isArray(order.items)) {
+                    // Convert other types to string
+                    order.items = String(order.items);
                     orderWasFixed = true;
                 }
 
