@@ -1226,6 +1226,109 @@ function handleFileUpload(input, documentType) {
     }
 }
 
+function updateApplicationProgress(step) {
+    const progressBar = document.getElementById('progressBar');
+    const progressSteps = document.querySelectorAll('.progress-step');
+
+    // Update progress bar
+    const progressWidth = (step / 3) * 100;
+    if (progressBar) {
+        progressBar.style.width = progressWidth + '%';
+    }
+
+    // Update step indicators
+    progressSteps.forEach((stepEl, index) => {
+        const stepNumber = index + 1;
+        const stepDiv = stepEl.querySelector('div');
+
+        if (stepNumber < step) {
+            stepEl.classList.add('completed');
+            stepEl.classList.remove('active');
+        } else if (stepNumber === step) {
+            stepEl.classList.add('active');
+            stepEl.classList.remove('completed');
+        } else {
+            stepEl.classList.remove('active', 'completed');
+        }
+    });
+}
+
+function updateProceedButtonState() {
+    const proceedBtn = document.getElementById('proceedToReview');
+    if (proceedBtn) {
+        const requiredDocs = ['businessLicense', 'cannabisLicense', 'taxId'];
+        const uploadedCount = requiredDocs.filter(doc => {
+            const input = document.getElementById(doc);
+            return input && input.files.length > 0;
+        }).length;
+
+        proceedBtn.disabled = uploadedCount < 3;
+
+        if (uploadedCount >= 3) {
+            proceedBtn.style.background = 'linear-gradient(135deg, var(--brand-green), var(--brand-green-light))';
+            proceedBtn.style.color = 'white';
+        } else {
+            proceedBtn.style.background = 'var(--surface-elevated)';
+            proceedBtn.style.color = 'var(--text-muted)';
+        }
+    }
+}
+
+function resetRegistrationForm() {
+    currentRegistrationStep = 1;
+    registrationData = {};
+    uploadedDocuments = {};
+
+    // Reset UI
+    const step3 = document.getElementById('registrationStep3');
+    const step1 = document.getElementById('registrationStep1');
+    if (step3) step3.style.display = 'none';
+    if (step1) step1.style.display = 'block';
+    updateApplicationProgress(1);
+
+    // Clear form fields
+    const form = document.getElementById('businessInfoForm');
+    if (form) {
+        form.reset();
+    }
+
+    // Clear file inputs and previews
+    const fileInputs = ['businessLicense', 'cannabisLicense', 'taxId', 'additionalDocs'];
+    fileInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(inputId + 'Preview');
+        if (input) input.value = '';
+        if (preview) preview.innerHTML = '';
+    });
+
+    // Reset proceed button
+    const proceedBtn = document.getElementById('proceedToReview');
+    if (proceedBtn) {
+        proceedBtn.disabled = true;
+    }
+}
+
+function triggerAdminNotification(applicationData) {
+    // Store notification for admin dashboard
+    const adminNotifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+    adminNotifications.unshift({
+        id: 'NOTIF-' + Date.now(),
+        type: 'new_application',
+        title: 'New Business Application',
+        message: `${applicationData.businessName} has submitted a partnership application`,
+        applicationId: applicationData.applicationId,
+        timestamp: new Date().toISOString(),
+        read: false,
+        priority: 'high'
+    });
+    localStorage.setItem('adminNotifications', JSON.stringify(adminNotifications));
+
+    // Update admin dashboard counters if admin is logged in
+    if (window.adminDashboard && typeof window.adminDashboard.updateNotificationBadge === 'function') {
+        window.adminDashboard.updateNotificationBadge();
+    }
+}
+
 // Bulk Order Functions
 function createBulkOrder() {
     try {
@@ -2292,7 +2395,7 @@ window.testBulkOrderFunctions = function() {
         showNotification(`⚠️ ${results.undefined.length} bulk order functions missing`, 'warning');
     } else {
         console.log('✅ All bulk order functions are properly defined');
-        showNotification('✅ All bulk order functions available!', 'success');
+        showNotification('��� All bulk order functions available!', 'success');
     }
 
     return results;
