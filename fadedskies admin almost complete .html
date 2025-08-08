@@ -6086,6 +6086,216 @@ Faded Skies Wholesale Team`
             });
         }
 
+        // Email Notification System
+        function simulateEmailNotification(application, action, notes) {
+            const emailTemplates = {
+                approved: {
+                    subject: `🎉 Welcome to Faded Skies Wholesale Partnership!`,
+                    body: `Dear ${application.contactName},
+
+Congratulations! Your partnership application (${application.applicationId}) has been approved.
+
+We're excited to welcome ${application.businessName} to the Faded Skies wholesale family.
+
+Next Steps:
+1. You'll receive your login credentials within 24 hours
+2. A dedicated account manager will contact you to complete onboarding
+3. Access to wholesale pricing will be activated immediately
+
+Partnership Details:
+- Business: ${application.businessName}
+- Partner Tier: ${application.partnerTier || 'Starter'}
+- Estimated Volume: ${application.estimatedMonthlyVolume}
+
+If you have any questions, please don't hesitate to reach out.
+
+Welcome aboard!
+
+Best regards,
+Faded Skies Partnership Team`
+                },
+                rejected: {
+                    subject: `Application Update - Faded Skies Wholesale`,
+                    body: `Dear ${application.contactName},
+
+Thank you for your interest in partnering with Faded Skies Wholesale.
+
+After careful review of your application (${application.applicationId}), we're unable to move forward with a partnership at this time.
+
+Reason: ${notes}
+
+We appreciate your interest and encourage you to reapply in the future as your business grows.
+
+Best regards,
+Faded Skies Partnership Team`
+                },
+                request_info: {
+                    subject: `Additional Information Needed - Application ${application.applicationId}`,
+                    body: `Dear ${application.contactName},
+
+We're reviewing your partnership application for ${application.businessName}.
+
+To complete our review, we need some additional information:
+
+${notes}
+
+Please provide this information at your earliest convenience. You can reply to this email or contact us directly.
+
+Application ID: ${application.applicationId}
+
+Thank you for your patience.
+
+Best regards,
+Faded Skies Partnership Team`
+                }
+            };
+
+            const template = emailTemplates[action];
+            if (!template) return;
+
+            // Store email in localStorage for demonstration
+            const emails = JSON.parse(localStorage.getItem('sentEmails') || '[]');
+            emails.unshift({
+                id: 'EMAIL-' + Date.now(),
+                to: application.businessEmail,
+                from: 'partnerships@fadedskies.com',
+                subject: template.subject,
+                body: template.body,
+                sentDate: new Date().toISOString(),
+                applicationId: application.applicationId,
+                action: action
+            });
+            localStorage.setItem('sentEmails', JSON.stringify(emails));
+
+            // Show confirmation
+            showNotification(`📧 Email sent to ${application.businessEmail}`, 'success');
+
+            console.log('📧 Email notification sent:', {
+                to: application.businessEmail,
+                subject: template.subject,
+                action: action
+            });
+        }
+
+        // Update submitApplicationAction to include email notifications
+        const originalSubmitApplicationAction = submitApplicationAction;
+        submitApplicationAction = function(event) {
+            event.preventDefault();
+
+            const action = document.getElementById('reviewAction').value;
+            const notes = document.getElementById('reviewNotes').value;
+            const sendEmail = document.getElementById('sendEmailNotification').checked;
+
+            if (!currentReviewingApplication) {
+                showNotification('❌ No application selected for review', 'error');
+                return;
+            }
+
+            // Call original function
+            originalSubmitApplicationAction.call(this, event);
+
+            // Send email notification if requested
+            if (sendEmail && currentReviewingApplication) {
+                setTimeout(() => {
+                    simulateEmailNotification(currentReviewingApplication, action, notes);
+                }, 500);
+            }
+        };
+
+        // Application notification management
+        function loadApplicationNotifications() {
+            const notifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+            const applicationNotifications = notifications.filter(n => n.type === 'new_application');
+
+            const notificationsList = document.getElementById('notificationsList');
+            if (!notificationsList) return;
+
+            if (applicationNotifications.length === 0) {
+                notificationsList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        🔔 No application notifications found
+                    </div>
+                `;
+                return;
+            }
+
+            notificationsList.innerHTML = applicationNotifications.map(notification => `
+                <div class="notification-item" style="background: var(--surface-dark); padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid ${notification.read ? 'var(--border-subtle)' : 'var(--brand-green)'};">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <div style="font-weight: 600; color: var(--text-primary);">${notification.title}</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">
+                            ${new Date(notification.timestamp).toLocaleString()}
+                        </div>
+                    </div>
+                    <div style="color: var(--text-secondary); margin-bottom: 8px;">
+                        ${notification.message}
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-primary btn-sm" onclick="openApplicationFromNotification('${notification.applicationId}')">
+                            📋 Review Application
+                        </button>
+                        ${!notification.read ? `
+                            <button class="btn btn-secondary btn-sm" onclick="markNotificationRead('${notification.id}')">
+                                ✅ Mark Read
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openApplicationFromNotification(applicationId) {
+            closeModal('applicationNotificationsModal');
+            // Switch to applications tab if not already there
+            switchTab('applications');
+            // Open the specific application
+            setTimeout(() => {
+                openApplicationReview(applicationId);
+            }, 100);
+        }
+
+        function markNotificationRead(notificationId) {
+            const notifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+            const index = notifications.findIndex(n => n.id === notificationId);
+            if (index !== -1) {
+                notifications[index].read = true;
+                localStorage.setItem('adminNotifications', JSON.stringify(notifications));
+                loadApplicationNotifications();
+                showNotification('✅ Notification marked as read', 'success');
+            }
+        }
+
+        function markAllNotificationsRead() {
+            const notifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+            notifications.forEach(n => {
+                if (n.type === 'new_application') {
+                    n.read = true;
+                }
+            });
+            localStorage.setItem('adminNotifications', JSON.stringify(notifications));
+            loadApplicationNotifications();
+            showNotification('✅ All application notifications marked as read', 'success');
+        }
+
+        function clearOldNotifications() {
+            const notifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+            const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            const filteredNotifications = notifications.filter(n =>
+                n.type !== 'new_application' || new Date(n.timestamp) > oneWeekAgo
+            );
+            localStorage.setItem('adminNotifications', JSON.stringify(filteredNotifications));
+            loadApplicationNotifications();
+            showNotification('🗑️ Old notifications cleared', 'success');
+        }
+
+        // Global functions
+        window.simulateEmailNotification = simulateEmailNotification;
+        window.loadApplicationNotifications = loadApplicationNotifications;
+        window.openApplicationFromNotification = openApplicationFromNotification;
+        window.markNotificationRead = markNotificationRead;
+        window.markAllNotificationsRead = markAllNotificationsRead;
+        window.clearOldNotifications = clearOldNotifications;
+
         // Initialize applications when switching to applications tab
         window.loadApplicationsData = loadApplicationsData;
         window.refreshApplications = refreshApplications;
