@@ -1408,7 +1408,7 @@
                         <h3 style="color: var(--brand-green); margin: 0;">Dynamic Pricing Engine</h3>
                         <div class="action-group">
                             <button class="btn btn-primary" onclick="openModal('bulkPriceModal')">📈 Bulk Price Update</button>
-                            <button class="btn btn-secondary" onclick="openModal('priceRulesModal')">���️ Pricing Rules</button>
+                            <button class="btn btn-secondary" onclick="openModal('priceRulesModal')">⚙️ Pricing Rules</button>
                             <button class="btn btn-secondary" onclick="applyMarketAnalysis()">📊 Market Analysis</button>
                             <button class="btn btn-secondary" onclick="exportPricing()">📄 Export Pricing</button>
                         </div>
@@ -1802,7 +1802,7 @@
                     <div class="controls">
                         <h3 style="color: var(--brand-green); margin: 0;">System Configuration</h3>
                         <div class="action-group">
-                            <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+                            <button class="btn btn-primary" onclick="saveSettings()">���� Save Settings</button>
                             <button class="btn btn-secondary" onclick="backupSystem()">📦 Backup System</button>
                             <button class="btn btn-secondary" onclick="exportLogs()">📋 Export Logs</button>
                             <button class="btn btn-danger" onclick="resetSystem()">🔄 Reset System</button>
@@ -2862,6 +2862,31 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             }
         });
 
+        // Update system logo function
+        function updateSystemLogo(logoUrl) {
+            try {
+                console.log('📷 Updating system logo to:', logoUrl);
+
+                const updatedLogos = window.sharedDataManager.updateLogos({
+                    main: logoUrl,
+                    adminHeader: logoUrl,
+                    partnerHeader: logoUrl
+                });
+
+                console.log('✅ System logo updated:', updatedLogos);
+                showNotification('📷 Logo updated and synced to all portals!', 'success');
+
+                // Immediately refresh logos
+                loadSystemLogos();
+
+                return updatedLogos;
+            } catch (error) {
+                console.error('❌ Error updating system logo:', error);
+                showNotification('❌ Failed to update logo', 'error');
+                throw error;
+            }
+        }
+
         function initializeAdminDashboard() {
             console.log('🔧 Initializing Faded Skies Admin Dashboard...');
 
@@ -3696,7 +3721,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             
             const trackingSection = order.trackingNumber ? `
                 <div class="card" style="margin-bottom: 20px;">
-                    <h3>📦 Tracking Information</h3>
+                    <h3>���� Tracking Information</h3>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div>
                             <strong>Tracking Number:</strong><br>
