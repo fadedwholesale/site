@@ -3149,14 +3149,36 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
             switch (type) {
                 case 'external_update':
-                    // Reload products if they were updated externally
-                    products = window.sharedDataManager.getProducts();
+                case 'products_updated':
+                case 'product_updated':
+                case 'product_added':
+                case 'product_deleted':
+                    // Always reload data from shared manager to stay in sync
+                    console.log('📡 Admin: Reloading data due to external changes');
+                    loadDataFromSharedManager();
+                    updateAllDashboardViews();
+                    updateSyncStatus('connected');
+                    showNotification('📦 Inventory updated from partner portal', 'info');
+                    break;
+                case 'order_added':
+                case 'order_updated':
+                    // Reload order data
+                    console.log('📡 Admin: Reloading orders due to external changes');
+                    loadDataFromSharedManager();
                     updateAllDashboardViews();
                     updateSyncStatus('connected');
                     break;
                 case 'cart_updated':
                     // Update UI to show active cart users
                     updateSyncStatus('connected');
+                    break;
+                case 'full_sync':
+                    // Full data synchronization
+                    console.log('📡 Admin: Full sync received');
+                    loadDataFromSharedManager();
+                    updateAllDashboardViews();
+                    updateSyncStatus('connected');
+                    showNotification('🔄 Full inventory sync completed', 'success');
                     break;
             }
         }
