@@ -84,7 +84,7 @@ class NotificationSystem {
                 const product = data.after || data;
                 const stockLevel = data.updates.stock;
                 
-                if (stockLevel < 5) {
+                if (stockLevel <= 3 && stockLevel > 0) {
                     this.showRealTimeNotification('inventory', `Low stock alert!`, {
                         details: `${product.strain}: ${stockLevel} remaining`,
                         type: 'warning',

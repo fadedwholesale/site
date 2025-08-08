@@ -1251,10 +1251,10 @@
                     </form>
                     
                     <div style="margin-top: 32px; padding: 20px; background: var(--surface-elevated); border-radius: 12px; text-align: left;">
-                        <h4 style="color: var(--brand-green); margin-bottom: 12px;">🔐 Demo Credentials:</h4>
+                        <h4 style="color: var(--brand-green); margin-bottom: 12px;">🔐 Admin Access</h4>
                         <p style="color: var(--text-muted); font-size: 14px; line-height: 1.8;">
-                            <strong>Admin:</strong> admin@fadedskies.com / admin123<br>
-                            <small>This is a separate secure admin portal independent from the public website</small>
+                            <strong>Authorized Personnel Only</strong><br>
+                            <small>This is a secure admin portal for inventory and operations management</small>
                         </p>
                     </div>
                 </div>
@@ -2756,7 +2756,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 return updatedLogos;
             } catch (error) {
                 console.error('��� Error updating system logo:', error);
-                showNotification('❌ Failed to update logo', 'error');
+                showNotification('�� Failed to update logo', 'error');
                 throw error;
             }
         }
@@ -7443,5 +7443,6 @@ Faded Skies Partnership Team`
     <script src="simple-logger.js"></script>
     <script src="system-integration.js"></script>
     <script src="live-demo.js"></script>
+    <script src="cleanup-invalid-products.js"></script>
 </body>
 </html>
