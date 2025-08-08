@@ -685,16 +685,32 @@ function refreshProfileData() {
 }
 
 function openProfileEditModal() {
+    console.log('🔄 Opening profile edit modal...');
+
     if (!currentUser) {
         showNotification('❌ Please log in to edit your profile', 'error');
         return;
     }
 
-    // Populate form with current user data
-    populateProfileEditForm();
+    try {
+        // Show loading notification
+        showNotification('📝 Opening profile editor...', 'info');
 
-    // Open the modal
-    openModal('profileEditModal');
+        // Populate form with current user data
+        populateProfileEditForm();
+
+        // Open the modal with slight delay for better UX
+        setTimeout(() => {
+            openModal('profileEditModal');
+            showNotification('✏️ Edit your business profile information', 'success');
+        }, 300);
+
+        console.log('✅ Profile edit modal opened successfully');
+
+    } catch (error) {
+        console.error('Error opening profile edit modal:', error);
+        showNotification('❌ Error opening profile editor', 'error');
+    }
 }
 
 function populateProfileEditForm() {
