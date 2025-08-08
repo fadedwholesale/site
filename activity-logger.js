@@ -17,6 +17,7 @@ class ActivityLogger {
         this.currentSession = null;
         this.eventQueue = [];
         this.isProcessingQueue = false;
+        this.lastFlushTime = null;
         
         this.logLevels = {
             ERROR: 'error',
