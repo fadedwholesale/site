@@ -1267,12 +1267,47 @@ function submitRegistration() {
 }
 
 function handleFileUpload(input, documentType) {
+    const previewContainer = document.getElementById(documentType + 'Preview');
+
     if (input.files.length > 0) {
-        const file = input.files[0];
-        const previewContainer = document.getElementById(documentType + 'Preview');
-        
-        if (previewContainer) {
-            previewContainer.innerHTML = `
+        let previewHTML = '';
+
+        if (documentType === 'additionalDocs' && input.files.length > 1) {
+            // Handle multiple files for additional docs
+            Array.from(input.files).forEach(file => {
+                previewHTML += `
+                    <div class="file-preview-item">
+                        <div class="file-info">
+                            <span class="file-icon">📄</span>
+                            <div class="file-details">
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                            </div>
+                            <span class="file-status">✅</span>
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            // Handle single file
+            const file = input.files[0];
+
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showNotification('❌ File size must be less than 10MB', 'error');
+                input.value = '';
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+            if (!allowedTypes.includes(file.type)) {
+                showNotification('❌ File must be PDF, JPG, or PNG format', 'error');
+                input.value = '';
+                return;
+            }
+
+            previewHTML = `
                 <div class="file-preview-item">
                     <div class="file-info">
                         <span class="file-icon">📄</span>
@@ -1285,18 +1320,13 @@ function handleFileUpload(input, documentType) {
                 </div>
             `;
         }
-        
-        // Enable proceed button if all required docs are uploaded
-        const proceedBtn = document.getElementById('proceedToReview');
-        if (proceedBtn) {
-            const requiredDocs = ['businessLicense', 'cannabisLicense', 'taxId'];
-            const uploadedCount = requiredDocs.filter(doc => {
-                const input = document.getElementById(doc);
-                return input && input.files.length > 0;
-            }).length;
-            
-            proceedBtn.disabled = uploadedCount < 3;
+
+        if (previewContainer) {
+            previewContainer.innerHTML = previewHTML;
         }
+
+        // Enable proceed button if all required docs are uploaded
+        updateProceedButtonState();
     }
 }
 
@@ -2563,7 +2593,7 @@ async function processPayment(event) {
 
     } catch (error) {
         console.error('Payment processing error:', error);
-        showNotification('❌ Payment processing error. Please try again.', 'error');
+        showNotification('�� Payment processing error. Please try again.', 'error');
     }
 }
 
