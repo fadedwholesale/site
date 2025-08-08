@@ -2929,9 +2929,57 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 });
 
                 console.log('✅ Real-time sync listeners configured for admin portal');
+
+                // Set up periodic sync verification
+                setInterval(() => {
+                    verifyAdminPortalSync();
+                }, 30000); // Check every 30 seconds
+
             } else {
                 console.warn('⚠️ Real-time sync not available, retrying in 1 second...');
                 setTimeout(setupRealTimeSyncListeners, 1000);
+            }
+        }
+
+        // Verify admin portal is in sync with shared data
+        function verifyAdminPortalSync() {
+            try {
+                if (!window.sharedDataManager) return;
+
+                const sharedData = window.sharedDataManager.getData();
+
+                // Check if product counts match
+                if (sharedData.products && sharedData.products.length !== products.length) {
+                    console.log('🔄 Admin: Product count mismatch detected, syncing...');
+                    loadDataFromSharedManager();
+                    return;
+                }
+
+                // Check if order counts match
+                if (sharedData.orders && sharedData.orders.length !== orders.length) {
+                    console.log('🔄 Admin: Order count mismatch detected, syncing...');
+                    loadDataFromSharedManager();
+                    return;
+                }
+
+                // Check for stock differences
+                let stockMismatch = false;
+                if (sharedData.products) {
+                    sharedData.products.forEach(sharedProduct => {
+                        const localProduct = products.find(p => p.id === sharedProduct.id);
+                        if (localProduct && localProduct.stock !== sharedProduct.stock) {
+                            console.log(`🔄 Admin: Stock mismatch for ${sharedProduct.strain}: local=${localProduct.stock}, shared=${sharedProduct.stock}`);
+                            stockMismatch = true;
+                        }
+                    });
+                }
+
+                if (stockMismatch) {
+                    loadDataFromSharedManager();
+                }
+
+            } catch (error) {
+                console.warn('Error in admin sync verification:', error);
             }
         }
 
