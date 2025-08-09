@@ -318,16 +318,32 @@ class SharedDataManager {
 
     // System Configuration - Firebase only
     async getSystemConfig() {
-        if (!this.db) throw new Error('Firebase not ready');
+        // Enhanced Firebase readiness check
+        if (!this.db || !this.firebaseBridge) {
+            console.warn('⚠️ Firebase not ready for getSystemConfig, returning empty config');
+            return {};
+        }
 
         try {
+            // Additional safety check
+            if (!this.getStatus().firebaseReady) {
+                console.warn('⚠️ Firebase status reports not ready for getSystemConfig, returning empty config');
+                return {};
+            }
+
             const doc = await this.db.collection('system').doc('configuration').get();
-            
+
             if (doc.exists) {
                 return doc.data();
             }
             return {};
         } catch (error) {
+            // Handle "Firebase not ready" errors specifically
+            if (error.message === 'Firebase not ready') {
+                console.warn('⚠️ Firebase not ready during getSystemConfig operation, returning empty config');
+                return {};
+            }
+
             console.error('❌ Error getting system config from Firebase:', error);
             return {};
         }
