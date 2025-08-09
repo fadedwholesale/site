@@ -5434,10 +5434,10 @@
         }
 
         // Refresh all products from shared data
-        function refreshAllProducts() {
+        async function refreshAllProducts() {
             try {
-                if (window.sharedDataManager) {
-                    const sharedData = window.sharedDataManager.getData();
+                if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
+                    const sharedData = await window.sharedDataManager.getData();
                     if (sharedData && sharedData.products) {
                         products = sharedData.products;
                         updateAllViews();
