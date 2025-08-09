@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug RealTime Sync Fix</title>
+</head>
+<body>
+    <h1>Debug RealTime Sync Fix</h1>
+    <div id="status">Loading...</div>
+    <div id="logs"></div>
+
+    <!-- Load scripts in the same order as main portal -->
+    <script src="firebase-integration-bridge.js"></script>
+    <script src="realtime-sync.js"></script>
+    <script src="shared-data.js"></script>
+
+    <script>
+        // Debug logging
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const originalConsoleWarn = console.warn;
+        
+        const logsDiv = document.getElementById('logs');
+        
+        function addLog(type, ...args) {
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? 'red' : type === 'warn' ? 'orange' : 'black';
+            div.textContent = `[${type.toUpperCase()}] ${args.join(' ')}`;
+            logsDiv.appendChild(div);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        console.log = (...args) => {
+            originalConsoleLog(...args);
+            addLog('log', ...args);
+        };
+        
+        console.error = (...args) => {
+            originalConsoleError(...args);
+            addLog('error', ...args);
+        };
+        
+        console.warn = (...args) => {
+            originalConsoleWarn(...args);
+            addLog('warn', ...args);
+        };
+        
+        // Check status after 5 seconds
+        setTimeout(() => {
+            const statusDiv = document.getElementById('status');
+            
+            let status = 'Status Check:\n';
+            status += `- window.sharedDataManager exists: ${!!window.sharedDataManager}\n`;
+            status += `- window.realTimeSync exists: ${!!window.realTimeSync}\n`;
+            
+            if (window.sharedDataManager) {
+                status += `- sharedDataManager.getData exists: ${typeof window.sharedDataManager.getData === 'function'}\n`;
+                status += `- sharedDataManager.exportData exists: ${typeof window.sharedDataManager.exportData === 'function'}\n`;
+                status += `- sharedDataManager status: ${JSON.stringify(window.sharedDataManager.getStatus())}\n`;
+            }
+            
+            if (window.realTimeSync) {
+                status += `- realTimeSync clientId: ${window.realTimeSync.clientId}\n`;
+                status += `- realTimeSync isSharedDataManagerReady: ${window.realTimeSync.isSharedDataManagerReady}\n`;
+            }
+            
+            statusDiv.innerHTML = '<pre>' + status + '</pre>';
+        }, 5000);
+        
+        // Test getData method after 6 seconds
+        setTimeout(async () => {
+            try {
+                console.log('Testing getData method...');
+                if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
+                    const data = await window.sharedDataManager.getData();
+                    console.log('✅ getData successful:', data);
+                } else {
+                    console.error('❌ getData method not available');
+                }
+            } catch (error) {
+                console.error('❌ Error testing getData:', error);
+            }
+        }, 6000);
+    </script>
+</body>
+</html>
