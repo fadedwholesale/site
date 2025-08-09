@@ -1985,20 +1985,24 @@ function testRealTimeSync() {
     });
 
     // Test 3: Test product updates
-    setTimeout(() => {
+    setTimeout(async () => {
         console.log('📦 Testing product update sync...');
-        if (window.sharedDataManager) {
-            const products = window.sharedDataManager.getProducts();
-            if (products.length > 0) {
-                const testProduct = products[0];
-                const newStock = Math.floor(Math.random() * 50) + 1;
+        if (window.sharedDataManager && typeof window.sharedDataManager.getProducts === 'function') {
+            try {
+                const products = await window.sharedDataManager.getProducts();
+                if (products.length > 0) {
+                    const testProduct = products[0];
+                    const newStock = Math.floor(Math.random() * 50) + 1;
 
-                window.sharedDataManager.updateProduct(testProduct.id, {
-                    stock: newStock,
-                    lastModified: new Date().toISOString()
-                });
+                    await window.sharedDataManager.updateProduct(testProduct.id, {
+                        stock: newStock,
+                        lastModified: new Date().toISOString()
+                    });
 
-                console.log(`📦 Updated ${testProduct.strain} stock to ${newStock}`);
+                    console.log(`📦 Updated ${testProduct.strain} stock to ${newStock}`);
+                }
+            } catch (error) {
+                console.error('❌ Error in product update test:', error);
             }
         }
     }, 1000);
