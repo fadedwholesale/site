@@ -223,25 +223,46 @@ function initializeRealTimeStatusIndicator() {
 }
 
 async function loadInitialData() {
-    // Load products from shared data manager
-    if (window.sharedDataManager &&
-        typeof window.sharedDataManager.getProducts === 'function' &&
-        typeof window.sharedDataManager.getOrders === 'function') {
-        try {
-            products = await window.sharedDataManager.getProducts() || [];
-            orders = await window.sharedDataManager.getOrders() || [];
-            updateAllViews();
-            console.log(`📦 Loaded ${products.length} products and ${orders.length} orders`);
-        } catch (error) {
-            console.error('❌ Error loading initial data:', error);
-            products = [];
-            orders = [];
+    console.log('📦 Loading initial data...');
+
+    // Initialize with empty arrays to prevent filter errors
+    products = [];
+    orders = [];
+
+    // Wait for SharedDataManager and Firebase to be ready
+    const maxAttempts = 30; // Wait up to 30 seconds
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        if (window.sharedDataManager &&
+            typeof window.sharedDataManager.getProducts === 'function' &&
+            window.sharedDataManager.getStatus &&
+            window.sharedDataManager.getStatus().firebaseReady) {
+
+            try {
+                console.log(`📦 Attempting to load data (attempt ${attempt + 1})...`);
+                products = await window.sharedDataManager.getProducts() || [];
+                orders = await window.sharedDataManager.getOrders() || [];
+                updateAllViews();
+                console.log(`✅ Loaded ${products.length} products and ${orders.length} orders`);
+                return; // Success, exit the function
+            } catch (error) {
+                console.warn(`⚠️ Attempt ${attempt + 1} failed:`, error.message);
+                if (attempt === maxAttempts - 1) {
+                    console.error('❌ Failed to load data after all attempts:', error);
+                }
+            }
+        } else {
+            console.log(`⏳ Waiting for SharedDataManager and Firebase... (${attempt + 1}/${maxAttempts})`);
         }
-    } else {
-        console.warn('⚠️ SharedDataManager not ready for data loading');
-        products = [];
-        orders = [];
+
+        // Wait 1 second before next attempt
+        await new Promise(resolve => setTimeout(resolve, 1000));
     }
+
+    // If we get here, all attempts failed
+    console.warn('⚠️ Failed to load initial data after maximum attempts, using empty arrays');
+    products = [];
+    orders = [];
+    updateAllViews(); // Still update views to show loading state
 }
 
 function setupEventListeners() {
@@ -2092,7 +2113,7 @@ function testRealTimeSync() {
 
 // Test real-time functionality with multiple simulated users
 function testMultiUserSync() {
-    console.log('👥 Testing multi-user sync simulation...');
+    console.log('��� Testing multi-user sync simulation...');
 
     if (!window.realTimeSync) {
         console.error('❌ Real-Time Sync not available');
@@ -2436,7 +2457,7 @@ window.optimizeForDiscount = function() {
     if (window.bulkOrderManager) {
         window.bulkOrderManager.optimizeForDiscount();
     } else {
-        showNotification('⚠�� Bulk order system loading...', 'warning');
+        showNotification('⚠️ Bulk order system loading...', 'warning');
     }
 };
 
