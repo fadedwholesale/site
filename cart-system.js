@@ -26,7 +26,10 @@ class CartManager {
 
         // Load existing cart if user is logged in
         if (window.currentUser) {
-            this.loadCart();
+            this.loadCart().catch(error => {
+                console.error('Error in initial cart load:', error);
+                this.cart = [];
+            });
         }
     }
 
