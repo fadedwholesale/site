@@ -1,5 +1,11 @@
 {
   "projects": {
     "default": "wholesale-95ceb"
+  },
+  "targets": {},
+  "etags": {
+    "wholesale-95ceb": {
+      "extensionInstances": {}
+    }
   }
 }
