@@ -2320,7 +2320,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             </div>
             <div>
                 <div style="display: flex; gap: 16px; margin-bottom: 24px;">
-                    <button class="btn btn-primary" onclick="generatePartnerResetLinks()">🔗 Generate Reset Links</button>
+                    <button class="btn btn-primary" onclick="generatePartnerResetLinks()">���� Generate Reset Links</button>
                     <button class="btn btn-secondary" onclick="sendBulkPasswordResets()">📧 Send Bulk Reset Emails</button>
                     <button class="btn btn-secondary" onclick="refreshPasswordResetTable()">🔄 Refresh</button>
                 </div>
@@ -2582,7 +2582,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
             <div class="controls" style="margin-bottom: 24px;">
                 <div class="action-group">
-                    <button class="btn btn-secondary" onclick="markAllNotificationsRead()">✅ Mark All Read</button>
+                    <button class="btn btn-secondary" onclick="markAllNotificationsRead()">��� Mark All Read</button>
                     <button class="btn btn-secondary" onclick="clearOldNotifications()">🗑️ Clear Old</button>
                 </div>
             </div>
@@ -2597,6 +2597,8 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
     <script src="shared-data.js"></script>
     <!-- Include Test Functionality -->
     <script src="test-functionality.js"></script>
+    <!-- Include Admin Portal Improvement Tests -->
+    <script src="test-admin-improvements.js"></script>
 
     <script>
         // Global State Management
@@ -6493,7 +6495,7 @@ Faded Skies Wholesale Team`
                 });
             }
 
-            showNotification('📦 Bulk status update functionality coming soon!', 'warning');
+            showNotification('��� Bulk status update functionality coming soon!', 'warning');
         }
 
         function generateShippingLabels() {
@@ -6821,7 +6823,7 @@ Faded Skies Wholesale Team`
             const docsList = Object.keys(application.documents || {}).map(docType => {
                 if (docType === 'additionalDocs' && Array.isArray(application.documents[docType])) {
                     return application.documents[docType].map(doc =>
-                        `<div class="doc-item">📄 ${doc.name} (${(doc.size / 1024 / 1024).toFixed(2)} MB)</div>`
+                        `<div class="doc-item">��� ${doc.name} (${(doc.size / 1024 / 1024).toFixed(2)} MB)</div>`
                     ).join('');
                 } else if (application.documents[docType]) {
                     const friendlyNames = {
