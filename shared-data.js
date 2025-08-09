@@ -517,6 +517,26 @@ class SharedDataManager {
 // Initialize shared data manager
 window.sharedDataManager = new SharedDataManager();
 
+// Ensure all methods are properly bound and accessible
+window.addEventListener('DOMContentLoaded', () => {
+    if (!window.sharedDataManager || typeof window.sharedDataManager.getData !== 'function') {
+        console.warn('⚠️ SharedDataManager methods not properly bound, reinitializing...');
+        window.sharedDataManager = new SharedDataManager();
+    }
+
+    // Verify all essential methods are available
+    const requiredMethods = ['getData', 'getProducts', 'getOrders', 'getCart', 'getSystemConfig', 'getStatus'];
+    const missingMethods = requiredMethods.filter(method =>
+        !window.sharedDataManager[method] || typeof window.sharedDataManager[method] !== 'function'
+    );
+
+    if (missingMethods.length > 0) {
+        console.error('❌ Missing SharedDataManager methods:', missingMethods);
+    } else {
+        console.log('✅ All SharedDataManager methods verified and ready');
+    }
+});
+
 // Set up event listeners for cross-component communication
 window.addEventListener('sharedDataChanged', (event) => {
     const { type, data } = event.detail;
