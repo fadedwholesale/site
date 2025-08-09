@@ -51,18 +51,25 @@ class CartManager {
     }
 
     // Load cart from shared data manager
-    loadCart() {
-        if (!window.sharedDataManager) return;
+    async loadCart() {
+        if (!window.sharedDataManager || typeof window.sharedDataManager.getCart !== 'function') {
+            console.warn('⚠️ SharedDataManager not ready for cart loading');
+            this.cart = [];
+            return;
+        }
 
         try {
             const userEmail = window.currentUser?.email || 'guest';
-            const savedCart = window.sharedDataManager.getCart(userEmail);
-            this.cart = savedCart || [];
+            const savedCart = await window.sharedDataManager.getCart(userEmail);
+
+            // Ensure we always have an array
+            this.cart = Array.isArray(savedCart) ? savedCart : [];
             console.log('📦 Cart loaded:', this.cart.length, 'items');
             this.updateDisplay();
         } catch (error) {
             console.error('Error loading cart:', error);
             this.cart = [];
+            this.updateDisplay();
         }
     }
 
