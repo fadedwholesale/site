@@ -187,7 +187,7 @@ function initializeRealTimeStatusIndicator() {
         const hasDataManager = !!window.sharedDataManager;
 
         if (!isOnline) {
-            syncIcon.textContent = '📡';
+            syncIcon.textContent = '����';
             syncText.textContent = 'Offline';
             syncIcon.parentElement.style.background = 'linear-gradient(135deg, var(--accent-red), #FF6666)';
         } else if (hasRealTimeSync && hasDataManager) {
@@ -2099,22 +2099,28 @@ function testDataPersistence() {
 
     // Test 2: Check backup status
     const recoveryStatus = window.dataPersistence.getRecoveryStatus();
-    console.log('📊 Recovery Status:', recoveryStatus);
+    console.log('��� Recovery Status:', recoveryStatus);
 
     // Test 3: Simulate data corruption and recovery
-    setTimeout(() => {
+    setTimeout(async () => {
         console.log('🧪 Simulating data recovery test...');
         if (confirm('Test data recovery? This will temporarily corrupt and then restore data.')) {
-            // Backup current data first
-            const currentData = window.sharedDataManager.getData();
+            // Backup current data first (safely)
+            try {
+                const currentData = window.sharedDataManager && typeof window.sharedDataManager.getData === 'function'
+                    ? await window.sharedDataManager.getData()
+                    : null;
 
-            // Corrupt data temporarily
-            localStorage.setItem('fadedSkiesSharedData', '{"invalid": "json",}');
+                // Corrupt data temporarily
+                localStorage.setItem('fadedSkiesSharedData', '{"invalid": "json",}');
 
-            // Trigger recovery
-            setTimeout(() => {
-                window.dataPersistence.initiateRecovery();
-            }, 1000);
+                // Trigger recovery
+                setTimeout(() => {
+                    window.dataPersistence.initiateRecovery();
+                }, 1000);
+            } catch (error) {
+                console.warn('⚠️ Could not backup data before test:', error);
+            }
         }
     }, 2000);
 
