@@ -335,9 +335,15 @@ class RealTimeSync {
         console.log('🔄 Force syncing all data...');
 
         try {
-            if (window.sharedDataManager) {
+            if (window.sharedDataManager &&
+                typeof window.sharedDataManager.exportData === 'function' &&
+                window.sharedDataManager.getStatus().firebaseReady) {
+
                 const allData = await window.sharedDataManager.exportData();
                 this.broadcast('full_sync', allData, { force: true });
+                console.log('✅ Force sync completed');
+            } else {
+                console.warn('⚠️ SharedDataManager not ready for force sync');
             }
         } catch (error) {
             console.error('❌ Error during force sync:', error);
