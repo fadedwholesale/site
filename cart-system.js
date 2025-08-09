@@ -57,15 +57,12 @@ class CartManager {
         }
     }
 
-    // Load cart from shared data manager
+    // Load cart from shared data manager with Firebase readiness check
     async loadCart() {
-        if (!window.sharedDataManager || typeof window.sharedDataManager.getCart !== 'function') {
-            console.warn('⚠️ SharedDataManager not ready for cart loading');
-            this.cart = [];
-            return;
-        }
-
         try {
+            // Wait for SharedDataManager and Firebase to be ready
+            await this.waitForFirebaseReady();
+
             const userEmail = window.currentUser?.email || 'guest';
             const savedCart = await window.sharedDataManager.getCart(userEmail);
 
@@ -144,7 +141,7 @@ class CartManager {
 
                 this.cart.push(cartItem);
                 console.log(`➕ Added new cart item:`, cartItem);
-                this.showNotification(`✅ Added ${product.strain} to cart!`, 'success');
+                this.showNotification(`��� Added ${product.strain} to cart!`, 'success');
             }
 
             console.log(`🛒 Cart now contains ${this.cart.length} unique items:`, this.cart.map(item => `${item.strain} (x${item.quantity})`));
