@@ -43,9 +43,13 @@ class CartManager {
 
         if (window.currentUser && window.currentUser.email) {
             console.log('✅ Cart: Valid user found, loading cart');
-            this.loadCart();
-            this.updateDisplay();
-            console.log('✅ Cart: User state refreshed successfully');
+            this.loadCart().then(() => {
+                console.log('✅ Cart: User state refreshed successfully');
+            }).catch(error => {
+                console.error('Error in refreshUserState cart load:', error);
+                this.cart = [];
+                this.updateDisplay();
+            });
         } else {
             console.log('⚠️ Cart: No valid user found during refresh');
             this.cart = [];
