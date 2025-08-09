@@ -2717,7 +2717,7 @@
 
                         <!-- Recent Bulk Orders -->
                         <div class="card">
-                            <h3>📋 Recent Bulk Orders</h3>
+                            <h3>���� Recent Bulk Orders</h3>
                             <table class="data-table" id="bulkOrderHistoryTable">
                                 <thead>
                                     <tr>
@@ -5359,9 +5359,9 @@
         // Verify partner portal is in sync with shared data
         function verifyPartnerPortalSync() {
             try {
-                if (!window.sharedDataManager) return;
+                if (!window.sharedDataManager || typeof window.sharedDataManager.getData !== 'function') return;
 
-                const sharedData = window.sharedDataManager.getData();
+                const sharedData = await window.sharedDataManager.getData();
 
                 // Check if product counts match
                 if (sharedData.products && sharedData.products.length !== products.length) {
