@@ -91,9 +91,19 @@ class SharedDataManager {
     }
 
     async getProducts() {
-        if (!this.db) throw new Error('Firebase not ready');
+        // Enhanced Firebase readiness check
+        if (!this.db || !this.firebaseBridge) {
+            console.warn('⚠️ Firebase not ready for getProducts, returning empty array');
+            return [];
+        }
 
         try {
+            // Additional safety check
+            if (!this.getStatus().firebaseReady) {
+                console.warn('⚠️ Firebase status reports not ready for getProducts, returning empty array');
+                return [];
+            }
+
             const snapshot = await this.db.collection('products').get();
             const products = [];
             snapshot.forEach(doc => {
@@ -101,6 +111,12 @@ class SharedDataManager {
             });
             return products;
         } catch (error) {
+            // Handle "Firebase not ready" errors specifically
+            if (error.message === 'Firebase not ready') {
+                console.warn('⚠️ Firebase not ready during getProducts operation, returning empty array');
+                return [];
+            }
+
             console.error('❌ Error getting products from Firebase:', error);
             return [];
         }
@@ -400,7 +416,7 @@ class SharedDataManager {
         try {
             // Additional safety check - try to get status first
             if (!this.getStatus().firebaseReady) {
-                console.warn('⚠️ Firebase status reports not ready, returning empty data');
+                console.warn('���️ Firebase status reports not ready, returning empty data');
                 return {
                     products: [],
                     orders: [],
