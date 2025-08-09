@@ -189,33 +189,36 @@ class DataPersistence {
 
     // Check if data structure is valid
     isValidDataStructure(data) {
-        if (!data || typeof data !== 'object') return false;
-        
-        // Check required properties
-        const requiredProps = ['products', 'orders', 'carts'];
+        if (!data || typeof data !== 'object') {
+            console.warn('❌ Data is not an object');
+            return false;
+        }
+
+        // Check required properties for new SharedDataManager structure
+        const requiredProps = ['products', 'orders', 'systemConfig'];
         for (const prop of requiredProps) {
             if (!(prop in data)) {
                 console.warn(`❌ Missing required property: ${prop}`);
                 return false;
             }
         }
-        
+
         // Check data types
         if (!Array.isArray(data.products)) {
             console.warn('❌ Products should be an array');
             return false;
         }
-        
+
         if (!Array.isArray(data.orders)) {
             console.warn('❌ Orders should be an array');
             return false;
         }
-        
-        if (!data.carts || typeof data.carts !== 'object') {
-            console.warn('❌ Carts should be an object');
+
+        if (!data.systemConfig || typeof data.systemConfig !== 'object') {
+            console.warn('❌ SystemConfig should be an object');
             return false;
         }
-        
+
         return true;
     }
 
