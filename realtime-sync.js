@@ -311,7 +311,7 @@ class RealTimeSync {
     }
 
     handleOffline() {
-        console.log('���� Connection lost');
+        console.log('📡 Connection lost');
         this.isOnline = false;
         
         if (window.showNotification) {
@@ -435,18 +435,23 @@ class RealTimeSync {
         console.log('🔄 Force syncing all data...');
 
         try {
-            if (this.isSharedDataManagerReady &&
-                window.sharedDataManager &&
-                typeof window.sharedDataManager.exportData === 'function') {
-
-                const allData = await window.sharedDataManager.exportData();
-                this.broadcast('full_sync', allData, { force: true });
-                console.log('✅ Force sync completed');
-            } else {
-                console.warn('⚠️ SharedDataManager not ready for force sync');
+            if (!window.sharedDataManager) {
+                console.warn('⚠️ SharedDataManager not available for force sync');
+                return;
             }
+
+            if (typeof window.sharedDataManager.exportData !== 'function') {
+                console.warn('⚠️ SharedDataManager.exportData not available for force sync');
+                return;
+            }
+
+            const allData = await window.sharedDataManager.exportData();
+            this.broadcast('full_sync', allData, { force: true });
+            console.log('✅ Force sync completed');
         } catch (error) {
             console.error('❌ Error during force sync:', error);
+            // Reset readiness flag on error
+            this.isSharedDataManagerReady = false;
         }
     }
 
