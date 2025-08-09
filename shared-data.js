@@ -368,6 +368,45 @@ class SharedDataManager {
         }
     }
 
+    // Get consolidated data (for sync operations)
+    async getData() {
+        try {
+            const products = await this.getProducts();
+            const orders = await this.getOrders();
+            const systemConfig = await this.getSystemConfig();
+
+            return {
+                products,
+                orders,
+                systemConfig,
+                lastSync: new Date().toISOString()
+            };
+        } catch (error) {
+            console.error('❌ Error getting consolidated data:', error);
+            return {
+                products: [],
+                orders: [],
+                systemConfig: {},
+                lastSync: new Date().toISOString()
+            };
+        }
+    }
+
+    // Export all data (for sync operations)
+    async exportData() {
+        try {
+            return await this.getData();
+        } catch (error) {
+            console.error('❌ Error exporting data:', error);
+            return {
+                products: [],
+                orders: [],
+                systemConfig: {},
+                lastSync: new Date().toISOString()
+            };
+        }
+    }
+
     // Status and debugging
     getStatus() {
         return {
