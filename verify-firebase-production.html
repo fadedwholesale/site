@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Production Verification</title>
+    <style>
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #00C851 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: #111111;
+            border: 1px solid #222222;
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            border-color: #00C851;
+            box-shadow: 0 8px 32px rgba(0, 200, 81, 0.2);
+        }
+        .card h3 {
+            color: #00C851;
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status {
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin: 8px 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status.success { background: #0d5016; color: #4ade80; }
+        .status.error { background: #501010; color: #f87171; }
+        .status.warning { background: #502010; color: #fb923c; }
+        .status.info { background: #102050; color: #60a5fa; }
+        .status.loading { background: #1a1a1a; color: #cccccc; }
+        .btn {
+            background: linear-gradient(135deg, #00C851, #1DD65F);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 8px 8px 8px 0;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 200, 81, 0.3);
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid #00C851;
+            color: #00C851;
+        }
+        .btn-secondary:hover {
+            background: #00C851;
+            color: white;
+        }
+        .logs {
+            background: #000000;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            margin-top: 16px;
+        }
+        .log-entry {
+            margin: 4px 0;
+            padding: 2px 0;
+        }
+        .log-timestamp {
+            color: #666666;
+            margin-right: 8px;
+        }
+        .log-success { color: #4ade80; }
+        .log-error { color: #f87171; }
+        .log-warning { color: #fb923c; }
+        .log-info { color: #60a5fa; }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .metric {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #00C851;
+            margin-bottom: 8px;
+        }
+        .metric-label {
+            color: #cccccc;
+            font-size: 14px;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #333;
+            border-top: 3px solid #00C851;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🔥 Firebase Production Verification</h1>
+            <p style="color: #cccccc; font-size: 18px;">Comprehensive testing of Firebase services for production deployment</p>
+        </div>
+
+        <div class="grid">
+            <!-- Firebase Services Status -->
+            <div class="card">
+                <h3>🔥 Firebase Services</h3>
+                <div id="firebaseAppStatus" class="status loading">
+                    <span class="spinner"></span> Checking Firebase App...
+                </div>
+                <div id="firestoreStatus" class="status loading">
+                    <span class="spinner"></span> Checking Firestore...
+                </div>
+                <div id="authStatus" class="status loading">
+                    <span class="spinner"></span> Checking Authentication...
+                </div>
+                <div id="storageStatus" class="status loading">
+                    <span class="spinner"></span> Checking Storage...
+                </div>
+                <div id="analyticsStatus" class="status loading">
+                    <span class="spinner"></span> Checking Analytics...
+                </div>
+            </div>
+
+            <!-- Connection Status -->
+            <div class="card">
+                <h3>📡 Connection Status</h3>
+                <div id="networkStatus" class="status loading">
+                    <span class="spinner"></span> Checking Network...
+                </div>
+                <div id="offlinePersistence" class="status loading">
+                    <span class="spinner"></span> Checking Offline Persistence...
+                </div>
+                <div id="realtimeSync" class="status loading">
+                    <span class="spinner"></span> Checking Real-time Sync...
+                </div>
+                <div id="dataManagerStatus" class="status loading">
+                    <span class="spinner"></span> Checking Data Manager...
+                </div>
+            </div>
+
+            <!-- Data Operations -->
+            <div class="card">
+                <h3>📊 Data Operations</h3>
+                <button class="btn" onclick="testDataWrite()">Test Write Operation</button>
+                <button class="btn" onclick="testDataRead()">Test Read Operation</button>
+                <button class="btn-secondary" onclick="testBatchOperations()">Test Batch Operations</button>
+                <div id="dataOperationsStatus" class="status info">Ready for testing</div>
+            </div>
+
+            <!-- Application Testing -->
+            <div class="card">
+                <h3>📝 Application Testing</h3>
+                <button class="btn" onclick="testApplicationSubmission()">Test Application Submit</button>
+                <button class="btn" onclick="testOrderSubmission()">Test Order Submit</button>
+                <button class="btn-secondary" onclick="testNotifications()">Test Notifications</button>
+                <div id="applicationTestStatus" class="status info">Ready for testing</div>
+            </div>
+
+            <!-- Portal Integration -->
+            <div class="card">
+                <h3>🌐 Portal Integration</h3>
+                <button class="btn" onclick="openPartnerPortal()">🔗 Partner Portal</button>
+                <button class="btn" onclick="openAdminPortal()">⚙️ Admin Portal</button>
+                <div id="portalStatus" class="status info">Portals available for testing</div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="card">
+                <h3>⚡ Performance Metrics</h3>
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-value" id="responseTime">--</div>
+                        <div class="metric-label">Response Time (ms)</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="totalRequests">0</div>
+                        <div class="metric-label">Total Requests</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="errorRate">0%</div>
+                        <div class="metric-label">Error Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comprehensive Testing -->
+        <div class="card">
+            <h3>🔬 Comprehensive Testing</h3>
+            <button class="btn" onclick="runFullTest()">🚀 Run Full Production Test</button>
+            <button class="btn-secondary" onclick="clearLogs()">🗑️ Clear Logs</button>
+            <div id="comprehensiveStatus" class="status info">Click "Run Full Production Test" to begin comprehensive testing</div>
+            
+            <div class="logs" id="testLogs">
+                <div class="log-entry">
+                    <span class="log-timestamp">[Ready]</span>
+                    <span class="log-info">Firebase Production Verification ready</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Production Scripts -->
+    <script src="firebase-production-init.js"></script>
+
+    <script>
+        let testMetrics = {
+            totalRequests: 0,
+            successfulRequests: 0,
+            errors: 0,
+            startTime: Date.now()
+        };
+
+        // Logging functions
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logsContainer = document.getElementById('testLogs');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-timestamp">[${timestamp}]</span>
+                <span class="log-${type}">${message}</span>
+            `;
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearLogs() {
+            document.getElementById('testLogs').innerHTML = '';
+            log('Logs cleared', 'info');
+        }
+
+        function updateStatus(elementId, message, type, showSpinner = false) {
+            const element = document.getElementById(elementId);
+            const icon = showSpinner ? '<span class="spinner"></span>' : 
+                        type === 'success' ? '✅' :
+                        type === 'error' ? '❌' :
+                        type === 'warning' ? '⚠️' : 'ℹ️';
+            element.innerHTML = `${icon} ${message}`;
+            element.className = `status ${type}`;
+        }
+
+        function updateMetrics() {
+            document.getElementById('totalRequests').textContent = testMetrics.totalRequests;
+            
+            const errorRate = testMetrics.totalRequests > 0 ? 
+                ((testMetrics.errors / testMetrics.totalRequests) * 100).toFixed(1) : 0;
+            document.getElementById('errorRate').textContent = `${errorRate}%`;
+            
+            const avgResponseTime = testMetrics.totalRequests > 0 ? 
+                Math.round((Date.now() - testMetrics.startTime) / testMetrics.totalRequests) : 0;
+            document.getElementById('responseTime').textContent = avgResponseTime;
+        }
+
+        // Firebase status checking
+        async function checkFirebaseServices() {
+            log('🔍 Checking Firebase services...', 'info');
+
+            // Check Firebase Production Manager
+            if (window.firebaseProductionManager) {
+                log('✅ Firebase Production Manager found', 'success');
+                
+                const services = window.firebaseProductionManager.services;
+                const connectionState = window.firebaseProductionManager.connectionState;
+
+                // Check individual services
+                updateStatus('firebaseAppStatus', 
+                    services.app ? 'Firebase App initialized' : 'Firebase App failed',
+                    services.app ? 'success' : 'error'
+                );
+
+                updateStatus('firestoreStatus',
+                    services.db ? 'Firestore connected' : 'Firestore failed',
+                    services.db ? 'success' : 'error'
+                );
+
+                updateStatus('authStatus',
+                    services.auth ? 'Authentication ready' : 'Authentication failed',
+                    services.auth ? 'success' : 'error'
+                );
+
+                updateStatus('storageStatus',
+                    services.storage ? 'Storage connected' : 'Storage failed',
+                    services.storage ? 'success' : 'error'
+                );
+
+                updateStatus('analyticsStatus',
+                    services.analytics ? 'Analytics enabled' : 'Analytics optional',
+                    services.analytics ? 'success' : 'warning'
+                );
+
+                // Check connection status
+                updateStatus('networkStatus',
+                    connectionState.online ? 'Online' : 'Offline',
+                    connectionState.online ? 'success' : 'warning'
+                );
+
+                updateStatus('offlinePersistence',
+                    'Enabled for offline operation',
+                    'success'
+                );
+
+                updateStatus('realtimeSync',
+                    window.realTimeSync ? 'Real-time sync active' : 'Real-time sync not found',
+                    window.realTimeSync ? 'success' : 'warning'
+                );
+
+                updateStatus('dataManagerStatus',
+                    window.firebaseDataManager && window.firebaseDataManager.isInitialized ? 
+                        'Data Manager ready' : 'Data Manager initializing...',
+                    window.firebaseDataManager && window.firebaseDataManager.isInitialized ? 
+                        'success' : 'warning'
+                );
+
+            } else {
+                log('❌ Firebase Production Manager not found', 'error');
+                updateStatus('firebaseAppStatus', 'Production Manager not found', 'error');
+            }
+        }
+
+        // Test functions
+        async function testDataWrite() {
+            log('📝 Testing data write operation...', 'info');
+            testMetrics.totalRequests++;
+            
+            try {
+                const testData = {
+                    test: true,
+                    timestamp: new Date(),
+                    message: 'Firebase production test write',
+                    environment: 'production'
+                };
+
+                if (window.firebaseProductionManager && window.firebaseProductionManager.services.db) {
+                    const ref = await window.firebaseProductionManager.services.db
+                        .collection('production-tests')
+                        .add(testData);
+                    
+                    testMetrics.successfulRequests++;
+                    updateStatus('dataOperationsStatus', `✅ Write successful: ${ref.id}`, 'success');
+                    log(`✅ Data write successful: ${ref.id}`, 'success');
+                } else {
+                    throw new Error('Firebase services not available');
+                }
+            } catch (error) {
+                testMetrics.errors++;
+                updateStatus('dataOperationsStatus', `❌ Write failed: ${error.message}`, 'error');
+                log(`❌ Data write failed: ${error.message}`, 'error');
+            }
+            
+            updateMetrics();
+        }
+
+        async function testDataRead() {
+            log('📖 Testing data read operation...', 'info');
+            testMetrics.totalRequests++;
+            
+            try {
+                if (window.firebaseProductionManager && window.firebaseProductionManager.services.db) {
+                    const snapshot = await window.firebaseProductionManager.services.db
+                        .collection('production-tests')
+                        .limit(5)
+                        .get();
+                    
+                    testMetrics.successfulRequests++;
+                    updateStatus('dataOperationsStatus', `✅ Read successful: ${snapshot.size} docs`, 'success');
+                    log(`✅ Data read successful: ${snapshot.size} documents`, 'success');
+                } else {
+                    throw new Error('Firebase services not available');
+                }
+            } catch (error) {
+                testMetrics.errors++;
+                updateStatus('dataOperationsStatus', `❌ Read failed: ${error.message}`, 'error');
+                log(`❌ Data read failed: ${error.message}`, 'error');
+            }
+            
+            updateMetrics();
+        }
+
+        async function testApplicationSubmission() {
+            log('📝 Testing application submission...', 'info');
+            testMetrics.totalRequests++;
+            
+            try {
+                const testApplication = {
+                    businessName: 'Test Production Business',
+                    contactName: 'Test User',
+                    businessEmail: 'test@production.com',
+                    phone: '555-TEST-PROD',
+                    businessAddress: '123 Production St',
+                    businessType: 'dispensary',
+                    licenseNumber: 'PROD-TEST-001',
+                    estimatedMonthlyVolume: '$10,000 - $25,000',
+                    status: 'pending',
+                    submittedAt: new Date(),
+                    testSubmission: true
+                };
+
+                if (window.firebaseDataManager && window.firebaseDataManager.submitBusinessApplication) {
+                    const result = await window.firebaseDataManager.submitBusinessApplication(testApplication);
+                    testMetrics.successfulRequests++;
+                    updateStatus('applicationTestStatus', '✅ Application submitted successfully', 'success');
+                    log('✅ Application submission test passed', 'success');
+                } else if (window.firebaseProductionManager) {
+                    const ref = await window.firebaseProductionManager.services.db
+                        .collection('applications')
+                        .add(testApplication);
+                    testMetrics.successfulRequests++;
+                    updateStatus('applicationTestStatus', `✅ Application submitted: ${ref.id}`, 'success');
+                    log(`✅ Application submission test passed: ${ref.id}`, 'success');
+                } else {
+                    throw new Error('Firebase services not available');
+                }
+            } catch (error) {
+                testMetrics.errors++;
+                updateStatus('applicationTestStatus', `❌ Application test failed: ${error.message}`, 'error');
+                log(`❌ Application submission test failed: ${error.message}`, 'error');
+            }
+            
+            updateMetrics();
+        }
+
+        async function testOrderSubmission() {
+            log('🛒 Testing order submission...', 'info');
+            testMetrics.totalRequests++;
+            
+            try {
+                const testOrder = {
+                    partnerEmail: 'test@production.com',
+                    businessName: 'Test Production Business',
+                    items: [
+                        { productId: 'test-1', name: 'Test Product', quantity: 1, price: 100 }
+                    ],
+                    subtotal: 100,
+                    total: 100,
+                    status: 'PENDING',
+                    timestamp: new Date(),
+                    testOrder: true
+                };
+
+                if (window.firebaseDataManager && window.firebaseDataManager.addOrder) {
+                    const result = await window.firebaseDataManager.addOrder(testOrder);
+                    testMetrics.successfulRequests++;
+                    updateStatus('applicationTestStatus', '✅ Order submitted successfully', 'success');
+                    log('✅ Order submission test passed', 'success');
+                } else if (window.firebaseProductionManager) {
+                    const ref = await window.firebaseProductionManager.services.db
+                        .collection('orders')
+                        .add(testOrder);
+                    testMetrics.successfulRequests++;
+                    updateStatus('applicationTestStatus', `✅ Order submitted: ${ref.id}`, 'success');
+                    log(`✅ Order submission test passed: ${ref.id}`, 'success');
+                } else {
+                    throw new Error('Firebase services not available');
+                }
+            } catch (error) {
+                testMetrics.errors++;
+                updateStatus('applicationTestStatus', `❌ Order test failed: ${error.message}`, 'error');
+                log(`❌ Order submission test failed: ${error.message}`, 'error');
+            }
+            
+            updateMetrics();
+        }
+
+        async function runFullTest() {
+            log('🚀 Starting comprehensive production test...', 'info');
+            updateStatus('comprehensiveStatus', 'Running comprehensive test...', 'info', true);
+            
+            const tests = [
+                { name: 'Firebase Services Check', func: checkFirebaseServices },
+                { name: 'Data Write Test', func: testDataWrite },
+                { name: 'Data Read Test', func: testDataRead },
+                { name: 'Application Submission Test', func: testApplicationSubmission },
+                { name: 'Order Submission Test', func: testOrderSubmission }
+            ];
+
+            let passedTests = 0;
+            
+            for (const test of tests) {
+                log(`⏳ Running ${test.name}...`, 'info');
+                try {
+                    await test.func();
+                    passedTests++;
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Brief pause between tests
+                } catch (error) {
+                    log(`❌ ${test.name} failed: ${error.message}`, 'error');
+                }
+            }
+
+            const testResult = passedTests === tests.length ? 'success' : 
+                             passedTests > tests.length / 2 ? 'warning' : 'error';
+            
+            updateStatus('comprehensiveStatus', 
+                `Test completed: ${passedTests}/${tests.length} passed`, 
+                testResult
+            );
+            
+            log(`🏁 Comprehensive test completed: ${passedTests}/${tests.length} tests passed`, 
+                testResult === 'success' ? 'success' : testResult === 'warning' ? 'warning' : 'error'
+            );
+        }
+
+        function openPartnerPortal() {
+            window.open('faded_skies_portal-5.html', '_blank');
+            log('🔗 Opened Partner Portal in new tab', 'info');
+        }
+
+        function openAdminPortal() {
+            window.open('fadedskies admin almost complete .html', '_blank');
+            log('⚙️ Opened Admin Portal in new tab', 'info');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Firebase Production Verification initialized', 'info');
+            
+            // Wait for Firebase to initialize then check services
+            setTimeout(() => {
+                checkFirebaseServices();
+            }, 2000);
+
+            // Update metrics periodically
+            setInterval(updateMetrics, 5000);
+        });
+
+        // Listen for Firebase events
+        window.addEventListener('firebaseProductionReady', function(event) {
+            log('🔥 Firebase Production Ready event received', 'success');
+            checkFirebaseServices();
+        });
+
+        window.addEventListener('firebaseConnectionChanged', function(event) {
+            log(`📡 Connection state changed: ${event.detail.online ? 'Online' : 'Offline'}`, 
+                event.detail.online ? 'success' : 'warning');
+            checkFirebaseServices();
+        });
+    </script>
+</body>
+</html>

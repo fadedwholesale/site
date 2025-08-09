@@ -30,56 +30,181 @@ class FirebaseDataManager {
 
     async init() {
         try {
-            console.log('🔥 Initializing Firebase Dynamic Data Manager...');
+            console.log('🔥 Initializing Firebase Dynamic Data Manager for Production...');
+            console.log('🌐 Environment: Production deployment (no localhost dependencies)');
 
-            // Wait for Firebase modules to be loaded
-            await waitForFirebase();
+            // Wait for Firebase Production Manager or modules to be available
+            await this.waitForFirebaseProduction();
 
-            // Firebase configuration
-            const firebaseConfig = {
-                apiKey: "AIzaSyD5Q45_-o5iZcsHeoWEwsQLtVC_A9Z8ixo",
-                authDomain: "wholesale-95ceb.firebaseapp.com",
-                projectId: "wholesale-95ceb",
-                storageBucket: "wholesale-95ceb.firebasestorage.app",
-                messagingSenderId: "719478576563",
-                appId: "1:719478576563:web:c4e06fbd5e59882f86a7c6",
-                measurementId: "G-Z3RXB38R19"
-            };
+            // Use Firebase services from production manager if available
+            if (window.firebaseProductionManager && window.firebaseProductionManager.isReady()) {
+                console.log('✅ Using Firebase Production Manager services');
+                this.app = window.firebaseProductionManager.getService('app');
+                this.db = window.firebaseProductionManager.getService('db');
+                this.auth = window.firebaseProductionManager.getService('auth');
 
-            // Initialize Firebase using the globally available modules
-            const { initializeApp } = window.firebaseModule;
-            this.app = initializeApp(firebaseConfig);
-
-            // Import Firestore and Auth dynamically
-            const firestoreModule = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-            const authModule = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
-
-            this.db = firestoreModule.getFirestore(this.app);
-            this.auth = authModule.getAuth(this.app);
-
-            // Store Firebase methods for later use
-            this.firebase = {
-                ...firestoreModule,
-                ...authModule
-            };
+                // Get Firebase methods from compat SDK
+                this.firebase = {
+                    collection: (path) => this.db.collection(path),
+                    doc: (path) => this.db.doc(path),
+                    addDoc: (ref, data) => ref.add(data),
+                    getDocs: (ref) => ref.get(),
+                    updateDoc: (ref, data) => ref.update(data),
+                    deleteDoc: (ref) => ref.delete(),
+                    query: (ref, ...conditions) => ref.where(...conditions),
+                    orderBy: (field, direction) => ({ orderBy: field, direction }),
+                    limit: (count) => ({ limit: count }),
+                    where: (field, operator, value) => ({ field, operator, value }),
+                    serverTimestamp: () => window.firebase.firestore.FieldValue.serverTimestamp(),
+                    onSnapshot: (ref, callback) => ref.onSnapshot(callback)
+                };
+            } else {
+                // Fallback initialization if production manager not available
+                console.log('⚠️ Firebase Production Manager not found, using fallback initialization');
+                await this.initializeFallback();
+            }
 
             // Set up authentication state listener
             this.setupAuthListener();
 
-            // Initialize collections
-            await this.initializeCollections();
+            // Initialize collections with production data
+            await this.initializeProductionCollections();
+
+            // Enable offline persistence for production
+            await this.enableProductionPersistence();
 
             this.isInitialized = true;
-            console.log('✅ Firebase Dynamic Data Manager initialized successfully');
-            
+            console.log('✅ Firebase Dynamic Data Manager initialized for production');
+
             // Notify other systems
-            window.dispatchEvent(new CustomEvent('firebaseInitialized', { 
-                detail: { manager: this } 
+            window.dispatchEvent(new CustomEvent('firebaseInitialized', {
+                detail: { manager: this, environment: 'production' }
             }));
 
         } catch (error) {
-            console.error('❌ Firebase initialization error:', error);
+            console.error('❌ Firebase production initialization error:', error);
             throw error;
+        }
+    }
+
+    async waitForFirebaseProduction() {
+        return new Promise((resolve) => {
+            let attempts = 0;
+            const maxAttempts = 30;
+
+            const checkFirebase = () => {
+                if (window.firebaseProductionManager && window.firebaseProductionManager.isReady()) {
+                    console.log('✅ Firebase Production Manager ready');
+                    resolve();
+                } else if (window.firebase) {
+                    console.log('✅ Firebase SDK available');
+                    resolve();
+                } else if (attempts < maxAttempts) {
+                    attempts++;
+                    setTimeout(checkFirebase, 1000);
+                } else {
+                    console.log('⚠️ Firebase timeout, proceeding with available resources');
+                    resolve();
+                }
+            };
+            checkFirebase();
+        });
+    }
+
+    async initializeFallback() {
+        console.log('🔄 Initializing Firebase fallback mode...');
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Q45_-o5iZcsHeoWEwsQLtVC_A9Z8ixo",
+            authDomain: "wholesale-95ceb.firebaseapp.com",
+            projectId: "wholesale-95ceb",
+            storageBucket: "wholesale-95ceb.firebasestorage.app",
+            messagingSenderId: "719478576563",
+            appId: "1:719478576563:web:c4e06fbd5e59882f86a7c6",
+            measurementId: "G-Z3RXB38R19"
+        };
+
+        if (window.firebase) {
+            this.app = window.firebase.initializeApp(firebaseConfig);
+            this.db = window.firebase.firestore();
+            this.auth = window.firebase.auth();
+            console.log('✅ Firebase fallback initialization successful');
+        } else {
+            throw new Error('Firebase SDK not available');
+        }
+    }
+
+    async enableProductionPersistence() {
+        try {
+            if (this.db && this.db.enablePersistence) {
+                await this.db.enablePersistence();
+                console.log('✅ Production offline persistence enabled');
+            }
+        } catch (error) {
+            console.log('⚠️ Offline persistence already enabled or unavailable');
+        }
+    }
+
+    async initializeProductionCollections() {
+        try {
+            console.log('🏗️ Initializing production collections...');
+
+            // Initialize collections with production-ready data
+            await this.initializeProducts();
+            await this.initializeSystemSettings();
+            await this.cleanupTestData();
+
+            console.log('✅ Production collections initialized');
+        } catch (error) {
+            console.error('❌ Error initializing production collections:', error);
+        }
+    }
+
+    async cleanupTestData() {
+        try {
+            console.log('🧹 Cleaning up test data for production...');
+
+            // Remove test applications
+            const testApplications = await this.db.collection('applications')
+                .where('testSubmission', '==', true)
+                .get();
+
+            if (!testApplications.empty) {
+                const batch = this.db.batch();
+                testApplications.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+                console.log(`🗑️ Removed ${testApplications.size} test applications`);
+            }
+
+            // Remove test orders
+            const testOrders = await this.db.collection('orders')
+                .where('testOrder', '==', true)
+                .get();
+
+            if (!testOrders.empty) {
+                const batch = this.db.batch();
+                testOrders.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+                console.log(`🗑️ Removed ${testOrders.size} test orders`);
+            }
+
+            // Remove old production tests
+            const productionTests = await this.db.collection('production-tests').get();
+            if (!productionTests.empty) {
+                const batch = this.db.batch();
+                productionTests.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+                console.log(`🗑️ Removed ${productionTests.size} production test records`);
+            }
+
+        } catch (error) {
+            console.log('⚠️ Could not clean up test data:', error.message);
         }
     }
 
