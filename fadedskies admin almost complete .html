@@ -17,6 +17,7 @@
             color: var(--text-primary);
             background: #000;
             overflow-x: hidden;
+            min-height: 100vh;
         }
 
         /* Universal selector for all text elements to ensure visibility on dark background */
@@ -233,11 +234,13 @@
             position: relative;
             z-index: 2;
             padding: 50px 0;
+            min-height: calc(100vh - 100px);
+            overflow-y: auto;
         }
 
         /* Login Screen */
         .login-screen {
-            min-height: calc(100vh - 100px);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -248,6 +251,7 @@
             left: 0;
             z-index: 2001;
             background: transparent;
+            overflow-y: auto;
         }
         .login-screen .container {
             display: flex;
@@ -278,6 +282,8 @@
         /* Dashboard */
         .dashboard {
             display: none;
+            min-height: calc(100vh - 200px);
+            padding-bottom: 50px;
         }
 
         .dashboard.active {
@@ -526,6 +532,28 @@
             overflow: hidden;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
             margin-bottom: 50px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 70vh;
+            border-radius: 20px;
+        }
+
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: var(--surface-dark);
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--brand-green);
+            border-radius: 4px;
         }
 
         .data-table th {
@@ -878,13 +906,15 @@
             }
 
             .tabs {
-                flex-direction: column;
+                overflow-x: auto;
                 padding: 12px;
+                flex-wrap: nowrap;
             }
 
             .tab {
-                min-width: auto;
+                min-width: 120px;
                 padding: 16px 20px;
+                flex-shrink: 0;
             }
 
             .controls {
@@ -908,9 +938,12 @@
 
             .data-table {
                 font-size: 12px;
-                display: block;
+                min-width: 800px;
+            }
+
+            .table-container {
                 overflow-x: auto;
-                white-space: nowrap;
+                max-height: 60vh;
             }
 
             .data-table th,
@@ -983,6 +1016,8 @@
 
             .modal-content {
                 padding: 24px 16px;
+                max-height: 95vh;
+                overflow-y: auto;
             }
 
             .btn {
@@ -995,6 +1030,28 @@
             .form-group textarea {
                 padding: 14px 16px;
                 font-size: 14px;
+            }
+
+            .tabs {
+                justify-content: flex-start;
+            }
+
+            .tab {
+                min-width: 100px;
+                font-size: 12px;
+                padding: 12px 16px;
+            }
+
+            .data-table {
+                min-width: 600px;
+            }
+
+            .table-container {
+                max-height: 50vh;
+            }
+
+            .dashboard {
+                min-height: calc(100vh - 150px);
             }
         }
 
