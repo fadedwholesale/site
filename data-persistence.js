@@ -24,10 +24,9 @@ class DataPersistence {
             // Set up recovery mechanisms
             this.setupRecoveryMechanisms();
 
-            // Add extra delay before startup check to ensure Firebase is fully ready
-            setTimeout(() => {
-                this.performStartupCheck();
-            }, 3000); // Wait 3 more seconds after SharedDataManager is "ready"
+            // Temporarily disable startup check to prevent Firebase timing issues
+            // TODO: Re-enable once Firebase initialization timing is more reliable
+            console.log('⏳ Startup check disabled to prevent Firebase timing issues');
 
             console.log('✅ Data Persistence System initialized');
         }).catch(error => {
