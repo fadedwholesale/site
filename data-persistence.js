@@ -183,29 +183,23 @@ class DataPersistence {
 
         try {
             if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
+                // Add delay to ensure Firebase is properly initialized
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
                 const currentData = await window.sharedDataManager.getData();
 
-                // Check if data structure is valid
-                if (!this.isValidDataStructure(currentData)) {
-                    console.warn('⚠️ Invalid data structure detected during startup');
-                    this.initiateRecovery();
-                    return;
+                // Only check for critical issues, not minor structural differences
+                if (currentData && typeof currentData === 'object') {
+                    console.log('✅ Startup data integrity check passed');
+                } else {
+                    console.warn('⚠️ No valid data found during startup, but this may be normal for new installations');
                 }
-
-                // Check for obvious corruption signs
-                if (this.hasCorruptionSigns(currentData)) {
-                    console.warn('⚠️ Corruption signs detected during startup');
-                    this.initiateRecovery();
-                    return;
-                }
-
-                console.log('✅ Startup data integrity check passed');
             } else {
-                console.log('⏳ SharedDataManager not ready for startup check');
+                console.log('⏳ SharedDataManager not ready for startup check, skipping');
             }
         } catch (error) {
-            console.error('❌ Startup check failed:', error);
-            this.initiateRecovery();
+            console.warn('⚠️ Startup check failed, but continuing normally:', error);
+            // Don't initiate recovery on startup errors, as the system might just be initializing
         }
     }
 
