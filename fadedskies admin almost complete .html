@@ -1566,7 +1566,7 @@
                         <div class="action-group">
                             <button class="btn btn-primary" onclick="openModal('addPartnerModal')">👥 Add Partner</button>
                             <button class="btn btn-secondary" onclick="openModal('bulkEmailModal')">📧 Bulk Email</button>
-                            <button class="btn btn-secondary" onclick="exportPartners()">📄 Export Partners</button>
+                            <button class="btn btn-secondary" onclick="exportPartners()">�� Export Partners</button>
                             <button class="btn btn-secondary" onclick="generatePartnerReport()">📊 Partner Report</button>
                             <button class="btn btn-secondary" onclick="openModal('passwordResetModal')">🔑 Password Resets</button>
                         </div>
@@ -3006,11 +3006,11 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         }
 
         // Verify admin portal is in sync with shared data
-        function verifyAdminPortalSync() {
+        async function verifyAdminPortalSync() {
             try {
-                if (!window.sharedDataManager) return;
+                if (!window.sharedDataManager || typeof window.sharedDataManager.getData !== 'function') return;
 
-                const sharedData = window.sharedDataManager.getData();
+                const sharedData = await window.sharedDataManager.getData();
 
                 // Check if product counts match
                 if (sharedData.products && sharedData.products.length !== products.length) {
