@@ -4,17 +4,20 @@
 // Global Variables - Authentication State
 let currentUser = null;
 
-// Ensure window.currentUser is always synchronized
+// Ensure window.currentUser is always synchronized - Firebase only
 function setCurrentUser(user) {
     currentUser = user;
     window.currentUser = user;
-    
+
     if (user) {
-        localStorage.setItem('currentUser', JSON.stringify(user));
         console.log('✅ User authenticated globally:', user.email);
+        // User state is managed by Firebase Auth
     } else {
-        localStorage.removeItem('currentUser');
-        console.log('��� User logged out globally');
+        console.log('🔒 User logged out globally');
+        // Clear Firebase Auth
+        if (window.firebaseIntegrationBridge?.auth) {
+            window.firebaseIntegrationBridge.auth.signOut();
+        }
     }
     
     // Immediately notify cart manager of auth state change
@@ -107,30 +110,44 @@ function initializeApplication() {
     // Initialize real-time status indicator
     initializeRealTimeStatusIndicator();
 
-    // Check if user is already logged in from a previous session
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-        try {
-            const userData = JSON.parse(savedUser);
-            // Validate the saved user data has required fields
-            if (userData.email && userData.name) {
+    // Check Firebase Auth state instead of localStorage
+    if (window.firebaseIntegrationBridge?.auth) {
+        window.firebaseIntegrationBridge.auth.onAuthStateChanged((user) => {
+            if (user) {
+                const userData = {
+                    email: user.email,
+                    name: user.displayName || 'Partner',
+                    uid: user.uid
+                };
                 setCurrentUser(userData);
                 showUserSession();
-                console.log('✅ User session restored:', currentUser.email);
+                console.log('✅ Firebase user session restored:', user.email);
             } else {
-                console.log('⚠️ Invalid saved user data, clearing session');
-                localStorage.removeItem('currentUser');
+                setCurrentUser(null);
                 showGuestSession();
+                console.log('👤 No Firebase user session found, showing guest session');
             }
-        } catch (error) {
-            console.error('Error restoring user session:', error);
-            localStorage.removeItem('currentUser');
-            showGuestSession();
-        }
+        });
     } else {
-        // No saved user, start in guest mode
-        console.log('👤 No user session found, showing guest session');
+        // Firebase not ready yet, show guest session
+        console.log('⏳ Waiting for Firebase auth...');
         showGuestSession();
+        // Retry Firebase auth check
+        setTimeout(() => {
+            if (window.firebaseIntegrationBridge?.auth) {
+                window.firebaseIntegrationBridge.auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        const userData = {
+                            email: user.email,
+                            name: user.displayName || 'Partner',
+                            uid: user.uid
+                        };
+                        setCurrentUser(userData);
+                        showUserSession();
+                    }
+                });
+            }
+        }, 2000);
     }
 
     // Initialize live checkout system
