@@ -252,8 +252,30 @@ class RealTimeSync {
                 return;
             }
 
-            if (window.sharedDataManager.getStatus && !window.sharedDataManager.getStatus().firebaseReady) {
+            if (!window.sharedDataManager.getStatus || typeof window.sharedDataManager.getStatus !== 'function') {
+                console.log('⏳ SharedDataManager.getStatus not available, skipping sync check');
+                this.isSharedDataManagerReady = false; // Reset flag
+                this.lastHeartbeat = Date.now();
+                return;
+            }
+
+            if (!window.sharedDataManager.getStatus().firebaseReady) {
                 console.log('⏳ Firebase not ready, skipping sync check');
+                this.lastHeartbeat = Date.now();
+                return;
+            }
+
+            // Additional safety check: try to access the method before calling
+            try {
+                if (!window.sharedDataManager.getData || typeof window.sharedDataManager.getData !== 'function') {
+                    console.log('⏳ getData method lost during execution, skipping sync check');
+                    this.isSharedDataManagerReady = false;
+                    this.lastHeartbeat = Date.now();
+                    return;
+                }
+            } catch (methodCheckError) {
+                console.log('⏳ Error checking getData method availability:', methodCheckError.message);
+                this.isSharedDataManagerReady = false;
                 this.lastHeartbeat = Date.now();
                 return;
             }
