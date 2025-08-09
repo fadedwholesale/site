@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification System Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #333;
+            border-radius: 8px;
+        }
+        
+        button {
+            background: #00C851;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #00A544;
+        }
+        
+        .user-selector {
+            margin-bottom: 20px;
+        }
+        
+        select {
+            background: #444;
+            color: white;
+            border: 1px solid #666;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        
+        .log {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔔 Notification System Test</h1>
+        
+        <div class="user-selector">
+            <label for="userType">Test as:</label>
+            <select id="userType" onchange="changeUser()">
+                <option value="admin">Admin User</option>
+                <option value="partner">Partner User</option>
+                <option value="guest">Guest User</option>
+            </select>
+            <span id="currentUser" style="margin-left: 10px; color: #00C851;"></span>
+        </div>
+        
+        <div class="test-section">
+            <h3>Order Notifications</h3>
+            <button onclick="testOrderNotification()">Test Order Placed</button>
+            <button onclick="testOrderConfirmation()">Test Order Confirmation</button>
+            <p><small>Admin should see all orders, partners only their own</small></p>
+        </div>
+        
+        <div class="test-section">
+            <h3>System Notifications</h3>
+            <button onclick="testSystemSync()">Test System Sync</button>
+            <button onclick="testInventoryUpdate()">Test Inventory Update</button>
+            <button onclick="testUserJoined()">Test User Joined</button>
+            <p><small>Admin should see all system notifications, partners should see minimal</small></p>
+        </div>
+        
+        <div class="test-section">
+            <h3>Filtered Notifications</h3>
+            <button onclick="testAdminOnly()">Test Admin-Only Notification</button>
+            <button onclick="testPartnerOnly()">Test Partner-Only Notification</button>
+            <p><small>These should be filtered based on user role</small></p>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test Log</h3>
+            <button onclick="clearLog()">Clear Log</button>
+            <div id="testLog" class="log"></div>
+        </div>
+    </div>
+
+    <!-- Include notification and sync systems -->
+    <script src="shared-data.js"></script>
+    <script src="realtime-sync.js"></script>
+    <script src="notification-system.js"></script>
+    <script src="main-app.js"></script>
+
+    <script>
+        // Test functions
+        let testLog = document.getElementById('testLog');
+        let currentUserDisplay = document.getElementById('currentUser');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            testLog.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            testLog.scrollTop = testLog.scrollHeight;
+        }
+        
+        function clearLog() {
+            testLog.textContent = '';
+        }
+        
+        function changeUser() {
+            const userType = document.getElementById('userType').value;
+            
+            switch(userType) {
+                case 'admin':
+                    window.currentUser = {
+                        email: 'admin@fadedskies.com',
+                        role: 'admin',
+                        name: 'Admin User'
+                    };
+                    break;
+                case 'partner':
+                    window.currentUser = {
+                        email: 'partner@store.com',
+                        role: 'partner',
+                        name: 'Partner User'
+                    };
+                    break;
+                case 'guest':
+                    window.currentUser = null;
+                    break;
+            }
+            
+            currentUserDisplay.textContent = window.currentUser ? 
+                `${window.currentUser.name} (${window.currentUser.role})` : 'Not logged in';
+            
+            log(`Changed user to: ${currentUserDisplay.textContent}`);
+        }
+        
+        function testOrderNotification() {
+            log('Testing order notification...');
+            
+            if (window.realTimeSync) {
+                window.realTimeSync.broadcast('order_added', {
+                    id: 'ORD-TEST-001',
+                    partner: 'partner@store.com',
+                    partnerName: 'Test Store',
+                    total: 1500,
+                    customerInfo: { name: 'Test Customer' }
+                });
+                log('Order notification sent via real-time sync', 'success');
+            } else {
+                log('Real-time sync not available', 'error');
+            }
+        }
+        
+        function testOrderConfirmation() {
+            log('Testing order confirmation...');
+            
+            if (window.notificationSystem) {
+                window.notificationSystem.handleUserActionNotification({
+                    action: 'order_placed',
+                    userName: 'Test Partner',
+                    userEmail: window.currentUser?.email,
+                    amount: 1250,
+                    orderId: 'ORD-TEST-002'
+                });
+                log('Order confirmation handled by notification system', 'success');
+            } else {
+                log('Notification system not available', 'error');
+            }
+        }
+        
+        function testSystemSync() {
+            log('Testing system sync notification...');
+            
+            if (window.showNotification) {
+                window.showNotification('📊 Inventory synced to partner portal', 'system');
+                log('System sync notification sent', 'success');
+            } else {
+                log('showNotification function not available', 'error');
+            }
+        }
+        
+        function testInventoryUpdate() {
+            log('Testing inventory update notification...');
+            
+            if (window.realTimeSync) {
+                window.realTimeSync.broadcast('product_updated', {
+                    updates: { stock: 2 },
+                    after: { strain: 'Test Strain' }
+                });
+                log('Inventory update sent via real-time sync', 'success');
+            } else {
+                log('Real-time sync not available', 'error');
+            }
+        }
+        
+        function testUserJoined() {
+            log('Testing user joined notification...');
+            
+            if (window.notificationSystem) {
+                window.notificationSystem.handleUserActionNotification({
+                    action: 'user_joined',
+                    userName: 'New Test User'
+                });
+                log('User joined notification handled', 'success');
+            } else {
+                log('Notification system not available', 'error');
+            }
+        }
+        
+        function testAdminOnly() {
+            log('Testing admin-only notification...');
+            
+            if (window.showNotification) {
+                window.showNotification('Admin-only system alert', 'warning', { adminOnly: true });
+                log('Admin-only notification sent', 'success');
+            } else {
+                log('showNotification function not available', 'error');
+            }
+        }
+        
+        function testPartnerOnly() {
+            log('Testing partner-only notification...');
+            
+            if (window.showNotification) {
+                window.showNotification('Partner-specific update', 'info', { partnerOnly: true });
+                log('Partner-only notification sent', 'success');
+            } else {
+                log('showNotification function not available', 'error');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            changeUser(); // Set initial user
+            
+            // Override console.log to capture filtering messages
+            const originalConsoleLog = console.log;
+            console.log = function(...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('Filtering out')) {
+                    log(args[0], 'warning');
+                }
+                originalConsoleLog.apply(console, args);
+            };
+            
+            log('Notification test system initialized', 'success');
+        });
+    </script>
+</body>
+</html>

@@ -83,6 +83,8 @@ class RealTimeSync {
             version: ++this.dataVersion,
             clientId: this.clientId,
             userEmail: window.currentUser?.email,
+            userRole: window.currentUser?.role,
+            isAdmin: window.currentUser?.role === 'admin' || window.currentUser?.email?.includes('admin'),
             ...options
         };
         
@@ -261,24 +263,53 @@ class RealTimeSync {
         }
     }
 
-    // Show user action notifications
+    // Show user action notifications with user context
     showUserActionNotification(data) {
         if (window.showNotification && data.action) {
+            const currentUser = window.currentUser;
+            const isAdmin = currentUser?.role === 'admin' || currentUser?.email?.includes('admin');
+            const isPartner = currentUser && !isAdmin;
+
             let message = '';
+            let shouldShow = false;
+
             switch (data.action) {
                 case 'order_placed':
-                    message = `🛒 New order placed: ${data.orderId}`;
+                    if (isAdmin) {
+                        // Admin sees all orders
+                        message = `🛒 New order placed: ${data.orderId}`;
+                        shouldShow = true;
+                    } else if (isPartner && data.userEmail === currentUser.email) {
+                        // Partner only sees their own orders
+                        message = `✅ Your order ${data.orderId} was confirmed`;
+                        shouldShow = true;
+                    }
                     break;
                 case 'user_joined':
-                    message = `👤 ${data.userName} joined the portal`;
+                    // Only show to admin
+                    if (isAdmin) {
+                        message = `👤 ${data.userName} joined the portal`;
+                        shouldShow = true;
+                    }
                     break;
                 case 'inventory_low':
-                    message = `⚠️ Low inventory alert: ${data.productName}`;
+                    // Show to admin, limited to partners
+                    if (isAdmin) {
+                        message = `⚠️ Low inventory alert: ${data.productName}`;
+                        shouldShow = true;
+                    }
                     break;
                 default:
-                    message = `📢 ${data.message}`;
+                    // Generic messages only to admin
+                    if (isAdmin) {
+                        message = `📢 ${data.message}`;
+                        shouldShow = true;
+                    }
             }
-            window.showNotification(message, data.type || 'info');
+
+            if (shouldShow) {
+                window.showNotification(message, data.type || 'info');
+            }
         }
     }
 
