@@ -3224,19 +3224,35 @@ function updateDeliveryMethodLive(label) {
 }
 
 // Real-time inventory checking
-function checkInventoryLive() {
+async function checkInventoryLive() {
     if (!window.cartManager || !window.sharedDataManager) return;
 
-    let hasChanges = false;
-    const products = window.sharedDataManager.getProducts();
+    // Safety check: ensure cart is an array
+    if (!Array.isArray(window.cartManager.cart)) {
+        console.warn('⚠️ checkInventoryLive: Cart is not an array:', typeof window.cartManager.cart);
+        return;
+    }
 
-    window.cartManager.cart.forEach(cartItem => {
-        const product = products.find(p => p.id === cartItem.id);
-        if (!product || product.status !== 'AVAILABLE' || product.stock < cartItem.quantity) {
-            hasChanges = true;
-            showNotification(`⚠️ ${cartItem.strain} availability changed`, 'warning');
+    let hasChanges = false;
+
+    try {
+        const products = await window.sharedDataManager.getProducts();
+
+        if (!Array.isArray(products)) {
+            console.warn('⚠️ checkInventoryLive: Products is not an array:', typeof products);
+            return;
         }
-    });
+
+        window.cartManager.cart.forEach(cartItem => {
+            const product = products.find(p => p.id === cartItem.id);
+            if (!product || product.status !== 'AVAILABLE' || product.stock < cartItem.quantity) {
+                hasChanges = true;
+                showNotification(`⚠️ ${cartItem.strain} availability changed`, 'warning');
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error in checkInventoryLive:', error);
+    }
 
     if (hasChanges && window.cartManager.syncCartRealTime) {
         window.cartManager.syncCartRealTime();
