@@ -33,6 +33,52 @@ class CartManager {
         }
     }
 
+    // Wait for Firebase to be ready with retry logic
+    async waitForFirebaseReady(maxAttempts = 10) {
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            try {
+                // Check if SharedDataManager exists
+                if (!window.sharedDataManager) {
+                    console.log(`⏳ Cart: Waiting for SharedDataManager... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check if getCart method exists
+                if (typeof window.sharedDataManager.getCart !== 'function') {
+                    console.log(`⏳ Cart: Waiting for getCart method... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check if getStatus exists and Firebase is ready
+                if (!window.sharedDataManager.getStatus ||
+                    typeof window.sharedDataManager.getStatus !== 'function') {
+                    console.log(`⏳ Cart: Waiting for getStatus method... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                const status = window.sharedDataManager.getStatus();
+                if (!status.firebaseReady) {
+                    console.log(`⏳ Cart: Waiting for Firebase to be ready... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                console.log('✅ Cart: Firebase is ready for cart operations');
+                return true;
+
+            } catch (error) {
+                console.log(`⏳ Cart: Firebase readiness check failed, retrying... (${attempt + 1}/${maxAttempts}):`, error.message);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        console.warn('⚠️ Cart: Firebase readiness timeout, proceeding with empty cart');
+        return false;
+    }
+
     // Refresh authentication state and reload cart
     refreshUserState() {
         console.log('🔄 Cart: Refreshing user state', {
@@ -141,7 +187,7 @@ class CartManager {
 
                 this.cart.push(cartItem);
                 console.log(`➕ Added new cart item:`, cartItem);
-                this.showNotification(`��� Added ${product.strain} to cart!`, 'success');
+                this.showNotification(`✅ Added ${product.strain} to cart!`, 'success');
             }
 
             console.log(`🛒 Cart now contains ${this.cart.length} unique items:`, this.cart.map(item => `${item.strain} (x${item.quantity})`));
