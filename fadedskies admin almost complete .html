@@ -1566,7 +1566,7 @@
                         <div class="action-group">
                             <button class="btn btn-primary" onclick="openModal('addPartnerModal')">👥 Add Partner</button>
                             <button class="btn btn-secondary" onclick="openModal('bulkEmailModal')">📧 Bulk Email</button>
-                            <button class="btn btn-secondary" onclick="exportPartners()">�� Export Partners</button>
+                            <button class="btn btn-secondary" onclick="exportPartners()">📄 Export Partners</button>
                             <button class="btn btn-secondary" onclick="generatePartnerReport()">📊 Partner Report</button>
                             <button class="btn btn-secondary" onclick="openModal('passwordResetModal')">🔑 Password Resets</button>
                         </div>
@@ -2995,8 +2995,12 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 console.log('✅ Real-time sync listeners configured for admin portal');
 
                 // Set up periodic sync verification
-                setInterval(() => {
-                    verifyAdminPortalSync();
+                setInterval(async () => {
+                    try {
+                        await verifyAdminPortalSync();
+                    } catch (error) {
+                        console.warn('⚠️ Error in admin portal sync verification:', error);
+                    }
                 }, 30000); // Check every 30 seconds
 
             } else {
@@ -6105,7 +6109,7 @@ Faded Skies Wholesale Team
                 console.log(`📧 Password reset email sent to: ${partner.email}`);
             });
             
-            showNotification(`��� Password reset emails sent to ${eligiblePartners.length} partners`, 'success');
+            showNotification(`����� Password reset emails sent to ${eligiblePartners.length} partners`, 'success');
         }
 
         function updatePasswordResetTable() {
