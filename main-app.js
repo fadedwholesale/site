@@ -658,9 +658,16 @@ function updatePublicInventoryDisplay() {
 function updatePartnerProductsDisplay() {
     const tbody = document.getElementById('partnerProductBody');
     if (!tbody) return;
-    
+
+    // Safety check: ensure products is an array
+    if (!Array.isArray(products)) {
+        console.warn('⚠️ updatePartnerProductsDisplay: Products is not an array:', typeof products, products);
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading products...</td></tr>';
+        return;
+    }
+
     let filteredProducts = products;
-    
+
     // Apply filter
     if (currentFilter === 'available') {
         filteredProducts = products.filter(p => p.status === 'AVAILABLE');
@@ -2429,7 +2436,7 @@ window.optimizeForDiscount = function() {
     if (window.bulkOrderManager) {
         window.bulkOrderManager.optimizeForDiscount();
     } else {
-        showNotification('⚠️ Bulk order system loading...', 'warning');
+        showNotification('⚠�� Bulk order system loading...', 'warning');
     }
 };
 
