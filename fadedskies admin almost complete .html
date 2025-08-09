@@ -4412,7 +4412,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
                 updateOrdersTable();
                 updateDashboardStats();
-                showNotification(`���� Order ${orderId} status updated to ${newStatus}`, 'success');
+                showNotification(`������ Order ${orderId} status updated to ${newStatus}`, 'success');
 
                 // Log successful status update
                 if (window.simpleLogger) {
@@ -7513,7 +7513,15 @@ Faded Skies Partnership Team`
     </script>
 
     <!-- Firebase Integration Bridge - Dynamic/Live Admin System -->
-    <script src="firebase-integration-bridge.js?v=fix-getdata-20250109"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script src="firebase-config.js"></script>
+    <script src="firebase-integration-bridge.js?v=portal-sync-ready"></script>
 
     <!-- Enhanced live data and real-time synchronization systems -->
     <script src="realtime-sync.js?v=fix-getdata-20250109"></script>
