@@ -269,6 +269,18 @@ class CartManager {
     // Get cart totals
     getTotals() {
         try {
+            // Safety check: ensure cart is an array
+            if (!Array.isArray(this.cart)) {
+                console.warn('⚠️ Cart is not an array in getTotals:', typeof this.cart, this.cart);
+                this.cart = [];
+                return {
+                    subtotal: 0,
+                    totalItems: 0,
+                    discount: 0,
+                    total: 0
+                };
+            }
+
             console.log('💰 Calculating totals for cart items:', this.cart.map(item => `${item.strain}: $${item.price} x ${item.quantity}`));
 
             let subtotal = 0;
