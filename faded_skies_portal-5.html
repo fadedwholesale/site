@@ -3254,7 +3254,7 @@
                 <!-- Business Details Section -->
                 <div class="form-section" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);">
                     <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                        📋 Business Details
+                        ���� Business Details
                     </h4>
                     <div class="form-row">
                         <div class="form-group">
@@ -3607,7 +3607,7 @@
     </div>
 
     <!-- Firebase Integration Bridge - Dynamic/Live Portal System -->
-    <script src="firebase-integration-bridge.js"></script>
+    <script src="firebase-integration-bridge.js?v=fix-getdata-20250109"></script>
 
     <!-- Enhanced real-time synchronization and live data systems -->
     <script src="realtime-sync.js?v=fix-getdata-20250109"></script>
@@ -4517,7 +4517,7 @@
                     showLoggedInState();
                     closeModal('loginModal');
                     showPartnerPortal();
-                    showNotification('�� Welcome back! Successfully logged in to your partner portal.', 'success');
+                    showNotification('✅ Welcome back! Successfully logged in to your partner portal.', 'success');
                     
                     // Reset form
                     event.target.reset();
@@ -5703,7 +5703,7 @@
 
         // Force update all views and tables with product images
         function forceUpdateWithImages() {
-            console.log('🔄 Force updating all tables with product images...');
+            console.log('�� Force updating all tables with product images...');
             
             // Update public inventory if visible
             if (inventoryVisible) {
@@ -6777,7 +6777,7 @@ Phone: (210) 835-7834
 
         function createBulkOrder() {
             try {
-                showNotification('📦 Bulk order wizard opening soon! Contact support for immediate assistance.', 'success');
+                showNotification('��� Bulk order wizard opening soon! Contact support for immediate assistance.', 'success');
             } catch (error) {
                 console.error('Error creating bulk order:', error);
                 showNotification('Bulk order error. Please try again.', 'error');
