@@ -1594,19 +1594,17 @@ function triggerAdminNotification(applicationData) {
         return;
     }
 
-    // Store notification for admin dashboard
-    const adminNotifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
-    adminNotifications.unshift({
-        id: 'NOTIF-' + Date.now(),
-        type: 'new_application',
-        title: 'New Business Application',
-        message: `${applicationData.businessName} has submitted a partnership application`,
-        applicationId: applicationData.applicationId,
-        timestamp: new Date().toISOString(),
-        read: false,
-        priority: 'high'
-    });
-    localStorage.setItem('adminNotifications', JSON.stringify(adminNotifications));
+    // Store notification in Firebase for admin dashboard
+    if (window.firebaseIntegrationBridge?.sendAdminNotification) {
+        window.firebaseIntegrationBridge.sendAdminNotification('new_application', {
+            businessName: applicationData.businessName,
+            applicationId: applicationData.applicationId,
+            message: `${applicationData.businessName} has submitted a partnership application`,
+            priority: 'high'
+        });
+    } else {
+        console.warn('Firebase notification system not available');
+    }
 
     // Update admin dashboard counters if admin is logged in
     if (window.adminDashboard && typeof window.adminDashboard.updateNotificationBadge === 'function') {
@@ -2667,7 +2665,7 @@ function showTestResults(results) {
     if (passedTests === totalTests) {
         showNotification(`✅ ${resultMessage} - All systems working!`, 'success');
     } else {
-        showNotification(`⚠️ ${resultMessage} - Some issues detected`, 'warning');
+        showNotification(`⚠��� ${resultMessage} - Some issues detected`, 'warning');
     }
 
     // Detailed results in console
