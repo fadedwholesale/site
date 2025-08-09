@@ -3225,7 +3225,7 @@
                 <!-- Business Information Section -->
                 <div class="form-section" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);">
                     <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                        🏢 Business Information
+                        �� Business Information
                     </h4>
                     <div class="form-row">
                         <div class="form-group">
@@ -3478,10 +3478,10 @@
                         💳 Card
                     </button>
                     <button type="button" class="payment-tab" data-method="crypto" onclick="selectPaymentMethod('crypto')" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: transparent; color: var(--text-secondary); cursor: pointer; font-weight: 600;">
-                        �� Crypto
+                        ₿ Crypto
                     </button>
                     <button type="button" class="payment-tab" data-method="bank" onclick="selectPaymentMethod('bank')" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: transparent; color: var(--text-secondary); cursor: pointer; font-weight: 600;">
-                        🏦 Bank Transfer
+                        �� Bank Transfer
                     </button>
                 </div>
             </div>
@@ -3622,7 +3622,7 @@
     <script src="realtime-ui.js?v=fix-getdata-20250109"></script>
     <script src="notification-system.js?v=fix-getdata-20250109"></script>
     <script src="shared-data.js?v=fix-getdata-20250109"></script>
-    <script src="cart-system.js?v=fix-getdata-20250109"></script>
+    <script src="cart-system.js?v=fix-cart-arrays-20250109"></script>
     <script src="bulk-order-system.js?v=fix-getdata-20250109"></script>
     <script src="main-app.js?v=fix-getdata-20250109"></script>
     <script src="cleanup-invalid-products.js"></script>
@@ -5955,7 +5955,7 @@
                 // Calculate total items (sum of all quantities) and update immediately
                 const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
                 console.log('📊 Total items in cart calculation:', totalItems);
-                console.log('📊 Cart contents:', cart.map(item => `${item.strain}: ${item.quantity}`));
+                console.log('�� Cart contents:', cart.map(item => `${item.strain}: ${item.quantity}`));
                 
                 // Update cart counters immediately at start of function
                 if (cartCount) {
@@ -7258,7 +7258,7 @@ Phone: (210) 835-7834
                                     }, 1000);
                                 } else {
                                     console.log('❌ Quantity increase test failed');
-                                    showNotification('❌ Quantity increase test failed', 'error');
+                                    showNotification('��� Quantity increase test failed', 'error');
                                 }
                             }, 500);
                         }, 1000);
