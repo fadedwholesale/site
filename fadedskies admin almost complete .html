@@ -1509,7 +1509,7 @@
                         </div>
 
                         <div class="card">
-                            <h3>���� Price Distribution</h3>
+                            <h3>📊 Price Distribution</h3>
                             <div style="margin-bottom: 12px;">
                                 <span>A-Grade Average: <strong style="color: var(--brand-green);" id="agradeAvg">$847</strong></span>
                                 <div class="progress-bar">
@@ -2953,7 +2953,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         // Set up real-time sync listeners
         function setupRealTimeSyncListeners() {
             if (window.realTimeSync) {
-                console.log('📡 Setting up real-time sync listeners for admin portal...');
+                console.log('�� Setting up real-time sync listeners for admin portal...');
 
                 // Listen for product updates
                 window.realTimeSync.on('products_updated', (data) => {
@@ -6112,7 +6112,7 @@ Faded Skies Wholesale Team
                 console.log(`📧 Password reset email sent to: ${partner.email}`);
             });
             
-            showNotification(`������ Password reset emails sent to ${eligiblePartners.length} partners`, 'success');
+            showNotification(`����� Password reset emails sent to ${eligiblePartners.length} partners`, 'success');
         }
 
         function updatePasswordResetTable() {
@@ -6303,7 +6303,7 @@ Best regards,
 Faded Skies Wholesale Team`
                 },
                 newsletter: {
-                    subject: '���� Monthly Newsletter - Faded Skies Wholesale',
+                    subject: '📰 Monthly Newsletter - Faded Skies Wholesale',
                     message: `Dear Partners,
 
 Welcome to this month's Faded Skies Wholesale newsletter!
@@ -7524,12 +7524,12 @@ Faded Skies Partnership Team`
     <script src="firebase-integration-bridge.js?v=portal-sync-ready"></script>
 
     <!-- Enhanced live data and real-time synchronization systems -->
-    <script src="realtime-sync.js?v=fix-getdata-20250109"></script>
-    <script src="data-persistence.js?v=fix-getdata-20250109"></script>
-    <script src="live-data-manager.js?v=fix-getdata-20250109"></script>
-    <script src="order-sync-manager.js?v=fix-getdata-20250109"></script>
-    <script src="simple-logger.js?v=fix-getdata-20250109"></script>
-    <script src="system-integration.js?v=fix-getdata-20250109"></script>
-    <script src="cleanup-invalid-products.js?v=fix-getdata-20250109"></script>
+    <script src="realtime-sync.js?v=portal-sync-ready"></script>
+    <script src="data-persistence.js?v=portal-sync-ready"></script>
+    <script src="live-data-manager.js?v=portal-sync-ready"></script>
+    <script src="order-sync-manager.js?v=portal-sync-ready"></script>
+    <script src="simple-logger.js?v=portal-sync-ready"></script>
+    <script src="system-integration.js?v=portal-sync-ready"></script>
+    <script src="cleanup-invalid-products.js?v=portal-sync-ready"></script>
 </body>
 </html>
