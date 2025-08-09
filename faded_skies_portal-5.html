@@ -5434,19 +5434,21 @@
         }
 
         // Refresh all products from shared data
-        async function refreshAllProducts() {
-            try {
-                if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
-                    const sharedData = await window.sharedDataManager.getData();
-                    if (sharedData && sharedData.products) {
-                        products = sharedData.products;
-                        updateAllViews();
-                        forceUpdateWithImages();
+        function refreshAllProducts() {
+            (async () => {
+                try {
+                    if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
+                        const sharedData = await window.sharedDataManager.getData();
+                        if (sharedData && sharedData.products) {
+                            products = sharedData.products;
+                            updateAllViews();
+                            forceUpdateWithImages();
+                        }
                     }
+                } catch (error) {
+                    console.error('Error refreshing products:', error);
                 }
-            } catch (error) {
-                console.error('Error refreshing products:', error);
-            }
+            })();
         }
 
         // Update order status in partner view
