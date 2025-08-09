@@ -1474,7 +1474,7 @@ function handleFileUpload(input, documentType) {
             // Validate file type
             const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
             if (!allowedTypes.includes(file.type)) {
-                showNotification('❌ File must be PDF, JPG, or PNG format', 'error');
+                showNotification('�� File must be PDF, JPG, or PNG format', 'error');
                 input.value = '';
                 return;
             }
@@ -1795,7 +1795,7 @@ function debugAuthState() {
     console.log('🔍 AUTHENTICATION DEBUG STATE:', {
         localCurrentUser: currentUser,
         windowCurrentUser: window.currentUser,
-        localStorageUser: localStorage.getItem('currentUser'),
+        firebaseAuth: window.firebaseIntegrationBridge?.auth?.currentUser?.email || null,
         cartManager: !!window.cartManager,
         cartState: window.cartManager ? window.cartManager.getState() : 'not available'
     });
