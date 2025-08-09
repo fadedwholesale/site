@@ -3836,23 +3836,23 @@
             }
         ];
 
-        // Mobile Navigation Functions
-        function toggleMobileMenu() {
+        // Mobile Navigation Functions - Global scope
+        window.toggleMobileMenu = function() {
             try {
                 const navLinks = document.getElementById('mobileNavLinks');
                 const isOpen = navLinks.classList.contains('open');
 
                 if (isOpen) {
-                    closeMobileMenu();
+                    window.closeMobileMenu();
                 } else {
-                    openMobileMenu();
+                    window.openMobileMenu();
                 }
             } catch (error) {
                 console.error('Error toggling mobile menu:', error);
             }
-        }
+        };
 
-        function openMobileMenu() {
+        window.openMobileMenu = function() {
             try {
                 const navLinks = document.getElementById('mobileNavLinks');
                 navLinks.classList.add('open');
@@ -3861,9 +3861,9 @@
             } catch (error) {
                 console.error('Error opening mobile menu:', error);
             }
-        }
+        };
 
-        function closeMobileMenu() {
+        window.closeMobileMenu = function() {
             try {
                 const navLinks = document.getElementById('mobileNavLinks');
                 navLinks.classList.remove('open');
@@ -3872,7 +3872,7 @@
             } catch (error) {
                 console.error('Error closing mobile menu:', error);
             }
-        }
+        };
 
         // Initialize Application with Session Restoration and Mobile Support - FIXED
         document.addEventListener('DOMContentLoaded', function() {
@@ -6694,7 +6694,7 @@ Phone: (210) 835-7834
                 
                 order.status = 'CANCELLED';
                 updateOrderHistory();
-                showNotification(`❌ Order ${orderId} has been cancelled`, 'success');
+                showNotification(`��� Order ${orderId} has been cancelled`, 'success');
             } catch (error) {
                 console.error('Error cancelling order:', error);
                 showNotification('Cancel error. Please contact support.', 'error');
