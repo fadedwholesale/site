@@ -1,5 +1,5 @@
-// Firebase Integration Bridge for Faded Skies Portal
-// Simplified approach using Firebase CDN and localStorage as fallback
+// Firebase Integration Bridge for Faded Skies Portal - Production Version
+// All data processing goes through Firebase - no localStorage fallback
 
 class FirebaseIntegrationBridge {
     constructor() {
@@ -8,33 +8,29 @@ class FirebaseIntegrationBridge {
         this.auth = null;
         this.isOnline = navigator.onLine;
         this.isFirebaseReady = false;
-        this.fallbackToLocalStorage = true;
         
         this.init();
     }
 
     async init() {
-        console.log('🔄 Initializing Firebase Integration Bridge...');
+        console.log('🔄 Initializing Firebase Integration Bridge (Production Mode)...');
         
         try {
-            // Try to load Firebase from CDN
+            // Load Firebase from CDN
             await this.loadFirebaseFromCDN();
             
             if (this.isFirebaseReady) {
-                console.log('✅ Firebase loaded successfully - switching to live mode');
-                this.fallbackToLocalStorage = false;
+                console.log('✅ Firebase loaded successfully - live mode active');
                 this.setupFirebaseListeners();
+                this.integrateWithExistingSystems();
             } else {
-                console.log('⚠️ Firebase not available - using localStorage mode');
-                this.fallbackToLocalStorage = true;
+                console.error('❌ Firebase initialization failed - cannot operate without Firebase');
+                throw new Error('Firebase is required for production mode');
             }
             
-            // Replace the existing data management functions
-            this.integrateWithExistingSystems();
-            
         } catch (error) {
-            console.warn('Firebase initialization failed, using localStorage fallback:', error);
-            this.fallbackToLocalStorage = true;
+            console.error('❌ Firebase initialization failed:', error);
+            this.showNotification('Firebase connection required for live portal operation', 'error');
         }
     }
 
@@ -70,7 +66,7 @@ class FirebaseIntegrationBridge {
                 return true;
             }
         } catch (error) {
-            console.warn('Firebase CDN loading failed:', error);
+            console.error('Firebase CDN loading failed:', error);
             return false;
         }
         
@@ -103,14 +99,12 @@ class FirebaseIntegrationBridge {
         // Listen for connection state
         window.addEventListener('online', () => {
             this.isOnline = true;
-            console.log('🌐 Connection restored - switching to Firebase mode');
-            this.fallbackToLocalStorage = false;
+            console.log('🌐 Connection restored - Firebase operations resumed');
         });
 
         window.addEventListener('offline', () => {
             this.isOnline = false;
-            console.log('📡 Connection lost - switching to localStorage mode');
-            this.fallbackToLocalStorage = true;
+            console.log('📡 Connection lost - Firebase operations will queue');
         });
     }
 
@@ -135,67 +129,74 @@ class FirebaseIntegrationBridge {
     enhanceSharedDataManager() {
         const originalManager = window.sharedDataManager;
         
-        // Override methods to use Firebase when available
-        const originalAddOrder = originalManager.addOrder.bind(originalManager);
+        // Override methods to use Firebase exclusively
         originalManager.addOrder = async (orderData) => {
-            try {
-                if (!this.fallbackToLocalStorage && this.isFirebaseReady) {
-                    // Use Firebase
-                    const result = await this.addOrderToFirebase(orderData);
-                    console.log('📦 Order added to Firebase:', result.id);
-                    return result;
-                } else {
-                    // Fallback to localStorage
-                    return originalAddOrder(orderData);
-                }
-            } catch (error) {
-                console.warn('Firebase order failed, using localStorage fallback:', error);
-                return originalAddOrder(orderData);
+            if (!this.isFirebaseReady) {
+                throw new Error('Firebase connection required for order processing');
             }
+            
+            const result = await this.addOrderToFirebase(orderData);
+            console.log('📦 Order added to Firebase:', result.id);
+            return result;
         };
 
-        const originalUpdateProduct = originalManager.updateProduct.bind(originalManager);
         originalManager.updateProduct = async (productId, updates) => {
-            try {
-                if (!this.fallbackToLocalStorage && this.isFirebaseReady) {
-                    // Use Firebase
-                    await this.updateProductInFirebase(productId, updates);
-                    console.log('📦 Product updated in Firebase:', productId);
-                } else {
-                    // Fallback to localStorage
-                    return originalUpdateProduct(productId, updates);
-                }
-            } catch (error) {
-                console.warn('Firebase product update failed, using localStorage fallback:', error);
-                return originalUpdateProduct(productId, updates);
+            if (!this.isFirebaseReady) {
+                throw new Error('Firebase connection required for product updates');
             }
+            
+            await this.updateProductInFirebase(productId, updates);
+            console.log('📦 Product updated in Firebase:', productId);
+            return true;
         };
 
-        console.log('✅ SharedDataManager enhanced with Firebase capabilities');
+        originalManager.getOrders = async () => {
+            if (!this.isFirebaseReady) {
+                throw new Error('Firebase connection required');
+            }
+            
+            const snapshot = await this.db.collection('orders')
+                .orderBy('createdAt', 'desc')
+                .get();
+            
+            const orders = [];
+            snapshot.forEach((doc) => {
+                orders.push({ id: doc.id, ...doc.data() });
+            });
+            
+            return orders;
+        };
+
+        originalManager.getProducts = async () => {
+            if (!this.isFirebaseReady) {
+                throw new Error('Firebase connection required');
+            }
+            
+            const snapshot = await this.db.collection('products').get();
+            const products = [];
+            snapshot.forEach((doc) => {
+                products.push({ id: doc.id, ...doc.data() });
+            });
+            
+            return products;
+        };
+
+        console.log('✅ SharedDataManager enhanced with Firebase-only capabilities');
     }
 
     enhanceCartManager() {
         const originalManager = window.cartManager;
         
-        // Override processOrder to use Firebase
-        const originalProcessOrder = originalManager.processOrder ? originalManager.processOrder.bind(originalManager) : null;
-        
-        if (originalProcessOrder) {
-            originalManager.processOrder = async () => {
-                try {
-                    if (!this.fallbackToLocalStorage && this.isFirebaseReady) {
-                        return await this.processOrderThroughFirebase();
-                    } else {
-                        return await originalProcessOrder();
-                    }
-                } catch (error) {
-                    console.warn('Firebase order processing failed, using fallback:', error);
-                    return await originalProcessOrder();
-                }
-            };
-        }
+        // Override processOrder to use Firebase exclusively
+        originalManager.processOrder = async () => {
+            if (!this.isFirebaseReady) {
+                throw new Error('Firebase connection required for order processing');
+            }
+            
+            return await this.processOrderThroughFirebase();
+        };
 
-        console.log('✅ CartManager enhanced with Firebase capabilities');
+        console.log('✅ CartManager enhanced with Firebase-only capabilities');
     }
 
     async addOrderToFirebase(orderData) {
@@ -286,7 +287,7 @@ class FirebaseIntegrationBridge {
     }
 
     setupOrderProcessing() {
-        // Listen for real-time order updates if Firebase is available
+        // Listen for real-time order updates
         if (this.isFirebaseReady) {
             this.db.collection('orders')
                 .orderBy('createdAt', 'desc')
@@ -310,16 +311,11 @@ class FirebaseIntegrationBridge {
     setupBusinessApplications() {
         // Override business application submission
         window.submitBusinessApplication = async (formData) => {
-            try {
-                if (!this.fallbackToLocalStorage && this.isFirebaseReady) {
-                    return await this.submitApplicationToFirebase(formData);
-                } else {
-                    return this.submitApplicationToLocalStorage(formData);
-                }
-            } catch (error) {
-                console.warn('Firebase application submission failed, using localStorage:', error);
-                return this.submitApplicationToLocalStorage(formData);
+            if (!this.isFirebaseReady) {
+                throw new Error('Firebase connection required for application submission');
             }
+            
+            return await this.submitApplicationToFirebase(formData);
         };
     }
 
@@ -349,51 +345,21 @@ class FirebaseIntegrationBridge {
         return { id: docRef.id, ...application };
     }
 
-    submitApplicationToLocalStorage(formData) {
-        // Use the existing localStorage system
-        const applicationData = {
-            ...formData,
-            submissionDate: new Date().toISOString(),
-            applicationId: 'APP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
-            status: 'pending'
-        };
-
-        const existingApplications = JSON.parse(localStorage.getItem('businessApplications') || '[]');
-        existingApplications.push(applicationData);
-        localStorage.setItem('businessApplications', JSON.stringify(existingApplications));
-
-        if (window.showNotification) {
-            window.showNotification(`🎉 Application submitted! ID: ${applicationData.applicationId}`, 'success');
-        }
-
-        return applicationData;
-    }
-
     // Get current status
     getStatus() {
         return {
             isFirebaseReady: this.isFirebaseReady,
             isOnline: this.isOnline,
-            fallbackMode: this.fallbackToLocalStorage,
-            mode: this.fallbackToLocalStorage ? 'localStorage' : 'firebase'
+            mode: 'firebase-production'
         };
     }
 
-    // Test Firebase connection
-    async testConnection() {
-        if (!this.isFirebaseReady) {
-            console.log('❌ Firebase not available');
-            return false;
-        }
-
-        try {
-            // Try to read from a test collection
-            await this.db.collection('test').limit(1).get();
-            console.log('✅ Firebase connection test successful');
-            return true;
-        } catch (error) {
-            console.log('❌ Firebase connection test failed:', error);
-            return false;
+    // Utility method for notifications
+    showNotification(message, type = 'info') {
+        if (window.showNotification) {
+            window.showNotification(message, type);
+        } else {
+            console.log(`[${type.toUpperCase()}] ${message}`);
         }
     }
 }
@@ -410,17 +376,13 @@ function updateFirebaseSyncStatus() {
     const syncText = document.getElementById('syncText');
     
     if (syncIcon && syncText) {
-        if (status.isFirebaseReady && !status.fallbackMode) {
+        if (status.isFirebaseReady) {
             syncIcon.textContent = '🔥';
             syncText.textContent = 'Firebase Live';
             syncIcon.parentElement.style.background = 'linear-gradient(135deg, var(--brand-green), var(--brand-green-light))';
-        } else if (status.fallbackMode) {
-            syncIcon.textContent = '💾';
-            syncText.textContent = 'Local Mode';
-            syncIcon.parentElement.style.background = 'linear-gradient(135deg, var(--accent-orange), #FFB366)';
         } else {
             syncIcon.textContent = '❌';
-            syncText.textContent = 'Offline';
+            syncText.textContent = 'Connecting...';
             syncIcon.parentElement.style.background = 'linear-gradient(135deg, var(--accent-red), #FF6666)';
         }
     }
@@ -434,11 +396,11 @@ setTimeout(() => {
     const status = window.firebaseIntegrationBridge?.getStatus();
     if (status && window.showNotification) {
         if (status.isFirebaseReady) {
-            window.showNotification('🔥 Firebase integration active - real-time data sync enabled!', 'success');
+            window.showNotification('🔥 Firebase production mode active - real-time processing enabled!', 'success');
         } else {
-            window.showNotification('💾 Local storage mode active - data saved locally', 'info');
+            window.showNotification('❌ Firebase connection required for portal operation', 'error');
         }
     }
 }, 3000);
 
-console.log('🔥 Firebase Integration Bridge initialized');
+console.log('🔥 Firebase Integration Bridge initialized (Production Mode)');
