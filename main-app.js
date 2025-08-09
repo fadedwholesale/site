@@ -598,6 +598,13 @@ function updatePublicInventoryDisplay() {
     const tbody = document.getElementById('publicInventoryBody');
     if (!tbody) return;
 
+    // Safety check: ensure products is an array
+    if (!Array.isArray(products)) {
+        console.warn('⚠️ Products is not an array:', typeof products, products);
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading products...</td></tr>';
+        return;
+    }
+
     const availableProducts = products.filter(p => p.status === 'AVAILABLE');
 
     if (availableProducts.length === 0) {
