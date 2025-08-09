@@ -3610,7 +3610,15 @@
     </div>
 
     <!-- Firebase Integration Bridge - Dynamic/Live Portal System -->
-    <script src="firebase-integration-bridge.js?v=fix-getdata-20250109"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script src="firebase-config.js"></script>
+    <script src="firebase-integration-bridge.js?v=portal-sync-ready"></script>
 
     <!-- Enhanced real-time synchronization and live data systems -->
     <script src="realtime-sync.js?v=fix-getdata-20250109"></script>
@@ -7547,7 +7555,7 @@ Phone: (210) 835-7834
                     const img = new Image();
                     img.onload = () => {
                         successCount++;
-                        console.log(`�� Image loaded: ${product.strain}`);
+                        console.log(`��� Image loaded: ${product.strain}`);
                         
                         if (successCount + errorCount === products.length) {
                             showNotification(`������ Image test complete: ${successCount}/${products.length} loaded successfully`, 'success');
