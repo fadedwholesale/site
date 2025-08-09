@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple getData Test</title>
+    <style>
+        body { font-family: monospace; background: #000; color: #0f0; padding: 20px; }
+        .error { color: #f00; }
+        .success { color: #0f0; }
+        .warning { color: #fa0; }
+    </style>
+</head>
+<body>
+    <h1>Simple getData Method Test</h1>
+    <div id="log"></div>
+
+    <!-- Load only essential scripts -->
+    <script src="firebase-integration-bridge.js?v=test1"></script>
+    <script src="shared-data.js?v=test1"></script>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        
+        function log(type, message) {
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(div);
+        }
+
+        log('success', 'Test started...');
+
+        // Check every second for 30 seconds
+        let attempts = 0;
+        const maxAttempts = 30;
+        
+        const checker = setInterval(() => {
+            attempts++;
+            
+            log('success', `Attempt ${attempts}/${maxAttempts}`);
+            
+            // Check if sharedDataManager exists
+            if (!window.sharedDataManager) {
+                log('warning', 'window.sharedDataManager does not exist yet');
+                if (attempts >= maxAttempts) {
+                    clearInterval(checker);
+                    log('error', 'FAILED: sharedDataManager never became available');
+                }
+                return;
+            }
+            
+            log('success', 'window.sharedDataManager exists');
+            
+            // Check the getData method
+            const getDataType = typeof window.sharedDataManager.getData;
+            log('success', `typeof window.sharedDataManager.getData = "${getDataType}"`);
+            
+            if (getDataType !== 'function') {
+                log('error', `PROBLEM: getData is not a function, it's a ${getDataType}`);
+                
+                // List all available methods/properties
+                const properties = Object.getOwnPropertyNames(window.sharedDataManager);
+                log('warning', `Available properties: ${properties.join(', ')}`);
+                
+                // Check prototype methods
+                const prototypeMethods = Object.getOwnPropertyNames(Object.getPrototypeOf(window.sharedDataManager));
+                log('warning', `Prototype methods: ${prototypeMethods.join(', ')}`);
+                
+                if (attempts >= maxAttempts) {
+                    clearInterval(checker);
+                    log('error', 'FAILED: getData method never became available');
+                }
+                return;
+            }
+            
+            log('success', 'getData method is available!');
+            
+            // Try to call it
+            try {
+                log('success', 'Attempting to call getData()...');
+                window.sharedDataManager.getData().then(data => {
+                    log('success', '✅ SUCCESS: getData() worked!');
+                    log('success', `Returned data: ${JSON.stringify(data, null, 2)}`);
+                    clearInterval(checker);
+                }).catch(error => {
+                    log('error', `❌ getData() promise rejected: ${error.message}`);
+                    clearInterval(checker);
+                });
+            } catch (error) {
+                log('error', `❌ Exception calling getData(): ${error.message}`);
+                if (attempts >= maxAttempts) {
+                    clearInterval(checker);
+                }
+            }
+            
+        }, 1000);
+
+        // Monitor console errors
+        const originalError = console.error;
+        console.error = (...args) => {
+            originalError(...args);
+            const message = args.join(' ');
+            if (message.includes('getData is not a function')) {
+                log('error', `🚨 CONSOLE ERROR DETECTED: ${message}`);
+            }
+        };
+
+        // Monitor window errors
+        window.onerror = function(message, source, lineno, colno, error) {
+            if (message.includes('getData is not a function')) {
+                log('error', `🚨 WINDOW ERROR DETECTED: ${message} at ${source}:${lineno}`);
+            }
+        };
+    </script>
+</body>
+</html>
