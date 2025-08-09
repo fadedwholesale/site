@@ -1,0 +1,12 @@
+specVersion: "v1"
+serviceId: "wholesale-95ceb-service"
+location: "us-central1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "wholesale-95ceb-database"
+      cloudSql:
+        instanceId: "wholesale-95ceb-instance"
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ["./connector"]
