@@ -20,20 +20,49 @@ class RealTimeSync {
     }
 
     // Wait for SharedDataManager to be ready
-    async waitForSharedDataManager(maxAttempts = 10) {
+    async waitForSharedDataManager(maxAttempts = 15) {
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
-            if (window.sharedDataManager &&
-                typeof window.sharedDataManager.getData === 'function' &&
-                window.sharedDataManager.getStatus &&
-                window.sharedDataManager.getStatus().firebaseReady) {
+            try {
+                // Check basic existence
+                if (!window.sharedDataManager) {
+                    console.log(`⏳ Waiting for SharedDataManager to exist... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check if getData method exists
+                if (typeof window.sharedDataManager.getData !== 'function') {
+                    console.log(`⏳ Waiting for SharedDataManager.getData method... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check if getStatus exists
+                if (!window.sharedDataManager.getStatus || typeof window.sharedDataManager.getStatus !== 'function') {
+                    console.log(`⏳ Waiting for SharedDataManager.getStatus method... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check Firebase readiness
+                const status = window.sharedDataManager.getStatus();
+                if (!status.firebaseReady) {
+                    console.log(`⏳ Waiting for Firebase to be ready... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Test getData method
+                await window.sharedDataManager.getData();
 
                 this.isSharedDataManagerReady = true;
                 console.log('✅ SharedDataManager is ready for sync operations');
                 return true;
-            }
 
-            console.log(`⏳ Waiting for SharedDataManager... (${attempt + 1}/${maxAttempts})`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            } catch (error) {
+                console.log(`⏳ SharedDataManager test failed, retrying... (${attempt + 1}/${maxAttempts}):`, error.message);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
         }
 
         console.warn('⚠️ SharedDataManager readiness timeout after', maxAttempts, 'attempts');
