@@ -2526,7 +2526,7 @@
                             <div class="action-group">
                                 <button class="btn btn-primary" onclick="quickOrder()">⚡ Quick Order</button>
                                 <button class="btn btn-secondary" onclick="downloadOrderHistory()">�� Download History</button>
-                                <button class="btn btn-secondary" onclick="openSupportModal()">��� Contact Support</button>
+                                <button class="btn btn-secondary" onclick="openSupportModal()">📞 Contact Support</button>
                             </div>
                         </div>
 
@@ -3206,7 +3206,7 @@
                 </div>
 
                 <div style="display: flex; justify-content: space-between; margin-top: 24px;">
-                    <button type="button" class="btn btn-secondary" onclick="previousRegistrationStep()">← Back</button>
+                    <button type="button" class="btn btn-secondary" onclick="previousRegistrationStep()">�� Back</button>
                     <button type="button" class="btn btn-primary" onclick="submitRegistration()" style="flex: 1; margin-left: 12px;">Submit Application 🚀</button>
                 </div>
             </div>
@@ -3472,7 +3472,7 @@
 
             <!-- Payment Method Selection -->
             <div class="payment-method-section" style="margin-bottom: 24px;">
-                <h4 style="color: var(--text-primary); margin-bottom: 16px;">💳 Payment Method</h4>
+                <h4 style="color: var(--text-primary); margin-bottom: 16px;">���� Payment Method</h4>
                 <div class="payment-method-tabs" style="display: flex; gap: 8px; margin-bottom: 20px; background: var(--surface-card); padding: 8px; border-radius: 12px;">
                     <button type="button" class="payment-tab active" data-method="card" onclick="selectPaymentMethod('card')" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: var(--brand-green); color: white; cursor: pointer; font-weight: 600;">
                         💳 Card
@@ -3614,7 +3614,7 @@
 
     <!-- Enhanced real-time synchronization and live data systems -->
     <script src="realtime-sync.js?v=fix-getdata-20250109"></script>
-    <script src="data-persistence.js?v=fix-getdata-20250109"></script>
+    <script src="data-persistence.js?v=fix-firebase-ready-v2"></script>
     <script src="live-data-manager.js?v=fix-getdata-20250109"></script>
     <script src="order-sync-manager.js?v=fix-getdata-20250109"></script>
     <script src="simple-logger.js?v=fix-getdata-20250109"></script>
@@ -5295,7 +5295,7 @@
                 console.log('✅ Application ready for production deployment with full mobile support and product images!');
             } catch (error) {
                 console.error('Initialization error:', error);
-                showNotification('�� Some features may be limited. Please refresh if you experience issues.', 'warning');
+                showNotification('❌ Some features may be limited. Please refresh if you experience issues.', 'warning');
             }
         }
 
