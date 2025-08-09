@@ -27,6 +27,7 @@ class RealTimeSync {
                 window.sharedDataManager.getStatus &&
                 window.sharedDataManager.getStatus().firebaseReady) {
 
+                this.isSharedDataManagerReady = true;
                 console.log('✅ SharedDataManager is ready for sync operations');
                 return true;
             }
