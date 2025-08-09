@@ -1128,8 +1128,15 @@ function updateDashboardStats() {
 }
 
 function updateInventoryStats() {
+    // Safety check: ensure products is an array
+    if (!Array.isArray(products)) {
+        console.warn('⚠️ updateInventoryStats: Products is not an array:', typeof products, products);
+        return;
+    }
+
     const availableCount = products.filter(p => p.status === 'AVAILABLE').length;
-    const startingPrice = Math.min(...products.filter(p => p.status === 'AVAILABLE').map(p => p.price));
+    const availableProducts = products.filter(p => p.status === 'AVAILABLE');
+    const startingPrice = availableProducts.length > 0 ? Math.min(...availableProducts.map(p => p.price)) : 0;
     const categories = new Set(products.map(p => p.grade)).size;
     
     const countEl = document.getElementById('publicAvailableCount');
