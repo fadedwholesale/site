@@ -2348,7 +2348,7 @@
             <div id="liveInventorySection" class="live-inventory">
                 <div class="container">
                     <div class="section-header">
-                        <h2 class="section-title">Live THCA & Cannabis Wholesale Inventory 📊</h2>
+                        <h2 class="section-title">Live THCA & Cannabis Wholesale Inventory ��</h2>
                         <p class="section-subtitle">Real-time THCA wholesale pricing and THC hemp availability - synchronized with our cannabis wholesale distribution systems for immediate hemp wholesale ordering</p>
                     </div>
                     
@@ -3214,7 +3214,7 @@
     <div id="profileEditModal" class="modal">
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
-                <h3 class="modal-title">✏️ Edit Business Profile</h3>
+                <h3 class="modal-title">✏�� Edit Business Profile</h3>
                 <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Update your business information and contact details</div>
                 <button class="modal-close" onclick="closeModal('profileEditModal')">×</button>
             </div>
@@ -3472,7 +3472,7 @@
                 <h4 style="color: var(--text-primary); margin-bottom: 16px;">💳 Payment Method</h4>
                 <div class="payment-method-tabs" style="display: flex; gap: 8px; margin-bottom: 20px; background: var(--surface-card); padding: 8px; border-radius: 12px;">
                     <button type="button" class="payment-tab active" data-method="card" onclick="selectPaymentMethod('card')" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: var(--brand-green); color: white; cursor: pointer; font-weight: 600;">
-                        💳 Card
+                        �� Card
                     </button>
                     <button type="button" class="payment-tab" data-method="crypto" onclick="selectPaymentMethod('crypto')" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: transparent; color: var(--text-secondary); cursor: pointer; font-weight: 600;">
                         ₿ Crypto
@@ -3606,26 +3606,8 @@
         </div>
     </div>
 
-    <!-- Firebase Dynamic System Scripts -->
-    <script type="module">
-        // Firebase v9 imports
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-        import { getAuth } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-
-        // Make Firebase available globally
-        window.firebaseModule = {
-            initializeApp,
-            getFirestore,
-            getAuth
-        };
-
-        console.log('🔥 Firebase modules loaded and ready');
-    </script>
-    <script src="firebase-data-manager.js"></script>
-    <script src="firebase-cart-system.js"></script>
-    <script src="firebase-application-system.js"></script>
-    <script src="firebase-system-integration.js"></script>
+    <!-- Firebase Integration Bridge - Dynamic/Live Portal System -->
+    <script src="firebase-integration-bridge.js"></script>
 
     <!-- Enhanced real-time synchronization and live data systems -->
     <script src="realtime-sync.js"></script>
@@ -4372,7 +4354,7 @@
                     showNotification('📊 Welcome to your Partner Portal!', 'success');
                 } else {
                     console.error('Partner view element not found');
-                    showNotification('���� Portal loading error. Please try again.', 'error');
+                    showNotification('�� Portal loading error. Please try again.', 'error');
                 }
                 
                 console.log('Switched to partner portal view');
@@ -5399,7 +5381,7 @@
                             if (localProduct.stock !== sharedProduct.stock ||
                                 localProduct.price !== sharedProduct.price ||
                                 localProduct.status !== sharedProduct.status) {
-                                console.log(`��� Partner: Data mismatch for ${sharedProduct.strain}`);
+                                console.log(`🔄 Partner: Data mismatch for ${sharedProduct.strain}`);
                                 dataMismatch = true;
                             }
                         }
