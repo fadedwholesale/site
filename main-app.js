@@ -2579,7 +2579,7 @@ function testAuthorizationAndSync() {
     return testResults;
 }
 
-function testRealTimeSyncFeatures(testResults) {
+async function testRealTimeSyncFeatures(testResults) {
     console.log('📡 Testing real-time sync features...');
 
     if (!window.realTimeSync || !window.sharedDataManager) {
