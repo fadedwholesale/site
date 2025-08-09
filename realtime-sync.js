@@ -10,7 +10,8 @@ class RealTimeSync {
         this.isOnline = navigator.onLine;
         this.lastHeartbeat = Date.now();
         this.clientId = this.generateClientId();
-        
+        this.isSharedDataManagerReady = false;
+
         this.init();
     }
 
