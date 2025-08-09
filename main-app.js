@@ -1114,14 +1114,24 @@ function updateProfile(event) {
 // Dashboard Functions
 function updateDashboardStats() {
     if (!currentUser) return;
-    
+
+    // Safety checks: ensure arrays are properly initialized
+    if (!Array.isArray(orders)) {
+        console.warn('⚠️ updateDashboardStats: Orders is not an array:', typeof orders, orders);
+        return;
+    }
+    if (!Array.isArray(products)) {
+        console.warn('⚠️ updateDashboardStats: Products is not an array:', typeof products, products);
+        return;
+    }
+
     const userOrders = orders.filter(order => order.partner === currentUser.email);
     const totalSpent = userOrders.reduce((sum, order) => sum + order.total, 0);
-    
+
     const orderCountEl = document.getElementById('partnerOrderCount');
     const savingsEl = document.getElementById('partnerSavings');
     const availableProductsEl = document.getElementById('partnerAvailableProducts');
-    
+
     if (orderCountEl) orderCountEl.textContent = userOrders.length;
     if (savingsEl) savingsEl.textContent = `$${totalSpent.toFixed(0)}`;
     if (availableProductsEl) availableProductsEl.textContent = products.filter(p => p.status === 'AVAILABLE').length;
@@ -3117,7 +3127,7 @@ function validateFieldLive(input) {
                 break;
             default:
                 isValid = value.length > 0;
-                message = isValid ? '✅' : '❌';
+                message = isValid ? '✅' : '��';
         }
 
         if (indicator) {
