@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Communication Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+        .section {
+            border: 1px solid #333;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            background: #111;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #0d5016; color: #4ade80; }
+        .error { background: #501010; color: #f87171; }
+        .warning { background: #502010; color: #fb923c; }
+        .info { background: #102050; color: #60a5fa; }
+        button {
+            background: #00C851;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #1DD65F; }
+        .logs {
+            background: #000;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔥 Firebase Communication Test</h1>
+    <p>This page tests the Firebase integration between the partner portal and admin dashboard.</p>
+
+    <div class="section">
+        <h2>Firebase Status</h2>
+        <div id="firebaseStatus" class="status info">Checking Firebase connection...</div>
+        <div id="authStatus" class="status info">Checking authentication...</div>
+    </div>
+
+    <div class="section">
+        <h2>Application Submission Test</h2>
+        <button onclick="testApplicationSubmission()">🔄 Test Submit Application</button>
+        <button onclick="testGetApplications()">📋 Test Get Applications</button>
+        <div id="applicationStatus" class="status info">Ready to test application submission</div>
+    </div>
+
+    <div class="section">
+        <h2>Order Submission Test</h2>
+        <button onclick="testOrderSubmission()">🔄 Test Submit Order</button>
+        <button onclick="testGetOrders()">📦 Test Get Orders</button>
+        <div id="orderStatus" class="status info">Ready to test order submission</div>
+    </div>
+
+    <div class="section">
+        <h2>Real-time Sync Test</h2>
+        <button onclick="testRealTimeSync()">📡 Test Real-Time Sync</button>
+        <div id="syncStatus" class="status info">Ready to test real-time sync</div>
+    </div>
+
+    <div class="section">
+        <h2>Portal Links</h2>
+        <button onclick="openPartnerPortal()">🌐 Open Partner Portal</button>
+        <button onclick="openAdminPortal()">⚙️ Open Admin Portal</button>
+    </div>
+
+    <div class="section">
+        <h2>Debug Logs</h2>
+        <button onclick="clearLogs()">🗑️ Clear Logs</button>
+        <div id="debugLogs" class="logs"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script src="firebase-config.js"></script>
+    <script src="firebase-data-manager.js"></script>
+    <script src="firebase-application-system.js"></script>
+
+    <script>
+        // Debug logging
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('debugLogs');
+            logElement.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLogs() {
+            document.getElementById('debugLogs').innerHTML = '';
+        }
+
+        function updateStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+        }
+
+        // Test functions
+        async function checkFirebaseStatus() {
+            try {
+                log('🔥 Checking Firebase status...');
+                
+                if (window.firebaseDataManager) {
+                    if (window.firebaseDataManager.isInitialized) {
+                        updateStatus('firebaseStatus', '✅ Firebase connected and ready', 'success');
+                        log('✅ Firebase Data Manager is initialized');
+                    } else {
+                        updateStatus('firebaseStatus', '⏳ Firebase initializing...', 'warning');
+                        log('⏳ Firebase Data Manager is initializing...');
+                    }
+                } else {
+                    updateStatus('firebaseStatus', '❌ Firebase Data Manager not found', 'error');
+                    log('❌ Firebase Data Manager not found');
+                }
+
+                // Check auth status
+                if (window.firebaseDataManager && window.firebaseDataManager.auth) {
+                    const user = window.firebaseDataManager.auth.currentUser;
+                    if (user) {
+                        updateStatus('authStatus', `✅ Authenticated as ${user.email}`, 'success');
+                        log(`✅ User authenticated: ${user.email}`);
+                    } else {
+                        updateStatus('authStatus', '❌ Not authenticated', 'warning');
+                        log('❌ No user authentication');
+                    }
+                } else {
+                    updateStatus('authStatus', '❌ Auth system not available', 'error');
+                    log('❌ Auth system not available');
+                }
+
+            } catch (error) {
+                updateStatus('firebaseStatus', `❌ Error: ${error.message}`, 'error');
+                log(`❌ Firebase status check error: ${error.message}`);
+            }
+        }
+
+        async function testApplicationSubmission() {
+            try {
+                log('📝 Testing application submission...');
+                updateStatus('applicationStatus', '⏳ Submitting test application...', 'warning');
+
+                const testApplication = {
+                    businessName: 'Test Cannabis Shop',
+                    contactName: 'John Doe',
+                    businessEmail: 'test@example.com',
+                    phone: '555-123-4567',
+                    businessAddress: '123 Test St, Test City, TS 12345',
+                    businessType: 'dispensary',
+                    licenseNumber: 'TEST-LIC-001',
+                    estimatedMonthlyVolume: '$10,000 - $25,000',
+                    yearsInBusiness: '2',
+                    businessDescription: 'Test dispensary for Firebase communication testing'
+                };
+
+                if (window.firebaseApplicationManager) {
+                    const result = await window.firebaseApplicationManager.submitBusinessApplication(testApplication);
+                    if (result) {
+                        updateStatus('applicationStatus', '✅ Test application submitted successfully!', 'success');
+                        log('✅ Test application submitted successfully');
+                    } else {
+                        updateStatus('applicationStatus', '❌ Application submission failed', 'error');
+                        log('❌ Application submission returned false');
+                    }
+                } else if (window.firebaseDataManager) {
+                    const result = await window.firebaseDataManager.submitBusinessApplication(testApplication);
+                    updateStatus('applicationStatus', '✅ Test application submitted via DataManager!', 'success');
+                    log('✅ Test application submitted via DataManager');
+                } else {
+                    updateStatus('applicationStatus', '❌ No submission system available', 'error');
+                    log('❌ No Firebase application system available');
+                }
+
+            } catch (error) {
+                updateStatus('applicationStatus', `❌ Error: ${error.message}`, 'error');
+                log(`❌ Application submission error: ${error.message}`);
+            }
+        }
+
+        async function testGetApplications() {
+            try {
+                log('📋 Testing get applications...');
+                
+                if (window.firebaseDataManager && window.firebaseDataManager.getApplications) {
+                    const applications = await window.firebaseDataManager.getApplications();
+                    updateStatus('applicationStatus', `✅ Found ${applications.length} applications`, 'success');
+                    log(`✅ Retrieved ${applications.length} applications from Firebase`);
+                    applications.forEach((app, index) => {
+                        log(`  ${index + 1}. ${app.businessName} - ${app.status} (${app.applicationId})`);
+                    });
+                } else {
+                    updateStatus('applicationStatus', '❌ Get applications method not available', 'error');
+                    log('❌ Get applications method not available');
+                }
+
+            } catch (error) {
+                updateStatus('applicationStatus', `❌ Error: ${error.message}`, 'error');
+                log(`❌ Get applications error: ${error.message}`);
+            }
+        }
+
+        async function testOrderSubmission() {
+            try {
+                log('📦 Testing order submission...');
+                updateStatus('orderStatus', '⏳ Submitting test order...', 'warning');
+
+                const testOrder = {
+                    partnerEmail: 'test@example.com',
+                    businessName: 'Test Cannabis Shop',
+                    items: [
+                        { productId: 1, name: 'Test Product', quantity: 2, price: 50 }
+                    ],
+                    subtotal: 100,
+                    total: 100,
+                    shipping: 0,
+                    paymentMethod: 'credit_card',
+                    status: 'PENDING'
+                };
+
+                if (window.firebaseDataManager && window.firebaseDataManager.addOrder) {
+                    const result = await window.firebaseDataManager.addOrder(testOrder);
+                    updateStatus('orderStatus', '✅ Test order submitted successfully!', 'success');
+                    log(`✅ Test order submitted successfully: ${result.id || 'ID not returned'}`);
+                } else {
+                    updateStatus('orderStatus', '❌ Order submission system not available', 'error');
+                    log('❌ Firebase order system not available');
+                }
+
+            } catch (error) {
+                updateStatus('orderStatus', `❌ Error: ${error.message}`, 'error');
+                log(`❌ Order submission error: ${error.message}`);
+            }
+        }
+
+        async function testGetOrders() {
+            try {
+                log('📦 Testing get orders...');
+                
+                if (window.firebaseDataManager && window.firebaseDataManager.getOrders) {
+                    const orders = await window.firebaseDataManager.getOrders();
+                    updateStatus('orderStatus', `✅ Found ${orders.length} orders`, 'success');
+                    log(`✅ Retrieved ${orders.length} orders from Firebase`);
+                    orders.forEach((order, index) => {
+                        log(`  ${index + 1}. Order #${order.id} - ${order.status} - $${order.total}`);
+                    });
+                } else {
+                    updateStatus('orderStatus', '❌ Get orders method not available', 'error');
+                    log('❌ Get orders method not available');
+                }
+
+            } catch (error) {
+                updateStatus('orderStatus', `❌ Error: ${error.message}`, 'error');
+                log(`❌ Get orders error: ${error.message}`);
+            }
+        }
+
+        async function testRealTimeSync() {
+            try {
+                log('📡 Testing real-time sync...');
+                updateStatus('syncStatus', '⏳ Testing real-time sync...', 'warning');
+
+                if (window.realTimeSync) {
+                    // Test broadcast
+                    window.realTimeSync.broadcast('test_message', { 
+                        message: 'Hello from Firebase Communication Test',
+                        timestamp: Date.now()
+                    });
+                    
+                    updateStatus('syncStatus', '✅ Real-time sync test message sent', 'success');
+                    log('✅ Real-time sync test message broadcasted');
+                } else {
+                    updateStatus('syncStatus', '❌ Real-time sync not available', 'error');
+                    log('❌ Real-time sync system not available');
+                }
+
+            } catch (error) {
+                updateStatus('syncStatus', `❌ Error: ${error.message}`, 'error');
+                log(`❌ Real-time sync error: ${error.message}`);
+            }
+        }
+
+        function openPartnerPortal() {
+            window.open('faded_skies_portal-5.html', '_blank');
+        }
+
+        function openAdminPortal() {
+            window.open('fadedskies admin almost complete .html', '_blank');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Firebase Communication Test initialized');
+            
+            // Check status every 2 seconds
+            setInterval(checkFirebaseStatus, 2000);
+            checkFirebaseStatus();
+        });
+
+        // Listen for Firebase initialization
+        window.addEventListener('firebaseInitialized', function(event) {
+            log('🔥 Firebase initialization event received');
+            checkFirebaseStatus();
+        });
+    </script>
+</body>
+</html>
