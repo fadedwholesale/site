@@ -370,6 +370,17 @@ class SharedDataManager {
 
     // Get consolidated data (for sync operations)
     async getData() {
+        // Check if Firebase is ready before proceeding
+        if (!this.db) {
+            console.warn('⚠️ Firebase not ready for getData, returning empty data');
+            return {
+                products: [],
+                orders: [],
+                systemConfig: {},
+                lastSync: new Date().toISOString()
+            };
+        }
+
         try {
             const products = await this.getProducts();
             const orders = await this.getOrders();
