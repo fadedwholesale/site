@@ -3921,7 +3921,7 @@
                 window.addEventListener('orientationchange', function() {
                     setTimeout(() => {
                         // Close mobile menu on orientation change
-                        closeMobileMenu();
+                        window.closeMobileMenu();
 
                         // Resize modal if open
                         const openModals = document.querySelectorAll('.modal[style*="block"]');
