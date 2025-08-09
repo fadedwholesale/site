@@ -2590,7 +2590,7 @@ async function testRealTimeSyncFeatures(testResults) {
 
     // Test 4: Product update sync
     console.log('📦 Testing product update sync...');
-    const products = window.sharedDataManager.getProducts();
+    const products = await window.sharedDataManager.getProducts();
     if (products.length > 0) {
         const testProduct = products[0];
         const originalStock = testProduct.stock;
