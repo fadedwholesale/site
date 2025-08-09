@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Method Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        #console-output {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛒 Cart Method Fix Test</h1>
+    
+    <div class="test-container">
+        <h3>Test Status</h3>
+        <div id="test-status" class="status info">Starting method test...</div>
+        
+        <button onclick="testCartMethods()">🔍 Test Cart Methods</button>
+        <button onclick="testCartLoading()">🛒 Test Cart Loading</button>
+        <button onclick="clearOutput()">🧹 Clear Output</button>
+    </div>
+
+    <div class="test-container">
+        <h3>Console Output</h3>
+        <div id="console-output"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Our Scripts with new cache version -->
+    <script src="firebase-config.js"></script>
+    <script src="firebase-integration-bridge.js?v=firebase-ready-fix-v2"></script>
+    <script src="shared-data.js?v=firebase-ready-fix-v2"></script>
+    <script src="cart-system.js?v=firebase-ready-fix-v2"></script>
+    <script src="main-app.js?v=firebase-ready-fix-v2"></script>
+
+    <script>
+        // Console capture
+        const consoleOutput = document.getElementById('console-output');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        function addToOutput(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = {
+                log: '#e2e8f0',
+                error: '#fc8181',
+                warn: '#f6e05e',
+                info: '#63b3ed'
+            }[type];
+            
+            consoleOutput.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToOutput(args.join(' '), 'log');
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToOutput('ERROR: ' + args.join(' '), 'error');
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToOutput('WARN: ' + args.join(' '), 'warn');
+        };
+
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('test-status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        // Test cart methods existence
+        function testCartMethods() {
+            updateStatus('Testing cart methods...', 'info');
+            
+            try {
+                console.log('🔍 Testing Cart Methods...');
+                
+                // Check if CartManager class exists
+                if (typeof CartManager === 'undefined') {
+                    throw new Error('CartManager class not found');
+                }
+                
+                // Create cart manager instance
+                const cartManager = new CartManager();
+                
+                // Check if waitForFirebaseReady method exists
+                if (typeof cartManager.waitForFirebaseReady !== 'function') {
+                    throw new Error('waitForFirebaseReady method not found');
+                }
+                
+                // Check if loadCart method exists
+                if (typeof cartManager.loadCart !== 'function') {
+                    throw new Error('loadCart method not found');
+                }
+                
+                // Check if refreshUserState method exists
+                if (typeof cartManager.refreshUserState !== 'function') {
+                    throw new Error('refreshUserState method not found');
+                }
+                
+                console.log('✅ All cart methods exist and are accessible');
+                console.log('✅ waitForFirebaseReady: function');
+                console.log('✅ loadCart: function');
+                console.log('✅ refreshUserState: function');
+                
+                updateStatus('Cart methods test PASSED ✅', 'success');
+                
+            } catch (error) {
+                console.error('❌ Cart methods test failed:', error.message);
+                updateStatus(`Cart methods test FAILED: ${error.message}`, 'error');
+            }
+        }
+
+        // Test cart loading functionality
+        async function testCartLoading() {
+            updateStatus('Testing cart loading...', 'info');
+            
+            try {
+                console.log('🛒 Testing Cart Loading...');
+                
+                // Set up test user
+                window.currentUser = {
+                    email: 'test@example.com',
+                    name: 'Test User',
+                    role: 'partner'
+                };
+                
+                // Create cart manager instance
+                if (!window.cartManager) {
+                    window.cartManager = new CartManager();
+                }
+                
+                // Test the waitForFirebaseReady method directly
+                console.log('Testing waitForFirebaseReady method...');
+                const firebaseReady = await window.cartManager.waitForFirebaseReady(3); // Short timeout for test
+                
+                if (firebaseReady) {
+                    console.log('✅ Firebase readiness check passed');
+                } else {
+                    console.log('⏳ Firebase not ready (expected in test environment)');
+                }
+                
+                console.log('✅ Cart loading test completed without method errors');
+                updateStatus('Cart loading test PASSED ✅', 'success');
+                
+            } catch (error) {
+                console.error('❌ Cart loading test failed:', error.message);
+                updateStatus(`Cart loading test FAILED: ${error.message}`, 'error');
+            }
+        }
+
+        function clearOutput() {
+            consoleOutput.innerHTML = '';
+            updateStatus('Ready to start tests...', 'info');
+        }
+
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Cart Method Fix Test page loaded');
+            console.log('⏳ Waiting for scripts to load...');
+            
+            // Auto-run method test after scripts load
+            setTimeout(() => {
+                console.log('🎯 Auto-starting method tests...');
+                testCartMethods();
+            }, 2000);
+        });
+
+        // Monitor for errors
+        window.addEventListener('error', (event) => {
+            console.error('💥 Page error:', event.error?.message || event.message);
+            updateStatus(`Page error: ${event.error?.message || event.message}`, 'error');
+        });
+    </script>
+</body>
+</html>
