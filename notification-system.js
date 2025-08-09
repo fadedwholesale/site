@@ -72,35 +72,65 @@ class NotificationSystem {
         // Listen for specific real-time events that should trigger notifications
         window.realTimeSync.on('order_added', (data, metadata) => {
             if (metadata.remote) {
-                this.showRealTimeNotification('order', `New order: ${data.id}`, {
-                    details: `$${data.total?.toFixed(2)} from ${data.customerInfo?.name || 'Customer'}`,
-                    action: () => this.openOrderDetails(data.id)
-                });
-            }
-        });
+                const currentUser = window.currentUser;
+                const isAdmin = currentUser?.role === 'admin' || currentUser?.email?.includes('admin');
+                const isPartner = currentUser && !isAdmin;
 
-        window.realTimeSync.on('product_updated', (data, metadata) => {
-            if (metadata.remote && data.updates?.stock !== undefined) {
-                const product = data.after || data;
-                const stockLevel = data.updates.stock;
-                
-                if (stockLevel <= 3 && stockLevel > 0) {
-                    this.showRealTimeNotification('inventory', `Low stock alert!`, {
-                        details: `${product.strain}: ${stockLevel} remaining`,
-                        type: 'warning',
-                        duration: 6000
+                // Only show order notifications to relevant users
+                if (isAdmin) {
+                    // Admin sees all orders
+                    this.showRealTimeNotification('order', `New order: ${data.id}`, {
+                        details: `$${data.total?.toFixed(2)} from ${data.customerInfo?.name || data.partnerName || 'Customer'}`,
+                        action: () => this.openOrderDetails(data.id)
                     });
-                } else {
-                    this.showRealTimeNotification('inventory', `Stock updated`, {
-                        details: `${product.strain}: ${stockLevel} available`
+                } else if (isPartner && data.partner === currentUser.email) {
+                    // Partner only sees their own order confirmations
+                    this.showRealTimeNotification('order', `Order confirmed: ${data.id}`, {
+                        details: `Your order for $${data.total?.toFixed(2)} was received`,
+                        type: 'success',
+                        duration: 4000
                     });
                 }
             }
         });
 
+        window.realTimeSync.on('product_updated', (data, metadata) => {
+            if (metadata.remote && data.updates?.stock !== undefined) {
+                const currentUser = window.currentUser;
+                const isAdmin = currentUser?.role === 'admin' || currentUser?.email?.includes('admin');
+                const isPartner = currentUser && !isAdmin;
+                const product = data.after || data;
+                const stockLevel = data.updates.stock;
+
+                // Only show stock updates to admin to avoid partner notification spam
+                if (isAdmin) {
+                    if (stockLevel <= 3 && stockLevel > 0) {
+                        this.showRealTimeNotification('inventory', `Low stock alert!`, {
+                            details: `${product.strain}: ${stockLevel} remaining`,
+                            type: 'warning',
+                            duration: 6000
+                        });
+                    } else if (data.updates.significantChange) {
+                        // Only show non-critical updates if it's a significant change
+                        this.showRealTimeNotification('inventory', `Stock updated`, {
+                            details: `${product.strain}: ${stockLevel} available`,
+                            duration: 3000
+                        });
+                    }
+                }
+                // Partners don't get notifications for every stock change to avoid spam
+            }
+        });
+
         window.realTimeSync.on('user_action', (data, metadata) => {
             if (metadata.remote) {
-                this.handleUserActionNotification(data);
+                // Add user context to the action data
+                const enrichedData = {
+                    ...data,
+                    currentUserEmail: window.currentUser?.email,
+                    currentUserRole: window.currentUser?.role
+                };
+                this.handleUserActionNotification(enrichedData);
             }
         });
 
@@ -113,10 +143,16 @@ class NotificationSystem {
 
         window.realTimeSync.on('client_online', (data, metadata) => {
             if (metadata.remote) {
-                this.showRealTimeNotification('system', 'User connected', {
-                    details: 'Someone joined the portal',
-                    duration: 2000
-                });
+                const currentUser = window.currentUser;
+                const isAdmin = currentUser?.role === 'admin' || currentUser?.email?.includes('admin');
+
+                // Only show connection notifications to admin
+                if (isAdmin) {
+                    this.showRealTimeNotification('system', 'User connected', {
+                        details: 'Someone joined the portal',
+                        duration: 2000
+                    });
+                }
             }
         });
 
@@ -154,28 +190,57 @@ class NotificationSystem {
 
     // Handle user action notifications
     handleUserActionNotification(actionData) {
+        // Get current user information
+        const currentUser = window.currentUser;
+        const isAdmin = currentUser?.role === 'admin' || currentUser?.email?.includes('admin');
+        const isPartner = currentUser && !isAdmin;
+
         switch (actionData.action) {
             case 'order_placed':
-                this.showRealTimeNotification('order', 'New order placed!', {
-                    details: `${actionData.userName}: $${actionData.amount?.toFixed(2)}`,
-                    type: 'success',
-                    duration: 5000
-                });
+                // Only show to admin if it's an order FOR the admin
+                // Only show to partner if THEY placed the order
+                if (isAdmin) {
+                    // Admin should see all orders placed by partners
+                    this.showRealTimeNotification('order', 'New order placed!', {
+                        details: `${actionData.userName}: $${actionData.amount?.toFixed(2)}`,
+                        type: 'success',
+                        duration: 5000
+                    });
+                } else if (isPartner && actionData.userEmail === currentUser.email) {
+                    // Partner should only see their own order confirmations
+                    this.showRealTimeNotification('order', 'Your order was placed!', {
+                        details: `Order confirmed: $${actionData.amount?.toFixed(2)}`,
+                        type: 'success',
+                        duration: 4000
+                    });
+                }
                 break;
-                
+
             case 'user_joined':
-                this.showRealTimeNotification('user', 'User joined', {
-                    details: actionData.userName,
-                    duration: 3000
-                });
+                // Only show to admin
+                if (isAdmin) {
+                    this.showRealTimeNotification('user', 'User joined', {
+                        details: actionData.userName,
+                        duration: 3000
+                    });
+                }
                 break;
-                
+
             case 'inventory_low':
-                this.showRealTimeNotification('inventory', 'Inventory alert!', {
-                    details: `${actionData.productName} is running low`,
-                    type: 'warning',
-                    duration: 6000
-                });
+                // Show to admin always, partners only if they're affected
+                if (isAdmin) {
+                    this.showRealTimeNotification('inventory', 'Inventory alert!', {
+                        details: `${actionData.productName} is running low`,
+                        type: 'warning',
+                        duration: 6000
+                    });
+                } else if (isPartner && actionData.affectsPartner) {
+                    this.showRealTimeNotification('inventory', 'Low stock alert', {
+                        details: `${actionData.productName} stock is low`,
+                        type: 'warning',
+                        duration: 4000
+                    });
+                }
                 break;
         }
     }
