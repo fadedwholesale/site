@@ -5357,7 +5357,7 @@
         }
 
         // Verify partner portal is in sync with shared data
-        function verifyPartnerPortalSync() {
+        async function verifyPartnerPortalSync() {
             try {
                 if (!window.sharedDataManager || typeof window.sharedDataManager.getData !== 'function') return;
 
@@ -7608,7 +7608,7 @@ Phone: (210) 835-7834
                         if (inventorySection) {
                             inventorySection.classList.add('show');
                             updatePublicInventory();
-                            showNotification('����� Inventory displayed with product images!', 'success');
+                            showNotification('������ Inventory displayed with product images!', 'success');
                         } else {
                             console.error('Inventory section not found');
                         }
