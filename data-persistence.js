@@ -284,14 +284,14 @@ class DataPersistence {
                 }
                 
                 // Reset to default data
-                this.resetToDefaults();
+                await this.resetToDefaults();
             }
         } catch (error) {
             console.error('❌ Recovery process failed:', error);
             if (window.showNotification) {
                 window.showNotification('❌ Recovery failed - resetting to defaults', 'error');
             }
-            this.resetToDefaults();
+            await this.resetToDefaults();
         } finally {
             this.isRecovering = false;
         }
@@ -327,7 +327,10 @@ class DataPersistence {
                 // Restore the backup
                 if (window.sharedDataManager) {
                     backup.data.lastSync = new Date().toISOString();
-                    window.sharedDataManager.importData(backup.data);
+                    // Since SharedDataManager uses Firebase, we need to restore data through its methods
+                    if (backup.data.products) {
+                        await window.sharedDataManager.updateProducts(backup.data.products);
+                    }
                     console.log(`✅ Successfully recovered from backup: ${backup.timestamp}`);
                     return backup.data;
                 }
@@ -342,15 +345,25 @@ class DataPersistence {
     }
 
     // Reset to default data
-    resetToDefaults() {
+    async resetToDefaults() {
         console.log('🔄 Resetting to default data...');
-        
-        if (window.sharedDataManager) {
-            // Clear corrupted data
-            window.sharedDataManager.clearAllData();
-            
-            // The SharedDataManager will initialize with default products
-            console.log('✅ Reset to defaults completed');
+
+        try {
+            if (window.sharedDataManager) {
+                // Since SharedDataManager doesn't have clearAllData, we'll initialize with basic empty data
+                const defaultData = {
+                    products: [],
+                    orders: [],
+                    systemConfig: {},
+                    lastSync: new Date().toISOString()
+                };
+
+                // Update with empty products to effectively clear
+                await window.sharedDataManager.updateProducts([]);
+                console.log('✅ Reset to defaults completed');
+            }
+        } catch (error) {
+            console.error('❌ Error resetting to defaults:', error);
         }
     }
 
@@ -367,11 +380,18 @@ class DataPersistence {
     }
 
     // Manual backup trigger
-    createManualBackup() {
+    async createManualBackup() {
         console.log('💾 Creating manual backup...');
-        this.createBackup();
-        if (window.showNotification) {
-            window.showNotification('💾 Manual backup created', 'success');
+        try {
+            await this.createBackup();
+            if (window.showNotification) {
+                window.showNotification('💾 Manual backup created', 'success');
+            }
+        } catch (error) {
+            console.error('❌ Error creating manual backup:', error);
+            if (window.showNotification) {
+                window.showNotification('❌ Error creating backup', 'error');
+            }
         }
     }
 
@@ -387,25 +407,32 @@ class DataPersistence {
     }
 
     // Export data for manual backup
-    exportData() {
-        if (window.sharedDataManager) {
-            const data = window.sharedDataManager.getData();
-            const backup = {
-                timestamp: new Date().toISOString(),
-                data: data,
-                checksum: this.calculateChecksum(data)
-            };
-            
-            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `faded-skies-backup-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
+    async exportData() {
+        try {
+            if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
+                const data = await window.sharedDataManager.getData();
+                const backup = {
+                    timestamp: new Date().toISOString(),
+                    data: data,
+                    checksum: this.calculateChecksum(data)
+                };
+
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `faded-skies-backup-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                if (window.showNotification) {
+                    window.showNotification('📁 Data exported successfully', 'success');
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error exporting data:', error);
             if (window.showNotification) {
-                window.showNotification('📁 Data exported successfully', 'success');
+                window.showNotification('❌ Error exporting data', 'error');
             }
         }
     }
