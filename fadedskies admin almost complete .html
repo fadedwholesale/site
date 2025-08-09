@@ -1962,7 +1962,7 @@
                     <div class="controls">
                         <h3 style="color: var(--brand-green); margin: 0;">System Configuration</h3>
                         <div class="action-group">
-                            <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+                            <button class="btn btn-primary" onclick="saveSettings()">�� Save Settings</button>
                             <button class="btn btn-secondary" onclick="backupSystem()">📦 Backup System</button>
                             <button class="btn btn-secondary" onclick="exportLogs()">📋 Export Logs</button>
                             <button class="btn btn-danger" onclick="resetSystem()">🔄 Reset System</button>
@@ -2917,6 +2917,9 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             // Always use shared data manager as source of truth
             loadDataFromSharedManager();
 
+            // Initialize Firebase integration for real-time data
+            initializeFirebaseIntegration();
+
             // Listen for shared data changes
             window.addEventListener('sharedDataChange', handleAdminSharedDataChange);
 
@@ -2935,6 +2938,66 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
             console.log('✅ Admin dashboard initialized');
             console.log('🔐 Secure admin portal ready');
             console.log('🔄 Portal sync monitoring active');
+        }
+
+        // Initialize Firebase integration for admin portal
+        function initializeFirebaseIntegration() {
+            console.log('🔥 Setting up Firebase integration for admin portal...');
+
+            // Wait for Firebase to be ready
+            const waitForFirebase = () => {
+                if (window.firebaseDataManager && window.firebaseDataManager.isInitialized) {
+                    console.log('✅ Firebase ready, setting up subscriptions...');
+
+                    // Subscribe to applications
+                    window.firebaseDataManager.subscribeToApplications((applications) => {
+                        console.log('📝 Applications updated from Firebase:', applications.length);
+                        currentApplications = applications;
+                        updateApplicationStats();
+                        populateApplicationsTable();
+
+                        // Show notification for new applications
+                        if (applications.length > 0) {
+                            const newApps = applications.filter(app =>
+                                new Date(app.submittedAt || app.submissionDate).getTime() > (Date.now() - 60000)
+                            );
+                            if (newApps.length > 0) {
+                                showNotification(`📝 ${newApps.length} new partnership application(s) received!`, 'success');
+                            }
+                        }
+                    });
+
+                    // Subscribe to orders
+                    window.firebaseDataManager.subscribeToOrders((orders) => {
+                        console.log('📋 Orders updated from Firebase:', orders.length);
+                        // Update order displays if currentOrders is defined
+                        if (typeof currentOrders !== 'undefined') {
+                            currentOrders = orders;
+                            if (typeof updateOrderStats === 'function') updateOrderStats();
+                            if (typeof populateOrdersTable === 'function') populateOrdersTable();
+                        }
+
+                        // Show notification for new orders
+                        if (orders.length > 0) {
+                            const newOrders = orders.filter(order =>
+                                new Date(order.timestamp || order.orderDate).getTime() > (Date.now() - 60000)
+                            );
+                            if (newOrders.length > 0) {
+                                showNotification(`🛒 ${newOrders.length} new order(s) received!`, 'success');
+                            }
+                        }
+                    });
+
+                    // Load initial data
+                    loadApplicationsData();
+
+                } else {
+                    console.log('⏳ Waiting for Firebase to initialize...');
+                    setTimeout(waitForFirebase, 500);
+                }
+            };
+
+            waitForFirebase();
         }
 
         // Automatic sync after admin changes (with debouncing)
@@ -6656,6 +6719,8 @@ Faded Skies Wholesale Team`
                 updatePartnerStats();
             } else if (tabName === 'applications') {
                 loadApplicationsData();
+                // Refresh sync status when viewing applications
+                updateSyncStatus('connected');
             } else if (tabName === 'orders') {
                 updateOrdersTable();
             }
@@ -6748,12 +6813,34 @@ Faded Skies Wholesale Team`
         let currentReviewingApplication = null;
 
         function loadApplicationsData() {
+            console.log('📝 Loading applications from Firebase...');
+
+            // If Firebase is available, load from Firebase
+            if (window.firebaseDataManager && window.firebaseDataManager.isInitialized) {
+                window.firebaseDataManager.getApplications().then(applications => {
+                    console.log('✅ Loaded applications from Firebase:', applications.length);
+                    currentApplications = applications;
+                    updateApplicationStats();
+                    populateApplicationsTable();
+                }).catch(error => {
+                    console.error('❌ Error loading applications from Firebase:', error);
+                    // Fallback to localStorage
+                    loadApplicationsFromLocalStorage();
+                });
+            } else {
+                // Fallback to localStorage if Firebase not ready
+                console.log('⚠️ Firebase not ready, loading from localStorage...');
+                loadApplicationsFromLocalStorage();
+            }
+        }
+
+        function loadApplicationsFromLocalStorage() {
             try {
                 currentApplications = JSON.parse(localStorage.getItem('businessApplications') || '[]');
                 updateApplicationStats();
                 populateApplicationsTable();
             } catch (error) {
-                console.error('Error loading applications:', error);
+                console.error('Error loading applications from localStorage:', error);
                 currentApplications = [];
             }
         }
