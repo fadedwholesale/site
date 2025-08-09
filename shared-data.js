@@ -370,9 +370,9 @@ class SharedDataManager {
 
     // Get consolidated data (for sync operations)
     async getData() {
-        // Check if Firebase is ready before proceeding
-        if (!this.db) {
-            console.warn('⚠️ Firebase not ready for getData, returning empty data');
+        // Enhanced Firebase readiness check
+        if (!this.db || !this.firebaseBridge) {
+            console.warn('⚠️ Firebase not ready for getData (db or bridge missing), returning empty data');
             return {
                 products: [],
                 orders: [],
@@ -382,6 +382,17 @@ class SharedDataManager {
         }
 
         try {
+            // Additional safety check - try to get status first
+            if (!this.getStatus().firebaseReady) {
+                console.warn('⚠️ Firebase status reports not ready, returning empty data');
+                return {
+                    products: [],
+                    orders: [],
+                    systemConfig: {},
+                    lastSync: new Date().toISOString()
+                };
+            }
+
             const products = await this.getProducts();
             const orders = await this.getOrders();
             const systemConfig = await this.getSystemConfig();
@@ -393,6 +404,17 @@ class SharedDataManager {
                 lastSync: new Date().toISOString()
             };
         } catch (error) {
+            // Handle "Firebase not ready" errors specifically
+            if (error.message === 'Firebase not ready') {
+                console.warn('⚠️ Firebase not ready during getData operation, returning empty data');
+                return {
+                    products: [],
+                    orders: [],
+                    systemConfig: {},
+                    lastSync: new Date().toISOString()
+                };
+            }
+
             console.error('❌ Error getting consolidated data:', error);
             return {
                 products: [],
