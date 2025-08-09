@@ -253,16 +253,32 @@ class SharedDataManager {
     }
 
     async getCart(userEmail) {
-        if (!this.db) throw new Error('Firebase not ready');
+        // Enhanced Firebase readiness check
+        if (!this.db || !this.firebaseBridge) {
+            console.warn('⚠️ Firebase not ready for getCart, returning empty cart');
+            return [];
+        }
 
         try {
+            // Additional safety check
+            if (!this.getStatus().firebaseReady) {
+                console.warn('⚠️ Firebase status reports not ready for getCart, returning empty cart');
+                return [];
+            }
+
             const doc = await this.db.collection('carts').doc(userEmail).get();
-            
+
             if (doc.exists) {
                 return doc.data().items || [];
             }
             return [];
         } catch (error) {
+            // Handle "Firebase not ready" errors specifically
+            if (error.message === 'Firebase not ready') {
+                console.warn('⚠️ Firebase not ready during getCart operation, returning empty cart');
+                return [];
+            }
+
             console.error('❌ Error getting cart from Firebase:', error);
             return [];
         }
