@@ -452,10 +452,37 @@ class RealTimeSync {
 // Auto-initialize when script loads
 if (typeof window !== 'undefined') {
     window.RealTimeSync = RealTimeSync;
-    
-    // Initialize the real-time sync system
-    if (!window.realTimeSync) {
-        window.realTimeSync = new RealTimeSync();
-        console.log('🔄 Global Real-Time Sync initialized');
+
+    // Initialize the real-time sync system with proper timing
+    function initializeRealTimeSync() {
+        if (!window.realTimeSync) {
+            window.realTimeSync = new RealTimeSync();
+            console.log('🔄 Global Real-Time Sync initialized');
+        }
+    }
+
+    // If SharedDataManager is already available, initialize immediately
+    if (window.sharedDataManager) {
+        initializeRealTimeSync();
+    } else {
+        // Otherwise, wait for SharedDataManager to be available
+        let initAttempts = 0;
+        const maxInitAttempts = 20;
+
+        const checkForSharedDataManager = () => {
+            initAttempts++;
+            if (window.sharedDataManager) {
+                console.log('✅ SharedDataManager detected, initializing RealTimeSync');
+                initializeRealTimeSync();
+            } else if (initAttempts < maxInitAttempts) {
+                setTimeout(checkForSharedDataManager, 500);
+            } else {
+                console.warn('⚠️ SharedDataManager not found after', maxInitAttempts, 'attempts, initializing RealTimeSync anyway');
+                initializeRealTimeSync();
+            }
+        };
+
+        // Start checking immediately
+        setTimeout(checkForSharedDataManager, 100);
     }
 }
