@@ -184,7 +184,11 @@ class DataPersistence {
         console.log('🔍 Performing startup data integrity check...');
 
         try {
-            if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
+            if (window.sharedDataManager &&
+                typeof window.sharedDataManager.getData === 'function' &&
+                window.sharedDataManager.getStatus &&
+                window.sharedDataManager.getStatus().firebaseReady) {
+
                 // Add delay to ensure Firebase is properly initialized
                 await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -197,10 +201,14 @@ class DataPersistence {
                     console.warn('⚠️ No valid data found during startup, but this may be normal for new installations');
                 }
             } else {
-                console.log('⏳ SharedDataManager not ready for startup check, skipping');
+                console.log('⏳ Firebase not ready for startup check, skipping');
             }
         } catch (error) {
-            console.warn('⚠️ Startup check failed, but continuing normally:', error);
+            if (error.message === 'Firebase not ready') {
+                console.log('⏳ Firebase still not ready during startup check, skipping');
+            } else {
+                console.warn('⚠️ Startup check failed, but continuing normally:', error);
+            }
             // Don't initiate recovery on startup errors, as the system might just be initializing
         }
     }
