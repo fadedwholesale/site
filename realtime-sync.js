@@ -188,14 +188,18 @@ class RealTimeSync {
     }
 
     // Handle online status changes
-    handleOnline() {
+    async handleOnline() {
         console.log('🌐 Connection restored');
         this.isOnline = true;
         this.broadcast('client_online', { clientId: this.clientId });
-        
+
         // Force sync when coming back online
-        this.performPeriodicSync();
-        
+        try {
+            await this.performPeriodicSync();
+        } catch (error) {
+            console.warn('⚠️ Error in online sync:', error);
+        }
+
         if (window.showNotification) {
             window.showNotification('🌐 Connection restored - syncing data', 'success');
         }
