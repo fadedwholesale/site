@@ -38,10 +38,10 @@ let orders = [];
 let currentFilter = 'all';
 
 // Initialize Application
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('🚀 Faded Skies Portal initializing...');
     initializeApplication();
-    loadInitialData();
+    await loadInitialData();
     setupEventListeners();
     setupNotificationFiltering();
 
