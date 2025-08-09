@@ -1413,10 +1413,13 @@ function submitRegistration() {
         userAgent: navigator.userAgent
     };
 
-    // Store application in localStorage for admin review
-    const existingApplications = JSON.parse(localStorage.getItem('businessApplications') || '[]');
-    existingApplications.push(applicationData);
-    localStorage.setItem('businessApplications', JSON.stringify(existingApplications));
+    // Store application in Firebase for admin review
+    if (window.submitBusinessApplication) {
+        window.submitBusinessApplication(applicationData);
+    } else {
+        console.error('Firebase application submission not available');
+        throw new Error('Firebase connection required for application submission');
+    }
 
     setTimeout(() => {
         closeModal('registerModal');
