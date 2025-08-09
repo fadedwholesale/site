@@ -5343,9 +5343,13 @@
                     console.log('✅ Real-time sync listeners configured for partner portal');
 
                     // Set up periodic sync verification
-                    setInterval(() => {
-                        verifyPartnerPortalSync();
-                    }, 30000); // Check every 30 seconds
+                    setInterval(async () => {
+                    try {
+                        await verifyPartnerPortalSync();
+                    } catch (error) {
+                        console.warn('⚠️ Error in partner portal sync verification:', error);
+                    }
+                }, 30000); // Check every 30 seconds
 
                 } else {
                     console.log('⏳ Real-time sync not ready, retrying in 1 second...');
