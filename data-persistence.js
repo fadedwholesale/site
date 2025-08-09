@@ -417,7 +417,7 @@ class DataPersistence {
             const backups = this.getBackups();
             const recentBackups = backups.slice(-5); // Keep only 5 most recent
             localStorage.setItem(this.backupKey, JSON.stringify(recentBackups));
-            console.log('🧹 Cleaned old backups');
+            console.log('��� Cleaned old backups');
         } catch (error) {
             console.error('❌ Error cleaning backups:', error);
         }
@@ -496,12 +496,12 @@ class DataPersistence {
 // Auto-initialize when script loads
 if (typeof window !== 'undefined') {
     window.DataPersistence = DataPersistence;
-    
-    // Initialize after DOM is ready
-    document.addEventListener('DOMContentLoaded', () => {
+
+    // Initialize with delay to allow other systems to load
+    setTimeout(() => {
         if (!window.dataPersistence) {
             window.dataPersistence = new DataPersistence();
             console.log('💾 Global Data Persistence initialized');
         }
-    });
+    }, 3000); // Wait 3 seconds for other systems to initialize
 }
