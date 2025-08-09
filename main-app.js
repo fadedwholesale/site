@@ -4,17 +4,20 @@
 // Global Variables - Authentication State
 let currentUser = null;
 
-// Ensure window.currentUser is always synchronized
+// Ensure window.currentUser is always synchronized - Firebase only
 function setCurrentUser(user) {
     currentUser = user;
     window.currentUser = user;
-    
+
     if (user) {
-        localStorage.setItem('currentUser', JSON.stringify(user));
         console.log('✅ User authenticated globally:', user.email);
+        // User state is managed by Firebase Auth
     } else {
-        localStorage.removeItem('currentUser');
-        console.log('��� User logged out globally');
+        console.log('🔒 User logged out globally');
+        // Clear Firebase Auth
+        if (window.firebaseIntegrationBridge?.auth) {
+            window.firebaseIntegrationBridge.auth.signOut();
+        }
     }
     
     // Immediately notify cart manager of auth state change
@@ -107,30 +110,44 @@ function initializeApplication() {
     // Initialize real-time status indicator
     initializeRealTimeStatusIndicator();
 
-    // Check if user is already logged in from a previous session
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-        try {
-            const userData = JSON.parse(savedUser);
-            // Validate the saved user data has required fields
-            if (userData.email && userData.name) {
+    // Check Firebase Auth state instead of localStorage
+    if (window.firebaseIntegrationBridge?.auth) {
+        window.firebaseIntegrationBridge.auth.onAuthStateChanged((user) => {
+            if (user) {
+                const userData = {
+                    email: user.email,
+                    name: user.displayName || 'Partner',
+                    uid: user.uid
+                };
                 setCurrentUser(userData);
                 showUserSession();
-                console.log('✅ User session restored:', currentUser.email);
+                console.log('✅ Firebase user session restored:', user.email);
             } else {
-                console.log('⚠️ Invalid saved user data, clearing session');
-                localStorage.removeItem('currentUser');
+                setCurrentUser(null);
                 showGuestSession();
+                console.log('👤 No Firebase user session found, showing guest session');
             }
-        } catch (error) {
-            console.error('Error restoring user session:', error);
-            localStorage.removeItem('currentUser');
-            showGuestSession();
-        }
+        });
     } else {
-        // No saved user, start in guest mode
-        console.log('👤 No user session found, showing guest session');
+        // Firebase not ready yet, show guest session
+        console.log('⏳ Waiting for Firebase auth...');
         showGuestSession();
+        // Retry Firebase auth check
+        setTimeout(() => {
+            if (window.firebaseIntegrationBridge?.auth) {
+                window.firebaseIntegrationBridge.auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        const userData = {
+                            email: user.email,
+                            name: user.displayName || 'Partner',
+                            uid: user.uid
+                        };
+                        setCurrentUser(userData);
+                        showUserSession();
+                    }
+                });
+            }
+        }, 2000);
     }
 
     // Initialize live checkout system
@@ -1011,7 +1028,7 @@ function updateProfile(event) {
                     currentUser.name = formData.contactName;
                 }
 
-                // Update localStorage and global state
+                // Update global state and Firebase Auth
                 setCurrentUser(currentUser);
 
                 // Update all UI displays that might show user data
@@ -1396,10 +1413,13 @@ function submitRegistration() {
         userAgent: navigator.userAgent
     };
 
-    // Store application in localStorage for admin review
-    const existingApplications = JSON.parse(localStorage.getItem('businessApplications') || '[]');
-    existingApplications.push(applicationData);
-    localStorage.setItem('businessApplications', JSON.stringify(existingApplications));
+    // Store application in Firebase for admin review
+    if (window.submitBusinessApplication) {
+        window.submitBusinessApplication(applicationData);
+    } else {
+        console.error('Firebase application submission not available');
+        throw new Error('Firebase connection required for application submission');
+    }
 
     setTimeout(() => {
         closeModal('registerModal');
@@ -1454,7 +1474,7 @@ function handleFileUpload(input, documentType) {
             // Validate file type
             const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
             if (!allowedTypes.includes(file.type)) {
-                showNotification('❌ File must be PDF, JPG, or PNG format', 'error');
+                showNotification('�� File must be PDF, JPG, or PNG format', 'error');
                 input.value = '';
                 return;
             }
@@ -1574,19 +1594,17 @@ function triggerAdminNotification(applicationData) {
         return;
     }
 
-    // Store notification for admin dashboard
-    const adminNotifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
-    adminNotifications.unshift({
-        id: 'NOTIF-' + Date.now(),
-        type: 'new_application',
-        title: 'New Business Application',
-        message: `${applicationData.businessName} has submitted a partnership application`,
-        applicationId: applicationData.applicationId,
-        timestamp: new Date().toISOString(),
-        read: false,
-        priority: 'high'
-    });
-    localStorage.setItem('adminNotifications', JSON.stringify(adminNotifications));
+    // Store notification in Firebase for admin dashboard
+    if (window.firebaseIntegrationBridge?.sendAdminNotification) {
+        window.firebaseIntegrationBridge.sendAdminNotification('new_application', {
+            businessName: applicationData.businessName,
+            applicationId: applicationData.applicationId,
+            message: `${applicationData.businessName} has submitted a partnership application`,
+            priority: 'high'
+        });
+    } else {
+        console.warn('Firebase notification system not available');
+    }
 
     // Update admin dashboard counters if admin is logged in
     if (window.adminDashboard && typeof window.adminDashboard.updateNotificationBadge === 'function') {
@@ -1777,7 +1795,7 @@ function debugAuthState() {
     console.log('🔍 AUTHENTICATION DEBUG STATE:', {
         localCurrentUser: currentUser,
         windowCurrentUser: window.currentUser,
-        localStorageUser: localStorage.getItem('currentUser'),
+        firebaseAuth: window.firebaseIntegrationBridge?.auth?.currentUser?.email || null,
         cartManager: !!window.cartManager,
         cartState: window.cartManager ? window.cartManager.getState() : 'not available'
     });
