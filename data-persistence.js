@@ -167,14 +167,14 @@ class DataPersistence {
             }
         });
         
-        // Periodic data integrity checks
+        // Periodic data integrity checks (reduced frequency to prevent false positives)
         this.recoveryTimer = setInterval(async () => {
             try {
                 await this.performIntegrityCheck();
             } catch (error) {
                 console.warn('⚠️ Error in periodic integrity check:', error);
             }
-        }, 60000); // Check every minute
+        }, 300000); // Check every 5 minutes instead of 1 minute
     }
 
     // Perform startup check for data integrity
@@ -417,7 +417,7 @@ class DataPersistence {
             const backups = this.getBackups();
             const recentBackups = backups.slice(-5); // Keep only 5 most recent
             localStorage.setItem(this.backupKey, JSON.stringify(recentBackups));
-            console.log('��� Cleaned old backups');
+            console.log('🧹 Cleaned old backups');
         } catch (error) {
             console.error('❌ Error cleaning backups:', error);
         }
