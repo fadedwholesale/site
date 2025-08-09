@@ -82,9 +82,12 @@ class RealTimeSync {
         // Set up periodic sync (with delay to allow SharedDataManager to initialize)
         this.waitForSharedDataManager().then(() => {
             this.startPeriodicSync();
+            // Also start a readiness monitor
+            this.startReadinessMonitor();
         }).catch(error => {
             console.warn('⚠️ SharedDataManager not ready, starting sync anyway:', error);
             this.startPeriodicSync();
+            this.startReadinessMonitor();
         });
 
         // Set up heartbeat system
