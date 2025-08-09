@@ -23,14 +23,18 @@ class FirebaseDataManager {
         this.unsubscribers = new Map();
         this.isInitialized = false;
         this.currentUser = null;
-        
+
+        // Wait for Firebase and then initialize
         this.init();
     }
 
     async init() {
         try {
             console.log('🔥 Initializing Firebase Dynamic Data Manager...');
-            
+
+            // Wait for Firebase modules to be loaded
+            await waitForFirebase();
+
             // Firebase configuration
             const firebaseConfig = {
                 apiKey: "AIzaSyD5Q45_-o5iZcsHeoWEwsQLtVC_A9Z8ixo",
@@ -42,10 +46,22 @@ class FirebaseDataManager {
                 measurementId: "G-Z3RXB38R19"
             };
 
-            // Initialize Firebase
+            // Initialize Firebase using the globally available modules
+            const { initializeApp } = window.firebaseModule;
             this.app = initializeApp(firebaseConfig);
-            this.db = getFirestore(this.app);
-            this.auth = getAuth(this.app);
+
+            // Import Firestore and Auth dynamically
+            const firestoreModule = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+            const authModule = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+
+            this.db = firestoreModule.getFirestore(this.app);
+            this.auth = authModule.getAuth(this.app);
+
+            // Store Firebase methods for later use
+            this.firebase = {
+                ...firestoreModule,
+                ...authModule
+            };
 
             // Set up authentication state listener
             this.setupAuthListener();
