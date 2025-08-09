@@ -11,7 +11,12 @@
     "build": "echo 'No build process needed for static HTML'",
     "test": "echo 'No tests configured'"
   },
-  "keywords": ["cannabis", "wholesale", "portal", "static-site"],
+  "keywords": [
+    "cannabis",
+    "wholesale",
+    "portal",
+    "static-site"
+  ],
   "author": "Faded Skies",
   "license": "MIT",
   "devDependencies": {
@@ -21,5 +26,8 @@
     "type": "git",
     "url": "."
   },
-  "homepage": "./faded_skies_portal-5.html"
+  "homepage": "./faded_skies_portal-5.html",
+  "dependencies": {
+    "firebase": "^12.1.0"
+  }
 }
