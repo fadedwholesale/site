@@ -29,9 +29,12 @@ class RealTimeSync {
         window.addEventListener('offline', this.handleOffline.bind(this));
 
         // Set up periodic sync (with delay to allow SharedDataManager to initialize)
-        setTimeout(() => {
+        this.waitForSharedDataManager().then(() => {
             this.startPeriodicSync();
-        }, 2000);
+        }).catch(error => {
+            console.warn('⚠️ SharedDataManager not ready, starting sync anyway:', error);
+            this.startPeriodicSync();
+        });
 
         // Set up heartbeat system
         this.startHeartbeat();
