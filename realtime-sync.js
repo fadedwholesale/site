@@ -148,22 +148,26 @@ class RealTimeSync {
         }, 5000); // Sync every 5 seconds
     }
 
-    performPeriodicSync() {
+    async performPeriodicSync() {
         console.log('🔄 Performing periodic sync...');
-        
-        // Check for data consistency
-        if (window.sharedDataManager) {
-            const currentData = window.sharedDataManager.getData();
-            const lastSync = new Date(currentData.lastSync || 0);
-            const now = new Date();
-            
-            // If data is older than 30 seconds, broadcast a sync request
-            if (now - lastSync > 30000) {
-                console.log('🔄 Data seems stale, requesting sync...');
-                this.broadcast('sync_request', { timestamp: now.toISOString() });
+
+        try {
+            // Check for data consistency
+            if (window.sharedDataManager) {
+                const currentData = await window.sharedDataManager.getData();
+                const lastSync = new Date(currentData.lastSync || 0);
+                const now = new Date();
+
+                // If data is older than 30 seconds, broadcast a sync request
+                if (now - lastSync > 30000) {
+                    console.log('🔄 Data seems stale, requesting sync...');
+                    this.broadcast('sync_request', { timestamp: now.toISOString() });
+                }
             }
+        } catch (error) {
+            console.warn('⚠️ Error during periodic sync data check:', error);
         }
-        
+
         // Update heartbeat
         this.lastHeartbeat = Date.now();
     }
@@ -314,12 +318,16 @@ class RealTimeSync {
     }
 
     // Force sync all data
-    forceSyncAll() {
+    async forceSyncAll() {
         console.log('🔄 Force syncing all data...');
-        
-        if (window.sharedDataManager) {
-            const allData = window.sharedDataManager.exportData();
-            this.broadcast('full_sync', allData, { force: true });
+
+        try {
+            if (window.sharedDataManager) {
+                const allData = await window.sharedDataManager.exportData();
+                this.broadcast('full_sync', allData, { force: true });
+            }
+        } catch (error) {
+            console.error('❌ Error during force sync:', error);
         }
     }
 
