@@ -20,11 +20,18 @@ function setCurrentUser(user) {
         }
     }
     
-    // Immediately notify cart manager of auth state change
+    // Notify cart manager of auth state change with delay for Firebase readiness
     if (window.cartManager) {
         console.log('🔄 Refreshing cart manager after auth change');
-        window.cartManager.refreshUserState();
-        window.cartManager.updateDisplay();
+        // Add a small delay to allow Firebase to be ready
+        setTimeout(() => {
+            try {
+                window.cartManager.refreshUserState();
+                window.cartManager.updateDisplay();
+            } catch (error) {
+                console.warn('⚠️ Cart manager refresh failed, but continuing:', error.message);
+            }
+        }, 1000);
     }
     
     return user;
