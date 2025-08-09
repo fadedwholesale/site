@@ -1028,7 +1028,7 @@ function updateProfile(event) {
                     currentUser.name = formData.contactName;
                 }
 
-                // Update localStorage and global state
+                // Update global state and Firebase Auth
                 setCurrentUser(currentUser);
 
                 // Update all UI displays that might show user data
@@ -2665,7 +2665,7 @@ function showTestResults(results) {
     if (passedTests === totalTests) {
         showNotification(`✅ ${resultMessage} - All systems working!`, 'success');
     } else {
-        showNotification(`⚠��� ${resultMessage} - Some issues detected`, 'warning');
+        showNotification(`⚠️ ${resultMessage} - Some issues detected`, 'warning');
     }
 
     // Detailed results in console
