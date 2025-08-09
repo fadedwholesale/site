@@ -15,17 +15,45 @@ class DataPersistence {
 
     init() {
         console.log('💾 Initializing Data Persistence System...');
-        
-        // Start automatic backup
-        this.startAutomaticBackup();
-        
-        // Set up recovery mechanisms
-        this.setupRecoveryMechanisms();
-        
-        // Check for corrupted data on startup
-        this.performStartupCheck();
-        
-        console.log('✅ Data Persistence System initialized');
+
+        // Wait for SharedDataManager to be ready before starting
+        this.waitForSharedDataManager().then(() => {
+            // Start automatic backup
+            this.startAutomaticBackup();
+
+            // Set up recovery mechanisms
+            this.setupRecoveryMechanisms();
+
+            // Check for corrupted data on startup
+            this.performStartupCheck();
+
+            console.log('✅ Data Persistence System initialized');
+        }).catch(error => {
+            console.warn('⚠️ SharedDataManager not ready, starting with limited functionality:', error);
+            // Set up basic mechanisms without data operations
+            this.setupRecoveryMechanisms();
+            console.log('⚠️ Data Persistence System initialized with limited functionality');
+        });
+    }
+
+    // Wait for SharedDataManager to be ready
+    async waitForSharedDataManager(maxAttempts = 10) {
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            if (window.sharedDataManager &&
+                typeof window.sharedDataManager.getData === 'function' &&
+                window.sharedDataManager.getStatus &&
+                window.sharedDataManager.getStatus().firebaseReady) {
+
+                console.log('✅ SharedDataManager is ready for persistence operations');
+                return true;
+            }
+
+            console.log(`⏳ Waiting for SharedDataManager... (${attempt + 1}/${maxAttempts})`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        console.warn('⚠️ SharedDataManager readiness timeout after', maxAttempts, 'attempts');
+        return false;
     }
 
     // Start automatic backup system
