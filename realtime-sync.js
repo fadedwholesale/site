@@ -183,12 +183,30 @@ class RealTimeSync {
         console.log('🔄 Performing periodic sync...');
 
         try {
-            // Check for data consistency
-            if (this.isSharedDataManagerReady &&
-                window.sharedDataManager &&
-                typeof window.sharedDataManager.getData === 'function') {
+            // More comprehensive readiness check
+            if (!window.sharedDataManager) {
+                console.log('⏳ SharedDataManager not available, skipping sync check');
+                this.lastHeartbeat = Date.now();
+                return;
+            }
 
-                const currentData = await window.sharedDataManager.getData();
+            if (typeof window.sharedDataManager.getData !== 'function') {
+                console.log('⏳ SharedDataManager.getData not available, skipping sync check');
+                this.isSharedDataManagerReady = false; // Reset flag
+                this.lastHeartbeat = Date.now();
+                return;
+            }
+
+            if (window.sharedDataManager.getStatus && !window.sharedDataManager.getStatus().firebaseReady) {
+                console.log('⏳ Firebase not ready, skipping sync check');
+                this.lastHeartbeat = Date.now();
+                return;
+            }
+
+            // If we get here, everything should be ready
+            const currentData = await window.sharedDataManager.getData();
+
+            if (currentData && currentData.lastSync) {
                 const lastSync = new Date(currentData.lastSync || 0);
                 const now = new Date();
 
@@ -197,11 +215,11 @@ class RealTimeSync {
                     console.log('🔄 Data seems stale, requesting sync...');
                     this.broadcast('sync_request', { timestamp: now.toISOString() });
                 }
-            } else {
-                console.log('⏳ SharedDataManager not ready yet, skipping sync check');
             }
         } catch (error) {
             console.warn('⚠️ Error during periodic sync data check:', error);
+            // Reset readiness flag on error
+            this.isSharedDataManagerReady = false;
         }
 
         // Update heartbeat
