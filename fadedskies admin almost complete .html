@@ -7509,6 +7509,27 @@ Faded Skies Partnership Team`
         });
     </script>
 
+    <!-- Firebase Dynamic System Scripts -->
+    <script type="module">
+        // Firebase v9 imports
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+
+        // Make Firebase available globally
+        window.firebaseModule = {
+            initializeApp,
+            getFirestore,
+            getAuth
+        };
+
+        console.log('🔥 Firebase modules loaded and ready for admin portal');
+    </script>
+    <script src="firebase-data-manager.js"></script>
+    <script src="firebase-cart-system.js"></script>
+    <script src="firebase-application-system.js"></script>
+    <script src="firebase-system-integration.js"></script>
+
     <!-- Enhanced live data and real-time synchronization systems -->
     <script src="realtime-sync.js"></script>
     <script src="data-persistence.js"></script>
