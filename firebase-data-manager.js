@@ -1,31 +1,19 @@
 // Firebase Dynamic Data Manager for Faded Skies Portal
 // Real-time Firestore integration for orders, applications, and inventory
 
-import { initializeApp } from 'firebase/app';
-import { 
-    getFirestore, 
-    collection, 
-    doc, 
-    getDocs, 
-    getDoc,
-    addDoc, 
-    updateDoc, 
-    deleteDoc, 
-    onSnapshot, 
-    query, 
-    where, 
-    orderBy, 
-    limit,
-    serverTimestamp,
-    writeBatch
-} from 'firebase/firestore';
-import { 
-    getAuth, 
-    signInWithEmailAndPassword, 
-    createUserWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged
-} from 'firebase/auth';
+// Wait for Firebase modules to be available
+function waitForFirebase() {
+    return new Promise((resolve) => {
+        const checkFirebase = () => {
+            if (window.firebaseModule) {
+                resolve();
+            } else {
+                setTimeout(checkFirebase, 100);
+            }
+        };
+        checkFirebase();
+    });
+}
 
 class FirebaseDataManager {
     constructor() {
