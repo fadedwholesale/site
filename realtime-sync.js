@@ -157,7 +157,10 @@ class RealTimeSync {
 
         try {
             // Check for data consistency
-            if (window.sharedDataManager) {
+            if (window.sharedDataManager &&
+                typeof window.sharedDataManager.getData === 'function' &&
+                window.sharedDataManager.getStatus().firebaseReady) {
+
                 const currentData = await window.sharedDataManager.getData();
                 const lastSync = new Date(currentData.lastSync || 0);
                 const now = new Date();
@@ -167,6 +170,8 @@ class RealTimeSync {
                     console.log('🔄 Data seems stale, requesting sync...');
                     this.broadcast('sync_request', { timestamp: now.toISOString() });
                 }
+            } else {
+                console.log('⏳ SharedDataManager not ready yet, skipping sync check');
             }
         } catch (error) {
             console.warn('⚠️ Error during periodic sync data check:', error);
