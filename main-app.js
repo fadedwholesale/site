@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApplication();
     loadInitialData();
     setupEventListeners();
+    setupNotificationFiltering();
 
     // Verify authentication state
     setTimeout(() => {
@@ -54,6 +55,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('✅ Application initialized successfully');
 });
+
+// Setup notification filtering based on user context
+function setupNotificationFiltering() {
+    // Override the global showNotification function to add filtering
+    const originalShowNotification = window.showNotification;
+
+    window.showNotification = function(message, type = 'info', options = {}) {
+        const currentUser = window.currentUser;
+        const isAdmin = currentUser?.role === 'admin' || currentUser?.email?.includes('admin');
+        const isPartner = currentUser && !isAdmin;
+
+        // Filter notifications based on type and user role
+        if (options.adminOnly && !isAdmin) {
+            console.log('Filtering out admin-only notification for non-admin user');
+            return;
+        }
+
+        if (options.partnerOnly && !isPartner) {
+            console.log('Filtering out partner-only notification for non-partner user');
+            return;
+        }
+
+        // Filter out system notifications for partners to reduce noise
+        if (isPartner && (type === 'system' || message.includes('synced') || message.includes('updated'))) {
+            // Only show if it's their own action
+            if (!options.userSpecific) {
+                console.log('Filtering out system notification for partner to reduce noise');
+                return;
+            }
+        }
+
+        // Call original function
+        if (originalShowNotification) {
+            originalShowNotification(message, type, options);
+        }
+    };
+}
 
 function initializeApplication() {
     // Initialize cart manager if not already done
@@ -1527,6 +1565,15 @@ function resetRegistrationForm() {
 }
 
 function triggerAdminNotification(applicationData) {
+    // Only trigger admin notifications if current user is admin
+    const currentUser = window.currentUser;
+    const isAdmin = currentUser?.role === 'admin' || currentUser?.email?.includes('admin');
+
+    if (!isAdmin) {
+        console.log('Skipping admin notification - current user is not admin');
+        return;
+    }
+
     // Store notification for admin dashboard
     const adminNotifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
     adminNotifications.unshift({
@@ -2354,7 +2401,7 @@ window.exportAllPresets = function() {
     if (window.bulkOrderManager) {
         window.bulkOrderManager.exportAllPresets();
     } else {
-        showNotification('⚠️ Bulk order system loading...', 'warning');
+        showNotification('��️ Bulk order system loading...', 'warning');
     }
 };
 
