@@ -326,6 +326,12 @@ class CartManager {
     // Update cart display
     updateDisplay() {
         try {
+            // Safety check: ensure cart is an array
+            if (!Array.isArray(this.cart)) {
+                console.warn('⚠️ Cart is not an array in updateDisplay:', typeof this.cart, this.cart);
+                this.cart = [];
+            }
+
             console.log('🔄 Updating cart display with', this.cart.length, 'unique items');
             
             const cartItems = document.getElementById('cartItems');
@@ -586,7 +592,7 @@ class CartManager {
             // Validate cart items
             const validation = this.validateCart();
             if (!validation.valid) {
-                this.showNotification('🔄 Please review your cart and try again', 'warning');
+                this.showNotification('��� Please review your cart and try again', 'warning');
                 return false;
             }
 
