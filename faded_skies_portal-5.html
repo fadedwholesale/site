@@ -2692,7 +2692,7 @@
                             <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px;">
                                 <button class="btn btn-primary" onclick="openBulkOrderModal()">📦 Create Bulk Order</button>
                                 <button class="btn btn-secondary" onclick="openPresetManager()">�� Manage Presets</button>
-                                <button class="btn btn-secondary" onclick="viewBulkHistory()">📋 View History</button>
+                                <button class="btn btn-secondary" onclick="viewBulkHistory()">��� View History</button>
                                 <button class="btn btn-secondary" onclick="requestCustomQuote()">💬 Custom Quote</button>
                             </div>
 
@@ -2784,7 +2784,7 @@
                     �� Wholesale Cannabis Vape Cartridges<br>
                     • Bulk Hemp Orders (20lb+ available)<br>
                     • Cannabis Wholesale Packaging Solutions<br>
-                    ��� Hemp White Label Opportunities<br>
+                    • Hemp White Label Opportunities<br>
                     • THCA Bulk Pricing & Wholesale Cannabis Edibles</p>
                 </div>
                 <div class="footer-section">
@@ -3390,7 +3390,7 @@
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 16px; border: 2px solid var(--border-subtle); border-radius: 8px; background: var(--surface-card); transition: all 0.3s ease;" onchange="updateDeliveryMethodLive(this)">
                                 <input type="radio" name="deliveryMethod" value="priority" style="margin: 0;">
                                 <div>
-                                    <div style="font-weight: 600; color: var(--text-primary);">⚡ Priority Shipping</div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">�� Priority Shipping</div>
                                     <div style="font-size: 12px; color: var(--text-secondary);">1-2 business days • <span class="live-shipping-cost" data-method="priority">$25</span></div>
                                 </div>
                             </label>
@@ -3629,7 +3629,7 @@
     <script src="system-integration.js?v=portal-sync-ready"></script>
     <script src="realtime-ui.js?v=portal-sync-ready"></script>
     <script src="notification-system.js?v=portal-sync-ready"></script>
-    <script src="shared-data.js?v=portal-sync-ready"></script>
+    <script src="shared-data.js?v=firebase-ready-fix-v2"></script>
     <script src="cart-system.js?v=firebase-ready-fix-v2"></script>
     <script src="bulk-order-system.js?v=portal-sync-ready"></script>
     <script src="main-app.js?v=firebase-ready-fix-v2"></script>
@@ -5898,7 +5898,7 @@
                             <button class="btn btn-secondary btn-sm" onclick="viewOrderDetails('${order.id}')">👁️ View</button>
                             <button class="btn btn-secondary btn-sm" onclick="trackOrderDetailed('${order.id}')">📦 Track</button>
                             ${canEdit ? `<button class="btn btn-primary btn-sm" onclick="editOrder('${order.id}')">✏️ Edit</button>` : ''}
-                            ${(canCancel && order.status !== 'CANCELLED') ? `<button class="btn btn-danger btn-sm" onclick="cancelOrder('${order.id}')">❌ Cancel</button>` : ''}
+                            ${(canCancel && order.status !== 'CANCELLED') ? `<button class="btn btn-danger btn-sm" onclick="cancelOrder('${order.id}')">��� Cancel</button>` : ''}
                             <button class="btn btn-secondary btn-sm" onclick="reorderItems('${order.id}')">🔄 Reorder</button>
                         </div>
                     </td>
