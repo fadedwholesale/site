@@ -259,18 +259,24 @@ function setupEventListeners() {
     });
 }
 
-function handleSharedDataChange(event) {
+async function handleSharedDataChange(event) {
     const { type, data } = event.detail;
     console.log('📡 Shared data changed:', type, data);
-    
+
     switch (type) {
         case 'products_updated':
             products = data;
             updateAllViews();
             break;
         case 'order_added':
-            orders = window.sharedDataManager.getOrders();
-            updateOrdersDisplay();
+            try {
+                if (window.sharedDataManager && typeof window.sharedDataManager.getOrders === 'function') {
+                    orders = await window.sharedDataManager.getOrders();
+                    updateOrdersDisplay();
+                }
+            } catch (error) {
+                console.error('❌ Error getting orders:', error);
+            }
             if (currentUser && data.partner === currentUser.email) {
                 showNotification(`🎉 Order ${data.id} placed successfully!`, 'success');
             }
