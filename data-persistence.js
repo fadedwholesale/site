@@ -72,8 +72,19 @@ class DataPersistence {
     // Create a backup of current data
     async createBackup() {
         try {
-            if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
+            if (window.sharedDataManager &&
+                typeof window.sharedDataManager.getData === 'function' &&
+                window.sharedDataManager.getStatus &&
+                window.sharedDataManager.getStatus().firebaseReady) {
+
                 const currentData = await window.sharedDataManager.getData();
+
+                // Validate data before backing up
+                if (!this.isValidDataStructure(currentData)) {
+                    console.warn('⚠️ Invalid data structure, skipping backup');
+                    return;
+                }
+
                 const backup = {
                     timestamp: new Date().toISOString(),
                     data: currentData,
@@ -84,6 +95,8 @@ class DataPersistence {
 
                 this.saveBackup(backup);
                 console.log('💾 Backup created:', backup.timestamp);
+            } else {
+                console.log('⏳ SharedDataManager not ready, skipping backup');
             }
         } catch (error) {
             console.error('❌ Error creating backup:', error);
