@@ -208,19 +208,35 @@ class SharedDataManager {
     }
 
     async getOrders() {
-        if (!this.db) throw new Error('Firebase not ready');
+        // Enhanced Firebase readiness check
+        if (!this.db || !this.firebaseBridge) {
+            console.warn('⚠️ Firebase not ready for getOrders, returning empty array');
+            return [];
+        }
 
         try {
+            // Additional safety check
+            if (!this.getStatus().firebaseReady) {
+                console.warn('⚠️ Firebase status reports not ready for getOrders, returning empty array');
+                return [];
+            }
+
             const snapshot = await this.db.collection('orders')
                 .orderBy('createdAt', 'desc')
                 .get();
-            
+
             const orders = [];
             snapshot.forEach(doc => {
                 orders.push({ id: doc.id, ...doc.data() });
             });
             return orders;
         } catch (error) {
+            // Handle "Firebase not ready" errors specifically
+            if (error.message === 'Firebase not ready') {
+                console.warn('⚠️ Firebase not ready during getOrders operation, returning empty array');
+                return [];
+            }
+
             console.error('❌ Error getting orders from Firebase:', error);
             return [];
         }
