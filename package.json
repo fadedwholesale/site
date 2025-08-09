@@ -29,6 +29,6 @@
   "homepage": "./faded_skies_portal-5.html",
   "dependencies": {
     "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
-    "firebase": "^12.1.0"
+    "firebase": "^11.10.0"
   }
 }
