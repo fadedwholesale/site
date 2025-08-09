@@ -4,12 +4,12 @@
 class DataPersistence {
     constructor() {
         this.backupKey = 'fadedSkiesBackup';
-        this.backupInterval = 30000; // 30 seconds
-        this.maxBackups = 10;
+        this.backupInterval = 300000; // 5 minutes instead of 30 seconds
+        this.maxBackups = 5; // Reduce backup count to save storage
         this.backupTimer = null;
         this.recoveryTimer = null;
         this.isRecovering = false;
-        
+
         this.init();
     }
 
