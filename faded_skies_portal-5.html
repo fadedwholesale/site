@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>THCA Wholesale | Premium THC Hemp Products | Faded Skies Cannabis Wholesale Distribution</title>
     <meta name="description" content="#1 THCA wholesale distributor. Premium THC hemp products, wholesale cannabis concentrates, THCA flower, vapes & edibles. Licensed processor serving dispensaries nationwide with lab-tested, Farm Bill compliant products.">
     <meta name="keywords" content="THCA wholesale, THC wholesale, hemp wholesale, wholesale cannabis, THCA flower wholesale, THC concentrates wholesale, hemp products wholesale, cannabis wholesale distributor, THCA bulk sales, THC hemp wholesale, wholesale marijuana products, cannabis wholesale pricing, hemp processor wholesale, THCA wholesale prices, bulk hemp products, wholesale CBD THCA, cannabis wholesale supplier, hemp wholesale distributor, THCA wholesale marketplace, THC wholesale distribution, wholesale cannabis flower, hemp wholesale products, THCA bulk pricing, cannabis wholesale business, hemp wholesale sales, wholesale THCA products, THC hemp distributor, cannabis wholesale network, hemp wholesale company, THCA wholesale dealer">
@@ -2717,7 +2720,7 @@
 
                         <!-- Recent Bulk Orders -->
                         <div class="card">
-                            <h3>📋 Recent Bulk Orders</h3>
+                            <h3>���� Recent Bulk Orders</h3>
                             <table class="data-table" id="bulkOrderHistoryTable">
                                 <thead>
                                     <tr>
@@ -3214,7 +3217,7 @@
     <div id="profileEditModal" class="modal">
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
-                <h3 class="modal-title">✏️ Edit Business Profile</h3>
+                <h3 class="modal-title">���️ Edit Business Profile</h3>
                 <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Update your business information and contact details</div>
                 <button class="modal-close" onclick="closeModal('profileEditModal')">×</button>
             </div>
@@ -3254,7 +3257,7 @@
                 <!-- Business Details Section -->
                 <div class="form-section" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);">
                     <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                        📋 Business Details
+                        ���� Business Details
                     </h4>
                     <div class="form-row">
                         <div class="form-group">
@@ -3607,21 +3610,29 @@
     </div>
 
     <!-- Firebase Integration Bridge - Dynamic/Live Portal System -->
-    <script src="firebase-integration-bridge.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script src="firebase-config.js"></script>
+    <script src="firebase-integration-bridge.js?v=firebase-ready-fix-v2"></script>
 
     <!-- Enhanced real-time synchronization and live data systems -->
-    <script src="realtime-sync.js"></script>
-    <script src="data-persistence.js"></script>
-    <script src="live-data-manager.js"></script>
-    <script src="order-sync-manager.js"></script>
-    <script src="simple-logger.js"></script>
-    <script src="system-integration.js"></script>
-    <script src="realtime-ui.js"></script>
-    <script src="notification-system.js"></script>
-    <script src="shared-data.js"></script>
-    <script src="cart-system.js"></script>
-    <script src="bulk-order-system.js"></script>
-    <script src="main-app.js"></script>
+    <script src="realtime-sync.js?v=firebase-ready-fix-v2"></script>
+    <script src="data-persistence.js?v=portal-sync-ready"></script>
+    <script src="live-data-manager.js?v=portal-sync-ready"></script>
+    <script src="order-sync-manager.js?v=portal-sync-ready"></script>
+    <script src="simple-logger.js?v=portal-sync-ready"></script>
+    <script src="system-integration.js?v=portal-sync-ready"></script>
+    <script src="realtime-ui.js?v=portal-sync-ready"></script>
+    <script src="notification-system.js?v=portal-sync-ready"></script>
+    <script src="shared-data.js?v=firebase-ready-fix-v2"></script>
+    <script src="cart-system.js?v=firebase-ready-fix-v2"></script>
+    <script src="bulk-order-system.js?v=portal-sync-ready"></script>
+    <script src="main-app.js?v=firebase-ready-fix-v2"></script>
     <script src="cleanup-invalid-products.js"></script>
 
     <script>
@@ -3833,23 +3844,23 @@
             }
         ];
 
-        // Mobile Navigation Functions
-        function toggleMobileMenu() {
+        // Mobile Navigation Functions - Global scope
+        window.toggleMobileMenu = function() {
             try {
                 const navLinks = document.getElementById('mobileNavLinks');
                 const isOpen = navLinks.classList.contains('open');
 
                 if (isOpen) {
-                    closeMobileMenu();
+                    window.closeMobileMenu();
                 } else {
-                    openMobileMenu();
+                    window.openMobileMenu();
                 }
             } catch (error) {
                 console.error('Error toggling mobile menu:', error);
             }
-        }
+        };
 
-        function openMobileMenu() {
+        window.openMobileMenu = function() {
             try {
                 const navLinks = document.getElementById('mobileNavLinks');
                 navLinks.classList.add('open');
@@ -3858,9 +3869,9 @@
             } catch (error) {
                 console.error('Error opening mobile menu:', error);
             }
-        }
+        };
 
-        function closeMobileMenu() {
+        window.closeMobileMenu = function() {
             try {
                 const navLinks = document.getElementById('mobileNavLinks');
                 navLinks.classList.remove('open');
@@ -3869,7 +3880,7 @@
             } catch (error) {
                 console.error('Error closing mobile menu:', error);
             }
-        }
+        };
 
         // Initialize Application with Session Restoration and Mobile Support - FIXED
         document.addEventListener('DOMContentLoaded', function() {
@@ -3918,7 +3929,7 @@
                 window.addEventListener('orientationchange', function() {
                     setTimeout(() => {
                         // Close mobile menu on orientation change
-                        closeMobileMenu();
+                        window.closeMobileMenu();
 
                         // Resize modal if open
                         const openModals = document.querySelectorAll('.modal[style*="block"]');
@@ -3942,7 +3953,7 @@
                     } else {
                         if (mobileToggle) mobileToggle.style.display = 'none';
                         document.body.classList.remove('mobile-device');
-                        closeMobileMenu();
+                        window.closeMobileMenu();
                     }
                 });
 
@@ -3954,7 +3965,7 @@
 
                     if (navLinks && navLinks.classList.contains('open')) {
                         if (!navLinks.contains(e.target) && !mobileToggle.contains(e.target)) {
-                            closeMobileMenu();
+                            window.closeMobileMenu();
                         }
                     }
                 });
@@ -5343,9 +5354,13 @@
                     console.log('✅ Real-time sync listeners configured for partner portal');
 
                     // Set up periodic sync verification
-                    setInterval(() => {
-                        verifyPartnerPortalSync();
-                    }, 30000); // Check every 30 seconds
+                    setInterval(async () => {
+                    try {
+                        await verifyPartnerPortalSync();
+                    } catch (error) {
+                        console.warn('⚠️ Error in partner portal sync verification:', error);
+                    }
+                }, 30000); // Check every 30 seconds
 
                 } else {
                     console.log('⏳ Real-time sync not ready, retrying in 1 second...');
@@ -5357,11 +5372,11 @@
         }
 
         // Verify partner portal is in sync with shared data
-        function verifyPartnerPortalSync() {
+        async function verifyPartnerPortalSync() {
             try {
-                if (!window.sharedDataManager) return;
+                if (!window.sharedDataManager || typeof window.sharedDataManager.getData !== 'function') return;
 
-                const sharedData = window.sharedDataManager.getData();
+                const sharedData = await window.sharedDataManager.getData();
 
                 // Check if product counts match
                 if (sharedData.products && sharedData.products.length !== products.length) {
@@ -5435,18 +5450,20 @@
 
         // Refresh all products from shared data
         function refreshAllProducts() {
-            try {
-                if (window.sharedDataManager) {
-                    const sharedData = window.sharedDataManager.getData();
-                    if (sharedData && sharedData.products) {
-                        products = sharedData.products;
-                        updateAllViews();
-                        forceUpdateWithImages();
+            (async () => {
+                try {
+                    if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
+                        const sharedData = await window.sharedDataManager.getData();
+                        if (sharedData && sharedData.products) {
+                            products = sharedData.products;
+                            updateAllViews();
+                            forceUpdateWithImages();
+                        }
                     }
+                } catch (error) {
+                    console.error('Error refreshing products:', error);
                 }
-            } catch (error) {
-                console.error('Error refreshing products:', error);
-            }
+            })();
         }
 
         // Update order status in partner view
@@ -5697,7 +5714,7 @@
 
         // Force update all views and tables with product images
         function forceUpdateWithImages() {
-            console.log('🔄 Force updating all tables with product images...');
+            console.log('�� Force updating all tables with product images...');
             
             // Update public inventory if visible
             if (inventoryVisible) {
@@ -6685,7 +6702,7 @@ Phone: (210) 835-7834
                 
                 order.status = 'CANCELLED';
                 updateOrderHistory();
-                showNotification(`❌ Order ${orderId} has been cancelled`, 'success');
+                showNotification(`��� Order ${orderId} has been cancelled`, 'success');
             } catch (error) {
                 console.error('Error cancelling order:', error);
                 showNotification('Cancel error. Please contact support.', 'error');
@@ -6771,7 +6788,7 @@ Phone: (210) 835-7834
 
         function createBulkOrder() {
             try {
-                showNotification('📦 Bulk order wizard opening soon! Contact support for immediate assistance.', 'success');
+                showNotification('��� Bulk order wizard opening soon! Contact support for immediate assistance.', 'success');
             } catch (error) {
                 console.error('Error creating bulk order:', error);
                 showNotification('Bulk order error. Please try again.', 'error');
@@ -7608,7 +7625,7 @@ Phone: (210) 835-7834
                         if (inventorySection) {
                             inventorySection.classList.add('show');
                             updatePublicInventory();
-                            showNotification('����� Inventory displayed with product images!', 'success');
+                            showNotification('������ Inventory displayed with product images!', 'success');
                         } else {
                             console.error('Inventory section not found');
                         }

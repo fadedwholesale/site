@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Persistence Fix</title>
+    <style>
+        body { font-family: monospace; margin: 20px; background: #000; color: #fff; }
+        .log { margin: 5px 0; padding: 5px; border-left: 3px solid #0f0; }
+        .error { border-left-color: #f00; }
+        .warn { border-left-color: #fa0; }
+        .success { border-left-color: #0f0; }
+    </style>
+</head>
+<body>
+    <h1>Data Persistence Fix Test</h1>
+    <p>Monitoring for "Recovery failed - resetting to defaults" errors...</p>
+    <div id="logs"></div>
+    
+    <!-- Load scripts in same order as admin portal -->
+    <script src="firebase-integration-bridge.js"></script>
+    <script src="realtime-sync.js"></script>
+    <script src="data-persistence.js"></script>
+    <script src="shared-data.js"></script>
+
+    <script>
+        const logsDiv = document.getElementById('logs');
+        let errorCount = 0;
+        
+        function addLog(type, message) {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsDiv.appendChild(div);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            
+            if (type === 'error' && message.includes('Recovery failed')) {
+                errorCount++;
+                document.title = `Test Page - ${errorCount} Errors`;
+            }
+        }
+        
+        // Override console methods to capture logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = (...args) => {
+            originalLog(...args);
+            addLog('log', args.join(' '));
+        };
+        
+        console.error = (...args) => {
+            originalError(...args);
+            addLog('error', args.join(' '));
+        };
+        
+        console.warn = (...args) => {
+            originalWarn(...args);
+            addLog('warn', args.join(' '));
+        };
+        
+        // Mock notification system to capture error messages
+        window.showNotification = (message, type) => {
+            addLog(type || 'info', `NOTIFICATION: ${message}`);
+            
+            if (message.includes('Recovery failed - resetting to defaults')) {
+                addLog('error', '🚨 DETECTED THE PROBLEMATIC ERROR MESSAGE! 🚨');
+                errorCount++;
+            }
+        };
+        
+        // Status checker
+        setInterval(() => {
+            const status = {
+                dataPersistence: !!window.dataPersistence,
+                sharedDataManager: !!window.sharedDataManager,
+                realTimeSync: !!window.realTimeSync,
+                errorCount: errorCount
+            };
+            
+            if (errorCount === 0) {
+                addLog('success', `Status OK - No recovery errors detected. Systems: ${JSON.stringify(status)}`);
+            }
+        }, 10000);
+        
+        addLog('log', 'Test page loaded, monitoring for errors...');
+    </script>
+</body>
+</html>

@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Faded Skies - Admin Dashboard</title>
     <style>
         * {
@@ -1481,7 +1484,7 @@
                         <div class="action-group">
                             <button class="btn btn-primary" onclick="openModal('bulkPriceModal')">📈 Bulk Price Update</button>
                             <button class="btn btn-secondary" onclick="openModal('priceRulesModal')">⚙️ Pricing Rules</button>
-                            <button class="btn btn-secondary" onclick="applyMarketAnalysis()">📊 Market Analysis</button>
+                            <button class="btn btn-secondary" onclick="applyMarketAnalysis()">���� Market Analysis</button>
                             <button class="btn btn-secondary" onclick="exportPricing()">📄 Export Pricing</button>
                         </div>
                     </div>
@@ -2591,7 +2594,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
     </div>
 
     <!-- Include Shared Data Manager -->
-    <script src="shared-data.js"></script>
+    <script src="shared-data.js?v=firebase-ready-fix-v2"></script>
 
     <script>
         // Global State Management
@@ -2995,8 +2998,12 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                 console.log('✅ Real-time sync listeners configured for admin portal');
 
                 // Set up periodic sync verification
-                setInterval(() => {
-                    verifyAdminPortalSync();
+                setInterval(async () => {
+                    try {
+                        await verifyAdminPortalSync();
+                    } catch (error) {
+                        console.warn('⚠️ Error in admin portal sync verification:', error);
+                    }
                 }, 30000); // Check every 30 seconds
 
             } else {
@@ -3006,11 +3013,11 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
         }
 
         // Verify admin portal is in sync with shared data
-        function verifyAdminPortalSync() {
+        async function verifyAdminPortalSync() {
             try {
-                if (!window.sharedDataManager) return;
+                if (!window.sharedDataManager || typeof window.sharedDataManager.getData !== 'function') return;
 
-                const sharedData = window.sharedDataManager.getData();
+                const sharedData = await window.sharedDataManager.getData();
 
                 // Check if product counts match
                 if (sharedData.products && sharedData.products.length !== products.length) {
@@ -3237,7 +3244,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
                                 window.sharedDataManager.updateProduct(product.id, { stock: newStock });
                             }
 
-                            console.log(`📦 Updated stock for ${productName}: ${product.stock + quantity} → ${newStock}`);
+                            console.log(`�� Updated stock for ${productName}: ${product.stock + quantity} → ${newStock}`);
                         }
                     }
                 });
@@ -4405,7 +4412,7 @@ B-GRADE,Blue Dream,26.1,550,AVAILABLE,15,Hybrid"></textarea>
 
                 updateOrdersTable();
                 updateDashboardStats();
-                showNotification(`📋 Order ${orderId} status updated to ${newStatus}`, 'success');
+                showNotification(`���� Order ${orderId} status updated to ${newStatus}`, 'success');
 
                 // Log successful status update
                 if (window.simpleLogger) {
@@ -5868,7 +5875,7 @@ Faded Skies Wholesale Team
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 800px;">
                     <div class="modal-header">
-                        <h3 class="modal-title">��️ Edit Partner - ${partner.businessName}</h3>
+                        <h3 class="modal-title">���� Edit Partner - ${partner.businessName}</h3>
                         <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
                     </div>
                     <form id="editPartnerForm">
@@ -6105,7 +6112,7 @@ Faded Skies Wholesale Team
                 console.log(`📧 Password reset email sent to: ${partner.email}`);
             });
             
-            showNotification(`��� Password reset emails sent to ${eligiblePartners.length} partners`, 'success');
+            showNotification(`����� Password reset emails sent to ${eligiblePartners.length} partners`, 'success');
         }
 
         function updatePasswordResetTable() {
@@ -6304,7 +6311,7 @@ Welcome to this month's Faded Skies Wholesale newsletter!
 🎯 THIS MONTH'S HIGHLIGHTS:
 • Industry market trends and insights
 �� New product announcements and arrivals
-��� Partnership program updates and tier benefits
+���� Partnership program updates and tier benefits
 • Educational resources and compliance updates
 
 📈 PARTNERSHIP BENEFITS:
@@ -7506,15 +7513,23 @@ Faded Skies Partnership Team`
     </script>
 
     <!-- Firebase Integration Bridge - Dynamic/Live Admin System -->
-    <script src="firebase-integration-bridge.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script src="firebase-config.js"></script>
+    <script src="firebase-integration-bridge.js?v=portal-sync-ready"></script>
 
     <!-- Enhanced live data and real-time synchronization systems -->
-    <script src="realtime-sync.js"></script>
-    <script src="data-persistence.js"></script>
-    <script src="live-data-manager.js"></script>
-    <script src="order-sync-manager.js"></script>
-    <script src="simple-logger.js"></script>
-    <script src="system-integration.js"></script>
-    <script src="cleanup-invalid-products.js"></script>
+    <script src="realtime-sync.js?v=firebase-ready-fix-v2"></script>
+    <script src="data-persistence.js?v=portal-sync-ready"></script>
+    <script src="live-data-manager.js?v=portal-sync-ready"></script>
+    <script src="order-sync-manager.js?v=portal-sync-ready"></script>
+    <script src="simple-logger.js?v=portal-sync-ready"></script>
+    <script src="system-integration.js?v=portal-sync-ready"></script>
+    <script src="cleanup-invalid-products.js?v=portal-sync-ready"></script>
 </body>
 </html>

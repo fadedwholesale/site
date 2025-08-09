@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cache Diagnostic</title>
+    <style>
+        body { font-family: monospace; background: #000; color: #0f0; padding: 20px; }
+        .error { color: #f00; font-weight: bold; }
+        .success { color: #0f0; font-weight: bold; }
+        .warning { color: #fa0; font-weight: bold; }
+        .code { background: #333; padding: 10px; margin: 10px 0; border-left: 3px solid #0f0; }
+    </style>
+</head>
+<body>
+    <h1>Cache Diagnostic - Script Loading Test</h1>
+    <div id="results"></div>
+
+    <!-- Load scripts with cache busting -->
+    <script src="firebase-integration-bridge.js?v=fix-getdata-20250109"></script>
+    <script src="realtime-sync.js?v=fix-getdata-20250109"></script>
+    <script src="data-persistence.js?v=fix-getdata-20250109"></script>
+    <script src="shared-data.js?v=fix-getdata-20250109"></script>
+
+    <script>
+        const resultsDiv = document.getElementById('results');
+
+        function addResult(type, message) {
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            resultsDiv.appendChild(div);
+        }
+
+        function checkScriptVersions() {
+            addResult('success', '<h2>Script Loading Diagnostic</h2>');
+            
+            // Check if scripts loaded
+            addResult('success', `✅ firebase-integration-bridge.js loaded: ${!!window.firebaseIntegrationBridge}`);
+            addResult('success', `✅ realtime-sync.js loaded: ${!!window.RealTimeSync}`);
+            addResult('success', `✅ data-persistence.js loaded: ${!!window.DataPersistence}`);
+            addResult('success', `✅ shared-data.js loaded: ${!!window.sharedDataManager}`);
+            
+            // Check specific method availability
+            if (window.sharedDataManager) {
+                const hasGetData = typeof window.sharedDataManager.getData === 'function';
+                addResult(hasGetData ? 'success' : 'error', 
+                    `${hasGetData ? '✅' : '❌'} sharedDataManager.getData method available: ${hasGetData}`);
+                
+                if (hasGetData) {
+                    addResult('success', '<div class="code">window.sharedDataManager.getData is a function!</div>');
+                } else {
+                    addResult('error', '<div class="code">window.sharedDataManager.getData is NOT a function!</div>');
+                    addResult('error', `Type: ${typeof window.sharedDataManager.getData}`);
+                    addResult('error', `Available methods: ${Object.getOwnPropertyNames(window.sharedDataManager).join(', ')}`);
+                }
+            } else {
+                addResult('error', '❌ window.sharedDataManager not available');
+            }
+
+            // Check RealTimeSync
+            if (window.realTimeSync) {
+                addResult('success', `✅ realTimeSync instance exists: ${!!window.realTimeSync}`);
+                addResult('success', `✅ realTimeSync ready flag: ${window.realTimeSync.isSharedDataManagerReady}`);
+            }
+
+            // Check for the specific error by monitoring console
+            const originalError = console.error;
+            let errorDetected = false;
+            
+            console.error = (...args) => {
+                originalError(...args);
+                const message = args.join(' ');
+                if (message.includes('window.sharedDataManager.getData is not a function')) {
+                    errorDetected = true;
+                    addResult('error', '🚨 TARGET ERROR DETECTED IN CONSOLE! 🚨');
+                    addResult('error', `<div class="code">${message}</div>`);
+                }
+            };
+
+            // Wait and check for errors
+            setTimeout(() => {
+                if (!errorDetected) {
+                    addResult('success', '🎉 No "getData is not a function" errors detected so far!');
+                } else {
+                    addResult('error', '❌ The target error was detected!');
+                }
+            }, 15000);
+        }
+
+        // Run checks after a delay
+        setTimeout(checkScriptVersions, 2000);
+
+        // Monitor for any uncaught errors
+        window.onerror = function(message, source, lineno, colno, error) {
+            addResult('error', `Uncaught Error: ${message} at ${source}:${lineno}:${colno}`);
+            if (message.includes('getData is not a function')) {
+                addResult('error', '🚨 TARGET ERROR DETECTED VIA WINDOW.ONERROR! 🚨');
+            }
+        };
+
+        addResult('success', 'Diagnostic started... waiting for scripts to load...');
+    </script>
+</body>
+</html>

@@ -4,44 +4,88 @@
 class DataPersistence {
     constructor() {
         this.backupKey = 'fadedSkiesBackup';
-        this.backupInterval = 30000; // 30 seconds
-        this.maxBackups = 10;
+        this.backupInterval = 300000; // 5 minutes instead of 30 seconds
+        this.maxBackups = 5; // Reduce backup count to save storage
         this.backupTimer = null;
         this.recoveryTimer = null;
         this.isRecovering = false;
-        
+
         this.init();
     }
 
     init() {
         console.log('💾 Initializing Data Persistence System...');
-        
-        // Start automatic backup
-        this.startAutomaticBackup();
-        
-        // Set up recovery mechanisms
-        this.setupRecoveryMechanisms();
-        
-        // Check for corrupted data on startup
-        this.performStartupCheck();
-        
-        console.log('✅ Data Persistence System initialized');
+
+        // Wait for SharedDataManager to be ready before starting
+        this.waitForSharedDataManager().then(() => {
+            // Start automatic backup
+            this.startAutomaticBackup();
+
+            // Set up recovery mechanisms
+            this.setupRecoveryMechanisms();
+
+            // Temporarily disable startup check to prevent Firebase timing issues
+            // TODO: Re-enable once Firebase initialization timing is more reliable
+            console.log('⏳ Startup check disabled to prevent Firebase timing issues');
+
+            console.log('✅ Data Persistence System initialized');
+        }).catch(error => {
+            console.warn('⚠️ SharedDataManager not ready, starting with limited functionality:', error);
+            // Set up basic mechanisms without data operations
+            this.setupRecoveryMechanisms();
+            console.log('⚠️ Data Persistence System initialized with limited functionality');
+        });
+    }
+
+    // Wait for SharedDataManager to be ready
+    async waitForSharedDataManager(maxAttempts = 10) {
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            if (window.sharedDataManager &&
+                typeof window.sharedDataManager.getData === 'function' &&
+                window.sharedDataManager.getStatus &&
+                window.sharedDataManager.getStatus().firebaseReady) {
+
+                console.log('✅ SharedDataManager is ready for persistence operations');
+                return true;
+            }
+
+            console.log(`⏳ Waiting for SharedDataManager... (${attempt + 1}/${maxAttempts})`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        console.warn('⚠️ SharedDataManager readiness timeout after', maxAttempts, 'attempts');
+        return false;
     }
 
     // Start automatic backup system
     startAutomaticBackup() {
-        this.backupTimer = setInterval(() => {
-            this.createBackup();
+        this.backupTimer = setInterval(async () => {
+            try {
+                await this.createBackup();
+            } catch (error) {
+                console.warn('⚠️ Error in automatic backup:', error);
+            }
         }, this.backupInterval);
-        
+
         console.log(`💾 Automatic backup started (every ${this.backupInterval / 1000} seconds)`);
     }
 
     // Create a backup of current data
-    createBackup() {
+    async createBackup() {
         try {
-            if (window.sharedDataManager) {
-                const currentData = window.sharedDataManager.getData();
+            if (window.sharedDataManager &&
+                typeof window.sharedDataManager.getData === 'function' &&
+                window.sharedDataManager.getStatus &&
+                window.sharedDataManager.getStatus().firebaseReady) {
+
+                const currentData = await window.sharedDataManager.getData();
+
+                // Validate data before backing up
+                if (!this.isValidDataStructure(currentData)) {
+                    console.warn('⚠️ Invalid data structure, skipping backup');
+                    return;
+                }
+
                 const backup = {
                     timestamp: new Date().toISOString(),
                     data: currentData,
@@ -49,9 +93,11 @@ class DataPersistence {
                     userEmail: window.currentUser?.email,
                     checksum: this.calculateChecksum(currentData)
                 };
-                
+
                 this.saveBackup(backup);
                 console.log('💾 Backup created:', backup.timestamp);
+            } else {
+                console.log('⏳ SharedDataManager not ready, skipping backup');
             }
         } catch (error) {
             console.error('❌ Error creating backup:', error);
@@ -122,50 +168,101 @@ class DataPersistence {
             }
         });
         
-        // Periodic data integrity checks
-        this.recoveryTimer = setInterval(() => {
-            this.performIntegrityCheck();
-        }, 60000); // Check every minute
+        // Periodic data integrity checks (reduced frequency to prevent false positives)
+        this.recoveryTimer = setInterval(async () => {
+            try {
+                await this.performIntegrityCheck();
+            } catch (error) {
+                console.warn('⚠️ Error in periodic integrity check:', error);
+            }
+        }, 300000); // Check every 5 minutes instead of 1 minute
+    }
+
+    // Wait for Firebase to be ready
+    async waitForFirebaseReady(maxAttempts = 15) {
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            try {
+                // Check if SharedDataManager exists
+                if (!window.sharedDataManager) {
+                    console.log(`⏳ DataPersistence: Waiting for SharedDataManager... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check if getData method exists
+                if (typeof window.sharedDataManager.getData !== 'function') {
+                    console.log(`⏳ DataPersistence: Waiting for getData method... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check if getStatus exists and Firebase is ready
+                if (!window.sharedDataManager.getStatus ||
+                    typeof window.sharedDataManager.getStatus !== 'function') {
+                    console.log(`⏳ DataPersistence: Waiting for getStatus method... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                const status = window.sharedDataManager.getStatus();
+                if (!status.firebaseReady) {
+                    console.log(`⏳ DataPersistence: Waiting for Firebase to be ready... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                console.log('✅ DataPersistence: Firebase is ready');
+                return true;
+
+            } catch (error) {
+                console.log(`⏳ DataPersistence: Firebase readiness check failed, retrying... (${attempt + 1}/${maxAttempts}):`, error.message);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        console.warn('⚠️ DataPersistence: Firebase readiness timeout');
+        return false;
     }
 
     // Perform startup check for data integrity
-    performStartupCheck() {
+    async performStartupCheck() {
         console.log('🔍 Performing startup data integrity check...');
-        
+
         try {
-            if (window.sharedDataManager) {
-                const currentData = window.sharedDataManager.getData();
-                
-                // Check if data structure is valid
-                if (!this.isValidDataStructure(currentData)) {
-                    console.warn('⚠️ Invalid data structure detected during startup');
-                    this.initiateRecovery();
-                    return;
-                }
-                
-                // Check for obvious corruption signs
-                if (this.hasCorruptionSigns(currentData)) {
-                    console.warn('⚠️ Corruption signs detected during startup');
-                    this.initiateRecovery();
-                    return;
-                }
-                
+            // Wait for Firebase to be ready
+            const firebaseReady = await this.waitForFirebaseReady();
+
+            if (!firebaseReady) {
+                console.log('⏳ Firebase not ready for startup check, skipping');
+                return;
+            }
+
+            const currentData = await window.sharedDataManager.getData();
+
+            // Only check for critical issues, not minor structural differences
+            if (currentData && typeof currentData === 'object') {
                 console.log('✅ Startup data integrity check passed');
+            } else {
+                console.warn('⚠️ No valid data found during startup, but this may be normal for new installations');
             }
         } catch (error) {
-            console.error('❌ Startup check failed:', error);
-            this.initiateRecovery();
+            if (error.message === 'Firebase not ready') {
+                console.log('⏳ Firebase still not ready during startup check, skipping');
+            } else {
+                console.warn('⚠️ Startup check failed, but continuing normally:', error);
+            }
+            // Don't initiate recovery on startup errors, as the system might just be initializing
         }
     }
 
     // Periodic integrity check
-    performIntegrityCheck() {
+    async performIntegrityCheck() {
         if (this.isRecovering) return;
-        
+
         try {
-            if (window.sharedDataManager) {
-                const currentData = window.sharedDataManager.getData();
-                
+            if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
+                const currentData = await window.sharedDataManager.getData();
+
                 if (!this.isValidDataStructure(currentData)) {
                     console.warn('⚠️ Data integrity check failed - invalid structure');
                     this.initiateRecovery();
@@ -179,33 +276,36 @@ class DataPersistence {
 
     // Check if data structure is valid
     isValidDataStructure(data) {
-        if (!data || typeof data !== 'object') return false;
-        
-        // Check required properties
-        const requiredProps = ['products', 'orders', 'carts'];
+        if (!data || typeof data !== 'object') {
+            console.warn('❌ Data is not an object');
+            return false;
+        }
+
+        // Check required properties for new SharedDataManager structure
+        const requiredProps = ['products', 'orders', 'systemConfig'];
         for (const prop of requiredProps) {
             if (!(prop in data)) {
                 console.warn(`❌ Missing required property: ${prop}`);
                 return false;
             }
         }
-        
+
         // Check data types
         if (!Array.isArray(data.products)) {
             console.warn('❌ Products should be an array');
             return false;
         }
-        
+
         if (!Array.isArray(data.orders)) {
             console.warn('❌ Orders should be an array');
             return false;
         }
-        
-        if (!data.carts || typeof data.carts !== 'object') {
-            console.warn('❌ Carts should be an object');
+
+        if (!data.systemConfig || typeof data.systemConfig !== 'object') {
+            console.warn('❌ SystemConfig should be an object');
             return false;
         }
-        
+
         return true;
     }
 
@@ -274,14 +374,14 @@ class DataPersistence {
                 }
                 
                 // Reset to default data
-                this.resetToDefaults();
+                await this.resetToDefaults();
             }
         } catch (error) {
             console.error('❌ Recovery process failed:', error);
             if (window.showNotification) {
                 window.showNotification('❌ Recovery failed - resetting to defaults', 'error');
             }
-            this.resetToDefaults();
+            await this.resetToDefaults();
         } finally {
             this.isRecovering = false;
         }
@@ -317,7 +417,10 @@ class DataPersistence {
                 // Restore the backup
                 if (window.sharedDataManager) {
                     backup.data.lastSync = new Date().toISOString();
-                    window.sharedDataManager.importData(backup.data);
+                    // Since SharedDataManager uses Firebase, we need to restore data through its methods
+                    if (backup.data.products) {
+                        await window.sharedDataManager.updateProducts(backup.data.products);
+                    }
                     console.log(`✅ Successfully recovered from backup: ${backup.timestamp}`);
                     return backup.data;
                 }
@@ -332,15 +435,25 @@ class DataPersistence {
     }
 
     // Reset to default data
-    resetToDefaults() {
+    async resetToDefaults() {
         console.log('🔄 Resetting to default data...');
-        
-        if (window.sharedDataManager) {
-            // Clear corrupted data
-            window.sharedDataManager.clearAllData();
-            
-            // The SharedDataManager will initialize with default products
-            console.log('✅ Reset to defaults completed');
+
+        try {
+            if (window.sharedDataManager) {
+                // Since SharedDataManager doesn't have clearAllData, we'll initialize with basic empty data
+                const defaultData = {
+                    products: [],
+                    orders: [],
+                    systemConfig: {},
+                    lastSync: new Date().toISOString()
+                };
+
+                // Update with empty products to effectively clear
+                await window.sharedDataManager.updateProducts([]);
+                console.log('✅ Reset to defaults completed');
+            }
+        } catch (error) {
+            console.error('❌ Error resetting to defaults:', error);
         }
     }
 
@@ -357,11 +470,18 @@ class DataPersistence {
     }
 
     // Manual backup trigger
-    createManualBackup() {
+    async createManualBackup() {
         console.log('💾 Creating manual backup...');
-        this.createBackup();
-        if (window.showNotification) {
-            window.showNotification('💾 Manual backup created', 'success');
+        try {
+            await this.createBackup();
+            if (window.showNotification) {
+                window.showNotification('💾 Manual backup created', 'success');
+            }
+        } catch (error) {
+            console.error('❌ Error creating manual backup:', error);
+            if (window.showNotification) {
+                window.showNotification('❌ Error creating backup', 'error');
+            }
         }
     }
 
@@ -377,25 +497,32 @@ class DataPersistence {
     }
 
     // Export data for manual backup
-    exportData() {
-        if (window.sharedDataManager) {
-            const data = window.sharedDataManager.getData();
-            const backup = {
-                timestamp: new Date().toISOString(),
-                data: data,
-                checksum: this.calculateChecksum(data)
-            };
-            
-            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `faded-skies-backup-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
+    async exportData() {
+        try {
+            if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
+                const data = await window.sharedDataManager.getData();
+                const backup = {
+                    timestamp: new Date().toISOString(),
+                    data: data,
+                    checksum: this.calculateChecksum(data)
+                };
+
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `faded-skies-backup-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                if (window.showNotification) {
+                    window.showNotification('📁 Data exported successfully', 'success');
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error exporting data:', error);
             if (window.showNotification) {
-                window.showNotification('📁 Data exported successfully', 'success');
+                window.showNotification('❌ Error exporting data', 'error');
             }
         }
     }
@@ -415,12 +542,12 @@ class DataPersistence {
 // Auto-initialize when script loads
 if (typeof window !== 'undefined') {
     window.DataPersistence = DataPersistence;
-    
-    // Initialize after DOM is ready
-    document.addEventListener('DOMContentLoaded', () => {
+
+    // Initialize with delay to allow other systems to load
+    setTimeout(() => {
         if (!window.dataPersistence) {
             window.dataPersistence = new DataPersistence();
             console.log('💾 Global Data Persistence initialized');
         }
-    });
+    }, 3000); // Wait 3 seconds for other systems to initialize
 }

@@ -26,8 +26,57 @@ class CartManager {
 
         // Load existing cart if user is logged in
         if (window.currentUser) {
-            this.loadCart();
+            this.loadCart().catch(error => {
+                console.error('Error in initial cart load:', error);
+                this.cart = [];
+            });
         }
+    }
+
+    // Wait for Firebase to be ready with retry logic
+    async waitForFirebaseReady(maxAttempts = 10) {
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            try {
+                // Check if SharedDataManager exists
+                if (!window.sharedDataManager) {
+                    console.log(`⏳ Cart: Waiting for SharedDataManager... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check if getCart method exists
+                if (typeof window.sharedDataManager.getCart !== 'function') {
+                    console.log(`⏳ Cart: Waiting for getCart method... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check if getStatus exists and Firebase is ready
+                if (!window.sharedDataManager.getStatus ||
+                    typeof window.sharedDataManager.getStatus !== 'function') {
+                    console.log(`⏳ Cart: Waiting for getStatus method... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                const status = window.sharedDataManager.getStatus();
+                if (!status.firebaseReady) {
+                    console.log(`⏳ Cart: Waiting for Firebase to be ready... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                console.log('✅ Cart: Firebase is ready for cart operations');
+                return true;
+
+            } catch (error) {
+                console.log(`⏳ Cart: Firebase readiness check failed, retrying... (${attempt + 1}/${maxAttempts}):`, error.message);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        console.warn('⚠️ Cart: Firebase readiness timeout, proceeding with empty cart');
+        return false;
     }
 
     // Refresh authentication state and reload cart
@@ -40,9 +89,13 @@ class CartManager {
 
         if (window.currentUser && window.currentUser.email) {
             console.log('✅ Cart: Valid user found, loading cart');
-            this.loadCart();
-            this.updateDisplay();
-            console.log('✅ Cart: User state refreshed successfully');
+            this.loadCart().then(() => {
+                console.log('✅ Cart: User state refreshed successfully');
+            }).catch(error => {
+                console.error('Error in refreshUserState cart load:', error);
+                this.cart = [];
+                this.updateDisplay();
+            });
         } else {
             console.log('⚠️ Cart: No valid user found during refresh');
             this.cart = [];
@@ -50,19 +103,23 @@ class CartManager {
         }
     }
 
-    // Load cart from shared data manager
-    loadCart() {
-        if (!window.sharedDataManager) return;
-
+    // Load cart from shared data manager with Firebase readiness check
+    async loadCart() {
         try {
+            // Wait for SharedDataManager and Firebase to be ready
+            await this.waitForFirebaseReady();
+
             const userEmail = window.currentUser?.email || 'guest';
-            const savedCart = window.sharedDataManager.getCart(userEmail);
-            this.cart = savedCart || [];
+            const savedCart = await window.sharedDataManager.getCart(userEmail);
+
+            // Ensure we always have an array
+            this.cart = Array.isArray(savedCart) ? savedCart : [];
             console.log('📦 Cart loaded:', this.cart.length, 'items');
             this.updateDisplay();
         } catch (error) {
             console.error('Error loading cart:', error);
             this.cart = [];
+            this.updateDisplay();
         }
     }
 
@@ -255,6 +312,18 @@ class CartManager {
     // Get cart totals
     getTotals() {
         try {
+            // Safety check: ensure cart is an array
+            if (!Array.isArray(this.cart)) {
+                console.warn('⚠️ Cart is not an array in getTotals:', typeof this.cart, this.cart);
+                this.cart = [];
+                return {
+                    subtotal: 0,
+                    totalItems: 0,
+                    discount: 0,
+                    total: 0
+                };
+            }
+
             console.log('💰 Calculating totals for cart items:', this.cart.map(item => `${item.strain}: $${item.price} x ${item.quantity}`));
 
             let subtotal = 0;
@@ -300,6 +369,12 @@ class CartManager {
     // Update cart display
     updateDisplay() {
         try {
+            // Safety check: ensure cart is an array
+            if (!Array.isArray(this.cart)) {
+                console.warn('⚠️ Cart is not an array in updateDisplay:', typeof this.cart, this.cart);
+                this.cart = [];
+            }
+
             console.log('🔄 Updating cart display with', this.cart.length, 'unique items');
             
             const cartItems = document.getElementById('cartItems');
@@ -560,7 +635,7 @@ class CartManager {
             // Validate cart items
             const validation = this.validateCart();
             if (!validation.valid) {
-                this.showNotification('🔄 Please review your cart and try again', 'warning');
+                this.showNotification('��� Please review your cart and try again', 'warning');
                 return false;
             }
 

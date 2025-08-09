@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Mobile Menu Test</title>
+    <style>
+        body { font-family: monospace; background: #000; color: #0f0; padding: 20px; }
+        .error { color: #f00; font-weight: bold; }
+        .success { color: #0f0; font-weight: bold; }
+        .warning { color: #fa0; font-weight: bold; }
+        .section { margin: 20px 0; border: 1px solid #333; padding: 15px; border-radius: 5px; }
+        .test-button { 
+            background: #333; 
+            color: #0f0; 
+            padding: 10px 20px; 
+            margin: 10px; 
+            border: 1px solid #0f0; 
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .test-button:hover { background: #0f0; color: #000; }
+    </style>
+</head>
+<body>
+    <h1>Mobile Menu Function Test</h1>
+    
+    <div class="section">
+        <h2>🎯 Target Error:</h2>
+        <p class="warning">ReferenceError: closeMobileMenu is not defined</p>
+    </div>
+    
+    <div class="section">
+        <h2>🧪 Function Tests:</h2>
+        <button class="test-button" onclick="testMobileFunctions()">Test Mobile Menu Functions</button>
+        <button class="test-button" onclick="testDirectCall()">Test Direct Call (like onclick)</button>
+        <div id="testResults" style="margin-top: 20px; background: #111; padding: 10px; border-radius: 5px;"></div>
+    </div>
+    
+    <div class="section">
+        <h2>📝 Error Monitor:</h2>
+        <div id="errorLog" style="background: #111; padding: 10px; border-radius: 5px; max-height: 300px; overflow-y: auto;"></div>
+    </div>
+
+    <script>
+        const testResults = document.getElementById('testResults');
+        const errorLog = document.getElementById('errorLog');
+        let errorDetected = false;
+
+        function addLog(type, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = `[${timestamp}] ${message}`;
+            errorLog.appendChild(div);
+            errorLog.scrollTop = errorLog.scrollHeight;
+        }
+
+        // Monitor for the specific error
+        window.onerror = function(message, source, lineno, colno, error) {
+            if (message.includes('closeMobileMenu is not defined')) {
+                errorDetected = true;
+                addLog('error', '🚨 TARGET ERROR DETECTED: closeMobileMenu is not defined');
+            } else {
+                addLog('error', `Error: ${message} at line ${lineno}`);
+            }
+        };
+
+        function testMobileFunctions() {
+            let results = '<strong>Function Availability Test:</strong><br>';
+            
+            // Test if functions exist
+            const functions = ['toggleMobileMenu', 'openMobileMenu', 'closeMobileMenu'];
+            let allPass = true;
+            
+            functions.forEach(funcName => {
+                const exists = typeof window[funcName] === 'function';
+                results += `${funcName}: ${exists ? '<span class="success">✅ Available</span>' : '<span class="error">❌ Missing</span>'}<br>`;
+                if (!exists) allPass = false;
+            });
+            
+            results += '<br><strong>Function Call Test:</strong><br>';
+            
+            // Test calling the functions
+            try {
+                if (typeof window.closeMobileMenu === 'function') {
+                    window.closeMobileMenu();
+                    results += 'closeMobileMenu(): <span class="success">✅ Called successfully</span><br>';
+                } else {
+                    results += 'closeMobileMenu(): <span class="error">❌ Function not available</span><br>';
+                    allPass = false;
+                }
+            } catch (error) {
+                results += `closeMobileMenu(): <span class="error">❌ Error: ${error.message}</span><br>`;
+                allPass = false;
+            }
+            
+            try {
+                if (typeof window.openMobileMenu === 'function') {
+                    window.openMobileMenu();
+                    results += 'openMobileMenu(): <span class="success">✅ Called successfully</span><br>';
+                } else {
+                    results += 'openMobileMenu(): <span class="error">❌ Function not available</span><br>';
+                    allPass = false;
+                }
+            } catch (error) {
+                results += `openMobileMenu(): <span class="error">❌ Error: ${error.message}</span><br>`;
+                allPass = false;
+            }
+            
+            if (allPass) {
+                results += '<br><span class="success">🎉 All mobile menu functions working correctly!</span>';
+            } else {
+                results += '<br><span class="error">❌ Some mobile menu functions have issues</span>';
+            }
+            
+            testResults.innerHTML = results;
+        }
+
+        function testDirectCall() {
+            let results = '<strong>Direct Call Test (simulating onclick):</strong><br>';
+            
+            try {
+                // This simulates what happens in the onclick handlers
+                eval('closeMobileMenu()');
+                results += 'Direct closeMobileMenu() call: <span class="success">✅ Success</span><br>';
+            } catch (error) {
+                results += `Direct closeMobileMenu() call: <span class="error">❌ Error: ${error.message}</span><br>';
+                if (error.message.includes('closeMobileMenu is not defined')) {
+                    results += '<span class="error">🚨 This is the target error we\'re fixing!</span><br>';
+                }
+            }
+            
+            try {
+                // Test multiple function calls like in the onclick handlers
+                eval('showPublicWebsite(); closeMobileMenu();');
+                results += 'Compound call test: <span class="success">✅ Success</span><br>';
+            } catch (error) {
+                results += `Compound call test: <span class="error">❌ Error: ${error.message}</span><br>';
+            }
+            
+            testResults.innerHTML = results;
+        }
+
+        // Mock functions that might be called in onclick handlers
+        window.showPublicWebsite = function() { 
+            console.log('showPublicWebsite called'); 
+        };
+        
+        window.scrollToSection = function(section) { 
+            console.log('scrollToSection called:', section); 
+        };
+        
+        window.toggleLiveInventory = function() { 
+            console.log('toggleLiveInventory called'); 
+        };
+
+        // Auto-run tests after a delay
+        setTimeout(() => {
+            addLog('success', 'Starting mobile menu function tests...');
+            testMobileFunctions();
+        }, 2000);
+
+        addLog('success', 'Mobile menu error monitoring started...');
+    </script>
+</body>
+</html>

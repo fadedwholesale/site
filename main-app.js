@@ -20,11 +20,18 @@ function setCurrentUser(user) {
         }
     }
     
-    // Immediately notify cart manager of auth state change
+    // Notify cart manager of auth state change with delay for Firebase readiness
     if (window.cartManager) {
         console.log('🔄 Refreshing cart manager after auth change');
-        window.cartManager.refreshUserState();
-        window.cartManager.updateDisplay();
+        // Add a small delay to allow Firebase to be ready
+        setTimeout(() => {
+            try {
+                window.cartManager.refreshUserState();
+                window.cartManager.updateDisplay();
+            } catch (error) {
+                console.warn('⚠️ Cart manager refresh failed, but continuing:', error.message);
+            }
+        }, 1000);
     }
     
     return user;
@@ -38,10 +45,10 @@ let orders = [];
 let currentFilter = 'all';
 
 // Initialize Application
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('🚀 Faded Skies Portal initializing...');
     initializeApplication();
-    loadInitialData();
+    await loadInitialData();
     setupEventListeners();
     setupNotificationFiltering();
 
@@ -187,7 +194,7 @@ function initializeRealTimeStatusIndicator() {
         const hasDataManager = !!window.sharedDataManager;
 
         if (!isOnline) {
-            syncIcon.textContent = '📡';
+            syncIcon.textContent = '����';
             syncText.textContent = 'Offline';
             syncIcon.parentElement.style.background = 'linear-gradient(135deg, var(--accent-red), #FF6666)';
         } else if (hasRealTimeSync && hasDataManager) {
@@ -222,14 +229,47 @@ function initializeRealTimeStatusIndicator() {
     }
 }
 
-function loadInitialData() {
-    // Load products from shared data manager
-    if (window.sharedDataManager) {
-        products = window.sharedDataManager.getProducts() || [];
-        orders = window.sharedDataManager.getOrders() || [];
-        updateAllViews();
-        console.log(`📦 Loaded ${products.length} products and ${orders.length} orders`);
+async function loadInitialData() {
+    console.log('📦 Loading initial data...');
+
+    // Initialize with empty arrays to prevent filter errors
+    products = [];
+    orders = [];
+
+    // Wait for SharedDataManager and Firebase to be ready
+    const maxAttempts = 30; // Wait up to 30 seconds
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        if (window.sharedDataManager &&
+            typeof window.sharedDataManager.getProducts === 'function' &&
+            window.sharedDataManager.getStatus &&
+            window.sharedDataManager.getStatus().firebaseReady) {
+
+            try {
+                console.log(`📦 Attempting to load data (attempt ${attempt + 1})...`);
+                products = await window.sharedDataManager.getProducts() || [];
+                orders = await window.sharedDataManager.getOrders() || [];
+                updateAllViews();
+                console.log(`✅ Loaded ${products.length} products and ${orders.length} orders`);
+                return; // Success, exit the function
+            } catch (error) {
+                console.warn(`⚠️ Attempt ${attempt + 1} failed:`, error.message);
+                if (attempt === maxAttempts - 1) {
+                    console.error('❌ Failed to load data after all attempts:', error);
+                }
+            }
+        } else {
+            console.log(`⏳ Waiting for SharedDataManager and Firebase... (${attempt + 1}/${maxAttempts})`);
+        }
+
+        // Wait 1 second before next attempt
+        await new Promise(resolve => setTimeout(resolve, 1000));
     }
+
+    // If we get here, all attempts failed
+    console.warn('⚠️ Failed to load initial data after maximum attempts, using empty arrays');
+    products = [];
+    orders = [];
+    updateAllViews(); // Still update views to show loading state
 }
 
 function setupEventListeners() {
@@ -247,18 +287,24 @@ function setupEventListeners() {
     });
 }
 
-function handleSharedDataChange(event) {
+async function handleSharedDataChange(event) {
     const { type, data } = event.detail;
     console.log('📡 Shared data changed:', type, data);
-    
+
     switch (type) {
         case 'products_updated':
             products = data;
             updateAllViews();
             break;
         case 'order_added':
-            orders = window.sharedDataManager.getOrders();
-            updateOrdersDisplay();
+            try {
+                if (window.sharedDataManager && typeof window.sharedDataManager.getOrders === 'function') {
+                    orders = await window.sharedDataManager.getOrders();
+                    updateOrdersDisplay();
+                }
+            } catch (error) {
+                console.error('❌ Error getting orders:', error);
+            }
             if (currentUser && data.partner === currentUser.email) {
                 showNotification(`🎉 Order ${data.id} placed successfully!`, 'success');
             }
@@ -580,6 +626,13 @@ function updatePublicInventoryDisplay() {
     const tbody = document.getElementById('publicInventoryBody');
     if (!tbody) return;
 
+    // Safety check: ensure products is an array
+    if (!Array.isArray(products)) {
+        console.warn('⚠️ Products is not an array:', typeof products, products);
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading products...</td></tr>';
+        return;
+    }
+
     const availableProducts = products.filter(p => p.status === 'AVAILABLE');
 
     if (availableProducts.length === 0) {
@@ -633,9 +686,16 @@ function updatePublicInventoryDisplay() {
 function updatePartnerProductsDisplay() {
     const tbody = document.getElementById('partnerProductBody');
     if (!tbody) return;
-    
+
+    // Safety check: ensure products is an array
+    if (!Array.isArray(products)) {
+        console.warn('⚠️ updatePartnerProductsDisplay: Products is not an array:', typeof products, products);
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading products...</td></tr>';
+        return;
+    }
+
     let filteredProducts = products;
-    
+
     // Apply filter
     if (currentFilter === 'available') {
         filteredProducts = products.filter(p => p.status === 'AVAILABLE');
@@ -1089,22 +1149,39 @@ function updateProfile(event) {
 // Dashboard Functions
 function updateDashboardStats() {
     if (!currentUser) return;
-    
+
+    // Safety checks: ensure arrays are properly initialized
+    if (!Array.isArray(orders)) {
+        console.warn('⚠️ updateDashboardStats: Orders is not an array:', typeof orders, orders);
+        return;
+    }
+    if (!Array.isArray(products)) {
+        console.warn('⚠️ updateDashboardStats: Products is not an array:', typeof products, products);
+        return;
+    }
+
     const userOrders = orders.filter(order => order.partner === currentUser.email);
     const totalSpent = userOrders.reduce((sum, order) => sum + order.total, 0);
-    
+
     const orderCountEl = document.getElementById('partnerOrderCount');
     const savingsEl = document.getElementById('partnerSavings');
     const availableProductsEl = document.getElementById('partnerAvailableProducts');
-    
+
     if (orderCountEl) orderCountEl.textContent = userOrders.length;
     if (savingsEl) savingsEl.textContent = `$${totalSpent.toFixed(0)}`;
     if (availableProductsEl) availableProductsEl.textContent = products.filter(p => p.status === 'AVAILABLE').length;
 }
 
 function updateInventoryStats() {
+    // Safety check: ensure products is an array
+    if (!Array.isArray(products)) {
+        console.warn('⚠️ updateInventoryStats: Products is not an array:', typeof products, products);
+        return;
+    }
+
     const availableCount = products.filter(p => p.status === 'AVAILABLE').length;
-    const startingPrice = Math.min(...products.filter(p => p.status === 'AVAILABLE').map(p => p.price));
+    const availableProducts = products.filter(p => p.status === 'AVAILABLE');
+    const startingPrice = availableProducts.length > 0 ? Math.min(...availableProducts.map(p => p.price)) : 0;
     const categories = new Set(products.map(p => p.grade)).size;
     
     const countEl = document.getElementById('publicAvailableCount');
@@ -1967,20 +2044,24 @@ function testRealTimeSync() {
     });
 
     // Test 3: Test product updates
-    setTimeout(() => {
+    setTimeout(async () => {
         console.log('📦 Testing product update sync...');
-        if (window.sharedDataManager) {
-            const products = window.sharedDataManager.getProducts();
-            if (products.length > 0) {
-                const testProduct = products[0];
-                const newStock = Math.floor(Math.random() * 50) + 1;
+        if (window.sharedDataManager && typeof window.sharedDataManager.getProducts === 'function') {
+            try {
+                const products = await window.sharedDataManager.getProducts();
+                if (products.length > 0) {
+                    const testProduct = products[0];
+                    const newStock = Math.floor(Math.random() * 50) + 1;
 
-                window.sharedDataManager.updateProduct(testProduct.id, {
-                    stock: newStock,
-                    lastModified: new Date().toISOString()
-                });
+                    await window.sharedDataManager.updateProduct(testProduct.id, {
+                        stock: newStock,
+                        lastModified: new Date().toISOString()
+                    });
 
-                console.log(`📦 Updated ${testProduct.strain} stock to ${newStock}`);
+                    console.log(`📦 Updated ${testProduct.strain} stock to ${newStock}`);
+                }
+            } catch (error) {
+                console.error('❌ Error in product update test:', error);
             }
         }
     }, 1000);
@@ -2039,7 +2120,7 @@ function testRealTimeSync() {
 
 // Test real-time functionality with multiple simulated users
 function testMultiUserSync() {
-    console.log('👥 Testing multi-user sync simulation...');
+    console.log('��� Testing multi-user sync simulation...');
 
     if (!window.realTimeSync) {
         console.error('❌ Real-Time Sync not available');
@@ -2099,22 +2180,28 @@ function testDataPersistence() {
 
     // Test 2: Check backup status
     const recoveryStatus = window.dataPersistence.getRecoveryStatus();
-    console.log('📊 Recovery Status:', recoveryStatus);
+    console.log('��� Recovery Status:', recoveryStatus);
 
     // Test 3: Simulate data corruption and recovery
-    setTimeout(() => {
+    setTimeout(async () => {
         console.log('🧪 Simulating data recovery test...');
         if (confirm('Test data recovery? This will temporarily corrupt and then restore data.')) {
-            // Backup current data first
-            const currentData = window.sharedDataManager.getData();
+            // Backup current data first (safely)
+            try {
+                const currentData = window.sharedDataManager && typeof window.sharedDataManager.getData === 'function'
+                    ? await window.sharedDataManager.getData()
+                    : null;
 
-            // Corrupt data temporarily
-            localStorage.setItem('fadedSkiesSharedData', '{"invalid": "json",}');
+                // Corrupt data temporarily
+                localStorage.setItem('fadedSkiesSharedData', '{"invalid": "json",}');
 
-            // Trigger recovery
-            setTimeout(() => {
-                window.dataPersistence.initiateRecovery();
-            }, 1000);
+                // Trigger recovery
+                setTimeout(() => {
+                    window.dataPersistence.initiateRecovery();
+                }, 1000);
+            } catch (error) {
+                console.warn('⚠️ Could not backup data before test:', error);
+            }
         }
     }, 2000);
 
@@ -2540,8 +2627,8 @@ function testAuthorizationAndSync() {
                 }
 
                 // Test 3: Real-time sync
-                setTimeout(() => {
-                    testRealTimeSyncFeatures(testResults);
+                setTimeout(async () => {
+                    await testRealTimeSyncFeatures(testResults);
                 }, 1000);
 
             }, 1000);
@@ -2551,7 +2638,7 @@ function testAuthorizationAndSync() {
     return testResults;
 }
 
-function testRealTimeSyncFeatures(testResults) {
+async function testRealTimeSyncFeatures(testResults) {
     console.log('📡 Testing real-time sync features...');
 
     if (!window.realTimeSync || !window.sharedDataManager) {
@@ -2562,7 +2649,7 @@ function testRealTimeSyncFeatures(testResults) {
 
     // Test 4: Product update sync
     console.log('📦 Testing product update sync...');
-    const products = window.sharedDataManager.getProducts();
+    const products = await window.sharedDataManager.getProducts();
     if (products.length > 0) {
         const testProduct = products[0];
         const originalStock = testProduct.stock;
@@ -3075,7 +3162,7 @@ function validateFieldLive(input) {
                 break;
             default:
                 isValid = value.length > 0;
-                message = isValid ? '✅' : '❌';
+                message = isValid ? '✅' : '��';
         }
 
         if (indicator) {
@@ -3144,19 +3231,35 @@ function updateDeliveryMethodLive(label) {
 }
 
 // Real-time inventory checking
-function checkInventoryLive() {
+async function checkInventoryLive() {
     if (!window.cartManager || !window.sharedDataManager) return;
 
-    let hasChanges = false;
-    const products = window.sharedDataManager.getProducts();
+    // Safety check: ensure cart is an array
+    if (!Array.isArray(window.cartManager.cart)) {
+        console.warn('⚠️ checkInventoryLive: Cart is not an array:', typeof window.cartManager.cart);
+        return;
+    }
 
-    window.cartManager.cart.forEach(cartItem => {
-        const product = products.find(p => p.id === cartItem.id);
-        if (!product || product.status !== 'AVAILABLE' || product.stock < cartItem.quantity) {
-            hasChanges = true;
-            showNotification(`⚠️ ${cartItem.strain} availability changed`, 'warning');
+    let hasChanges = false;
+
+    try {
+        const products = await window.sharedDataManager.getProducts();
+
+        if (!Array.isArray(products)) {
+            console.warn('⚠️ checkInventoryLive: Products is not an array:', typeof products);
+            return;
         }
-    });
+
+        window.cartManager.cart.forEach(cartItem => {
+            const product = products.find(p => p.id === cartItem.id);
+            if (!product || product.status !== 'AVAILABLE' || product.stock < cartItem.quantity) {
+                hasChanges = true;
+                showNotification(`⚠️ ${cartItem.strain} availability changed`, 'warning');
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error in checkInventoryLive:', error);
+    }
 
     if (hasChanges && window.cartManager.syncCartRealTime) {
         window.cartManager.syncCartRealTime();

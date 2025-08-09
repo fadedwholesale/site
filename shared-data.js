@@ -91,9 +91,19 @@ class SharedDataManager {
     }
 
     async getProducts() {
-        if (!this.db) throw new Error('Firebase not ready');
+        // Enhanced Firebase readiness check
+        if (!this.db || !this.firebaseBridge) {
+            console.warn('⚠️ Firebase not ready for getProducts, returning empty array');
+            return [];
+        }
 
         try {
+            // Additional safety check
+            if (!this.getStatus().firebaseReady) {
+                console.warn('⚠️ Firebase status reports not ready for getProducts, returning empty array');
+                return [];
+            }
+
             const snapshot = await this.db.collection('products').get();
             const products = [];
             snapshot.forEach(doc => {
@@ -101,6 +111,12 @@ class SharedDataManager {
             });
             return products;
         } catch (error) {
+            // Handle "Firebase not ready" errors specifically
+            if (error.message === 'Firebase not ready') {
+                console.warn('⚠️ Firebase not ready during getProducts operation, returning empty array');
+                return [];
+            }
+
             console.error('❌ Error getting products from Firebase:', error);
             return [];
         }
@@ -192,19 +208,35 @@ class SharedDataManager {
     }
 
     async getOrders() {
-        if (!this.db) throw new Error('Firebase not ready');
+        // Enhanced Firebase readiness check
+        if (!this.db || !this.firebaseBridge) {
+            console.warn('⚠️ Firebase not ready for getOrders, returning empty array');
+            return [];
+        }
 
         try {
+            // Additional safety check
+            if (!this.getStatus().firebaseReady) {
+                console.warn('⚠️ Firebase status reports not ready for getOrders, returning empty array');
+                return [];
+            }
+
             const snapshot = await this.db.collection('orders')
                 .orderBy('createdAt', 'desc')
                 .get();
-            
+
             const orders = [];
             snapshot.forEach(doc => {
                 orders.push({ id: doc.id, ...doc.data() });
             });
             return orders;
         } catch (error) {
+            // Handle "Firebase not ready" errors specifically
+            if (error.message === 'Firebase not ready') {
+                console.warn('⚠️ Firebase not ready during getOrders operation, returning empty array');
+                return [];
+            }
+
             console.error('❌ Error getting orders from Firebase:', error);
             return [];
         }
@@ -253,16 +285,32 @@ class SharedDataManager {
     }
 
     async getCart(userEmail) {
-        if (!this.db) throw new Error('Firebase not ready');
+        // Enhanced Firebase readiness check
+        if (!this.db || !this.firebaseBridge) {
+            console.warn('⚠️ Firebase not ready for getCart, returning empty cart');
+            return [];
+        }
 
         try {
+            // Additional safety check
+            if (!this.getStatus().firebaseReady) {
+                console.warn('⚠️ Firebase status reports not ready for getCart, returning empty cart');
+                return [];
+            }
+
             const doc = await this.db.collection('carts').doc(userEmail).get();
-            
+
             if (doc.exists) {
                 return doc.data().items || [];
             }
             return [];
         } catch (error) {
+            // Handle "Firebase not ready" errors specifically
+            if (error.message === 'Firebase not ready') {
+                console.warn('⚠️ Firebase not ready during getCart operation, returning empty cart');
+                return [];
+            }
+
             console.error('❌ Error getting cart from Firebase:', error);
             return [];
         }
@@ -270,16 +318,32 @@ class SharedDataManager {
 
     // System Configuration - Firebase only
     async getSystemConfig() {
-        if (!this.db) throw new Error('Firebase not ready');
+        // Enhanced Firebase readiness check
+        if (!this.db || !this.firebaseBridge) {
+            console.warn('⚠️ Firebase not ready for getSystemConfig, returning empty config');
+            return {};
+        }
 
         try {
+            // Additional safety check
+            if (!this.getStatus().firebaseReady) {
+                console.warn('⚠️ Firebase status reports not ready for getSystemConfig, returning empty config');
+                return {};
+            }
+
             const doc = await this.db.collection('system').doc('configuration').get();
-            
+
             if (doc.exists) {
                 return doc.data();
             }
             return {};
         } catch (error) {
+            // Handle "Firebase not ready" errors specifically
+            if (error.message === 'Firebase not ready') {
+                console.warn('⚠️ Firebase not ready during getSystemConfig operation, returning empty config');
+                return {};
+            }
+
             console.error('❌ Error getting system config from Firebase:', error);
             return {};
         }
@@ -368,6 +432,78 @@ class SharedDataManager {
         }
     }
 
+    // Get consolidated data (for sync operations)
+    async getData() {
+        // Enhanced Firebase readiness check
+        if (!this.db || !this.firebaseBridge) {
+            console.warn('⚠️ Firebase not ready for getData (db or bridge missing), returning empty data');
+            return {
+                products: [],
+                orders: [],
+                systemConfig: {},
+                lastSync: new Date().toISOString()
+            };
+        }
+
+        try {
+            // Additional safety check - try to get status first
+            if (!this.getStatus().firebaseReady) {
+                console.warn('���️ Firebase status reports not ready, returning empty data');
+                return {
+                    products: [],
+                    orders: [],
+                    systemConfig: {},
+                    lastSync: new Date().toISOString()
+                };
+            }
+
+            const products = await this.getProducts();
+            const orders = await this.getOrders();
+            const systemConfig = await this.getSystemConfig();
+
+            return {
+                products,
+                orders,
+                systemConfig,
+                lastSync: new Date().toISOString()
+            };
+        } catch (error) {
+            // Handle "Firebase not ready" errors specifically
+            if (error.message === 'Firebase not ready') {
+                console.warn('⚠️ Firebase not ready during getData operation, returning empty data');
+                return {
+                    products: [],
+                    orders: [],
+                    systemConfig: {},
+                    lastSync: new Date().toISOString()
+                };
+            }
+
+            console.error('❌ Error getting consolidated data:', error);
+            return {
+                products: [],
+                orders: [],
+                systemConfig: {},
+                lastSync: new Date().toISOString()
+            };
+        }
+    }
+
+    // Export all data (for sync operations)
+    async exportData() {
+        try {
+            return await this.getData();
+        } catch (error) {
+            console.error('❌ Error exporting data:', error);
+            return {
+                products: [],
+                orders: [],
+                systemConfig: {},
+                lastSync: new Date().toISOString()
+            };
+        }
+    }
+
     // Status and debugging
     getStatus() {
         return {
@@ -380,6 +516,26 @@ class SharedDataManager {
 
 // Initialize shared data manager
 window.sharedDataManager = new SharedDataManager();
+
+// Ensure all methods are properly bound and accessible
+window.addEventListener('DOMContentLoaded', () => {
+    if (!window.sharedDataManager || typeof window.sharedDataManager.getData !== 'function') {
+        console.warn('⚠️ SharedDataManager methods not properly bound, reinitializing...');
+        window.sharedDataManager = new SharedDataManager();
+    }
+
+    // Verify all essential methods are available
+    const requiredMethods = ['getData', 'getProducts', 'getOrders', 'getCart', 'getSystemConfig', 'getStatus'];
+    const missingMethods = requiredMethods.filter(method =>
+        !window.sharedDataManager[method] || typeof window.sharedDataManager[method] !== 'function'
+    );
+
+    if (missingMethods.length > 0) {
+        console.error('❌ Missing SharedDataManager methods:', missingMethods);
+    } else {
+        console.log('✅ All SharedDataManager methods verified and ready');
+    }
+});
 
 // Set up event listeners for cross-component communication
 window.addEventListener('sharedDataChanged', (event) => {

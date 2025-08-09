@@ -10,7 +10,8 @@ class RealTimeSync {
         this.isOnline = navigator.onLine;
         this.lastHeartbeat = Date.now();
         this.clientId = this.generateClientId();
-        
+        this.isSharedDataManagerReady = false;
+
         this.init();
     }
 
@@ -18,25 +19,83 @@ class RealTimeSync {
         return 'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 
+    // Wait for SharedDataManager to be ready
+    async waitForSharedDataManager(maxAttempts = 15) {
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            try {
+                // Check basic existence
+                if (!window.sharedDataManager) {
+                    console.log(`⏳ Waiting for SharedDataManager to exist... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check if getData method exists
+                if (typeof window.sharedDataManager.getData !== 'function') {
+                    console.log(`⏳ Waiting for SharedDataManager.getData method... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check if getStatus exists
+                if (!window.sharedDataManager.getStatus || typeof window.sharedDataManager.getStatus !== 'function') {
+                    console.log(`⏳ Waiting for SharedDataManager.getStatus method... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check Firebase readiness
+                const status = window.sharedDataManager.getStatus();
+                if (!status.firebaseReady) {
+                    console.log(`⏳ Waiting for Firebase to be ready... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Test getData method
+                await window.sharedDataManager.getData();
+
+                this.isSharedDataManagerReady = true;
+                console.log('✅ SharedDataManager is ready for sync operations');
+                return true;
+
+            } catch (error) {
+                console.log(`⏳ SharedDataManager test failed, retrying... (${attempt + 1}/${maxAttempts}):`, error.message);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        console.warn('⚠️ SharedDataManager readiness timeout after', maxAttempts, 'attempts');
+        return false;
+    }
+
     init() {
         console.log('🔄 Initializing Real-Time Sync System...', this.clientId);
-        
+
         // Set up storage listener for cross-tab communication
         window.addEventListener('storage', this.handleStorageChange.bind(this));
-        
+
         // Set up online/offline detection
         window.addEventListener('online', this.handleOnline.bind(this));
         window.addEventListener('offline', this.handleOffline.bind(this));
-        
-        // Set up periodic sync
-        this.startPeriodicSync();
-        
+
+        // Set up periodic sync (with delay to allow SharedDataManager to initialize)
+        this.waitForSharedDataManager().then(() => {
+            this.startPeriodicSync();
+            // Also start a readiness monitor
+            this.startReadinessMonitor();
+        }).catch(error => {
+            console.warn('⚠️ SharedDataManager not ready, starting sync anyway:', error);
+            this.startPeriodicSync();
+            this.startReadinessMonitor();
+        });
+
         // Set up heartbeat system
         this.startHeartbeat();
-        
+
         // Set up beforeunload handler
         window.addEventListener('beforeunload', this.handleBeforeUnload.bind(this));
-        
+
         console.log('✅ Real-Time Sync System initialized');
     }
 
@@ -141,29 +200,105 @@ class RealTimeSync {
         }
     }
 
+    // Monitor SharedDataManager readiness
+    startReadinessMonitor() {
+        setInterval(() => {
+            if (this.isSharedDataManagerReady) {
+                // Double-check that it's still ready
+                if (!window.sharedDataManager ||
+                    typeof window.sharedDataManager.getData !== 'function') {
+                    console.warn('⚠️ SharedDataManager became unavailable, marking as not ready');
+                    this.isSharedDataManagerReady = false;
+                }
+            } else {
+                // Try to re-establish readiness
+                if (window.sharedDataManager &&
+                    typeof window.sharedDataManager.getData === 'function' &&
+                    window.sharedDataManager.getStatus &&
+                    window.sharedDataManager.getStatus().firebaseReady) {
+                    console.log('✅ SharedDataManager is ready again');
+                    this.isSharedDataManagerReady = true;
+                }
+            }
+        }, 10000); // Check every 10 seconds
+    }
+
     // Periodic sync to catch missed updates
     startPeriodicSync() {
-        this.syncInterval = setInterval(() => {
-            this.performPeriodicSync();
+        this.syncInterval = setInterval(async () => {
+            try {
+                await this.performPeriodicSync();
+            } catch (error) {
+                console.warn('⚠️ Error in periodic sync:', error);
+            }
         }, 5000); // Sync every 5 seconds
     }
 
-    performPeriodicSync() {
+    async performPeriodicSync() {
         console.log('🔄 Performing periodic sync...');
-        
-        // Check for data consistency
-        if (window.sharedDataManager) {
-            const currentData = window.sharedDataManager.getData();
-            const lastSync = new Date(currentData.lastSync || 0);
-            const now = new Date();
-            
-            // If data is older than 30 seconds, broadcast a sync request
-            if (now - lastSync > 30000) {
-                console.log('🔄 Data seems stale, requesting sync...');
-                this.broadcast('sync_request', { timestamp: now.toISOString() });
+
+        try {
+            // More comprehensive readiness check
+            if (!window.sharedDataManager) {
+                console.log('⏳ SharedDataManager not available, skipping sync check');
+                this.lastHeartbeat = Date.now();
+                return;
             }
+
+            if (typeof window.sharedDataManager.getData !== 'function') {
+                console.log('⏳ SharedDataManager.getData not available, skipping sync check');
+                this.isSharedDataManagerReady = false; // Reset flag
+                this.lastHeartbeat = Date.now();
+                return;
+            }
+
+            if (!window.sharedDataManager.getStatus || typeof window.sharedDataManager.getStatus !== 'function') {
+                console.log('⏳ SharedDataManager.getStatus not available, skipping sync check');
+                this.isSharedDataManagerReady = false; // Reset flag
+                this.lastHeartbeat = Date.now();
+                return;
+            }
+
+            if (!window.sharedDataManager.getStatus().firebaseReady) {
+                console.log('⏳ Firebase not ready, skipping sync check');
+                this.lastHeartbeat = Date.now();
+                return;
+            }
+
+            // Additional safety check: try to access the method before calling
+            try {
+                if (!window.sharedDataManager.getData || typeof window.sharedDataManager.getData !== 'function') {
+                    console.log('⏳ getData method lost during execution, skipping sync check');
+                    this.isSharedDataManagerReady = false;
+                    this.lastHeartbeat = Date.now();
+                    return;
+                }
+            } catch (methodCheckError) {
+                console.log('⏳ Error checking getData method availability:', methodCheckError.message);
+                this.isSharedDataManagerReady = false;
+                this.lastHeartbeat = Date.now();
+                return;
+            }
+
+            // If we get here, everything should be ready
+            const currentData = await window.sharedDataManager.getData();
+
+            if (currentData && currentData.lastSync) {
+                const lastSync = new Date(currentData.lastSync || 0);
+                const now = new Date();
+
+                // If data is older than 30 seconds, broadcast a sync request
+                if (now - lastSync > 30000) {
+                    console.log('🔄 Data seems stale, requesting sync...');
+                    this.broadcast('sync_request', { timestamp: now.toISOString() });
+                }
+            }
+        } catch (error) {
+            console.warn('⚠️ Error during periodic sync data check:', error);
+            // Reset readiness flag on error
+            this.isSharedDataManagerReady = false;
         }
-        
+
         // Update heartbeat
         this.lastHeartbeat = Date.now();
     }
@@ -180,14 +315,18 @@ class RealTimeSync {
     }
 
     // Handle online status changes
-    handleOnline() {
+    async handleOnline() {
         console.log('🌐 Connection restored');
         this.isOnline = true;
         this.broadcast('client_online', { clientId: this.clientId });
-        
+
         // Force sync when coming back online
-        this.performPeriodicSync();
-        
+        try {
+            await this.performPeriodicSync();
+        } catch (error) {
+            console.warn('⚠️ Error in online sync:', error);
+        }
+
         if (window.showNotification) {
             window.showNotification('🌐 Connection restored - syncing data', 'success');
         }
@@ -314,12 +453,27 @@ class RealTimeSync {
     }
 
     // Force sync all data
-    forceSyncAll() {
+    async forceSyncAll() {
         console.log('🔄 Force syncing all data...');
-        
-        if (window.sharedDataManager) {
-            const allData = window.sharedDataManager.exportData();
+
+        try {
+            if (!window.sharedDataManager) {
+                console.warn('⚠️ SharedDataManager not available for force sync');
+                return;
+            }
+
+            if (typeof window.sharedDataManager.exportData !== 'function') {
+                console.warn('⚠️ SharedDataManager.exportData not available for force sync');
+                return;
+            }
+
+            const allData = await window.sharedDataManager.exportData();
             this.broadcast('full_sync', allData, { force: true });
+            console.log('✅ Force sync completed');
+        } catch (error) {
+            console.error('❌ Error during force sync:', error);
+            // Reset readiness flag on error
+            this.isSharedDataManagerReady = false;
         }
     }
 
@@ -398,10 +552,37 @@ class RealTimeSync {
 // Auto-initialize when script loads
 if (typeof window !== 'undefined') {
     window.RealTimeSync = RealTimeSync;
-    
-    // Initialize the real-time sync system
-    if (!window.realTimeSync) {
-        window.realTimeSync = new RealTimeSync();
-        console.log('🔄 Global Real-Time Sync initialized');
+
+    // Initialize the real-time sync system with proper timing
+    function initializeRealTimeSync() {
+        if (!window.realTimeSync) {
+            window.realTimeSync = new RealTimeSync();
+            console.log('🔄 Global Real-Time Sync initialized');
+        }
+    }
+
+    // If SharedDataManager is already available, initialize immediately
+    if (window.sharedDataManager) {
+        initializeRealTimeSync();
+    } else {
+        // Otherwise, wait for SharedDataManager to be available
+        let initAttempts = 0;
+        const maxInitAttempts = 20;
+
+        const checkForSharedDataManager = () => {
+            initAttempts++;
+            if (window.sharedDataManager) {
+                console.log('✅ SharedDataManager detected, initializing RealTimeSync');
+                initializeRealTimeSync();
+            } else if (initAttempts < maxInitAttempts) {
+                setTimeout(checkForSharedDataManager, 500);
+            } else {
+                console.warn('⚠️ SharedDataManager not found after', maxInitAttempts, 'attempts, initializing RealTimeSync anyway');
+                initializeRealTimeSync();
+            }
+        };
+
+        // Start checking immediately
+        setTimeout(checkForSharedDataManager, 100);
     }
 }
