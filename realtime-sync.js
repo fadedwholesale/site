@@ -143,8 +143,12 @@ class RealTimeSync {
 
     // Periodic sync to catch missed updates
     startPeriodicSync() {
-        this.syncInterval = setInterval(() => {
-            this.performPeriodicSync();
+        this.syncInterval = setInterval(async () => {
+            try {
+                await this.performPeriodicSync();
+            } catch (error) {
+                console.warn('⚠️ Error in periodic sync:', error);
+            }
         }, 5000); // Sync every 5 seconds
     }
 
