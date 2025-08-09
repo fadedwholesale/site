@@ -222,13 +222,25 @@ function initializeRealTimeStatusIndicator() {
     }
 }
 
-function loadInitialData() {
+async function loadInitialData() {
     // Load products from shared data manager
-    if (window.sharedDataManager) {
-        products = window.sharedDataManager.getProducts() || [];
-        orders = window.sharedDataManager.getOrders() || [];
-        updateAllViews();
-        console.log(`📦 Loaded ${products.length} products and ${orders.length} orders`);
+    if (window.sharedDataManager &&
+        typeof window.sharedDataManager.getProducts === 'function' &&
+        typeof window.sharedDataManager.getOrders === 'function') {
+        try {
+            products = await window.sharedDataManager.getProducts() || [];
+            orders = await window.sharedDataManager.getOrders() || [];
+            updateAllViews();
+            console.log(`📦 Loaded ${products.length} products and ${orders.length} orders`);
+        } catch (error) {
+            console.error('❌ Error loading initial data:', error);
+            products = [];
+            orders = [];
+        }
+    } else {
+        console.warn('⚠️ SharedDataManager not ready for data loading');
+        products = [];
+        orders = [];
     }
 }
 
