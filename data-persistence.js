@@ -30,18 +30,22 @@ class DataPersistence {
 
     // Start automatic backup system
     startAutomaticBackup() {
-        this.backupTimer = setInterval(() => {
-            this.createBackup();
+        this.backupTimer = setInterval(async () => {
+            try {
+                await this.createBackup();
+            } catch (error) {
+                console.warn('⚠️ Error in automatic backup:', error);
+            }
         }, this.backupInterval);
-        
+
         console.log(`💾 Automatic backup started (every ${this.backupInterval / 1000} seconds)`);
     }
 
     // Create a backup of current data
-    createBackup() {
+    async createBackup() {
         try {
-            if (window.sharedDataManager) {
-                const currentData = window.sharedDataManager.getData();
+            if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
+                const currentData = await window.sharedDataManager.getData();
                 const backup = {
                     timestamp: new Date().toISOString(),
                     data: currentData,
@@ -49,7 +53,7 @@ class DataPersistence {
                     userEmail: window.currentUser?.email,
                     checksum: this.calculateChecksum(currentData)
                 };
-                
+
                 this.saveBackup(backup);
                 console.log('💾 Backup created:', backup.timestamp);
             }
@@ -123,34 +127,40 @@ class DataPersistence {
         });
         
         // Periodic data integrity checks
-        this.recoveryTimer = setInterval(() => {
-            this.performIntegrityCheck();
+        this.recoveryTimer = setInterval(async () => {
+            try {
+                await this.performIntegrityCheck();
+            } catch (error) {
+                console.warn('⚠️ Error in periodic integrity check:', error);
+            }
         }, 60000); // Check every minute
     }
 
     // Perform startup check for data integrity
-    performStartupCheck() {
+    async performStartupCheck() {
         console.log('🔍 Performing startup data integrity check...');
-        
+
         try {
-            if (window.sharedDataManager) {
-                const currentData = window.sharedDataManager.getData();
-                
+            if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
+                const currentData = await window.sharedDataManager.getData();
+
                 // Check if data structure is valid
                 if (!this.isValidDataStructure(currentData)) {
                     console.warn('⚠️ Invalid data structure detected during startup');
                     this.initiateRecovery();
                     return;
                 }
-                
+
                 // Check for obvious corruption signs
                 if (this.hasCorruptionSigns(currentData)) {
                     console.warn('⚠️ Corruption signs detected during startup');
                     this.initiateRecovery();
                     return;
                 }
-                
+
                 console.log('✅ Startup data integrity check passed');
+            } else {
+                console.log('⏳ SharedDataManager not ready for startup check');
             }
         } catch (error) {
             console.error('❌ Startup check failed:', error);
@@ -159,13 +169,13 @@ class DataPersistence {
     }
 
     // Periodic integrity check
-    performIntegrityCheck() {
+    async performIntegrityCheck() {
         if (this.isRecovering) return;
-        
+
         try {
-            if (window.sharedDataManager) {
-                const currentData = window.sharedDataManager.getData();
-                
+            if (window.sharedDataManager && typeof window.sharedDataManager.getData === 'function') {
+                const currentData = await window.sharedDataManager.getData();
+
                 if (!this.isValidDataStructure(currentData)) {
                     console.warn('⚠️ Data integrity check failed - invalid structure');
                     this.initiateRecovery();
