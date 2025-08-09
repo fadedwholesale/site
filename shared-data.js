@@ -11,13 +11,28 @@ class SharedDataManager {
     }
 
     async initializeFirebase() {
-        // Wait for Firebase Integration Bridge
-        if (window.firebaseIntegrationBridge) {
+        console.log('🔥 Initializing Shared Data Manager for Production...');
+        console.log('🌐 Production Mode: All data operations through Firebase');
+
+        // Wait for Firebase Production Manager or Integration Bridge
+        if (window.firebaseProductionManager && window.firebaseProductionManager.isReady()) {
+            console.log('✅ Using Firebase Production Manager');
+            this.firebaseBridge = window.firebaseProductionManager;
+            this.db = window.firebaseProductionManager.getService('db');
+            await this.initializeData();
+        } else if (window.firebaseIntegrationBridge) {
+            console.log('✅ Using Firebase Integration Bridge');
             this.firebaseBridge = window.firebaseIntegrationBridge;
             this.db = this.firebaseBridge.db;
             await this.initializeData();
+        } else if (window.firebaseDataManager && window.firebaseDataManager.isInitialized) {
+            console.log('✅ Using Firebase Data Manager');
+            this.firebaseBridge = window.firebaseDataManager;
+            this.db = window.firebaseDataManager.db;
+            await this.initializeData();
         } else {
-            // Retry every second until Firebase is ready
+            console.log('⏳ Waiting for Firebase services...');
+            // Retry until Firebase is ready
             setTimeout(() => this.initializeFirebase(), 1000);
         }
     }
