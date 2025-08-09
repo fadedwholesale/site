@@ -20,23 +20,25 @@ class RealTimeSync {
 
     init() {
         console.log('🔄 Initializing Real-Time Sync System...', this.clientId);
-        
+
         // Set up storage listener for cross-tab communication
         window.addEventListener('storage', this.handleStorageChange.bind(this));
-        
+
         // Set up online/offline detection
         window.addEventListener('online', this.handleOnline.bind(this));
         window.addEventListener('offline', this.handleOffline.bind(this));
-        
-        // Set up periodic sync
-        this.startPeriodicSync();
-        
+
+        // Set up periodic sync (with delay to allow SharedDataManager to initialize)
+        setTimeout(() => {
+            this.startPeriodicSync();
+        }, 2000);
+
         // Set up heartbeat system
         this.startHeartbeat();
-        
+
         // Set up beforeunload handler
         window.addEventListener('beforeunload', this.handleBeforeUnload.bind(this));
-        
+
         console.log('✅ Real-Time Sync System initialized');
     }
 
