@@ -178,29 +178,72 @@ class DataPersistence {
         }, 300000); // Check every 5 minutes instead of 1 minute
     }
 
+    // Wait for Firebase to be ready
+    async waitForFirebaseReady(maxAttempts = 15) {
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            try {
+                // Check if SharedDataManager exists
+                if (!window.sharedDataManager) {
+                    console.log(`⏳ DataPersistence: Waiting for SharedDataManager... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check if getData method exists
+                if (typeof window.sharedDataManager.getData !== 'function') {
+                    console.log(`⏳ DataPersistence: Waiting for getData method... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                // Check if getStatus exists and Firebase is ready
+                if (!window.sharedDataManager.getStatus ||
+                    typeof window.sharedDataManager.getStatus !== 'function') {
+                    console.log(`⏳ DataPersistence: Waiting for getStatus method... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                const status = window.sharedDataManager.getStatus();
+                if (!status.firebaseReady) {
+                    console.log(`⏳ DataPersistence: Waiting for Firebase to be ready... (${attempt + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+
+                console.log('✅ DataPersistence: Firebase is ready');
+                return true;
+
+            } catch (error) {
+                console.log(`⏳ DataPersistence: Firebase readiness check failed, retrying... (${attempt + 1}/${maxAttempts}):`, error.message);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        console.warn('⚠️ DataPersistence: Firebase readiness timeout');
+        return false;
+    }
+
     // Perform startup check for data integrity
     async performStartupCheck() {
         console.log('🔍 Performing startup data integrity check...');
 
         try {
-            if (window.sharedDataManager &&
-                typeof window.sharedDataManager.getData === 'function' &&
-                window.sharedDataManager.getStatus &&
-                window.sharedDataManager.getStatus().firebaseReady) {
+            // Wait for Firebase to be ready
+            const firebaseReady = await this.waitForFirebaseReady();
 
-                // Add delay to ensure Firebase is properly initialized
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                const currentData = await window.sharedDataManager.getData();
-
-                // Only check for critical issues, not minor structural differences
-                if (currentData && typeof currentData === 'object') {
-                    console.log('✅ Startup data integrity check passed');
-                } else {
-                    console.warn('⚠️ No valid data found during startup, but this may be normal for new installations');
-                }
-            } else {
+            if (!firebaseReady) {
                 console.log('⏳ Firebase not ready for startup check, skipping');
+                return;
+            }
+
+            const currentData = await window.sharedDataManager.getData();
+
+            // Only check for critical issues, not minor structural differences
+            if (currentData && typeof currentData === 'object') {
+                console.log('✅ Startup data integrity check passed');
+            } else {
+                console.warn('⚠️ No valid data found during startup, but this may be normal for new installations');
             }
         } catch (error) {
             if (error.message === 'Firebase not ready') {
