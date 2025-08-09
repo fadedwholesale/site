@@ -2568,8 +2568,8 @@ function testAuthorizationAndSync() {
                 }
 
                 // Test 3: Real-time sync
-                setTimeout(() => {
-                    testRealTimeSyncFeatures(testResults);
+                setTimeout(async () => {
+                    await testRealTimeSyncFeatures(testResults);
                 }, 1000);
 
             }, 1000);
