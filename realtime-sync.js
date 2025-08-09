@@ -200,6 +200,29 @@ class RealTimeSync {
         }
     }
 
+    // Monitor SharedDataManager readiness
+    startReadinessMonitor() {
+        setInterval(() => {
+            if (this.isSharedDataManagerReady) {
+                // Double-check that it's still ready
+                if (!window.sharedDataManager ||
+                    typeof window.sharedDataManager.getData !== 'function') {
+                    console.warn('⚠️ SharedDataManager became unavailable, marking as not ready');
+                    this.isSharedDataManagerReady = false;
+                }
+            } else {
+                // Try to re-establish readiness
+                if (window.sharedDataManager &&
+                    typeof window.sharedDataManager.getData === 'function' &&
+                    window.sharedDataManager.getStatus &&
+                    window.sharedDataManager.getStatus().firebaseReady) {
+                    console.log('✅ SharedDataManager is ready again');
+                    this.isSharedDataManagerReady = true;
+                }
+            }
+        }, 10000); // Check every 10 seconds
+    }
+
     // Periodic sync to catch missed updates
     startPeriodicSync() {
         this.syncInterval = setInterval(async () => {
@@ -288,7 +311,7 @@ class RealTimeSync {
     }
 
     handleOffline() {
-        console.log('📡 Connection lost');
+        console.log('���� Connection lost');
         this.isOnline = false;
         
         if (window.showNotification) {
