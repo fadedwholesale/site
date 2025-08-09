@@ -18,6 +18,26 @@ class RealTimeSync {
         return 'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 
+    // Wait for SharedDataManager to be ready
+    async waitForSharedDataManager(maxAttempts = 10) {
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            if (window.sharedDataManager &&
+                typeof window.sharedDataManager.getData === 'function' &&
+                window.sharedDataManager.getStatus &&
+                window.sharedDataManager.getStatus().firebaseReady) {
+
+                console.log('✅ SharedDataManager is ready for sync operations');
+                return true;
+            }
+
+            console.log(`⏳ Waiting for SharedDataManager... (${attempt + 1}/${maxAttempts})`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        console.warn('⚠️ SharedDataManager readiness timeout after', maxAttempts, 'attempts');
+        return false;
+    }
+
     init() {
         console.log('🔄 Initializing Real-Time Sync System...', this.clientId);
 
