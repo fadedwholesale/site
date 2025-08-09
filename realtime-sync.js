@@ -184,9 +184,9 @@ class RealTimeSync {
 
         try {
             // Check for data consistency
-            if (window.sharedDataManager &&
-                typeof window.sharedDataManager.getData === 'function' &&
-                window.sharedDataManager.getStatus().firebaseReady) {
+            if (this.isSharedDataManagerReady &&
+                window.sharedDataManager &&
+                typeof window.sharedDataManager.getData === 'function') {
 
                 const currentData = await window.sharedDataManager.getData();
                 const lastSync = new Date(currentData.lastSync || 0);
