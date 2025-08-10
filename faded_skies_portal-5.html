@@ -2852,7 +2852,7 @@
     <div id="bulkOrderModal" class="modal">
         <div class="modal-content" style="max-width: 1000px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
-                <h3 class="modal-title">�� Create Bulk Order</h3>
+                <h3 class="modal-title">📦 Create Bulk Order</h3>
                 <button class="modal-close" onclick="closeBulkOrderModal()">×</button>
             </div>
 
@@ -3794,6 +3794,21 @@
         window.submitBulkOrder = window.submitBulkOrder || function() {
             console.warn('Bulk order manager loading...');
         };
+
+        // Verify critical functions are defined
+        setTimeout(() => {
+            console.log('🔍 Verifying critical functions:');
+            console.log('openModal:', typeof window.openModal);
+            console.log('closeModal:', typeof window.closeModal);
+            console.log('toggleLiveInventory:', typeof window.toggleLiveInventory);
+            console.log('showPublicWebsite:', typeof window.showPublicWebsite);
+
+            if (typeof window.openModal === 'function') {
+                console.log('✅ openModal is properly defined and ready');
+            } else {
+                console.error('❌ openModal is not defined');
+            }
+        }, 100);
     </script>
 
     <script>
@@ -5472,7 +5487,7 @@
                     try {
                         await verifyPartnerPortalSync();
                     } catch (error) {
-                        console.warn('���️ Error in partner portal sync verification:', error);
+                        console.warn('⚠️ Error in partner portal sync verification:', error);
                     }
                 }, 30000); // Check every 30 seconds
 
@@ -7281,7 +7296,7 @@ Phone: (210) 835-7834
                                     const productId = parseInt(match[1]);
                                     const quantity = eval(match[2]); // Use eval to handle Math.max expressions
                                     
-                                    console.log('��� Quantity button clicked:', { productId, quantity });
+                                    console.log('🔄 Quantity button clicked:', { productId, quantity });
                                     
                                     // Add visual feedback
                                     e.target.style.transform = 'scale(0.9)';
