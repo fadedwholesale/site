@@ -7495,7 +7495,7 @@ Phone: (210) 835-7834
                                             const finalQuantity = cart.find(item => item.id === testProduct.id)?.quantity;
                                             if (finalQuantity === oldQuantity) {
                                                 console.log('✅ Quantity decrease test passed');
-                                                showNotification('🎉 Cart functionality test completed successfully!', 'success');
+                                                showNotification('��� Cart functionality test completed successfully!', 'success');
                                             } else {
                                                 console.log('❌ Quantity decrease test failed');
                                                 showNotification('❌ Quantity decrease test failed', 'error');
@@ -7746,7 +7746,7 @@ Phone: (210) 835-7834
                 showNotification('🚀 Application loaded successfully! Cart controls are now fully functional.', 'success');
             } catch (error) {
                 console.warn('Auto-refresh failed:', error);
-                showNotification('⚠️ Some features may need manual refresh', 'warning');
+                showNotification('��️ Some features may need manual refresh', 'warning');
             }
         }, 2000);
 
@@ -7901,9 +7901,7 @@ Phone: (210) 835-7834
         // Also trigger on window load as backup
         window.addEventListener('load', function() {
             console.log('📷 Window loaded - ensuring logo is displayed...');
-=======
             // Test modal functionality
->>>>>>> origin/main
             setTimeout(() => {
                 console.log('🧪 Testing modal functionality...');
                 const loginModal = document.getElementById('loginModal');
