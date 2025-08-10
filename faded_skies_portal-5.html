@@ -2299,10 +2299,15 @@
                 window.currentUser = { email: email, name: email.split('@')[0], tier: 'Gold' };
 
                 // Switch to partner portal
-                document.getElementById('publicView').classList.remove('active');
-                document.getElementById('partnerPortal').classList.add('active');
-                document.getElementById('guestSection').style.display = 'none';
-                document.getElementById('userSession').style.display = 'flex';
+                const publicView = document.getElementById('publicView');
+                const partnerView = document.getElementById('partnerView');
+                const guestSection = document.getElementById('guestSection');
+                const userSession = document.getElementById('userSession');
+
+                if (publicView) publicView.classList.remove('active');
+                if (partnerView) partnerView.classList.add('active');
+                if (guestSection) guestSection.style.display = 'none';
+                if (userSession) userSession.style.display = 'flex';
 
                 // Close modal
                 window.closeModal('loginModal');
@@ -3009,7 +3014,7 @@
 
                 <div style="display: flex; justify-content: space-between; margin-top: 20px;">
                     <div style="color: var(--text-secondary);">Selected: <span id="selectedProductsCount">0</span> products</div>
-                    <button class="btn btn-primary" onclick="nextBulkStep()" id="bulkStep1Next">Next: Set Quantities →</button>
+                    <button class="btn btn-primary" onclick="nextBulkStep()" id="bulkStep1Next">Next: Set Quantities ���</button>
                 </div>
             </div>
 
