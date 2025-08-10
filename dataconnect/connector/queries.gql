@@ -1,78 +1,352 @@
-# # Example queries for a simple movie app.
+# Faded Skies Portal - Data Connect Queries
+# Real-time data queries for dynamic portal functionality
 
-# # @auth() directives control who can call each operation.
-# # Anyone should be able to list all movies, so the auth level is set to PUBLIC
-# query ListMovies @auth(level: PUBLIC, insecureReason: "Anyone can list all movies.") {
-#   movies {
-#     id
-#     title
-#     imageUrl
-#     genre
-#   }
-# }
+# User Management Queries
+query GetUser($id: String!) {
+  user(id: $id) {
+    id
+    email
+    role
+    companyName
+    contactName
+    phone
+    address
+    licenseNumber
+    status
+    createdAt
+    updatedAt
+    lastLogin
+    verificationDocuments
+  }
+}
 
-# # List all users, only admins should be able to list all users, so we use NO_ACCESS
-# query ListUsers @auth(level: NO_ACCESS) {
-#   users {
-#     id
-#     username
-#   }
-# }
+query GetUsers($role: String, $status: String) {
+  users(where: {
+    role: $role,
+    status: $status
+  }) {
+    id
+    email
+    role
+    companyName
+    contactName
+    phone
+    status
+    createdAt
+    lastLogin
+  }
+}
 
-# # Logged in users can list all their reviews and movie titles associated with the review
-# # Since the query uses the uid of the current authenticated user, we set auth level to USER
-# query ListUserReviews @auth(level: USER) {
-#   user(key: { id_expr: "auth.uid" }) {
-#     id
-#     username
-#     # <field>_on_<foreign_key_field> makes it easy to grab info from another table
-#     # Here, we use it to grab all the reviews written by the user.
-#     reviews: reviews_on_user {
-#       rating
-#       reviewDate
-#       reviewText
-#       movie {
-#         id
-#         title
-#       }
-#     }
-#   }
-# }
+query GetPendingPartners {
+  users(where: {
+    role: "partner",
+    status: "pending"
+  }) {
+    id
+    email
+    companyName
+    contactName
+    phone
+    licenseNumber
+    createdAt
+  }
+}
 
-# # Get movie by id
-# query GetMovieById($id: UUID!) @auth(level: PUBLIC, insecureReason: "Anyone can get a movie by id.") {
-#   movie(id: $id) {
-#     id
-#     title
-#     imageUrl
-#     genre
-#     metadata: movieMetadata_on_movie {
-#       rating
-#       releaseYear
-#       description
-#     }
-#     reviews: reviews_on_movie {
-#       reviewText
-#       reviewDate
-#       rating
-#       user {
-#         id
-#         username
-#       }
-#     }
-#   }
-# }
+# Product Management Queries
+query GetProducts($category: String, $status: String) {
+  products(where: {
+    category: $category,
+    status: $status
+  }) {
+    id
+    name
+    description
+    category
+    subcategory
+    thcContent
+    cbdContent
+    price
+    wholesalePrice
+    stockQuantity
+    minOrderQuantity
+    maxOrderQuantity
+    status
+    images
+    labResults
+    createdAt
+    updatedAt
+  }
+}
 
-# # Search for movies, actors, and reviews
-# query SearchMovie($titleInput: String, $genre: String) @auth(level: PUBLIC, insecureReason: "Anyone can search for movies.") {
-#   movies(
-#     where: {
-#       _and: [{ genre: { eq: $genre } }, { title: { contains: $titleInput } }]
-#     }
-#   ) {
-#     id
-#     title
-#     genre
-#     imageUrl
-#   }
-# }
+query GetProduct($id: UUID!) {
+  product(id: $id) {
+    id
+    name
+    description
+    category
+    subcategory
+    thcContent
+    cbdContent
+    price
+    wholesalePrice
+    stockQuantity
+    minOrderQuantity
+    maxOrderQuantity
+    status
+    images
+    labResults
+    createdAt
+    updatedAt
+    createdBy
+  }
+}
+
+query GetLowStockProducts($threshold: Int!) {
+  products(where: {
+    stockQuantity: { _lte: $threshold },
+    status: "active"
+  }) {
+    id
+    name
+    stockQuantity
+    wholesalePrice
+  }
+}
+
+# Order Management Queries
+query GetOrders($partnerId: String, $status: String) {
+  orders(where: {
+    partnerId: $partnerId,
+    status: $status
+  }) {
+    id
+    orderNumber
+    partnerId
+    partner {
+      companyName
+      contactName
+      email
+    }
+    status
+    totalAmount
+    subtotal
+    tax
+    shipping
+    notes
+    shippingAddress
+    billingAddress
+    createdAt
+    updatedAt
+    estimatedDelivery
+    actualDelivery
+    trackingNumber
+  }
+}
+
+query GetOrder($id: UUID!) {
+  order(id: $id) {
+    id
+    orderNumber
+    partnerId
+    partner {
+      id
+      companyName
+      contactName
+      email
+      phone
+    }
+    status
+    totalAmount
+    subtotal
+    tax
+    shipping
+    notes
+    shippingAddress
+    billingAddress
+    createdAt
+    updatedAt
+    estimatedDelivery
+    actualDelivery
+    trackingNumber
+    orderItems {
+      id
+      productId
+      product {
+        name
+        description
+        images
+      }
+      quantity
+      unitPrice
+      totalPrice
+      notes
+    }
+  }
+}
+
+query GetRecentOrders($limit: Int!) {
+  orders(orderBy: { createdAt: DESC }, limit: $limit) {
+    id
+    orderNumber
+    partnerId
+    partner {
+      companyName
+    }
+    status
+    totalAmount
+    createdAt
+  }
+}
+
+# Notification Queries
+query GetNotifications($userId: String!, $read: Boolean) {
+  notifications(where: {
+    userId: $userId,
+    read: $read
+  }, orderBy: { createdAt: DESC }) {
+    id
+    type
+    title
+    message
+    read
+    createdAt
+    data
+  }
+}
+
+query GetUnreadNotificationCount($userId: String!) {
+  notifications(where: {
+    userId: $userId,
+    read: false
+  }) {
+    id
+  }
+}
+
+# Inventory Management Queries
+query GetInventoryTransactions($productId: UUID, $type: String) {
+  inventoryTransactions(where: {
+    productId: $productId,
+    type: $type
+  }, orderBy: { createdAt: DESC }) {
+    id
+    productId
+    product {
+      name
+    }
+    type
+    quantity
+    previousStock
+    newStock
+    reason
+    orderId
+    createdBy
+    createdAt
+  }
+}
+
+query GetProductStockHistory($productId: UUID!) {
+  inventoryTransactions(where: {
+    productId: $productId
+  }, orderBy: { createdAt: DESC }) {
+    id
+    type
+    quantity
+    previousStock
+    newStock
+    reason
+    createdAt
+  }
+}
+
+# Audit and Analytics Queries
+query GetAuditLogs($userId: String, $table: String, $limit: Int!) {
+  auditLogs(where: {
+    userId: $userId,
+    table: $table
+  }, orderBy: { createdAt: DESC }, limit: $limit) {
+    id
+    userId
+    user {
+      email
+      companyName
+    }
+    action
+    table
+    recordId
+    oldValues
+    newValues
+    ipAddress
+    createdAt
+  }
+}
+
+query GetSystemStats {
+  # Get total counts for dashboard
+  users(where: { role: "partner" }) {
+    id
+    status
+  }
+  products(where: { status: "active" }) {
+    id
+    stockQuantity
+  }
+  orders(where: { status: "pending" }) {
+    id
+    totalAmount
+  }
+}
+
+# Partner Document Queries
+query GetPartnerDocuments($partnerId: String!) {
+  partnerDocuments(where: {
+    partnerId: $partnerId
+  }) {
+    id
+    documentType
+    fileName
+    fileUrl
+    status
+    reviewedBy
+    reviewNotes
+    uploadedAt
+    reviewedAt
+  }
+}
+
+query GetPendingDocuments {
+  partnerDocuments(where: {
+    status: "pending"
+  }) {
+    id
+    partnerId
+    partner {
+      companyName
+      contactName
+      email
+    }
+    documentType
+    fileName
+    uploadedAt
+  }
+}
+
+# System Configuration Queries
+query GetSystemConfig($id: String!) {
+  systemConfig(id: $id) {
+    id
+    value
+    description
+    updatedBy
+    updatedAt
+  }
+}
+
+query GetAllSystemConfigs {
+  systemConfigs {
+    id
+    value
+    description
+    updatedAt
+  }
+}
