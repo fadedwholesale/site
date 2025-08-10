@@ -3271,7 +3271,7 @@
                 <!-- Business Information Section -->
                 <div class="form-section" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);">
                     <h4 style="color: var(--brand-green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                        ��� Business Information
+                        ����� Business Information
                     </h4>
                     <div class="form-row">
                         <div class="form-group">
@@ -3748,6 +3748,12 @@
 
         window.switchPortalTab = window.switchPortalTab || function(tabName) {
             console.log('switchPortalTab called for:', tabName, '- loading...');
+        };
+
+        window.login = window.login || function(event) {
+            if (event && event.preventDefault) event.preventDefault();
+            console.log('login called - loading...');
+            return false;
         };
 
         // Immediate bulk order function definitions to prevent undefined errors
