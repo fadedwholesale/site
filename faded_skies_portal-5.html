@@ -2363,10 +2363,16 @@
         window.logout = function() {
             console.log('🚀 logout called');
             window.currentUser = null;
-            document.getElementById('partnerPortal').classList.remove('active');
-            document.getElementById('publicView').classList.add('active');
-            document.getElementById('guestSection').style.display = 'block';
-            document.getElementById('userSession').style.display = 'none';
+
+            const partnerView = document.getElementById('partnerView');
+            const publicView = document.getElementById('publicView');
+            const guestSection = document.getElementById('guestSection');
+            const userSession = document.getElementById('userSession');
+
+            if (partnerView) partnerView.classList.remove('active');
+            if (publicView) publicView.classList.add('active');
+            if (guestSection) guestSection.style.display = 'block';
+            if (userSession) userSession.style.display = 'none';
             alert('Logged out successfully');
         };
 
@@ -2417,7 +2423,7 @@
                         🛒 Cart (<span id="cartCount">0</span>)
                     </button>
                     <button class="btn btn-primary btn-sm" onclick="showPartnerPortal()">
-                        ��� My Portal
+                        📊 My Portal
                     </button>
                     <button class="btn btn-danger btn-sm" onclick="logout()">
                         Logout <span id="userBadge" class="user-badge">PARTNER</span>
