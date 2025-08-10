@@ -3741,15 +3741,13 @@
                         addMobileModalHandlers(modal);
                     }, 100);
 
-                    // Add visual feedback for mobile
-                    showNotification('📱 Modal opened - tap outside or × to close', 'info');
+                    // Add visual feedback for mobile (skip notification to avoid dependency issues)
+                    console.log('📱 Modal opened:', modalId);
                 } else {
                     console.warn('Modal not found:', modalId);
-                    showNotification('Modal not found. Please refresh the page.', 'error');
                 }
             } catch (error) {
                 console.error('Error opening modal:', error);
-                showNotification('Modal error. Please try again.', 'error');
             }
         }
 
