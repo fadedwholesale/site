@@ -6289,7 +6289,7 @@
             }
         }
 
-        function updateQuantity(productId, quantity) {
+        window.updateQuantity = function(productId, quantity) {
             try {
                 console.log('🔄 Updating quantity for product:', productId, 'to:', quantity);
                 
@@ -6418,7 +6418,7 @@
                     
                     setTimeout(() => {
                         if (total > 1000) {
-                            showNotification('��� FREE priority shipping included with your order!', 'success');
+                            showNotification('🚚 FREE priority shipping included with your order!', 'success');
                         }
                     }, 4000);
                     
@@ -6440,7 +6440,7 @@
         }
 
         // Enhanced Functions with Error Handling
-        function viewOrderDetails(orderId) {
+        window.viewOrderDetails = function(orderId) {
             const order = orders.find(o => o.id === orderId);
             if (!order) return;
             
@@ -6683,7 +6683,7 @@ Phone: (210) 835-7834
             }
         }
 
-        function editOrder(orderId) {
+        window.editOrder = function(orderId) {
             try {
                 const order = orders.find(o => o.id === orderId);
                 if (!order || order.status !== 'PENDING') {
@@ -7797,7 +7797,7 @@ Phone: (210) 835-7834
                     </div>
                 </div>
                 <div class="card" style="margin-bottom: 32px;">
-                    <h3>📝 Recent Orders</h3>
+                    <h3>���� Recent Orders</h3>
                     <table class="data-table" style="margin-top: 12px;">
                         <thead>
                             <tr>
