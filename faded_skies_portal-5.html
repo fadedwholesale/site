@@ -4377,7 +4377,7 @@
             }
         }
 
-        function showPartnerPortal() {
+        window.showPartnerPortal = function() {
             try {
                 if (!currentUser) {
                     openModal('loginModal');
@@ -5184,7 +5184,7 @@
             }
         }
 
-        function logout() {
+        window.logout = function() {
             try {
                 if (confirm('Are you sure you want to logout? Any unsaved cart items will be lost.')) {
                     // Clear session storage
@@ -6231,7 +6231,7 @@
             showNotification('❌ A network or processing error occurred. Please try again.', 'error');
         });
 
-        function addToCart(productId) {
+        window.addToCart = function(productId) {
             if (addToCartLock) return;
             addToCartLock = true;
             setTimeout(() => { addToCartLock = false; }, 300);
@@ -6336,7 +6336,7 @@
             }
         }
 
-        function checkout() {
+        window.checkout = function() {
             if (!currentUser) {
                 showNotification('🔒 Please log in to complete checkout', 'error');
                 return;
