@@ -5783,19 +5783,10 @@
                 modals.forEach(modal => {
                     // Only close if modal is open and not just opened (prevents double-tap close)
                     if (event.target === modal && modal.getAttribute('data-modal-open') === 'true') {
-=======
-            
-            if (typeof window.closeModal !== 'function') {
-                window.closeModal = function(modalId) {
-                    console.log('Closing modal:', modalId);
-                    const modal = document.getElementById(modalId);
-                    if (modal) {
->>>>>>> origin/main
                         modal.style.display = 'none';
                         document.body.classList.remove('modal-open');
-                        console.log('Modal closed successfully');
+                        modal.removeAttribute('data-modal-open');
                     }
-<<<<<<< HEAD
                 });
             } catch (error) {
                 console.error('Error in window click handler:', error);
