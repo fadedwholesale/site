@@ -3720,6 +3720,111 @@
     </script>
 
     <script>
+        // Enhanced Modal Functions with Mobile Support - Moved to prevent undefined errors
+        function openModal(modalId) {
+            try {
+                console.log('[DEBUG] openModal called for:', modalId);
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'block';
+                    document.body.classList.add('modal-open');
+
+                    // Prevent scrolling on mobile
+                    document.body.style.overflow = 'hidden';
+                    document.body.style.position = 'fixed';
+                    document.body.style.width = '100%';
+
+                    // Prevent double-tap close on mobile
+                    setTimeout(() => {
+                        modal.setAttribute('data-modal-open', 'true');
+                        // Add mobile-specific modal handlers
+                        addMobileModalHandlers(modal);
+                    }, 100);
+
+                    // Add visual feedback for mobile
+                    showNotification('📱 Modal opened - tap outside or × to close', 'info');
+                } else {
+                    console.warn('Modal not found:', modalId);
+                    showNotification('Modal not found. Please refresh the page.', 'error');
+                }
+            } catch (error) {
+                console.error('Error opening modal:', error);
+                showNotification('Modal error. Please try again.', 'error');
+            }
+        }
+
+        function closeModal(modalId) {
+            try {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                    modal.removeAttribute('data-modal-open');
+
+                    // Restore scrolling on mobile
+                    document.body.style.overflow = '';
+                    document.body.style.position = '';
+                    document.body.style.width = '';
+                }
+            } catch (error) {
+                console.error('Error closing modal:', error);
+            }
+        }
+
+        function addMobileModalHandlers(modal) {
+            try {
+                // Handle modal close button
+                const closeBtn = modal.querySelector('.modal-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        modal.style.display = 'none';
+                        document.body.classList.remove('modal-open');
+                        document.body.style.overflow = '';
+                        document.body.style.position = '';
+                        document.body.style.width = '';
+                    });
+                }
+
+                // Handle form submission in modals
+                const forms = modal.querySelectorAll('form');
+                forms.forEach(form => {
+                    // Make sure submit buttons work on mobile
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.addEventListener('touchend', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            // Trigger form submission
+                            setTimeout(() => {
+                                if (form.id === 'editOrderForm' || form.id === 'editProfileForm') {
+                                    // Handle custom forms
+                                    const submitEvent = new Event('submit');
+                                    form.dispatchEvent(submitEvent);
+                                } else {
+                                    // Handle login/register forms
+                                    const formOnSubmit = form.getAttribute('onsubmit');
+                                    if (formOnSubmit) {
+                                        const eventObj = { target: form, preventDefault: () => {} };
+                                        if (formOnSubmit.includes('login')) {
+                                            login(eventObj);
+                                        } else if (formOnSubmit.includes('register')) {
+                                            register(eventObj);
+                                        }
+                                    }
+                                }
+                            }, 50);
+                        });
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error adding mobile modal handlers:', error);
+            }
+        }
+
         // Global State Management
         let currentUser = null;
         let currentView = 'public';
@@ -5751,7 +5856,7 @@
 
         // Force update all views and tables with product images
         function forceUpdateWithImages() {
-            console.log('�� Force updating all tables with product images...');
+            console.log('��� Force updating all tables with product images...');
             
             // Update public inventory if visible
             if (inventoryVisible) {
@@ -6459,7 +6564,7 @@
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 600px;">
                     <div class="modal-header">
-                        <h3 class="modal-title">📋 Order Details - ${order.id}</h3>
+                        <h3 class="modal-title">��� Order Details - ${order.id}</h3>
                         <button class="modal-close" onclick="this.closest('.modal').remove(); document.body.style.overflow = 'auto';">×</button>
                     </div>
                     <div style="background: var(--surface-elevated); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
