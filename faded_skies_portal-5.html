@@ -2338,8 +2338,11 @@
                 window.openModal('loginModal');
                 return;
             }
-            document.getElementById('publicView').classList.remove('active');
-            document.getElementById('partnerPortal').classList.add('active');
+            const publicView = document.getElementById('publicView');
+            const partnerView = document.getElementById('partnerView');
+
+            if (publicView) publicView.classList.remove('active');
+            if (partnerView) partnerView.classList.add('active');
             window.currentView = 'partner';
         };
 
@@ -2414,7 +2417,7 @@
                         🛒 Cart (<span id="cartCount">0</span>)
                     </button>
                     <button class="btn btn-primary btn-sm" onclick="showPartnerPortal()">
-                        📊 My Portal
+                        ��� My Portal
                     </button>
                     <button class="btn btn-danger btn-sm" onclick="logout()">
                         Logout <span id="userBadge" class="user-badge">PARTNER</span>
