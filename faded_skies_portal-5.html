@@ -2378,7 +2378,7 @@
                     </div>
                     <div class="grid">
                         <div class="card">
-                            <h3>🌿 THCA Wholesale Leader</h3>
+                            <h3>�� THCA Wholesale Leader</h3>
                             <p>As the #1 THCA wholesale distributor in the USA, we specialize in premium hemp wholesale products including THCA flower wholesale, THC hemp concentrates wholesale, and bulk cannabis wholesale solutions. Our licensed hemp processor facility ensures consistent quality for all wholesale cannabis flower and THCA bulk sales.</p>
                         </div>
                         <div class="card">
@@ -2842,7 +2842,7 @@
             </div>
             <div style="border-top: 1px solid var(--border-subtle); padding-top: 30px; text-align: center;">
                 <p style="margin-bottom: 8px; font-weight: 600;">&copy; 2025 Faded Skies Cannabis Wholesale. Licensed THCA Hemp Processor | Farm Bill Compliant THC Wholesale</p>
-                <p>📧 info@fadedskieswholesale.com | 📞 (210) 835-7834 | 📍 Austin, TX | Premium THCA & Cannabis Wholesale Quality Guaranteed ����</p>
+                <p>📧 info@fadedskieswholesale.com | 📞 (210) 835-7834 | 📍 Austin, TX | Premium THCA & Cannabis Wholesale Quality Guaranteed 🌿</p>
                 <p style="margin-top: 10px; font-size: 14px; color: var(--text-muted);">Keywords: THCA wholesale, THC hemp wholesale, cannabis wholesale distributor, hemp wholesale products, THCA bulk sales, wholesale cannabis flower, hemp processor wholesale, cannabis wholesale pricing</p>
             </div>
         </div>
@@ -3453,7 +3453,7 @@
                     <!-- Live Pricing Summary -->
                     <div class="live-pricing-summary" style="background: var(--surface-elevated); padding: 16px; border-radius: 8px; margin-top: 16px; border: 1px solid var(--brand-green);">
                         <h5 style="color: var(--brand-green); margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
-                            ⚡ Live Pricing Update
+                            ��� Live Pricing Update
                         </h5>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                             <span>Subtotal:</span>
@@ -3824,13 +3824,15 @@
             console.log('🔍 Verifying critical functions:');
             console.log('openModal:', typeof window.openModal);
             console.log('closeModal:', typeof window.closeModal);
-            console.log('toggleLiveInventory:', typeof window.toggleLiveInventory);
-            console.log('showPublicWebsite:', typeof window.showPublicWebsite);
+            console.log('login:', typeof window.login);
+            console.log('updateProfile:', typeof window.updateProfile);
+            console.log('proceedToPayment:', typeof window.proceedToPayment);
+            console.log('processPayment:', typeof window.processPayment);
 
-            if (typeof window.openModal === 'function') {
-                console.log('✅ openModal is properly defined and ready');
+            if (typeof window.openModal === 'function' && typeof window.login === 'function') {
+                console.log('✅ Critical functions are properly defined and ready');
             } else {
-                console.error('❌ openModal is not defined');
+                console.error('❌ Some critical functions are not defined');
             }
         }, 100);
     </script>
@@ -4632,7 +4634,7 @@
                 }
                 
                 if (!isValidEmail(email)) {
-                    showNotification('��️ Please enter a valid email address', 'error');
+                    showNotification('����� Please enter a valid email address', 'error');
                     return;
                 }
                 
