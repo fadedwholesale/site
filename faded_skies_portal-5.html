@@ -3429,7 +3429,7 @@
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 16px; border: 2px solid var(--border-subtle); border-radius: 8px; background: var(--surface-card); transition: all 0.3s ease;" onchange="updateDeliveryMethodLive(this)">
                                 <input type="radio" name="deliveryMethod" value="standard" checked style="margin: 0;">
                                 <div>
-                                    <div style="font-weight: 600; color: var(--text-primary);">���� Standard Shipping</div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">📦 Standard Shipping</div>
                                     <div style="font-size: 12px; color: var(--text-secondary);">3-5 business days • <span class="live-shipping-cost" data-method="standard">Free on orders $1000+</span></div>
                                 </div>
                             </label>
@@ -3765,108 +3765,7 @@
     </script>
 
     <script>
-        // Enhanced Modal Functions with Mobile Support - Moved to prevent undefined errors
-        function openModal(modalId) {
-            try {
-                console.log('[DEBUG] openModal called for:', modalId);
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.style.display = 'block';
-                    document.body.classList.add('modal-open');
-
-                    // Prevent scrolling on mobile
-                    document.body.style.overflow = 'hidden';
-                    document.body.style.position = 'fixed';
-                    document.body.style.width = '100%';
-
-                    // Prevent double-tap close on mobile
-                    setTimeout(() => {
-                        modal.setAttribute('data-modal-open', 'true');
-                        // Add mobile-specific modal handlers
-                        addMobileModalHandlers(modal);
-                    }, 100);
-
-                    // Add visual feedback for mobile (skip notification to avoid dependency issues)
-                    console.log('📱 Modal opened:', modalId);
-                } else {
-                    console.warn('Modal not found:', modalId);
-                }
-            } catch (error) {
-                console.error('Error opening modal:', error);
-            }
-        }
-
-        function closeModal(modalId) {
-            try {
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.style.display = 'none';
-                    document.body.classList.remove('modal-open');
-                    modal.removeAttribute('data-modal-open');
-
-                    // Restore scrolling on mobile
-                    document.body.style.overflow = '';
-                    document.body.style.position = '';
-                    document.body.style.width = '';
-                }
-            } catch (error) {
-                console.error('Error closing modal:', error);
-            }
-        }
-
-        function addMobileModalHandlers(modal) {
-            try {
-                // Handle modal close button
-                const closeBtn = modal.querySelector('.modal-close');
-                if (closeBtn) {
-                    closeBtn.addEventListener('touchend', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        modal.style.display = 'none';
-                        document.body.classList.remove('modal-open');
-                        document.body.style.overflow = '';
-                        document.body.style.position = '';
-                        document.body.style.width = '';
-                    });
-                }
-
-                // Handle form submission in modals
-                const forms = modal.querySelectorAll('form');
-                forms.forEach(form => {
-                    // Make sure submit buttons work on mobile
-                    const submitBtn = form.querySelector('button[type="submit"]');
-                    if (submitBtn) {
-                        submitBtn.addEventListener('touchend', function(e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-
-                            // Trigger form submission
-                            setTimeout(() => {
-                                if (form.id === 'editOrderForm' || form.id === 'editProfileForm') {
-                                    // Handle custom forms
-                                    const submitEvent = new Event('submit');
-                                    form.dispatchEvent(submitEvent);
-                                } else {
-                                    // Handle login/register forms
-                                    const formOnSubmit = form.getAttribute('onsubmit');
-                                    if (formOnSubmit) {
-                                        const eventObj = { target: form, preventDefault: () => {} };
-                                        if (formOnSubmit.includes('login')) {
-                                            login(eventObj);
-                                        } else if (formOnSubmit.includes('register')) {
-                                            register(eventObj);
-                                        }
-                                    }
-                                }
-                            }, 50);
-                        });
-                    }
-                });
-
-            } catch (error) {
-                console.error('Error adding mobile modal handlers:', error);
-            }
-        }
+        // Modal functions now defined in earlier script section to prevent undefined errors
 
         // Global State Management
         let currentUser = null;
@@ -4474,7 +4373,7 @@
    • Product browsing with search and filters
    • Analytics and reporting
 
-��� User Experience
+✅ User Experience
    • Mobile-responsive design
    • Keyboard navigation and accessibility
    • Loading states and error handling
