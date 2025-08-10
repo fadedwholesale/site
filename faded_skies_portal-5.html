@@ -2323,8 +2323,11 @@
         // Add other critical functions
         window.showPublicWebsite = function() {
             console.log('🚀 showPublicWebsite called');
-            document.getElementById('partnerPortal').classList.remove('active');
-            document.getElementById('publicView').classList.add('active');
+            const partnerView = document.getElementById('partnerView');
+            const publicView = document.getElementById('publicView');
+
+            if (partnerView) partnerView.classList.remove('active');
+            if (publicView) publicView.classList.add('active');
             window.currentView = 'public';
         };
 
@@ -3014,7 +3017,7 @@
 
                 <div style="display: flex; justify-content: space-between; margin-top: 20px;">
                     <div style="color: var(--text-secondary);">Selected: <span id="selectedProductsCount">0</span> products</div>
-                    <button class="btn btn-primary" onclick="nextBulkStep()" id="bulkStep1Next">Next: Set Quantities ���</button>
+                    <button class="btn btn-primary" onclick="nextBulkStep()" id="bulkStep1Next">Next: Set Quantities →</button>
                 </div>
             </div>
 
