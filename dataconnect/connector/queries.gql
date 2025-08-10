@@ -1,5 +1,5 @@
 # Faded Skies Portal - Data Connect Queries
-# Real-time data queries for dynamic portal functionality
+# Simplified queries for Data Connect compatibility
 
 # User Management Queries
 query GetUser($id: String!) {
@@ -16,14 +16,13 @@ query GetUser($id: String!) {
     createdAt
     updatedAt
     lastLogin
-    verificationDocuments
   }
 }
 
 query GetUsers($role: String, $status: String) {
   users(where: {
-    role: $role,
-    status: $status
+    role: { eq: $role },
+    status: { eq: $status }
   }) {
     id
     email
@@ -39,8 +38,8 @@ query GetUsers($role: String, $status: String) {
 
 query GetPendingPartners {
   users(where: {
-    role: "partner",
-    status: "pending"
+    role: { eq: "partner" },
+    status: { eq: "pending" }
   }) {
     id
     email
@@ -55,8 +54,8 @@ query GetPendingPartners {
 # Product Management Queries
 query GetProducts($category: String, $status: String) {
   products(where: {
-    category: $category,
-    status: $status
+    category: { eq: $category },
+    status: { eq: $status }
   }) {
     id
     name
@@ -103,8 +102,8 @@ query GetProduct($id: UUID!) {
 
 query GetLowStockProducts($threshold: Int!) {
   products(where: {
-    stockQuantity: { _lte: $threshold },
-    status: "active"
+    stockQuantity: { le: $threshold },
+    status: { eq: "active" }
   }) {
     id
     name
@@ -116,17 +115,12 @@ query GetLowStockProducts($threshold: Int!) {
 # Order Management Queries
 query GetOrders($partnerId: String, $status: String) {
   orders(where: {
-    partnerId: $partnerId,
-    status: $status
+    partnerId: { eq: $partnerId },
+    status: { eq: $status }
   }) {
     id
     orderNumber
     partnerId
-    partner {
-      companyName
-      contactName
-      email
-    }
     status
     totalAmount
     subtotal
@@ -148,13 +142,6 @@ query GetOrder($id: UUID!) {
     id
     orderNumber
     partnerId
-    partner {
-      id
-      companyName
-      contactName
-      email
-      phone
-    }
     status
     totalAmount
     subtotal
@@ -168,19 +155,19 @@ query GetOrder($id: UUID!) {
     estimatedDelivery
     actualDelivery
     trackingNumber
-    orderItems {
-      id
-      productId
-      product {
-        name
-        description
-        images
-      }
-      quantity
-      unitPrice
-      totalPrice
-      notes
-    }
+  }
+}
+
+query GetOrderItems($orderId: UUID!) {
+  orderItems(where: {
+    orderId: { eq: $orderId }
+  }) {
+    id
+    productId
+    quantity
+    unitPrice
+    totalPrice
+    notes
   }
 }
 
@@ -189,9 +176,6 @@ query GetRecentOrders($limit: Int!) {
     id
     orderNumber
     partnerId
-    partner {
-      companyName
-    }
     status
     totalAmount
     createdAt
@@ -201,8 +185,8 @@ query GetRecentOrders($limit: Int!) {
 # Notification Queries
 query GetNotifications($userId: String!, $read: Boolean) {
   notifications(where: {
-    userId: $userId,
-    read: $read
+    userId: { eq: $userId },
+    read: { eq: $read }
   }, orderBy: { createdAt: DESC }) {
     id
     type
@@ -216,118 +200,10 @@ query GetNotifications($userId: String!, $read: Boolean) {
 
 query GetUnreadNotificationCount($userId: String!) {
   notifications(where: {
-    userId: $userId,
-    read: false
+    userId: { eq: $userId },
+    read: { eq: false }
   }) {
     id
-  }
-}
-
-# Inventory Management Queries
-query GetInventoryTransactions($productId: UUID, $type: String) {
-  inventoryTransactions(where: {
-    productId: $productId,
-    type: $type
-  }, orderBy: { createdAt: DESC }) {
-    id
-    productId
-    product {
-      name
-    }
-    type
-    quantity
-    previousStock
-    newStock
-    reason
-    orderId
-    createdBy
-    createdAt
-  }
-}
-
-query GetProductStockHistory($productId: UUID!) {
-  inventoryTransactions(where: {
-    productId: $productId
-  }, orderBy: { createdAt: DESC }) {
-    id
-    type
-    quantity
-    previousStock
-    newStock
-    reason
-    createdAt
-  }
-}
-
-# Audit and Analytics Queries
-query GetAuditLogs($userId: String, $table: String, $limit: Int!) {
-  auditLogs(where: {
-    userId: $userId,
-    table: $table
-  }, orderBy: { createdAt: DESC }, limit: $limit) {
-    id
-    userId
-    user {
-      email
-      companyName
-    }
-    action
-    table
-    recordId
-    oldValues
-    newValues
-    ipAddress
-    createdAt
-  }
-}
-
-query GetSystemStats {
-  # Get total counts for dashboard
-  users(where: { role: "partner" }) {
-    id
-    status
-  }
-  products(where: { status: "active" }) {
-    id
-    stockQuantity
-  }
-  orders(where: { status: "pending" }) {
-    id
-    totalAmount
-  }
-}
-
-# Partner Document Queries
-query GetPartnerDocuments($partnerId: String!) {
-  partnerDocuments(where: {
-    partnerId: $partnerId
-  }) {
-    id
-    documentType
-    fileName
-    fileUrl
-    status
-    reviewedBy
-    reviewNotes
-    uploadedAt
-    reviewedAt
-  }
-}
-
-query GetPendingDocuments {
-  partnerDocuments(where: {
-    status: "pending"
-  }) {
-    id
-    partnerId
-    partner {
-      companyName
-      contactName
-      email
-    }
-    documentType
-    fileName
-    uploadedAt
   }
 }
 

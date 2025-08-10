@@ -1,21 +1,20 @@
 # Faded Skies Cannabis Wholesale Portal Schema
-# Real-time data processing through Firebase and PostgreSQL
+# Simplified schema for Data Connect compatibility
 
 # User table for partners and admins
 type User @table {
   id: String! @default(expr: "auth.uid")
   email: String! @col(dataType: "varchar(255)")
-  role: String! @col(dataType: "varchar(50)") # 'admin', 'partner'
+  role: String! @col(dataType: "varchar(50)")
   companyName: String @col(dataType: "varchar(255)")
   contactName: String @col(dataType: "varchar(255)")
   phone: String @col(dataType: "varchar(50)")
   address: String @col(dataType: "text")
   licenseNumber: String @col(dataType: "varchar(255)")
-  status: String! @col(dataType: "varchar(50)") @default(expr: "'pending'") # 'pending', 'approved', 'suspended'
+  status: String! @col(dataType: "varchar(50)") @default(expr: "'pending'")
   createdAt: Timestamp! @default(expr: "request.time")
   updatedAt: Timestamp! @default(expr: "request.time")
   lastLogin: Timestamp
-  verificationDocuments: [String!] @col(dataType: "text[]")
 }
 
 # Product catalog with real-time inventory
@@ -32,8 +31,8 @@ type Product @table {
   stockQuantity: Int! @col(dataType: "integer") @default(expr: "0")
   minOrderQuantity: Int @col(dataType: "integer")
   maxOrderQuantity: Int @col(dataType: "integer")
-  status: String! @col(dataType: "varchar(50)") @default(expr: "'active'") # 'active', 'inactive', 'out_of_stock'
-  images: [String!] @col(dataType: "text[]")
+  status: String! @col(dataType: "varchar(50)") @default(expr: "'active'")
+  images: String @col(dataType: "text")
   labResults: String @col(dataType: "text")
   createdAt: Timestamp! @default(expr: "request.time")
   updatedAt: Timestamp! @default(expr: "request.time")
@@ -45,8 +44,7 @@ type Order @table {
   id: UUID! @default(expr: "uuidV4()")
   orderNumber: String! @col(dataType: "varchar(50)")
   partnerId: String! @col(dataType: "varchar(255)")
-  partner: User! @join(on: "partnerId")
-  status: String! @col(dataType: "varchar(50)") @default(expr: "'pending'") # 'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'
+  status: String! @col(dataType: "varchar(50)") @default(expr: "'pending'")
   totalAmount: Float! @col(dataType: "decimal(10,2)")
   subtotal: Float! @col(dataType: "decimal(10,2)")
   tax: Float @col(dataType: "decimal(10,2)")
@@ -65,9 +63,7 @@ type Order @table {
 type OrderItem @table {
   id: UUID! @default(expr: "uuidV4()")
   orderId: UUID! @col(dataType: "uuid")
-  order: Order! @join(on: "orderId")
   productId: UUID! @col(dataType: "uuid")
-  product: Product! @join(on: "productId")
   quantity: Int! @col(dataType: "integer")
   unitPrice: Float! @col(dataType: "decimal(10,2)")
   totalPrice: Float! @col(dataType: "decimal(10,2)")
@@ -78,59 +74,12 @@ type OrderItem @table {
 type Notification @table {
   id: UUID! @default(expr: "uuidV4()")
   userId: String! @col(dataType: "varchar(255)")
-  user: User! @join(on: "userId")
-  type: String! @col(dataType: "varchar(50)") # 'order_update', 'product_change', 'system', 'partner_signup'
+  type: String! @col(dataType: "varchar(50)")
   title: String! @col(dataType: "varchar(255)")
   message: String! @col(dataType: "text")
   read: Boolean! @col(dataType: "boolean") @default(expr: "false")
   createdAt: Timestamp! @default(expr: "request.time")
-  data: String @col(dataType: "text") # JSON string for additional data
-}
-
-# Inventory transactions for tracking stock changes
-type InventoryTransaction @table {
-  id: UUID! @default(expr: "uuidV4()")
-  productId: UUID! @col(dataType: "uuid")
-  product: Product! @join(on: "productId")
-  type: String! @col(dataType: "varchar(50)") # 'purchase', 'sale', 'adjustment', 'return'
-  quantity: Int! @col(dataType: "integer")
-  previousStock: Int! @col(dataType: "integer")
-  newStock: Int! @col(dataType: "integer")
-  reason: String @col(dataType: "varchar(255)")
-  orderId: UUID @col(dataType: "uuid")
-  order: Order @join(on: "orderId")
-  createdBy: String! @col(dataType: "varchar(255)")
-  createdAt: Timestamp! @default(expr: "request.time")
-}
-
-# Audit log for all system changes
-type AuditLog @table {
-  id: UUID! @default(expr: "uuidV4()")
-  userId: String! @col(dataType: "varchar(255)")
-  user: User! @join(on: "userId")
-  action: String! @col(dataType: "varchar(100)")
-  table: String! @col(dataType: "varchar(100)")
-  recordId: String @col(dataType: "varchar(255)")
-  oldValues: String @col(dataType: "text") # JSON string
-  newValues: String @col(dataType: "text") # JSON string
-  ipAddress: String @col(dataType: "varchar(45)")
-  userAgent: String @col(dataType: "text")
-  createdAt: Timestamp! @default(expr: "request.time")
-}
-
-# Partner verification documents
-type PartnerDocument @table {
-  id: UUID! @default(expr: "uuidV4()")
-  partnerId: String! @col(dataType: "varchar(255)")
-  partner: User! @join(on: "partnerId")
-  documentType: String! @col(dataType: "varchar(100)") # 'license', 'tax_id', 'insurance', 'other'
-  fileName: String! @col(dataType: "varchar(255)")
-  fileUrl: String! @col(dataType: "text")
-  status: String! @col(dataType: "varchar(50)") @default(expr: "'pending'") # 'pending', 'approved', 'rejected'
-  reviewedBy: String @col(dataType: "varchar(255)")
-  reviewNotes: String @col(dataType: "text")
-  uploadedAt: Timestamp! @default(expr: "request.time")
-  reviewedAt: Timestamp
+  data: String @col(dataType: "text")
 }
 
 # System configuration for dynamic settings

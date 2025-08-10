@@ -1,36 +1,36 @@
 # Faded Skies Portal - Data Connect Mutations
-# Real-time data mutations for dynamic portal functionality
+# Simplified mutations for Data Connect compatibility
 
 # User Management Mutations
-mutation CreateUser($input: UserInput!) {
-  insertUser(input: $input) {
+mutation UpsertUser($id: String!, $email: String!, $role: String!, $companyName: String, $contactName: String, $phone: String, $address: String, $licenseNumber: String, $status: String!) {
+  user_upsert(data: {
+    id: $id,
+    email: $email,
+    role: $role,
+    companyName: $companyName,
+    contactName: $contactName,
+    phone: $phone,
+    address: $address,
+    licenseNumber: $licenseNumber,
+    status: $status,
+    updatedAt: "request.time"
+  }) {
     id
     email
     role
     companyName
     contactName
-    status
-    createdAt
-  }
-}
-
-mutation UpdateUser($id: String!, $input: UserInput!) {
-  updateUser(id: $id, input: $input) {
-    id
-    email
-    role
-    companyName
-    contactName
-    phone
-    address
-    licenseNumber
     status
     updatedAt
   }
 }
 
 mutation UpdateUserStatus($id: String!, $status: String!) {
-  updateUser(id: $id, input: { status: $status, updatedAt: "request.time" }) {
+  user_upsert(data: {
+    id: $id,
+    status: $status,
+    updatedAt: "request.time"
+  }) {
     id
     status
     updatedAt
@@ -38,29 +38,36 @@ mutation UpdateUserStatus($id: String!, $status: String!) {
 }
 
 mutation UpdateLastLogin($id: String!) {
-  updateUser(id: $id, input: { lastLogin: "request.time" }) {
+  user_upsert(data: {
+    id: $id,
+    lastLogin: "request.time"
+  }) {
     id
     lastLogin
   }
 }
 
 # Product Management Mutations
-mutation CreateProduct($input: ProductInput!) {
-  insertProduct(input: $input) {
-    id
-    name
-    description
-    category
-    price
-    wholesalePrice
-    stockQuantity
-    status
-    createdAt
-  }
-}
-
-mutation UpdateProduct($id: UUID!, $input: ProductInput!) {
-  updateProduct(id: $id, input: $input) {
+mutation UpsertProduct($id: UUID!, $name: String!, $description: String, $category: String!, $subcategory: String, $thcContent: Float, $cbdContent: Float, $price: Float!, $wholesalePrice: Float!, $stockQuantity: Int!, $minOrderQuantity: Int, $maxOrderQuantity: Int, $status: String!, $images: String, $labResults: String, $createdBy: String!) {
+  product_upsert(data: {
+    id: $id,
+    name: $name,
+    description: $description,
+    category: $category,
+    subcategory: $subcategory,
+    thcContent: $thcContent,
+    cbdContent: $cbdContent,
+    price: $price,
+    wholesalePrice: $wholesalePrice,
+    stockQuantity: $stockQuantity,
+    minOrderQuantity: $minOrderQuantity,
+    maxOrderQuantity: $maxOrderQuantity,
+    status: $status,
+    images: $images,
+    labResults: $labResults,
+    createdBy: $createdBy,
+    updatedAt: "request.time"
+  }) {
     id
     name
     description
@@ -74,9 +81,10 @@ mutation UpdateProduct($id: UUID!, $input: ProductInput!) {
 }
 
 mutation UpdateProductStock($id: UUID!, $stockQuantity: Int!) {
-  updateProduct(id: $id, input: { 
-    stockQuantity: $stockQuantity, 
-    updatedAt: "request.time" 
+  product_upsert(data: {
+    id: $id,
+    stockQuantity: $stockQuantity,
+    updatedAt: "request.time"
   }) {
     id
     stockQuantity
@@ -85,9 +93,10 @@ mutation UpdateProductStock($id: UUID!, $stockQuantity: Int!) {
 }
 
 mutation UpdateProductStatus($id: UUID!, $status: String!) {
-  updateProduct(id: $id, input: { 
-    status: $status, 
-    updatedAt: "request.time" 
+  product_upsert(data: {
+    id: $id,
+    status: $status,
+    updatedAt: "request.time"
   }) {
     id
     status
@@ -95,28 +104,39 @@ mutation UpdateProductStatus($id: UUID!, $status: String!) {
   }
 }
 
-mutation DeleteProduct($id: UUID!) {
-  deleteProduct(id: $id) {
-    id
-  }
-}
-
 # Order Management Mutations
-mutation CreateOrder($input: OrderInput!) {
-  insertOrder(input: $input) {
+mutation UpsertOrder($id: UUID!, $orderNumber: String!, $partnerId: String!, $status: String!, $totalAmount: Float!, $subtotal: Float!, $tax: Float, $shipping: Float, $notes: String, $shippingAddress: String, $billingAddress: String, $estimatedDelivery: Timestamp, $actualDelivery: Timestamp, $trackingNumber: String) {
+  order_upsert(data: {
+    id: $id,
+    orderNumber: $orderNumber,
+    partnerId: $partnerId,
+    status: $status,
+    totalAmount: $totalAmount,
+    subtotal: $subtotal,
+    tax: $tax,
+    shipping: $shipping,
+    notes: $notes,
+    shippingAddress: $shippingAddress,
+    billingAddress: $billingAddress,
+    estimatedDelivery: $estimatedDelivery,
+    actualDelivery: $actualDelivery,
+    trackingNumber: $trackingNumber,
+    updatedAt: "request.time"
+  }) {
     id
     orderNumber
     partnerId
     status
     totalAmount
-    createdAt
+    updatedAt
   }
 }
 
 mutation UpdateOrderStatus($id: UUID!, $status: String!) {
-  updateOrder(id: $id, input: { 
-    status: $status, 
-    updatedAt: "request.time" 
+  order_upsert(data: {
+    id: $id,
+    status: $status,
+    updatedAt: "request.time"
   }) {
     id
     status
@@ -125,10 +145,11 @@ mutation UpdateOrderStatus($id: UUID!, $status: String!) {
 }
 
 mutation UpdateOrderTracking($id: UUID!, $trackingNumber: String!, $estimatedDelivery: Timestamp) {
-  updateOrder(id: $id, input: { 
+  order_upsert(data: {
+    id: $id,
     trackingNumber: $trackingNumber,
     estimatedDelivery: $estimatedDelivery,
-    updatedAt: "request.time" 
+    updatedAt: "request.time"
   }) {
     id
     trackingNumber
@@ -138,10 +159,11 @@ mutation UpdateOrderTracking($id: UUID!, $trackingNumber: String!, $estimatedDel
 }
 
 mutation CompleteOrder($id: UUID!) {
-  updateOrder(id: $id, input: { 
+  order_upsert(data: {
+    id: $id,
     status: "delivered",
     actualDelivery: "request.time",
-    updatedAt: "request.time" 
+    updatedAt: "request.time"
   }) {
     id
     status
@@ -151,8 +173,16 @@ mutation CompleteOrder($id: UUID!) {
 }
 
 # Order Item Mutations
-mutation CreateOrderItem($input: OrderItemInput!) {
-  insertOrderItem(input: $input) {
+mutation UpsertOrderItem($id: UUID!, $orderId: UUID!, $productId: UUID!, $quantity: Int!, $unitPrice: Float!, $totalPrice: Float!, $notes: String) {
+  orderItem_upsert(data: {
+    id: $id,
+    orderId: $orderId,
+    productId: $productId,
+    quantity: $quantity,
+    unitPrice: $unitPrice,
+    totalPrice: $totalPrice,
+    notes: $notes
+  }) {
     id
     orderId
     productId
@@ -162,24 +192,18 @@ mutation CreateOrderItem($input: OrderItemInput!) {
   }
 }
 
-mutation UpdateOrderItem($id: UUID!, $input: OrderItemInput!) {
-  updateOrderItem(id: $id, input: $input) {
-    id
-    quantity
-    unitPrice
-    totalPrice
-  }
-}
-
-mutation DeleteOrderItem($id: UUID!) {
-  deleteOrderItem(id: $id) {
-    id
-  }
-}
-
 # Notification Mutations
-mutation CreateNotification($input: NotificationInput!) {
-  insertNotification(input: $input) {
+mutation UpsertNotification($id: UUID!, $userId: String!, $type: String!, $title: String!, $message: String!, $read: Boolean!, $data: String) {
+  notification_upsert(data: {
+    id: $id,
+    userId: $userId,
+    type: $type,
+    title: $title,
+    message: $message,
+    read: $read,
+    data: $data,
+    createdAt: "request.time"
+  }) {
     id
     userId
     type
@@ -191,204 +215,28 @@ mutation CreateNotification($input: NotificationInput!) {
 }
 
 mutation MarkNotificationRead($id: UUID!) {
-  updateNotification(id: $id, input: { read: true }) {
-    id
-    read
-  }
-}
-
-mutation MarkAllNotificationsRead($userId: String!) {
-  updateNotifications(where: { userId: $userId, read: false }, input: { read: true }) {
-    id
-    read
-  }
-}
-
-mutation DeleteNotification($id: UUID!) {
-  deleteNotification(id: $id) {
-    id
-  }
-}
-
-# Inventory Transaction Mutations
-mutation CreateInventoryTransaction($input: InventoryTransactionInput!) {
-  insertInventoryTransaction(input: $input) {
-    id
-    productId
-    type
-    quantity
-    previousStock
-    newStock
-    reason
-    createdBy
-    createdAt
-  }
-}
-
-mutation UpdateInventoryTransaction($id: UUID!, $input: InventoryTransactionInput!) {
-  updateInventoryTransaction(id: $id, input: $input) {
-    id
-    quantity
-    previousStock
-    newStock
-    reason
-  }
-}
-
-# Audit Log Mutations
-mutation CreateAuditLog($input: AuditLogInput!) {
-  insertAuditLog(input: $input) {
-    id
-    userId
-    action
-    table
-    recordId
-    createdAt
-  }
-}
-
-# Partner Document Mutations
-mutation CreatePartnerDocument($input: PartnerDocumentInput!) {
-  insertPartnerDocument(input: $input) {
-    id
-    partnerId
-    documentType
-    fileName
-    fileUrl
-    status
-    uploadedAt
-  }
-}
-
-mutation UpdateDocumentStatus($id: UUID!, $status: String!, $reviewedBy: String!, $reviewNotes: String) {
-  updatePartnerDocument(id: $id, input: { 
-    status: $status,
-    reviewedBy: $reviewedBy,
-    reviewNotes: $reviewNotes,
-    reviewedAt: "request.time"
+  notification_upsert(data: {
+    id: $id,
+    read: true
   }) {
     id
-    status
-    reviewedBy
-    reviewNotes
-    reviewedAt
-  }
-}
-
-mutation DeletePartnerDocument($id: UUID!) {
-  deletePartnerDocument(id: $id) {
-    id
+    read
   }
 }
 
 # System Configuration Mutations
-mutation CreateSystemConfig($input: SystemConfigInput!) {
-  insertSystemConfig(input: $input) {
+mutation UpsertSystemConfig($id: String!, $value: String!, $description: String, $updatedBy: String!) {
+  systemConfig_upsert(data: {
+    id: $id,
+    value: $value,
+    description: $description,
+    updatedBy: $updatedBy,
+    updatedAt: "request.time"
+  }) {
     id
     value
     description
     updatedBy
     updatedAt
-  }
-}
-
-mutation UpdateSystemConfig($id: String!, $input: SystemConfigInput!) {
-  updateSystemConfig(id: $id, input: $input) {
-    id
-    value
-    description
-    updatedBy
-    updatedAt
-  }
-}
-
-mutation DeleteSystemConfig($id: String!) {
-  deleteSystemConfig(id: $id) {
-    id
-  }
-}
-
-# Bulk Operations
-mutation BulkUpdateProductPrices($productIds: [UUID!]!, $priceChange: Float!, $changeType: String!) {
-  # changeType: 'percentage' or 'fixed'
-  updateProducts(where: { id: { _in: $productIds } }, input: { 
-    price: "CASE WHEN $changeType = 'percentage' THEN price * (1 + $priceChange / 100) ELSE price + $priceChange END",
-    updatedAt: "request.time"
-  }) {
-    id
-    price
-    updatedAt
-  }
-}
-
-mutation BulkUpdateProductStatus($productIds: [UUID!]!, $status: String!) {
-  updateProducts(where: { id: { _in: $productIds } }, input: { 
-    status: $status,
-    updatedAt: "request.time"
-  }) {
-    id
-    status
-    updatedAt
-  }
-}
-
-# Complex Order Operations
-mutation CreateOrderWithItems($orderInput: OrderInput!, $orderItems: [OrderItemInput!]!) {
-  # Create order first
-  order: insertOrder(input: $orderInput) {
-    id
-    orderNumber
-    partnerId
-    status
-    totalAmount
-    createdAt
-  }
-  
-  # Then create order items
-  orderItems: insertOrderItems(input: $orderItems) {
-    id
-    orderId
-    productId
-    quantity
-    unitPrice
-    totalPrice
-  }
-}
-
-# Inventory Management Operations
-mutation ProcessInventoryAdjustment($productId: UUID!, $quantity: Int!, $reason: String!, $type: String!) {
-  # Get current product
-  product: product(id: $productId) {
-    id
-    stockQuantity
-  }
-  
-  # Update product stock
-  updatedProduct: updateProduct(id: $productId, input: { 
-    stockQuantity: "stockQuantity + $quantity",
-    updatedAt: "request.time"
-  }) {
-    id
-    stockQuantity
-    updatedAt
-  }
-  
-  # Create inventory transaction
-  transaction: insertInventoryTransaction(input: {
-    productId: $productId,
-    type: $type,
-    quantity: $quantity,
-    previousStock: "product.stockQuantity",
-    newStock: "product.stockQuantity + $quantity",
-    reason: $reason,
-    createdBy: "auth.uid"
-  }) {
-    id
-    type
-    quantity
-    previousStock
-    newStock
-    reason
-    createdAt
   }
 }
