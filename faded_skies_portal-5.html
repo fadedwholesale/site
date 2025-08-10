@@ -2931,7 +2931,7 @@
 
                 <div style="display: flex; justify-content: space-between; margin-top: 20px;">
                     <button class="btn btn-secondary" onclick="previousBulkStep()">← Back</button>
-                    <button class="btn btn-primary" onclick="nextBulkStep()" id="bulkStep2Next">Next: Review →</button>
+                    <button class="btn btn-primary" onclick="nextBulkStep()" id="bulkStep2Next">Next: Review ���</button>
                 </div>
             </div>
 
@@ -3673,6 +3673,50 @@
     <script src="main-app.js?v=firebase-ready-fix-v2"></script>
 
     <script>
+        // Critical modal functions defined early to prevent undefined errors
+        window.openModal = window.openModal || function(modalId) {
+            try {
+                console.log('[DEBUG] openModal called for:', modalId);
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'block';
+                    document.body.classList.add('modal-open');
+
+                    // Prevent scrolling on mobile
+                    document.body.style.overflow = 'hidden';
+                    document.body.style.position = 'fixed';
+                    document.body.style.width = '100%';
+
+                    console.log('✅ Modal opened:', modalId);
+                } else {
+                    console.warn('Modal not found:', modalId);
+                    alert('Modal not found. Please refresh the page.');
+                }
+            } catch (error) {
+                console.error('Error opening modal:', error);
+                alert('Modal error. Please try again.');
+            }
+        };
+
+        window.closeModal = window.closeModal || function(modalId) {
+            try {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+
+                    // Restore scrolling on mobile
+                    document.body.style.overflow = '';
+                    document.body.style.position = '';
+                    document.body.style.width = '';
+
+                    console.log('✅ Modal closed:', modalId);
+                }
+            } catch (error) {
+                console.error('Error closing modal:', error);
+            }
+        };
+
         // Immediate bulk order function definitions to prevent undefined errors
         window.closeBulkOrderModal = window.closeBulkOrderModal || function() {
             const modal = document.getElementById('bulkOrderModal');
