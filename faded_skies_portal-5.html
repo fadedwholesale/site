@@ -7063,6 +7063,37 @@ Phone: (210) 835-7834
             }
         }
 
+        // Test modal function for debugging
+        function testModal(modalId) {
+            console.log('Testing modal:', modalId);
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                console.log('Modal found, current display:', modal.style.display);
+                openModal(modalId);
+            } else {
+                console.error('Modal not found:', modalId);
+            }
+        }
+
+        // Make modal functions globally accessible
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.testModal = testModal;
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.position = '';
+                    document.body.style.width = '';
+                }
+            });
+        });
+
         function addMobileModalHandlers(modal) {
             try {
                 // Handle modal close button
