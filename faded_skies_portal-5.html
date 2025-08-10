@@ -4420,7 +4420,7 @@
             }
         }
 
-        function switchPortalTab(tabName) {
+        window.switchPortalTab = function(tabName) {
             try {
                 currentPortalTab = tabName;
                 
@@ -5965,7 +5965,7 @@
             }
         }
 
-        function removeFromCart(productId) {
+        window.removeFromCart = function(productId) {
             const item = cart.find(item => item.id === productId);
             if (item) {
                 cart = cart.filter(item => item.id !== productId);
@@ -5974,7 +5974,7 @@
             }
         }
 
-        function clearCart() {
+        window.clearCart = function() {
             if (cart.length === 0) {
                 showNotification('🛒 Cart is already empty', 'warning');
                 return;
@@ -6418,7 +6418,7 @@
                     
                     setTimeout(() => {
                         if (total > 1000) {
-                            showNotification('🚚 FREE priority shipping included with your order!', 'success');
+                            showNotification('��� FREE priority shipping included with your order!', 'success');
                         }
                     }, 4000);
                     
