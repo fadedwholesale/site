@@ -6857,7 +6857,7 @@ Phone: (210) 835-7834
                             <h4 style="color: var(--brand-green); margin-bottom: 16px;">🆘 Quick Support Options</h4>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                                 <button class="btn btn-primary" onclick="contactOrderSupport()">📦 Order Issues</button>
-                                <button class="btn btn-secondary" onclick="contactShippingSupport()">🚚 Shipping Questions</button>
+                                <button class="btn btn-secondary" onclick="contactShippingSupport()">��� Shipping Questions</button>
                                 <button class="btn btn-secondary" onclick="contactBillingSupport()">💳 Billing Support</button>
                                 <button class="btn btn-secondary" onclick="contactGeneralSupport()">💬 General Inquiry</button>
                             </div>
@@ -7013,26 +7013,26 @@ Phone: (210) 835-7834
         }
 
         // Enhanced Modal Functions with Mobile Support
-        function openModal(modalId) {
+        window.openModal = function(modalId) {
             try {
                 console.log('[DEBUG] openModal called for:', modalId);
                 const modal = document.getElementById(modalId);
                 if (modal) {
                     modal.style.display = 'block';
                     document.body.classList.add('modal-open');
-                    
+
                     // Prevent scrolling on mobile
                     document.body.style.overflow = 'hidden';
                     document.body.style.position = 'fixed';
                     document.body.style.width = '100%';
-                    
+
                     // Prevent double-tap close on mobile
-                    setTimeout(() => { 
+                    setTimeout(() => {
                         modal.setAttribute('data-modal-open', 'true');
                         // Add mobile-specific modal handlers
                         addMobileModalHandlers(modal);
                     }, 100);
-                    
+
                     // Add visual feedback for mobile
                     showNotification('📱 Modal opened - tap outside or × to close', 'info');
                 } else {
@@ -7043,9 +7043,9 @@ Phone: (210) 835-7834
                 console.error('Error opening modal:', error);
                 showNotification('Modal error. Please try again.', 'error');
             }
-        }
+        };
 
-        function closeModal(modalId) {
+        window.closeModal = function(modalId) {
             try {
                 const modal = document.getElementById(modalId);
                 if (modal) {
