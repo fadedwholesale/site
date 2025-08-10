@@ -2986,6 +2986,7 @@
         </div>
     </footer>
 
+<<<<<<< HEAD
     <!-- Bulk Order Modal -->
     <div id="bulkOrderModal" class="modal">
         <div class="modal-content" style="max-width: 1000px; max-height: 90vh; overflow-y: auto;">
@@ -4176,78 +4177,27 @@
         };
 
         // Initialize Application with Session Restoration and Mobile Support - FIXED
+=======
+    <!-- Modal Fix Script -->
+    <script>
+        // Ensure modal functions are available after main-app.js loads
+>>>>>>> origin/main
         document.addEventListener('DOMContentLoaded', function() {
-            try {
-                console.log('🚀 DOM Content Loaded - Starting initialization...');
-
-                // Detect mobile device
-                const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                if (isMobile) {
-                    console.log('📱 Mobile device detected');
-                    document.body.classList.add('mobile-device');
-
-                    // Show mobile menu toggle button
-                    const mobileToggle = document.querySelector('.mobile-menu-toggle');
-                    if (mobileToggle) {
-                        mobileToggle.style.display = 'block';
-                    }
-                }
-
-                // Initialize core app
-                initializeApp();
-
-                // Periodic data backup
-                setInterval(backupSessionData, 60000); // Backup every minute
-
-                // Mobile-specific event listeners
-                if (isMobile) {
-                    setupMobileDebugging();
-                    setupMobileOptimizations();
-                }
-
-                console.log('✅ Application initialization complete');
-
-            } catch (error) {
-                console.error('Application failed to initialize:', error);
-                showNotification('❌ Application failed to initialize. Please refresh the page.', 'error');
-            }
-        });
-
-        // Setup Mobile Optimizations
-        function setupMobileOptimizations() {
-            try {
-                console.log('📱 Setting up mobile optimizations...');
-
-                // Handle orientation changes
-                window.addEventListener('orientationchange', function() {
-                    setTimeout(() => {
-                        // Close mobile menu on orientation change
-                        window.closeMobileMenu();
-
-                        // Resize modal if open
-                        const openModals = document.querySelectorAll('.modal[style*="block"]');
-                        openModals.forEach(modal => {
-                            const modalContent = modal.querySelector('.modal-content');
-                            if (modalContent) {
-                                modalContent.style.maxHeight = '90vh';
-                            }
-                        });
-                    }, 100);
-                });
-
-                // Handle window resize
-                window.addEventListener('resize', function() {
-                    const isMobile = window.innerWidth <= 768;
-                    const mobileToggle = document.querySelector('.mobile-menu-toggle');
-
-                    if (isMobile) {
-                        if (mobileToggle) mobileToggle.style.display = 'block';
-                        document.body.classList.add('mobile-device');
+            console.log('🔧 Setting up modal functions...');
+            
+            // Define modal functions if they don't exist
+            if (typeof window.openModal !== 'function') {
+                window.openModal = function(modalId) {
+                    console.log('Opening modal:', modalId);
+                    const modal = document.getElementById(modalId);
+                    if (modal) {
+                        modal.style.display = 'block';
+                        document.body.classList.add('modal-open');
+                        console.log('Modal opened successfully');
                     } else {
-                        if (mobileToggle) mobileToggle.style.display = 'none';
-                        document.body.classList.remove('mobile-device');
-                        window.closeMobileMenu();
+                        console.error('Modal not found:', modalId);
                     }
+<<<<<<< HEAD
                 });
 
                 // Add touch events for better mobile interaction
@@ -5409,12 +5359,11 @@
                     user: currentUser,
                     cart: cart,
                     timestamp: Date.now()
+=======
+>>>>>>> origin/main
                 };
-                
-                localStorage.setItem('fadedSkiesBackup', JSON.stringify(sessionData));
-            } catch (error) {
-                console.warn('Could not backup session data:', error);
             }
+<<<<<<< HEAD
         }
 
         function restoreSessionData() {
@@ -5838,13 +5787,19 @@
                 modals.forEach(modal => {
                     // Only close if modal is open and not just opened (prevents double-tap close)
                     if (event.target === modal && modal.getAttribute('data-modal-open') === 'true') {
+=======
+            
+            if (typeof window.closeModal !== 'function') {
+                window.closeModal = function(modalId) {
+                    console.log('Closing modal:', modalId);
+                    const modal = document.getElementById(modalId);
+                    if (modal) {
+>>>>>>> origin/main
                         modal.style.display = 'none';
                         document.body.classList.remove('modal-open');
-                        document.body.style.overflow = '';
-                        document.body.style.position = '';
-                        document.body.style.width = '';
-                        modal.removeAttribute('data-modal-open');
+                        console.log('Modal closed successfully');
                     }
+<<<<<<< HEAD
                 });
             } catch (error) {
                 console.error('Error in window click handler:', error);
@@ -6630,35 +6585,42 @@
             checkoutBtn.disabled = true;
 
             // Simulate order processing
+=======
+                };
+            }
+            
+            // Add click handlers to all modal buttons
+>>>>>>> origin/main
             setTimeout(() => {
-                try {
-                    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                    const orderItems = cart.map(item => `${item.strain} (x${item.quantity})`).join(', ');
-                    
-                    const newOrder = {
-                        id: `ORD-${String(orders.length + 1).padStart(3, '0')}`,
-                        partner: currentUser.email,
-                        partnerName: currentUser.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') + ' Store',
-                        items: orderItems,
-                        total: total,
-                        status: 'PENDING',
-                        date: new Date().toISOString().split('T')[0],
-                        notes: '',
-                        delivery: total > 1000 ? 'priority' : 'standard',
-                        created: new Date().toISOString()
+                console.log('🔧 Adding modal click handlers...');
+                
+                // Find all buttons that should open modals
+                const loginButtons = document.querySelectorAll('[onclick*="loginModal"]');
+                const registerButtons = document.querySelectorAll('[onclick*="registerModal"]');
+                
+                loginButtons.forEach(button => {
+                    button.onclick = function() {
+                        console.log('Login button clicked');
+                        openModal('loginModal');
                     };
-                    
-                    orders.push(newOrder);
-                    
-                    // Update inventory
-                    cart.forEach(cartItem => {
-                        const product = products.find(p => p.id === cartItem.id);
-                        if (product) {
-                            product.stock = Math.max(0, product.stock - cartItem.quantity);
-                            if (product.stock === 0) {
-                                product.status = 'SOLD OUT';
-                            }
+                });
+                
+                registerButtons.forEach(button => {
+                    button.onclick = function() {
+                        console.log('Register button clicked');
+                        openModal('registerModal');
+                    };
+                });
+                
+                // Add click handlers to modal close buttons
+                const closeButtons = document.querySelectorAll('.modal-close');
+                closeButtons.forEach(button => {
+                    button.onclick = function() {
+                        const modal = button.closest('.modal');
+                        if (modal) {
+                            closeModal(modal.id);
                         }
+<<<<<<< HEAD
                     });
 
                     cart = [];
@@ -7636,177 +7598,15 @@ Phone: (210) 835-7834
                 } catch (error) {
                     console.error('Error in setupModalTriggers:', error);
                 }
+=======
+                    };
+                });
+                
+                console.log('✅ Modal click handlers added');
+>>>>>>> origin/main
             }, 500);
-        });
-
-        function setupModalTriggers() {
-            try {
-                console.log('��� Setting up modal triggers for all devices...');
-                
-                // Find all modal trigger buttons and links using proper selectors
-                const modalTriggers = [
-                    ...document.querySelectorAll('[onclick*="openModal(\'loginModal\')"]'),
-                    ...document.querySelectorAll('[onclick*="openModal(\'registerModal\')"]')
-                ];
-                
-                // Find buttons by text content manually (since :contains() is not valid CSS)
-                const allButtons = document.querySelectorAll('button, .btn, a');
-                allButtons.forEach(btn => {
-                    if (!btn || !btn.textContent) return;
-                    
-                    const text = btn.textContent.toLowerCase().trim();
-                    if (text.includes('partner login') || 
-                        text.includes('get started') || 
-                        text.includes('start partnership') ||
-                        text.includes('start now') ||
-                        text.includes('go professional') ||
-                        text.includes('enterprise level') ||
-                        text.includes('register')) {
-                        modalTriggers.push(btn);
-                    }
-                });
-                
-                // Remove duplicates
-                const uniqueTriggers = [...new Set(modalTriggers)];
-                
-                uniqueTriggers.forEach(btn => {
-                    if (!btn) return;
-                    
-                    // Add comprehensive event listeners
-                    ['click', 'touchstart', 'touchend'].forEach(eventType => {
-                        btn.addEventListener(eventType, function(e) {
-                            try {
-                                if (eventType === 'touchstart') {
-                                    // Visual feedback on touch start
-                                    this.style.transform = 'scale(0.95)';
-                                    this.style.opacity = '0.8';
-                                    return;
-                                }
-                                
-                                if (eventType === 'touchend' || eventType === 'click') {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    
-                                    // Reset visual feedback
-                                    this.style.transform = '';
-                                    this.style.opacity = '';
-                                    
-                                    // Determine which modal to open
-                                    const text = this.textContent.toLowerCase();
-                                    const onclick = this.getAttribute('onclick');
-                                    
-                                    if (onclick?.includes('loginModal') || text.includes('login')) {
-                                        console.log('📱 Opening login modal from trigger');
-                                        setTimeout(() => openModal('loginModal'), 50);
-                                    } else if (onclick?.includes('registerModal') || 
-                                              text.includes('get started') || 
-                                              text.includes('start') || 
-                                              text.includes('register') ||
-                                              text.includes('professional') ||
-                                              text.includes('enterprise')) {
-                                        console.log('📱 Opening register modal from trigger');
-                                        setTimeout(() => openModal('registerModal'), 50);
-                                    }
-                                }
-                            } catch (error) {
-                                console.error('Error in modal trigger event:', error);
-                            }
-                        }, { passive: false });
-                    });
-                });
-                
-                // Special handling for navigation items
-                document.querySelectorAll('.nav-links a').forEach(link => {
-                    ['click', 'touchend'].forEach(eventType => {
-                        link.addEventListener(eventType, function(e) {
-                            try {
-                                e.preventDefault();
-                                const text = this.textContent.toLowerCase();
-                                
-                                if (text.includes('home')) {
-                                    showPublicWebsite();
-                                } else if (text.includes('products')) {
-                                    scrollToSection('products');
-                                } else if (text.includes('pricing')) {
-                                    scrollToSection('pricing');
-                                } else if (text.includes('inventory')) {
-                                    toggleLiveInventory();
-                                } else if (text.includes('compliance')) {
-                                    scrollToSection('compliance');
-                                }
-                            } catch (error) {
-                                console.error('Error in navigation click:', error);
-                            }
-                        });
-                    });
-                });
-                
-                console.log(`��� Modal triggers setup complete (${uniqueTriggers.length} triggers found)`);
-                
-            } catch (error) {
-                console.error('Error setting up modal triggers:', error);
-            }
-        }
-
-        // Add CSS helper for better mobile button detection
-        function addMobileButtonStyles() {
-            const style = document.createElement('style');
-            style.textContent = `
-                /* Better mobile button interaction feedback */
-                .btn, button, [onclick] {
-                    position: relative;
-                    overflow: hidden;
-                }
-                
-                .btn:active, button:active, [onclick]:active {
-                    transform: scale(0.95);
-                    transition: transform 0.1s ease;
-                }
-                
-                /* Mobile tap highlight */
-                @media (max-width: 768px) {
-                    .btn, button, [onclick] {
-                        -webkit-tap-highlight-color: rgba(0, 200, 81, 0.3);
-                        tap-highlight-color: rgba(0, 200, 81, 0.3);
-                    }
-                    
-                    /* Ensure minimum touch target size */
-                    .btn, button {
-                        min-height: 44px;
-                        min-width: 44px;
-                    }
-                    
-                    /* Better modal display on mobile */
-                    .modal-content {
-                        margin: 5px;
-                        width: calc(100% - 10px);
-                        max-width: 95vw;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-
-        // Call mobile button styles setup
-        setTimeout(() => {
-            addMobileButtonStyles();
-        }, 100);
-
-        console.log('📱🌿 Faded Skies Wholesale Portal - MOBILE OPTIMIZED! 🚀');
-        console.log('📱 Complete mobile touch support with visual feedback');
-        console.log('📱 Modal triggers work on all devices with comprehensive event handling');
-        console.log('📱 Mobile debugging tools available: testMobileFunction(), testMobileInteraction()');
-        console.log('🔥 READY FOR MOBILE DEPLOYMENT! 🔥');
-
-        // Debug Function to Check System Status
-        function debugSystemStatus() {
-            console.log('🔍 System Debug Information:');
-            console.log('Current User:', currentUser);
-            console.log('Current View:', currentView);
-            console.log('Cart Items:', cart.length);
-            console.log('Products Count:', products.length);
-            console.log('Orders Count:', orders.length);
             
+<<<<<<< HEAD
             // Check critical DOM elements
             const elements = {
                 'publicView': document.getElementById('publicView'),
@@ -8121,11 +7921,31 @@ Phone: (210) 835-7834
         // Also trigger on window load as backup
         window.addEventListener('load', function() {
             console.log('📷 Window loaded - ensuring logo is displayed...');
+=======
+            // Test modal functionality
+>>>>>>> origin/main
             setTimeout(() => {
-                loadSystemLogos();
-            }, 100);
+                console.log('🧪 Testing modal functionality...');
+                const loginModal = document.getElementById('loginModal');
+                const registerModal = document.getElementById('registerModal');
+                
+                if (loginModal) {
+                    console.log('✅ Login modal found');
+                } else {
+                    console.error('❌ Login modal not found');
+                }
+                
+                if (registerModal) {
+                    console.log('✅ Register modal found');
+                } else {
+                    console.error('❌ Register modal not found');
+                }
+                
+                console.log('✅ Modal setup complete');
+            }, 1000);
         });
     </script>
+<<<<<<< HEAD
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -8146,5 +7966,7 @@ Phone: (210) 835-7834
     <!-- <script src="system-integration.js?v=admin-portal-sync"></script> -->
     <!-- <script src="notification-system.js?v=admin-portal-sync"></script> -->
     <!-- <script src="order-sync-manager.js?v=admin-portal-sync"></script> -->
+=======
+>>>>>>> origin/main
 </body>
 </html>

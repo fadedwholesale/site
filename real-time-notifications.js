@@ -98,95 +98,85 @@ class RealTimeNotificationSystem {
             this.setupFirebaseNotificationListener();
         }
 
-        // Listen for custom events
-        document.addEventListener('showNotification', (event) => {
-            this.showNotification(event.detail);
+        // Listen for custom notification events
+        document.addEventListener('showRealtimeNotification', (event) => {
+            this.displayRealtimeNotification(event.detail);
         });
 
-        // Listen for storage events (cross-tab communication)
-        window.addEventListener('storage', (event) => {
-            if (event.key === 'fadedSkiesNotification') {
-                const notification = JSON.parse(event.newValue);
-                if (notification && notification.userId === this.userId) {
-                    this.showNotification(notification);
-                }
-            }
-        });
-
-        console.log('👂 Notification listeners active');
+        // Listen for Firebase real-time updates
+        if (window.dynamicDataProcessor) {
+            this.setupDynamicDataListener();
+        }
     }
 
     setupFirebaseNotificationListener() {
-        const { collection, query, where, onSnapshot, orderBy } = window.dynamicDataProcessor.firestore;
-        
-        const notificationsQuery = query(
-            collection(window.dynamicDataProcessor.firestore, 'notifications'),
-            where('userId', 'in', [this.userId, 'admin', 'all']),
-            orderBy('createdAt', 'desc')
-        );
+        try {
+            const { collection, onSnapshot, query, where } = window.dynamicDataProcessor.firestore;
+            
+            const notificationsQuery = query(
+                collection(window.dynamicDataProcessor.firestore, 'notifications'),
+                where('userId', 'in', [this.userId, 'admin', 'all'])
+            );
 
-        onSnapshot(notificationsQuery, (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === 'added') {
-                    const notification = change.doc.data();
-                    this.showNotification(notification);
-                    this.updateNotificationCount();
-                }
+            onSnapshot(notificationsQuery, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const notification = { id: change.doc.id, ...change.doc.data() };
+                        this.displayRealtimeNotification(notification);
+                    }
+                });
             });
-        });
+        } catch (error) {
+            console.error('❌ Failed to setup Firebase notification listener:', error);
+        }
     }
 
-    showNotification(notification) {
-        // Filter notifications based on user role
+    setupDynamicDataListener() {
+        // Listen for dynamic data processor events
+        if (window.dynamicDataProcessor) {
+            window.dynamicDataProcessor.on('notification', (notification) => {
+                this.displayRealtimeNotification(notification);
+            });
+        }
+    }
+
+    displayRealtimeNotification(notification) {
         if (!this.shouldShowNotification(notification)) {
             return;
         }
 
         // Add to queue
-        this.notificationQueue.push({
-            ...notification,
-            timestamp: Date.now(),
-            id: notification.id || Date.now()
-        });
-
-        // Display if not currently showing
-        if (!this.isDisplaying) {
-            this.displayNextNotification();
-        }
+        this.notificationQueue.push(notification);
+        this.notificationCount++;
+        this.unreadCount++;
 
         // Update badge
         this.updateNotificationCount();
+
+        // Display if not already showing
+        if (!this.isDisplaying) {
+            this.displayNextNotification();
+        }
     }
 
     shouldShowNotification(notification) {
-        // Admin notifications
-        if (notification.userId === 'admin' && this.userRole !== 'admin') {
-            return false;
-        }
+        // Check if user should see this notification
+        if (!notification) return false;
 
-        // Partner notifications
-        if (notification.userId === 'partner' && this.userRole !== 'partner') {
-            return false;
-        }
+        // Filter by user role and ID
+        const isForUser = notification.userId === this.userId || 
+                         notification.userId === 'all' || 
+                         (this.userRole === 'admin' && notification.userId === 'admin');
 
-        // User-specific notifications
-        if (notification.userId && notification.userId !== this.userId && notification.userId !== 'all') {
-            return false;
-        }
+        if (!isForUser) return false;
 
-        // Filter by notification type based on user role
-        const adminOnlyTypes = ['partner_signup', 'document_upload', 'low_stock', 'system'];
-        const partnerOnlyTypes = ['order_update', 'product_change'];
+        // Check if notification is recent (within last 24 hours)
+        const notificationTime = new Date(notification.createdAt);
+        const now = new Date();
+        const timeDiff = now - notificationTime;
+        const oneDay = 24 * 60 * 60 * 1000;
 
-        if (this.userRole === 'admin' && partnerOnlyTypes.includes(notification.type)) {
-            return false;
-        }
-
-        if (this.userRole === 'partner' && adminOnlyTypes.includes(notification.type)) {
-            return false;
-        }
-
-        return true;
+        return timeDiff < oneDay;
     }
 
     async displayNextNotification() {
@@ -198,37 +188,38 @@ class RealTimeNotificationSystem {
         this.isDisplaying = true;
         const notification = this.notificationQueue.shift();
 
-        // Create notification element
-        const notificationElement = this.createNotificationElement(notification);
-        
-        // Add to container
-        this.notificationContainer.appendChild(notificationElement);
+        try {
+            const notificationElement = this.createNotificationElement(notification);
+            this.notificationContainer.appendChild(notificationElement);
 
-        // Animate in
-        setTimeout(() => {
-            notificationElement.style.transform = 'translateX(0)';
-            notificationElement.style.opacity = '1';
-        }, 100);
+            // Animate in
+            setTimeout(() => {
+                notificationElement.style.transform = 'translateX(0)';
+                notificationElement.style.opacity = '1';
+            }, 100);
 
-        // Auto-remove after 5 seconds
-        setTimeout(() => {
-            this.removeNotification(notificationElement);
-        }, 5000);
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                this.removeNotification(notificationElement);
+                this.displayNextNotification();
+            }, 5000);
 
-        // Mark as read
-        this.markNotificationAsRead(notification.id);
+        } catch (error) {
+            console.error('❌ Error displaying notification:', error);
+            this.displayNextNotification();
+        }
     }
 
     createNotificationElement(notification) {
         const element = document.createElement('div');
-        element.className = 'notification-item';
+        element.className = 'realtime-notification';
         element.style.cssText = `
             background: white;
-            border-left: 4px solid ${this.getNotificationColor(notification.type)};
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
             padding: 15px;
-            border-radius: 4px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             transform: translateX(100%);
             opacity: 0;
             transition: all 0.3s ease;
@@ -242,28 +233,28 @@ class RealTimeNotificationSystem {
 
         element.innerHTML = `
             <div style="display: flex; align-items: flex-start; gap: 10px;">
-                <div style="color: ${color}; font-size: 20px; flex-shrink: 0;">
+                <div style="color: ${color}; font-size: 18px; flex-shrink: 0;">
                     ${icon}
                 </div>
-                <div style="flex: 1;">
-                    <div style="font-weight: bold; margin-bottom: 5px; color: #333;">
-                        ${notification.title}
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: bold; margin-bottom: 5px; font-size: 14px; color: #333;">
+                        ${notification.title || 'Notification'}
                     </div>
-                    <div style="color: #666; font-size: 14px; line-height: 1.4;">
+                    <div style="color: #666; font-size: 13px; line-height: 1.4;">
                         ${notification.message}
                     </div>
-                    <div style="font-size: 12px; color: #999; margin-top: 5px;">
+                    <div style="font-size: 11px; color: #999; margin-top: 5px;">
                         ${this.formatTimestamp(notification.createdAt)}
                     </div>
                 </div>
                 <button onclick="this.parentElement.parentElement.remove()" 
-                        style="background: none; border: none; color: #999; cursor: pointer; font-size: 16px; padding: 0;">
+                        style="background: none; border: none; color: #999; cursor: pointer; font-size: 16px; padding: 0; line-height: 1; flex-shrink: 0;">
                     ×
                 </button>
             </div>
         `;
 
-        // Add click handler for notification actions
+        // Add click handler
         element.addEventListener('click', (e) => {
             if (e.target.tagName !== 'BUTTON') {
                 this.handleNotificationClick(notification);
@@ -275,38 +266,42 @@ class RealTimeNotificationSystem {
 
     getNotificationIcon(type) {
         const icons = {
-            'order_created': '📦',
-            'order_update': '📝',
-            'product_change': '🛍️',
-            'partner_signup': '👥',
-            'document_upload': '📄',
-            'low_stock': '⚠️',
+            'order_update': '📦',
+            'product_change': '🌿',
             'system': '⚙️',
-            'inventory_change': '📊',
-            'notification': '🔔'
+            'partner_signup': '👥',
+            'inventory': '📊',
+            'document': '📄',
+            'notification': '🔔',
+            'success': '✅',
+            'error': '❌',
+            'warning': '⚠️',
+            'info': 'ℹ️'
         };
         return icons[type] || '🔔';
     }
 
     getNotificationColor(type) {
         const colors = {
-            'order_created': '#4CAF50',
-            'order_update': '#2196F3',
-            'product_change': '#FF9800',
-            'partner_signup': '#9C27B0',
-            'document_upload': '#607D8B',
-            'low_stock': '#F44336',
-            'system': '#795548',
-            'inventory_change': '#00BCD4',
-            'notification': '#FF5722'
+            'order_update': '#007bff',
+            'product_change': '#28a745',
+            'system': '#6c757d',
+            'partner_signup': '#17a2b8',
+            'inventory': '#ffc107',
+            'document': '#fd7e14',
+            'notification': '#6f42c1',
+            'success': '#28a745',
+            'error': '#dc3545',
+            'warning': '#ffc107',
+            'info': '#17a2b8'
         };
-        return colors[type] || '#FF5722';
+        return colors[type] || '#6f42c1';
     }
 
     formatTimestamp(timestamp) {
-        if (!timestamp) return 'Just now';
+        if (!timestamp) return '';
         
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        const date = new Date(timestamp);
         const now = new Date();
         const diff = now - date;
         
@@ -317,132 +312,120 @@ class RealTimeNotificationSystem {
     }
 
     handleNotificationClick(notification) {
-        // Handle different notification types
-        switch (notification.type) {
-            case 'order_created':
-            case 'order_update':
-                this.navigateToOrder(notification);
-                break;
-            case 'product_change':
-                this.navigateToProduct(notification);
-                break;
-            case 'partner_signup':
-                this.navigateToPartner(notification);
-                break;
-            case 'document_upload':
-                this.navigateToDocument(notification);
-                break;
-            case 'low_stock':
-                this.navigateToInventory(notification);
-                break;
-            default:
-                console.log('Notification clicked:', notification);
+        try {
+            // Mark as read
+            this.markNotificationAsRead(notification.id);
+
+            // Navigate based on notification type
+            switch (notification.type) {
+                case 'order_update':
+                    this.navigateToOrder(notification);
+                    break;
+                case 'product_change':
+                    this.navigateToProduct(notification);
+                    break;
+                case 'partner_signup':
+                    this.navigateToPartner(notification);
+                    break;
+                case 'document':
+                    this.navigateToDocument(notification);
+                    break;
+                case 'inventory':
+                    this.navigateToInventory(notification);
+                    break;
+                default:
+                    // Default behavior - show notification panel
+                    this.showNotificationPanel();
+            }
+        } catch (error) {
+            console.error('❌ Error handling notification click:', error);
         }
     }
 
     navigateToOrder(notification) {
-        const data = JSON.parse(notification.data || '{}');
-        if (data.orderId) {
-            // Navigate to order details
-            if (this.userRole === 'admin') {
-                this.showAdminOrderDetails(data.orderId);
-            } else {
-                this.showPartnerOrderDetails(data.orderId);
-            }
+        if (this.userRole === 'admin') {
+            this.showAdminOrderDetails(notification.orderId);
+        } else {
+            this.showPartnerOrderDetails(notification.orderId);
         }
     }
 
     navigateToProduct(notification) {
-        const data = JSON.parse(notification.data || '{}');
-        if (data.productId) {
-            // Navigate to product details
-            if (this.userRole === 'admin') {
-                this.showAdminProductDetails(data.productId);
-            } else {
-                this.showPartnerProductDetails(data.productId);
-            }
+        if (this.userRole === 'admin') {
+            this.showAdminProductDetails(notification.productId);
+        } else {
+            this.showPartnerProductDetails(notification.productId);
         }
     }
 
     navigateToPartner(notification) {
-        const data = JSON.parse(notification.data || '{}');
-        if (data.partnerId && this.userRole === 'admin') {
-            this.showPartnerDetails(data.partnerId);
-        }
+        this.showPartnerDetails(notification.partnerId);
     }
 
     navigateToDocument(notification) {
-        const data = JSON.parse(notification.data || '{}');
-        if (data.documentId && this.userRole === 'admin') {
-            this.showDocumentReview(data.documentId);
-        }
+        this.showDocumentReview(notification.documentId);
     }
 
     navigateToInventory(notification) {
-        const data = JSON.parse(notification.data || '{}');
-        if (data.productId && this.userRole === 'admin') {
-            this.showInventoryManagement(data.productId);
-        }
+        this.showInventoryManagement(notification.productId);
     }
 
-    // Navigation methods for admin portal
     showAdminOrderDetails(orderId) {
-        // Trigger admin portal navigation
-        const event = new CustomEvent('navigateToOrder', { detail: { orderId } });
-        document.dispatchEvent(event);
+        // Navigate to admin order details
+        console.log('Navigate to admin order:', orderId);
     }
 
     showAdminProductDetails(productId) {
-        const event = new CustomEvent('navigateToProduct', { detail: { productId } });
-        document.dispatchEvent(event);
+        // Navigate to admin product details
+        console.log('Navigate to admin product:', productId);
     }
 
     showPartnerDetails(partnerId) {
-        const event = new CustomEvent('navigateToPartner', { detail: { partnerId } });
-        document.dispatchEvent(event);
+        // Navigate to partner details
+        console.log('Navigate to partner:', partnerId);
     }
 
     showDocumentReview(documentId) {
-        const event = new CustomEvent('navigateToDocument', { detail: { documentId } });
-        document.dispatchEvent(event);
+        // Navigate to document review
+        console.log('Navigate to document:', documentId);
     }
 
     showInventoryManagement(productId) {
-        const event = new CustomEvent('navigateToInventory', { detail: { productId } });
-        document.dispatchEvent(event);
+        // Navigate to inventory management
+        console.log('Navigate to inventory:', productId);
     }
 
-    // Navigation methods for partner portal
     showPartnerOrderDetails(orderId) {
-        const event = new CustomEvent('navigateToOrder', { detail: { orderId } });
-        document.dispatchEvent(event);
+        // Navigate to partner order details
+        console.log('Navigate to partner order:', orderId);
     }
 
     showPartnerProductDetails(productId) {
-        const event = new CustomEvent('navigateToProduct', { detail: { productId } });
-        document.dispatchEvent(event);
+        // Navigate to partner product details
+        console.log('Navigate to partner product:', productId);
     }
 
     removeNotification(element) {
-        element.style.transform = 'translateX(100%)';
-        element.style.opacity = '0';
-        
-        setTimeout(() => {
-            if (element.parentNode) {
-                element.parentNode.removeChild(element);
-            }
-            this.displayNextNotification();
-        }, 300);
+        if (element && element.parentElement) {
+            element.style.transform = 'translateX(100%)';
+            element.style.opacity = '0';
+            setTimeout(() => {
+                if (element.parentElement) {
+                    element.remove();
+                }
+            }, 300);
+        }
     }
 
     async markNotificationAsRead(notificationId) {
-        if (!notificationId) return;
-
         try {
             if (window.dynamicDataProcessor && window.dynamicDataProcessor.firestore) {
                 const { doc, updateDoc } = window.dynamicDataProcessor.firestore;
                 const notificationRef = doc(window.dynamicDataProcessor.firestore, 'notifications', notificationId);
                 await updateDoc(notificationRef, { read: true });
+                
+                this.unreadCount = Math.max(0, this.unreadCount - 1);
+                this.updateNotificationCount();
             }
         } catch (error) {
             console.error('❌ Failed to mark notification as read:', error);
@@ -452,70 +435,69 @@ class RealTimeNotificationSystem {
     updateNotificationCount() {
         const badge = document.getElementById('notification-badge');
         if (badge) {
-            this.notificationCount++;
-            this.unreadCount++;
-            badge.textContent = this.unreadCount;
-            badge.style.display = this.unreadCount > 0 ? 'flex' : 'none';
+            if (this.unreadCount > 0) {
+                badge.style.display = 'flex';
+                badge.textContent = this.unreadCount > 99 ? '99+' : this.unreadCount.toString();
+            } else {
+                badge.style.display = 'none';
+            }
         }
     }
 
     showNotificationPanel() {
-        // Create notification panel
-        const panel = document.createElement('div');
-        panel.id = 'notification-panel';
-        panel.style.cssText = `
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 400px;
-            height: 100vh;
-            background: white;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-            z-index: 10001;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            overflow-y: auto;
-        `;
+        // Create notification panel if it doesn't exist
+        let panel = document.getElementById('notification-panel');
+        if (!panel) {
+            panel = document.createElement('div');
+            panel.id = 'notification-panel';
+            panel.style.cssText = `
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 400px;
+                height: 100vh;
+                background: white;
+                border-left: 1px solid #ddd;
+                z-index: 10001;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                display: flex;
+                flex-direction: column;
+            `;
 
-        panel.innerHTML = `
-            <div style="padding: 20px; border-bottom: 1px solid #eee;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="margin: 0;">Notifications</h3>
-                    <button onclick="this.parentElement.parentElement.parentElement.remove()" 
-                            style="background: none; border: none; font-size: 20px; cursor: pointer;">
+            panel.innerHTML = `
+                <div style="padding: 20px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; color: #333;">Notifications</h3>
+                    <button onclick="document.getElementById('notification-panel').style.transform='translateX(100%)'" 
+                            style="background: none; border: none; font-size: 20px; cursor: pointer; color: #999;">
                         ×
                     </button>
                 </div>
-            </div>
-            <div id="notification-list" style="padding: 20px;">
-                <div style="text-align: center; color: #999;">Loading notifications...</div>
-            </div>
-        `;
+                <div id="notification-list" style="flex: 1; overflow-y: auto; padding: 20px;">
+                    <div style="text-align: center; color: #999;">Loading notifications...</div>
+                </div>
+            `;
 
-        document.body.appendChild(panel);
+            document.body.appendChild(panel);
+        }
 
-        // Animate in
-        setTimeout(() => {
-            panel.style.transform = 'translateX(0)';
-        }, 100);
-
+        // Show panel
+        panel.style.transform = 'translateX(0)';
+        
         // Load notifications
         this.loadNotificationsForPanel();
     }
 
     async loadNotificationsForPanel() {
-        const listElement = document.getElementById('notification-list');
-        if (!listElement) return;
-
         try {
-            // Load notifications from Firebase
             if (window.dynamicDataProcessor && window.dynamicDataProcessor.firestore) {
-                const { collection, query, where, getDocs, orderBy } = window.dynamicDataProcessor.firestore;
+                const { collection, query, where, orderBy, limit, getDocs } = window.dynamicDataProcessor.firestore;
                 
                 const notificationsQuery = query(
                     collection(window.dynamicDataProcessor.firestore, 'notifications'),
                     where('userId', 'in', [this.userId, 'admin', 'all']),
-                    orderBy('createdAt', 'desc')
+                    orderBy('createdAt', 'desc'),
+                    limit(50)
                 );
 
                 const snapshot = await getDocs(notificationsQuery);
@@ -525,10 +507,18 @@ class RealTimeNotificationSystem {
                 }));
 
                 this.displayNotificationsInPanel(notifications);
+            } else {
+                const listElement = document.getElementById('notification-list');
+                if (listElement) {
+                    listElement.innerHTML = '<div style="text-align: center; color: #999;">No notifications available</div>';
+                }
             }
         } catch (error) {
             console.error('❌ Failed to load notifications:', error);
-            listElement.innerHTML = '<div style="text-align: center; color: #999;">Failed to load notifications</div>';
+            const listElement = document.getElementById('notification-list');
+            if (listElement) {
+                listElement.innerHTML = '<div style="text-align: center; color: #999;">Failed to load notifications</div>';
+            }
         }
     }
 
@@ -549,7 +539,7 @@ class RealTimeNotificationSystem {
                 border-bottom: 1px solid #eee;
                 cursor: pointer;
                 ${notification.read ? 'opacity: 0.7;' : ''}
-            " onclick="window.notificationSystem.handleNotificationClick(${JSON.stringify(notification)})">
+            " onclick="window.realtimeNotificationSystem.handleNotificationClick(${JSON.stringify(notification)})">
                 <div style="display: flex; align-items: flex-start; gap: 10px;">
                     <div style="color: ${this.getNotificationColor(notification.type)}; font-size: 18px;">
                         ${this.getNotificationIcon(notification.type)}
@@ -604,7 +594,7 @@ class RealTimeNotificationSystem {
     }
 
     // Public method to show notifications programmatically
-    static show(message, type = 'notification', title = 'Notification') {
+    static displayRealtimeNotification(message, type = 'notification', title = 'Notification') {
         const notification = {
             title,
             message,
@@ -613,14 +603,14 @@ class RealTimeNotificationSystem {
             createdAt: new Date()
         };
 
-        if (window.notificationSystem) {
-            window.notificationSystem.showNotification(notification);
+        if (window.realtimeNotificationSystem) {
+            window.realtimeNotificationSystem.displayRealtimeNotification(notification);
         }
     }
 }
 
-// Initialize notification system
-window.notificationSystem = new RealTimeNotificationSystem();
+// Initialize notification system with a different name to avoid conflicts
+window.realtimeNotificationSystem = new RealTimeNotificationSystem();
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
