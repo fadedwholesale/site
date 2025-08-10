@@ -2852,7 +2852,7 @@
     <div id="bulkOrderModal" class="modal">
         <div class="modal-content" style="max-width: 1000px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
-                <h3 class="modal-title">📦 Create Bulk Order</h3>
+                <h3 class="modal-title">�� Create Bulk Order</h3>
                 <button class="modal-close" onclick="closeBulkOrderModal()">×</button>
             </div>
 
@@ -2931,7 +2931,7 @@
 
                 <div style="display: flex; justify-content: space-between; margin-top: 20px;">
                     <button class="btn btn-secondary" onclick="previousBulkStep()">← Back</button>
-                    <button class="btn btn-primary" onclick="nextBulkStep()" id="bulkStep2Next">Next: Review ���</button>
+                    <button class="btn btn-primary" onclick="nextBulkStep()" id="bulkStep2Next">Next: Review →</button>
                 </div>
             </div>
 
@@ -3715,6 +3715,39 @@
             } catch (error) {
                 console.error('Error closing modal:', error);
             }
+        };
+
+        // Other critical functions used in onclick handlers
+        window.toggleLiveInventory = window.toggleLiveInventory || function() {
+            console.log('toggleLiveInventory called - loading...');
+        };
+
+        window.showPublicWebsite = window.showPublicWebsite || function() {
+            console.log('showPublicWebsite called - loading...');
+        };
+
+        window.showPartnerPortal = window.showPartnerPortal || function() {
+            console.log('showPartnerPortal called - loading...');
+        };
+
+        window.toggleCart = window.toggleCart || function() {
+            console.log('toggleCart called - loading...');
+        };
+
+        window.logout = window.logout || function() {
+            console.log('logout called - loading...');
+        };
+
+        window.addToCart = window.addToCart || function(productId) {
+            console.log('addToCart called for:', productId, '- loading...');
+        };
+
+        window.checkout = window.checkout || function() {
+            console.log('checkout called - loading...');
+        };
+
+        window.switchPortalTab = window.switchPortalTab || function(tabName) {
+            console.log('switchPortalTab called for:', tabName, '- loading...');
         };
 
         // Immediate bulk order function definitions to prevent undefined errors
@@ -5439,7 +5472,7 @@
                     try {
                         await verifyPartnerPortalSync();
                     } catch (error) {
-                        console.warn('⚠️ Error in partner portal sync verification:', error);
+                        console.warn('���️ Error in partner portal sync verification:', error);
                     }
                 }, 30000); // Check every 30 seconds
 
@@ -7248,7 +7281,7 @@ Phone: (210) 835-7834
                                     const productId = parseInt(match[1]);
                                     const quantity = eval(match[2]); // Use eval to handle Math.max expressions
                                     
-                                    console.log('🔄 Quantity button clicked:', { productId, quantity });
+                                    console.log('��� Quantity button clicked:', { productId, quantity });
                                     
                                     // Add visual feedback
                                     e.target.style.transform = 'scale(0.9)';
