@@ -3429,7 +3429,7 @@
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 16px; border: 2px solid var(--border-subtle); border-radius: 8px; background: var(--surface-card); transition: all 0.3s ease;" onchange="updateDeliveryMethodLive(this)">
                                 <input type="radio" name="deliveryMethod" value="standard" checked style="margin: 0;">
                                 <div>
-                                    <div style="font-weight: 600; color: var(--text-primary);">📦 Standard Shipping</div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">���� Standard Shipping</div>
                                     <div style="font-size: 12px; color: var(--text-secondary);">3-5 business days • <span class="live-shipping-cost" data-method="standard">Free on orders $1000+</span></div>
                                 </div>
                             </label>
@@ -3673,7 +3673,52 @@
     <script src="main-app.js?v=firebase-ready-fix-v2"></script>
 
     <script>
-        // Immediate bulk order function definitions to prevent undefined errors
+        // Immediate function definitions to prevent undefined errors
+
+        // Modal Functions - Critical to define early to prevent onclick errors
+        window.openModal = window.openModal || function(modalId) {
+            try {
+                console.log('[DEBUG] openModal called for:', modalId);
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'block';
+                    document.body.classList.add('modal-open');
+
+                    // Prevent scrolling on mobile
+                    document.body.style.overflow = 'hidden';
+                    document.body.style.position = 'fixed';
+                    document.body.style.width = '100%';
+
+                    // Add modal attributes
+                    setTimeout(() => {
+                        modal.setAttribute('data-modal-open', 'true');
+                    }, 100);
+                } else {
+                    console.warn('Modal not found:', modalId);
+                }
+            } catch (error) {
+                console.error('Error opening modal:', error);
+            }
+        };
+
+        window.closeModal = window.closeModal || function(modalId) {
+            try {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                    modal.removeAttribute('data-modal-open');
+
+                    // Restore scrolling on mobile
+                    document.body.style.overflow = '';
+                    document.body.style.position = '';
+                    document.body.style.width = '';
+                }
+            } catch (error) {
+                console.error('Error closing modal:', error);
+            }
+        };
+
         window.closeBulkOrderModal = window.closeBulkOrderModal || function() {
             const modal = document.getElementById('bulkOrderModal');
             if (modal) {
@@ -4429,7 +4474,7 @@
    • Product browsing with search and filters
    • Analytics and reporting
 
-✅ User Experience
+��� User Experience
    • Mobile-responsive design
    • Keyboard navigation and accessibility
    • Loading states and error handling
