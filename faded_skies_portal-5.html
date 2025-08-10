@@ -2248,6 +2248,127 @@
     </style>
 </head>
 <body>
+    <!-- IMMEDIATE SCRIPT - LOAD CRITICAL FUNCTIONS FIRST -->
+    <script>
+        console.log('🟢 IMMEDIATE SCRIPT LOADING...');
+
+        // Define critical functions immediately when page loads
+        window.openModal = function(modalId) {
+            console.log('🚀 IMMEDIATE openModal called for:', modalId);
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'block';
+                document.body.classList.add('modal-open');
+                document.body.style.overflow = 'hidden';
+                console.log('✅ Modal opened successfully:', modalId);
+            } else {
+                console.error('❌ Modal not found:', modalId);
+                alert('Modal not found: ' + modalId);
+            }
+        };
+
+        window.closeModal = function(modalId) {
+            console.log('🚀 IMMEDIATE closeModal called for:', modalId);
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                console.log('✅ Modal closed successfully:', modalId);
+            }
+        };
+
+        window.login = function(event) {
+            if (event) event.preventDefault();
+            console.log('🚀 IMMEDIATE login called');
+
+            // Get form values
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return false;
+            }
+
+            // Simple demo authentication
+            if (email.includes('@') && password.length >= 4) {
+                alert('Login successful! (Demo mode)');
+
+                // Simulate successful login
+                window.currentUser = { email: email, name: email.split('@')[0], tier: 'Gold' };
+
+                // Switch to partner portal
+                document.getElementById('publicView').classList.remove('active');
+                document.getElementById('partnerPortal').classList.add('active');
+                document.getElementById('guestSection').style.display = 'none';
+                document.getElementById('userSession').style.display = 'flex';
+
+                // Close modal
+                window.closeModal('loginModal');
+
+                console.log('✅ User logged in:', window.currentUser);
+            } else {
+                alert('Invalid credentials. Please try again.');
+            }
+
+            return false;
+        };
+
+        // Add other critical functions
+        window.showPublicWebsite = function() {
+            console.log('🚀 showPublicWebsite called');
+            document.getElementById('partnerPortal').classList.remove('active');
+            document.getElementById('publicView').classList.add('active');
+            window.currentView = 'public';
+        };
+
+        window.showPartnerPortal = function() {
+            console.log('🚀 showPartnerPortal called');
+            if (!window.currentUser) {
+                alert('Please log in first');
+                window.openModal('loginModal');
+                return;
+            }
+            document.getElementById('publicView').classList.remove('active');
+            document.getElementById('partnerPortal').classList.add('active');
+            window.currentView = 'partner';
+        };
+
+        window.toggleLiveInventory = function() {
+            console.log('🚀 toggleLiveInventory called');
+            const inventory = document.getElementById('liveInventory');
+            if (inventory) {
+                if (inventory.style.display === 'none' || !inventory.style.display) {
+                    inventory.style.display = 'block';
+                    inventory.classList.add('show');
+                } else {
+                    inventory.style.display = 'none';
+                    inventory.classList.remove('show');
+                }
+            }
+        };
+
+        window.logout = function() {
+            console.log('🚀 logout called');
+            window.currentUser = null;
+            document.getElementById('partnerPortal').classList.remove('active');
+            document.getElementById('publicView').classList.add('active');
+            document.getElementById('guestSection').style.display = 'block';
+            document.getElementById('userSession').style.display = 'none';
+            alert('Logged out successfully');
+        };
+
+        // Test that functions are working
+        setTimeout(() => {
+            console.log('🔍 Testing functions:');
+            console.log('openModal type:', typeof window.openModal);
+            console.log('closeModal type:', typeof window.closeModal);
+            console.log('login type:', typeof window.login);
+            console.log('✅ IMMEDIATE SCRIPT LOADED SUCCESSFULLY');
+        }, 100);
+    </script>
+
     <div class="bg-grid"></div>
 
     <header>
